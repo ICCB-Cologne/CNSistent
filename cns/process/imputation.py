@@ -1,0 +1,225 @@
+import numpy as np
+import pandas as pd
+
+
+def get_nan_segs(cna_df):
+    nans = cna_df[cna_df.isna().any(axis=1)].copy()
+    return nans
+
+
+def add_tails(cna_df,  chr_lengths, cn_columns=("major_cn", "minor_cn"), print_info=True):
+    nr_cn_cols = len(cn_columns)
+    grouped = cna_df.groupby(["sample_id", "chrom"]).agg({"start": "min", "end": "max"})
+    grouped = grouped.rename(columns={"start": "min_start", "end": "max_end"})
+    grouped = grouped.reset_index()
+    missing_ranges = []
+    for _, row in grouped.iterrows():
+        if row.min_start > 0:
+            missing_ranges.append(
+                [row.sample_id, row.chrom, 0, row.min_start] + [np.nan]*nr_cn_cols
+            )
+        if row.max_end < chr_lengths[f"{row.chrom}"]:
+            missing_ranges.append(
+                [
+                    row.sample_id,
+                    row.chrom,
+                    row.max_end,
+                    chr_lengths[str(row.chrom)],
+                ] + [np.nan]*nr_cn_cols
+            )
+
+    if len(missing_ranges) == 0:
+        if print_info:
+            print(f"No missing ends found.")
+        return cna_df.copy()
+    else:
+        if print_info:
+            print(f"Adding {len(missing_ranges)} missing ends")
+        missing_ends = pd.DataFrame(missing_ranges, columns=cna_df.columns)
+        res_df = pd.concat([cna_df, missing_ends])
+        res_df.sort_values(
+            by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
+        )
+        return res_df
+
+
+def fill_gaps(cna_df, print_info=True):
+    # Iterate over the rows
+    new_rows = []
+    for i in range(len(cna_df) - 1):
+        # Check if the next row has the same 'sample_id' and 'chrom'
+        if (
+            cna_df.at[i, "sample_id"] == cna_df.at[i + 1, "sample_id"]
+            and cna_df.at[i, "chrom"] == cna_df.at[i + 1, "chrom"]
+        ):
+            # Calculate the range
+            range_start = cna_df.at[i, "end"]
+            range_end = cna_df.at[i + 1, "start"]
+            # If the range is greater than 1, add a new row
+            if range_end > range_start:
+                new_rows.append(
+                    {
+                        "sample_id": cna_df.at[i, "sample_id"],
+                        "chrom": cna_df.at[i, "chrom"],
+                        "start": range_start,
+                        "end": range_end,
+                    }
+                )
+
+    if len(new_rows) == 0:
+        if print_info:
+            print(f"No gaps found.")
+        return cna_df.copy()
+    else:
+        # Concatenate the cna_dfs
+        if print_info:
+            print(f"Filling {len(new_rows)} gaps.")
+        res_df = pd.concat([cna_df, pd.DataFrame(new_rows, columns=cna_df.columns)])
+        res_df.sort_values(
+            by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
+        )
+        return res_df
+
+
+# Add fully missing chromosomes
+def add_missing(cna_df, samples_df, chr_lengths, print_info=True):
+    res_df = cna_df.set_index("sample_id")
+    chromosomes = chr_lengths.keys()
+
+    new_entries = []
+    for sample in res_df.index.unique():
+        cna_sample_df = res_df.loc[sample]
+        sample_chroms = cna_sample_df["chrom"].values
+        for chromosome in chromosomes:
+            if chromosome not in sample_chroms and (chromosome != "chrY" or samples_df.loc[sample].sex == "xy"):
+                new_entry = {
+                    "sample_id": sample,
+                    "chrom": chromosome,
+                    "start": 0,
+                    "end": chr_lengths[chromosome],
+                }
+                new_entries.append(new_entry)
+
+    if len(new_entries) == 0:
+        if print_info:
+            print(f"No missing chromosomes found.")
+        return cna_df.copy()
+    else:
+        if print_info:
+            print(f"Adding {len(new_entries)} missing chromosomes.")
+        empty_chrs_df = pd.DataFrame(new_entries)
+        res_df.reset_index(inplace=True)
+        res_df = pd.concat([res_df, empty_chrs_df])
+        res_df.sort_values(
+            by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
+        )
+        return res_df
+
+
+# Makes sure that the columns are of the correct type
+def _are_mergeable(a, b, cn_columns=('major_cn', 'minor_cn')):
+    return (
+        a.sample_id == b.sample_id
+        and a.chrom == b.chrom
+        and a.end == b.start
+        and all([(a[col] == b[col]) or (np.isnan(a[col]) and np.isnan(b[col])) for col in cn_columns])
+    )
+
+
+def merge_neighbours(cna_df, cn_columns=('major_cn', 'minor_cn'), print_info=True):
+    res_df = cna_df.copy()
+    idx_to_remove = []
+
+    for i, (index, row) in enumerate(res_df.iterrows()):
+        if i != 0 and _are_mergeable(prev, row, cn_columns):
+            idx_to_remove.append(i - 1)
+            res_df.at[index, "start"] = prev.start
+            row.start = prev.start  # update the comparison copy too
+        prev = row
+
+    if print_info:
+        print(f"Merged entries: {len(idx_to_remove)}")
+
+    # remove from cna_df where idx_to_remove is in the index
+    res_df = res_df.drop(res_df.index[idx_to_remove])
+    res_df.sort_values(
+        by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
+    )
+    return res_df
+
+
+def _is_same_chrom(df, i, j):
+    return df.at[j, "sample_id"] == df.at[i, "sample_id"] and df.at[j, "chrom"] == df.at[i, "chrom"]
+
+
+def create_imputed_entries(cna_df, cn_columns=("major_cn", "minor_cn"), print_info=True):
+    new_entries = []
+    for i in range(len(cna_df)):
+        if np.isnan(cna_df.at[i, cn_columns[0]]) or np.isnan(cna_df.at[i, cn_columns[1]]):
+            prev_vals = [cna_df.at[i, cn_columns[k]] for k in range(len(cn_columns))]
+            next_vals = list(prev_vals)
+            for k in range(len(cn_columns)):
+                if np.isnan(prev_vals[k]):
+                    j = i - 1
+                    while j >= 0 and np.isnan(prev_vals[k]) and _is_same_chrom(cna_df, i, j):
+                        prev_vals[k] = cna_df.at[j, cn_columns[k]]
+                        j -= 1
+                if np.isnan(next_vals[k]):
+                    j = i + 1
+                    while j < len(cna_df) and np.isnan(next_vals[k]) and _is_same_chrom(cna_df, i, j):
+                        next_vals[k] = cna_df.at[j, cn_columns[k]]
+                        j += 1
+            id = cna_df.at[i, "sample_id"]
+            chrom = cna_df.at[i, "chrom"]            
+            start = cna_df.at[i, "start"]
+            end = cna_df.at[i, "end"]
+            if i == 0 or not _is_same_chrom(cna_df, i, i-1):
+                new_start = [id, chrom, start, end] + next_vals
+                new_entries.append(new_start)
+            elif i == len(cna_df) - 1 or not _is_same_chrom(cna_df, i, i+1):
+                new_end = [id, chrom, start, end] + prev_vals
+                new_entries.append(new_end)
+            elif all([prev_vals[k] == next_vals[k] for k in range(len(cn_columns))]):
+                new_simple = [id, chrom, start, end] + prev_vals
+                new_entries.append(new_simple)
+            else:
+                midpoint = start + (end - start) // 2
+                first_half = [id, chrom, start, midpoint] + prev_vals
+                second_half = [id, chrom, midpoint, end] + next_vals
+                new_entries.append(first_half)                    
+                new_entries.append(second_half)                
+        
+    imputataion_df = pd.DataFrame(new_entries, columns=cna_df.columns)
+    query = ' or '.join([f"{col}.isnull()" for col in cn_columns])
+    idx_to_remove = cna_df.query(query).index
+
+    if print_info:
+        print(f"New entries: {imputataion_df.shape[0]}")
+        print(f"Removed entries: {len(idx_to_remove)}")
+    # remove from cna_df where idx_to_remove is in the index
+    filtered_df = cna_df.drop(idx_to_remove)
+    # concat the new_table to cna_df
+    res_df = pd.concat([filtered_df, imputataion_df])
+    # sort cna_df by sample_id, chr, start
+    res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
+    return res_df
+
+
+def fill_nans_with_zeros(cna_df, cn_columns=('major_cn', 'minor_cn'), print_info=True):
+    res_df = cna_df.copy()
+    if print_info:
+        print(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")
+    # Fully missing chromosomes filled with 0
+    for col in cn_columns:
+        res_df[col] = res_df[col].fillna(0).astype(int)
+    return res_df
+
+
+def fill_sex_if_missing(cns, samples):
+    res = samples.copy()
+    # Set found_sex to True for each sample if there is chrY, otherwise set it to False
+    found_sex = cns.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
+    found_sex = found_sex.map({True: "xy", False: "xx"})
+    # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
+    res.loc[~res["sex"].isin(["xy", "xx"]), "sex"] = found_sex
+    return res
