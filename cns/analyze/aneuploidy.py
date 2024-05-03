@@ -35,8 +35,8 @@ def _sum_chrom_different(values, expected_ploidy=1):
 # per chromosome and and allele find the number of aneuploid bases
 def calc_ane_per_chrom(cns, samples_indexed):
     aneuploidy = []
-    cna_indexed = cns.set_index(["sample_id", "chrom"])
-    for (sample, chrom), group in cna_indexed.groupby(level=[0, 1]):
+    cns_indexed = cns.set_index(["sample_id", "chrom"])
+    for (sample, chrom), group in cns_indexed.groupby(level=[0, 1]):
         is_xy = samples_indexed.loc[sample]["sex"] == "xy"
         sample_data = [sample, chrom]
         for column in ["major_cn", "minor_cn", "total_cn"]:

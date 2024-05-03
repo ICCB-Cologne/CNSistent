@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name="cnsistent"
+name="CNSistent"
 version="0.3"
 authors=[
 	{name="Adam Streck", email="adam.streck@gmail.com"}
@@ -22,3 +22,4 @@ cns="cnsistent:main"
 
 [tool.hatch.build.targets.wheel]
 include = ["cnsistent.py", "cns/**/*.py", "README.md", "docs/**"]
+exclude = ["cns/data_utils.py"]

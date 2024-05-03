@@ -17,7 +17,7 @@ from cns.utils.files import dataframe_array_split, samples_df_from_cns_df, load_
 
 
 def _add_common_args(parser):
-    parser.add_argument("cns", type=str, help="Path to the TSV file with copy numbers")
+    parser.add_argument("data", type=str, help="Path to the TSV file with copy number segments")
     parser.add_argument("--samples", type=str, help="Path to the samples file", required=False, default="")
     parser.add_argument("--out", type=str, help="Output file.", required=False, default="./cns.out.tsv")
     parser.add_argument("--assembly", type=str, help="Assembly to use. One of: hg19, hg38.", required=False, default="hg19")
@@ -28,17 +28,17 @@ def _add_common_args(parser):
 
 def _parse_args():
     # Top-level parser
-    parser = argparse.ArgumentParser(description="Impute missing values in CNA data")
+    parser = argparse.ArgumentParser(description="Impute missing values in CNS data")
     subparsers = parser.add_subparsers(dest="action", help="cns action to perform. One of:")
 
     parser.add_argument("-v", action="version", version="%(prog)s 1.0")
 
     sp_dict = {}
-    sp_dict["fill"] = subparsers.add_parser("fill", help=f"Adds Nan regions to the CNA data to match the assembly.")
-    sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNA data.")
-    sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNA data.")
-    sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Calculates aneuploidy for CNA data (NaNs are ignored).")
-    sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNA data.")
+    sp_dict["fill"] = subparsers.add_parser("fill", help=f"Adds Nan regions to the CNS data to match the assembly.")
+    sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNS data.")
+    sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data.")
+    sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Calculates aneuploidy for CNS data (NaNs are ignored).")
+    sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")
     sp_dict["cluster"] = subparsers.add_parser("cluster", help=f"Calculates a clustering of breakpoints between samples.")
 
     for sp in sp_dict.values():
@@ -51,7 +51,7 @@ def _parse_args():
     sp_dict["bin"].add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
     sp_dict["bin"].add_argument("--filter", type=int, help="If set, regions smaller than the given size are exclued from selection and gaps.", required=False, default=0)
     sp_dict["bin"].add_argument("--aggregate", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
-    sp_dict["bin"].add_argument("--onlybins", help="If set, creates a BED file with regions corresponding to the individual bins, without the actual binning. (A dummy CNA file still has to be provided)", action="store_true")
+    sp_dict["bin"].add_argument("--onlybins", help="If set, creates a BED file with regions corresponding to the individual bins, without the actual binning. (A dummy CNS file still has to be provided)", action="store_true")
     
     sp_dict["cluster"].add_argument("--dist", type=int, help="Maximum distance between breakpoint clusters for merging", required=False, default=0)
 
@@ -149,7 +149,7 @@ def main():
     args = _parse_args()
     action = args.action
     assembly = get_assembly(args.assembly)
-    cna_file_path = args.cns
+    cns_file_path = args.data
     samples_path = args.samples
     out_file = args.out
     print_progress = args.verbose
@@ -159,9 +159,9 @@ def main():
         print(f"cns {action}.")
         print("Parsing input...")
 
-    if not exists(cna_file_path):
-        raise ValueError(f"File {cna_file_path} not found.")
-    cns_df = load_cns(cna_file_path)
+    if not exists(cns_file_path):
+        raise ValueError(f"File {cns_file_path} not found.")
+    cns_df = load_cns(cns_file_path)
 
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
@@ -177,7 +177,7 @@ def main():
         res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
     else:
         if print_progress:
-            print(f"Processing {cna_file_path}...")    
+            print(f"Processing {cns_file_path}...")    
         start = time.time()
         res_df = _process(action, cns_df, samples_df, assembly, args)
 

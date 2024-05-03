@@ -8,11 +8,12 @@ CNSistent is available both as a [stand-alone](#cli) tool and as a [Python libra
 
 ## Quickstart (from Bash)
 
-1. Create the conda environment: `conda env create -f cns.yml`
+1. Create the conda environment: `conda env create -f ./cnsistent.yml`
 2. Activate the environment: `conda activate cns`
-3. Process data: `bash ./data_process.sh`
-4. Bin processed data: `bash ./data_bin.sh`
-5. Run example analysis: `python example_analysis.py`
+3. Install the package: `pip install .`
+4. Process data: `bash ./scripts/data_process.sh`
+5. Bin processed data: `bash ./scripts/data_bin.sh`
+6. Run example analysis: `python ./example_analysis.py`
 
 
 NOTES:
@@ -37,7 +38,7 @@ sample1         chr1    100     200     1           0
 sample1         chr1    550     1000    2           0
 ...
 ```
-![Example Data](./doc/example_data.png)
+![Example Data](./docs/example_data.png)
 
 > **NOTE:** For conformation with the standard, the start and end positions are 1-based, and the end position is inclusive. 
 > However, for the sake of sanity of the author, these are converted to 0-based, and the end position is exclusive. See details on usage: TODO: link.
@@ -54,18 +55,18 @@ awk 'BEGIN{FS="[ \t]+";OFS="\t"} {print "sample1", $1, $2, $3}' yourfile.txt | s
 
 The command line interface uses the following pattern:
 
-`cnsistent [command] cna_file_path [options]`
+`cns [command] cns_file_path [options]`
 
 The following commands are available (see details below)
 
-* `fill`: Adds NaN regions to the CNA data to match the assembly.
-* `impute`: Imputes missing values in the CNA data.
-* `coverage`: Calculates coverage for filled (but not imputed) CNA data.
-* `ploidy`: Calculates aneuploidy for CNA data (NaNs are ignored).
-* `bin`: Creates bins for CNA data.
+* `fill`: Adds NaN regions to the CNS data to match the assembly.
+* `impute`: Imputes missing values in the CNS data.
+* `coverage`: Calculates coverage for filled (but not imputed) CNS data.
+* `ploidy`: Calculates aneuploidy for CNS data (NaNs are ignored).
+* `bin`: Creates bins for CNS data.
 * `cluster`: Creates a clustering of breakpoints.
 
-The `cna_file_path` must point to a CNA file as described in the [Input](#input) section.
+The `cns_file_path` must point to a CNS file as described in the [Input](#input) section.
 
 The following additional optional arguments are shared:
 
@@ -99,7 +100,7 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 3. If a whole chromosome is missing, or declared as NaN, its assigned to 0 for its whole length.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major CN values must match to be merged.
 
-| ![Example Imputation](./doc/example_impute.png) | ![Example Merging](./doc/example_merge.png) | 
+| ![Example Imputation](./docs/example_impute.png) | ![Example Merging](./docs/example_merge.png) | 
 | -- | -- |
 
 
@@ -156,7 +157,7 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
     * If `--onlybins` is provided, only the segemnents are created, with the columns `chrom, start, end`.
 
 
-![Example Binning](./doc/example_bins.png)
+![Example Binning](./docs/example_bins.png)
 
 Additional arguments:
 
@@ -172,9 +173,9 @@ An example of use:
 
 ```bash	
 # Create bins of 1Mb size, exclude gaps, and filter out small segments
-python cns.py bin cns.tsv --bins 200000 --remove gaps --filter 
+cns bin cns.tsv --bins 200000 --remove gaps --filter 
 # Sample copy numbers of genes, take the minimum CN value across the gene to exclude fractional segments
-python cns.py bin cns.tsv --select genes.tsv --aggregate min
+cns bin cns.tsv --select genes.tsv --aggregate min
 ```
 
 ## `cluster`
@@ -191,7 +192,7 @@ Additional arguments:
 
 The library is split into three blocks:
 * `cns.process`: The methods for processing the data, including filling, imputing, and calculating coverage.
-* `cns.analyze`: The methods for deriving sample metrics from the CNA data and plotting.
+* `cns.analyze`: The methods for deriving sample metrics from the CNS data and plotting.
 * `cns.utils`: Miscellaneous utilities, mainly for converstion and file IO.
 
 > For examples of using the Library, you can check the file `example_API.py`.
@@ -199,6 +200,8 @@ The library is split into three blocks:
 # REFERENCE
 
 ## Data
+
+The data are obtained and processed using the code in `./notebooks/data/data_obtain.ipynb`. The sources are as follows:
 
 TCGA data obtained from ASCATv3 at: https://github.com/VanLoo-lab/ascat/tree/master/ReleasedData    
 Cite: https://www.pnas.org/doi/full/10.1073/pnas.1009843107    
@@ -222,7 +225,7 @@ Cite: https://www.nature.com/articles/35057062
 
 ...
 
-## License
+## The MIT License
 
 Copyright © 2023 Dr. Adam Streck, adam.streck@gmail.com
 

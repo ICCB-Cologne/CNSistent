@@ -21,11 +21,11 @@ def main_fill(cns_df, samples_df=None, assembly='hg38', cn_columns=('major_cn', 
 
     # Fill missing values with NaNs
     cns_df = cns_df.reset_index(drop=True)
-    cna_tailed_df = add_tails(cns_df,assembly.chr_lens, cn_columns, print_info=print_info)
-    cna_filled_df = fill_gaps(cna_tailed_df, print_info=print_info)
+    cns_tailed_df = add_tails(cns_df,assembly.chr_lens, cn_columns, print_info=print_info)
+    cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
-        cna_filled_df = add_missing(cna_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
-    res = merge_neighbours(cna_filled_df, cn_columns=cn_columns, print_info=print_info)
+        cns_filled_df = add_missing(cns_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
+    res = merge_neighbours(cns_filled_df, cn_columns=cn_columns, print_info=print_info)
     return res
 
 
@@ -42,9 +42,9 @@ def main_impute(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
 # TODO: should have any and all option (any is nan, or all are nan)
 def main_coverage(cns_df, samples_df, assembly, print_info=False):
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    cna_vals = cns_df.loc[~cns_df.isna().any(axis=1)].copy()
-    coverage = get_missing_chroms(cna_vals, samples_df, assembly)
-    coverage = get_covered_bases(cna_vals, coverage)
+    cns_vals = cns_df.loc[~cns_df.isna().any(axis=1)].copy()
+    coverage = get_missing_chroms(cns_vals, samples_df, assembly)
+    coverage = get_covered_bases(cns_vals, coverage)
     coverage = get_base_frac(coverage, assembly)
     return coverage
 

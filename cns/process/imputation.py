@@ -88,8 +88,8 @@ def add_missing(cns_df, samples_df, chr_lengths, print_info=True):
 
     new_entries = []
     for sample in res_df.index.unique():
-        cna_sample_df = res_df.loc[sample]
-        sample_chroms = cna_sample_df["chrom"].values
+        cns_sample_df = res_df.loc[sample]
+        sample_chroms = cns_sample_df["chrom"].values
         for chromosome in chromosomes:
             if chromosome not in sample_chroms and (chromosome != "chrY" or samples_df.loc[sample].sex == "xy"):
                 new_entry = {

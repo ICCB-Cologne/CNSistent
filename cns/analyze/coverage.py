@@ -60,7 +60,7 @@ def plot_segments_per_chr(info_df, dataset):
     plt.ylabel("Count")
     plt.title("Anueploidies (on whole chromosomes)")
 
-    # set title to "CNAs of the PCAWG dataset"
+    # set title to "CNS of the PCAWG dataset"
     plt.suptitle(f"CINs of the {dataset} dataset ({len(info_df)})", fontsize=16)
 
 

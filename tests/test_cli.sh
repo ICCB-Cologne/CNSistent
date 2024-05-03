@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$(dirname "$0")" # Set path to the script's path
+
 # Function to run a command and compare its output
 run_and_compare() {
   echo "Test: $1"
@@ -31,17 +33,17 @@ run_and_compare() {
 
 # Commands to run and test
 commands=(
-  "cns fill ./in/test_cna_source.tsv --sample ./in/test_sample_source.tsv --out ./temp/test_cna_fill.tsv"
-  "cns impute ./temp/test_cna_fill.tsv --out ./temp/test_cna_imp.tsv"
-  "cns coverage ./temp/test_cna_fill.tsv --out ./temp/test_sample_cover.tsv"
-  "cns ploidy ./out/test_cna_imp.tsv --samples ./in/test_sample_source.tsv --out ./out/test_sample_ploidy.tsv"
-  "cns cluster ./temp/test_cna_fill.tsv --dist 100000 --out ./temp/mcs_regions.tsv"
-  "cns bin --select arms ./temp/test_cna_fill.tsv --out ./temp/test_cna_arms.tsv"
-  "cns bin --select bands ./temp/test_cna_fill.tsv --out ./temp/test_cna_bands.tsv"
-  "cns bin --bins 1000000 ./temp/test_cna_fill.tsv --out ./temp/test_cna_1MB.tsv"
-  "cns bin --bins 1000000 ./temp/test_cna_fill.tsv --out ./temp/test_cna_1MB_gaps.tsv --remove gaps --filter 500000"
-  "cns bin --select arms ./temp/test_cna_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --onlybins"
-  "cns bin ./temp/test_cna_fill.tsv --select ./temp/mcs_regions.tsv --out ./temp/test_cna_mcs.tsv"
+  "cns fill ./in/test_cns_source.tsv --sample ./in/test_sample_source.tsv --out ./temp/test_cns_fill.tsv"
+  "cns impute ./temp/test_cns_fill.tsv --out ./temp/test_cns_imp.tsv"
+  "cns coverage ./temp/test_cns_fill.tsv --out ./temp/test_sample_cover.tsv"
+  "cns ploidy ./out/test_cns_imp.tsv --samples ./in/test_sample_source.tsv --out ./out/test_sample_ploidy.tsv"
+  "cns cluster ./temp/test_cns_fill.tsv --dist 100000 --out ./temp/mcs_regions.tsv"
+  "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_cns_arms.tsv"
+  "cns bin --select bands ./temp/test_cns_fill.tsv --out ./temp/test_cns_bands.tsv"
+  "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB.tsv"
+  "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB_gaps.tsv --remove gaps --filter 500000"
+  "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --onlybins"
+  "cns bin ./temp/test_cns_fill.tsv --select ./temp/mcs_regions.tsv --out ./temp/test_cns_mcs.tsv"
 )
 
 rm -r ./temp

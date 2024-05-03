@@ -55,7 +55,7 @@ def min_func(major_cn, minor_cn, length):
 
 def _get_bin_for_seg(sample_id, chrom, sample_rows, segment, agg_func):
     row_id = 0
-    seg_cna = []
+    seg_cns = []
     seg_start, seg_end = segment
     while sample_rows[row_id][1] <= seg_start:
         row_id += 1
@@ -66,17 +66,17 @@ def _get_bin_for_seg(sample_id, chrom, sample_rows, segment, agg_func):
         start = max(row[0], seg_start)
         end = min(row[1], seg_end)
         length = end - start
-        seg_cna.append((row[2], row[3], length))
+        seg_cns.append((row[2], row[3], length))
         if row[1] >= seg_end:  # last row ends behind the segment
             break
         row_id += 1
         if row_id >= len(sample_rows):
             break
     
-    seg_cna = [x for x in seg_cna if not np.isnan(x[0]) and not np.isnan(x[1])]
-    if seg_cna == []:
+    seg_cns = [x for x in seg_cns if not np.isnan(x[0]) and not np.isnan(x[1])]
+    if seg_cns == []:
         return (sample_id, chrom, seg_start, seg_end, np.nan, np.nan)
-    sel_array = np.array(seg_cna, dtype=np.uint32)
+    sel_array = np.array(seg_cns, dtype=np.uint32)
     major_cn, minor_cn = agg_func(sel_array[:, 0], sel_array[:, 1], sel_array[:, 2])
     return (sample_id, chrom, seg_start, seg_end, major_cn, minor_cn)
 

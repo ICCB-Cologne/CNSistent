@@ -6,25 +6,29 @@ import numpy as np
 from cns.utils.files import rename_columns
 
 
+data_dir = "../data"
+out_dir = "../out"
+
+
 def pcawg(print_debug=False):
-    cna_raw_df = pd.read_csv("./data/pcawg_cna_source.tsv", sep="\t")
-    cna_raw_df = rename_columns(cna_raw_df)
+    cns_raw_df = pd.read_csv(f"{data_dir}/pcawg_cns_source.tsv", sep="\t")
+    cns_raw_df = rename_columns(cns_raw_df)
     if print_debug:
-        print(cna_raw_df.head())
-    specimen_df = pd.read_csv("./data/pcawg_specimen_histology_August.tsv", sep="\t")
+        print(cns_raw_df.head())
+    specimen_df = pd.read_csv(f"{data_dir}/pcawg_specimen_histology_August.tsv", sep="\t")
     sample_to_donor_df = specimen_df[["# icgc_specimen_id", "icgc_donor_id"]].rename(columns={"# icgc_specimen_id": "sample_id", "icgc_donor_id": "donor_id"})
     sample_to_donor_df = sample_to_donor_df.drop_duplicates().sort_values(by="sample_id").reset_index(drop=True)
     sample_to_donor_map = sample_to_donor_df.set_index("sample_id").to_dict()["donor_id"]
     if print_debug:
         print(sample_to_donor_df.head())
 
-    donor_df = pd.read_csv("./data/pcawg_donor_clinical_August2016.tsv", sep="\t")
+    donor_df = pd.read_csv(f"{data_dir}/pcawg_donor_clinical_August2016.tsv", sep="\t")
     donor_to_sex_df = donor_df[["icgc_donor_id", "donor_sex"]].rename(columns={"icgc_donor_id": "donor_id"})
     donor_to_sex_df = donor_to_sex_df.drop_duplicates().sort_values(by="donor_id").reset_index(drop=True)
     donor_to_sex_map = donor_to_sex_df.set_index("donor_id").to_dict()["donor_sex"]
     if print_debug:
         print(donor_to_sex_df.head())
-    ids = cna_raw_df["sample_id"].unique()
+    ids = cns_raw_df["sample_id"].unique()
     donors = map(lambda x: sample_to_donor_map[x], ids)
     sexes = map(lambda x: donor_to_sex_map[x], donors)
     samples_df = pd.DataFrame([ids, sexes]).T
@@ -32,10 +36,10 @@ def pcawg(print_debug=False):
     samples_df = samples_df.set_index("sample_id")
     samples_df["sex"] = samples_df["sex"].replace({"male": "xy", "female": "xx"})
     # sanity check  
-    assert len(cna_raw_df["sample_id"].unique()) == len(samples_df)
+    assert len(cns_raw_df["sample_id"].unique()) == len(samples_df)
 
     # Add whitelist information
-    whitelist = pd.read_csv("./data/pcawg_supplementary_table_1.tsv", sep="\t")
+    whitelist = pd.read_csv(f"{data_dir}/pcawg_supplementary_table_1.tsv", sep="\t")
     whitelist_sp = whitelist["icgc_specimen_id"].unique()
     assert(len(whitelist_sp) == 2583) # 2583 white-listed samples (https://www.nature.com/articles/s41586-020-1969-6)
     samples_df['whitelist'] = samples_df.index.isin(whitelist_sp)
@@ -56,17 +60,17 @@ def pcawg(print_debug=False):
     if print_debug:
         print(samples_df.head())
 
-    return cna_raw_df, samples_df
+    return cns_raw_df, samples_df
 
 
 def tcga(hg_ver, print_debug=False):
-    cna_source_df = pd.read_csv(f"./data/tcga_{hg_ver}_cna_source.tsv", sep="\t")
-    cna_raw_df = rename_columns(cna_source_df)
+    cns_source_df = pd.read_csv(f"{data_dir}/tcga_{hg_ver}_cns_source.tsv", sep="\t")
+    cns_raw_df = rename_columns(cns_source_df)
     if print_debug:
-        print(cna_raw_df.head())
+        print(cns_raw_df.head())
 
     labels = f"summary.ascatv3TCGA.penalty70.{hg_ver}.tsv"
-    specimen_df = pd.read_csv(f"./data/{labels}", sep="\t")
+    specimen_df = pd.read_csv(f"{data_dir}/{labels}", sep="\t")
     if print_debug:
         print(specimen_df.head())
 
@@ -76,25 +80,25 @@ def tcga(hg_ver, print_debug=False):
     if print_debug:
         print(samples_df.head())
 
-    return cna_raw_df, samples_df
+    return cns_raw_df, samples_df
 
 
 def tracerx(print_debug=False):
-    prim_cna_file = pd.read_csv("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv")
+    prim_cns_file = pd.read_csv(f"{data_dir}/20220803_TxPri_mphase_by_sample_df.reduced.csv")
     if print_debug:
-        print(prim_cna_file.head())
+        print(prim_cns_file.head())
 
-    cna_subset = prim_cna_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
-    cna_subset["chr"] = "chr" + cna_subset["chr"].astype(str)
-    cna_raw_df = rename_columns(cna_subset)
+    cns_subset = prim_cns_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
+    cns_subset["chr"] = "chr" + cns_subset["chr"].astype(str)
+    cns_raw_df = rename_columns(cns_subset)
     if print_debug:
-        print(cna_raw_df.head())
+        print(cns_raw_df.head())
 
-    labels = pd.read_csv("./data/20221109_TRACERx421_all_patient_df.tsv", sep="\t")
+    labels = pd.read_csv(f"{data_dir}/20221109_TRACERx421_all_patient_df.tsv", sep="\t")
     if print_debug:
         print(labels.head())
 
-    left = prim_cna_file[["sample", "patient_id"]].drop_duplicates()
+    left = prim_cns_file[["sample", "patient_id"]].drop_duplicates()
     right = labels[["cruk_id", "sex", "histology_multi_full"]].drop_duplicates()
     merged = pd.merge(left, right, left_on="patient_id", right_on="cruk_id")
     merged["sex"] = np.where(merged["sex"] == "Female", "xx", "xy")
@@ -103,7 +107,7 @@ def tracerx(print_debug=False):
     if print_debug:
         print(samples_df.head())
 
-    return cna_raw_df, samples_df
+    return cns_raw_df, samples_df
 
 
 if __name__ == "__main__":
@@ -125,5 +129,5 @@ if __name__ == "__main__":
         raise ValueError(f"Dataset {dataset} not recognized.")
     
     assert len(cns_df["sample_id"].unique()) == len(samples_df)
-    samples_df.to_csv(f"./out/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
-    cns_df.to_csv(f"./out/{dataset}_cna_preprocess.tsv", sep="\t", index=False, header=True)
+    samples_df.to_csv(f"{out_dir}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
+    cns_df.to_csv(f"{out_dir}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)
