@@ -23,6 +23,7 @@ def _add_common_args(parser):
     parser.add_argument("--assembly", type=str, help="Assembly to use. One of: hg19, hg38.", required=False, default="hg19")
     parser.add_argument("--threads", type=int, help="Number of threads to use", required=False, default=1)
     parser.add_argument("--verbose", help="Print progress", action="store_true")
+    parser.add_argument("--time", help="Save runtime", action="store_true")
 
 
 def _parse_args():
@@ -186,9 +187,10 @@ def main():
         print(f"Finished in {runtime:.3f} seconds.")
         print(f"Writing to {out_file}...")
         # Add to file times.tsv
-        with open("./out/times.tsv", "a") as f:
-            f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
-    
+        if args.time:
+            with open("./out/times.tsv", "a") as f:
+                f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
+        
     if action == "bin" and args.onlybins:
         save_regions(res_df, out_file, True)
     elif action in ["fill", "impute", "bin"]:

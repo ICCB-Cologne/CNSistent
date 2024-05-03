@@ -7,3 +7,4 @@ scratch/
 pycns.out.tsv
 pycns.egg-info
 *.pdf
+.pytest_cache/

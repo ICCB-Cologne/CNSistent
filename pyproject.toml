@@ -18,7 +18,7 @@ requires-python = ">=3.9"
 
 
 [project.scripts]
-cnsistent="cnsistent:main"
+cns="cnsistent:main"
 
 [tool.hatch.build.targets.wheel]
 include = ["cnsistent.py", "cns/**/*.py", "README.md", "docs/**"]
