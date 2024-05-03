@@ -5,7 +5,7 @@ preprocess_only=false
 
 mkdir -p out
 # TRACERx PCAWG TCGA_hg19 TCGA_hg38
-for dataset in PCAWG;
+for dataset in TRACERx PCAWG TCGA_hg19 TCGA_hg38;
 do
     echo "Processing $dataset"
     ./data_preprocess.py ${dataset} --verbose
@@ -13,9 +13,9 @@ do
         continue      
     fi
     common_args="--threads $threads --verbose"
-    ./cns.py fill "./out/${dataset}_cna_preprocess.tsv" --samples "./out/${dataset}_samples_preprocess.tsv" --out "./out/${dataset}_cna_fill.tsv" $common_args
-    ./cns.py coverage "./out/${dataset}_cna_fill.tsv" --samples "./out/${dataset}_samples_preprocess.tsv" --out "./out/${dataset}_samples.tsv" $common_args
-    ./cns.py impute "./out/${dataset}_cna_fill.tsv" --samples "./out/${dataset}_samples.tsv" --out "./out/${dataset}_cna_imp.tsv" $common_args
-    ./cns.py ploidy "./out/${dataset}_cna_imp.tsv" --samples "./out/${dataset}_samples.tsv" --out "./out/${dataset}_samples.tsv" $common_args
+    cns fill "./out/${dataset}_cns_preprocess.tsv" --samples "./out/${dataset}_samples_preprocess.tsv" --out "./out/${dataset}_cns_fill.tsv" $common_args
+    cns coverage "./out/${dataset}_cns_fill.tsv" --samples "./out/${dataset}_samples_preprocess.tsv" --out "./out/${dataset}_samples.tsv" $common_args
+    cns impute "./out/${dataset}_cns_fill.tsv" --samples "./out/${dataset}_samples.tsv" --out "./out/${dataset}_cns_imp.tsv" $common_args
+    cns ploidy "./out/${dataset}_cns_imp.tsv" --samples "./out/${dataset}_samples.tsv" --out "./out/${dataset}_samples.tsv" $common_args
 done
 

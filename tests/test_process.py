@@ -108,7 +108,7 @@ class TestSegments(unittest.TestCase):
 
 class TestImputation(unittest.TestCase):
     def setUp(self):
-        self.cna_df = pd.DataFrame({
+        self.cns_df = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's2', 's2'],
             'chrom': ['chr1', 'chr2', 'chr2', 'chr2', 'chr2', 'chr2'],
             'start': [0, 0, 50, 125, 150, 175],
@@ -123,40 +123,40 @@ class TestImputation(unittest.TestCase):
         }, index=['s1', 's2'])
 
     def test_get_nan_regs(self):
-        result = get_nan_segs(self.cna_df)
+        result = get_nan_segs(self.cns_df)
         self.assertEqual(result.shape[0], 1)
 
     def test_add_tails(self):
-        result = add_tails(self.cna_df, self.chr_lengths)
+        result = add_tails(self.cns_df, self.chr_lengths)
         self.assertEqual(result.shape[0], 8)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 50)
 
     def test_fill_gaps(self):
-        result = fill_gaps(self.cna_df, print_info=True)
+        result = fill_gaps(self.cns_df, print_info=True)
         self.assertEqual(result.shape[0], 7)
         self.assertEqual(result.at[3, "start"], 100)
         self.assertEqual(result.at[3, "end"], 125)
 
     def test_add_missing(self):
-        result = add_missing(self.cna_df, self.samples_df, self.chr_lengths, print_info=False)
+        result = add_missing(self.cns_df, self.samples_df, self.chr_lengths, print_info=False)
         self.assertEqual(result.shape[0], 7)
         self.assertEqual(result.at[2, "start"], 0)
         self.assertEqual(result.at[2, "end"], 100)
 
     def test_merge_neighbours(self):
-        result = merge_neighbours(self.cna_df, print_info=False)
+        result = merge_neighbours(self.cns_df, print_info=False)
         self.assertEqual(result.shape[0], 5)
         self.assertEqual(result.at[4, "start"], 150)
         self.assertEqual(result.at[4, "end"], 200)
 
     def test_fill_nans_with_zeros(self):
-        result = fill_nans_with_zeros(self.cna_df, print_info=False)
+        result = fill_nans_with_zeros(self.cns_df, print_info=False)
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.minor_cn.isnull().sum(), 0)
 
     def test_create_imputed_entries(self):
-        result = add_tails(self.cna_df, self.chr_lengths)
+        result = add_tails(self.cns_df, self.chr_lengths)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
         result = create_imputed_entries(result, print_info=False)

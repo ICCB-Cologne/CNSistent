@@ -22,15 +22,15 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(df.values.tolist(), gaps)
 
     def test_sampleid_to_numeric_df(self):
-        cna_df = pd.DataFrame({'sample_id': ['sample1', 'sample2']})
-        samples, df = sampleid_to_numeric_df(cna_df)
+        cns_df = pd.DataFrame({'sample_id': ['sample1', 'sample2']})
+        samples, df = sampleid_to_numeric_df(cns_df)
         self.assertEqual(samples, ['sample1', 'sample2'])
         self.assertTrue((df['sample_id'] == [0, 1]).all())
 
     def test_numeric_to_sampleid_df(self):
         samples = ['sample1', 'sample2']
-        cna_df = pd.DataFrame({'sample_id': [0, 1]})
-        df = numeric_to_sampleid_df(samples, cna_df)
+        cns_df = pd.DataFrame({'sample_id': [0, 1]})
+        df = numeric_to_sampleid_df(samples, cns_df)
         self.assertTrue((df['sample_id'] == ['sample1', 'sample2']).all())
 
     def test_chrom_to_sortable(self):
@@ -52,8 +52,8 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(column_to_label('other'), 'other')
 
     def test_rename_columns(self):
-        cna_df = pd.DataFrame(np.zeros((5, 6)))
-        df = rename_columns(cna_df)
+        cns_df = pd.DataFrame(np.zeros((5, 6)))
+        df = rename_columns(cns_df)
         self.assertEqual(df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
 
     def test_segs_to_chrom_dict(self):

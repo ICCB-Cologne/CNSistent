@@ -4,13 +4,13 @@ from cns.analyze.genome import fig_genome, fig_genome_groups
 from cns.analyze.heatmap import fig_CN_heatmap
 from cns.process.binning import mean_bins, add_derived
 from cns.process.selection import cna_head
-from cns.utils.files import load_cna, load_samples
+from cns.utils.files import load_cns, load_samples
 from cns.utils.assemblies import get_assembly
 hg19 = get_assembly("hg19")
 
 # Load bins
 # %%  
-bins = load_cna("./out/PCAWG_bin_3MB.tsv")
+bins = load_cns("./out/PCAWG_bin_3MB.tsv")
 print(bins.head())
 
 # Add derived columns (length, cumulative mid,...)

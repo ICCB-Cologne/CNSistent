@@ -7,15 +7,15 @@ from cns.process.segments import breaks_to_segments
 from cns.utils.conversions import segs_to_chrom_dict
 
 
-def add_derived(cna_df, assembly):
-    cna_df = cna_df.copy()
-    cna_df["total_cn"] = cna_df["major_cn"] + cna_df["minor_cn"]
-    cna_df["length"] = (cna_df["end"] - cna_df["start"]).astype(np.uint32)
-    cna_df["mid"] = cna_df["start"] + cna_df["length"] // 2
-    cna_df["cum_mid"] = cna_df["mid"] + cna_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
+def add_derived(cns_df, assembly):
+    cns_df = cns_df.copy()
+    cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
+    cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
+    cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
+    cns_df["cum_mid"] = cns_df["mid"] + cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
     # order by cum_mid
-    cna_df = cna_df.sort_values(by=["sample_id", "cum_mid"])
-    return cna_df
+    cns_df = cns_df.sort_values(by=["sample_id", "cum_mid"])
+    return cns_df
 
 
 def mean_bins(bins_df, assembly):
@@ -92,14 +92,14 @@ def _get_agg_func(fun_type):
 
 
 # Add column names
-def bin_by_segments(cna_df, segments, fun_type="mean", print_progress=True):
+def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
     agg_func = _get_agg_func(fun_type)
     chrom_segments = segs_to_chrom_dict(segments)
-    cna_df_view = cna_df.set_index(["sample_id", "chrom"])
+    cns_df_view = cns_df.set_index(["sample_id", "chrom"])
     new_rows = []
-    indices = cna_df_view.index.unique()
+    indices = cns_df_view.index.unique()
     i = 0
-    for (sample, chrom), group in cna_df_view.groupby(level=[0, 1]):
+    for (sample, chrom), group in cns_df_view.groupby(level=[0, 1]):
         if print_progress:
             i += 1
             print(f"Binning chr ({i}/{len(indices)})", end="\r")
@@ -114,13 +114,13 @@ def bin_by_segments(cna_df, segments, fun_type="mean", print_progress=True):
     return bin_df
 
 
-def bin_by_breaks(cna_df, breaks, fun_type="mean", print_progress=True):
+def bin_by_breaks(cns_df, breaks, fun_type="mean", print_progress=True):
     segments = breaks_to_segments(breaks)
-    return bin_by_segments(cna_df, segments, fun_type, print_progress)
+    return bin_by_segments(cns_df, segments, fun_type, print_progress)
 
 
-def bin_block(cna_df, break_type, assembly, fun_type="mean", print_progress=True):
+def bin_block(cns_df, break_type, assembly, fun_type="mean", print_progress=True):
     breaks = get_breakpoints(break_type, assembly)
-    bin_df = bin_by_breaks(cna_df, breaks, fun_type, print_progress)
+    bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_progress)
     labelled_bins = add_derived(bin_df, assembly)
     return labelled_bins

@@ -1,11 +1,11 @@
-from cns.utils.files import load_cna
+from cns.utils.files import load_cns
 import pandas as pd
 
 
 class Dataset:
     def __init__(self, name, color):
         self.name = name
-        self.cns = load_cna(f"./out/{name}_cna_imp.tsv")
+        self.cns = load_cns(f"./out/{name}_cna_imp.tsv")
         self.samples = pd.read_csv(f"./out/{name}_samples.tsv", sep="\t")
         self.color = color
 

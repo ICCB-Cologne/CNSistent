@@ -5,7 +5,7 @@ from cns.process.segments import regions_to_segments
 from cns.process.imputation import fill_sex_if_missing
 
 
-def load_cna(path, sort=False, change_coords=True):
+def load_cns(path, sort=False, change_coords=True):
     cns = pd.read_csv(path, sep="\t")
     cns = rename_columns(cns)
     cns["start"] = cns["start"].astype(int)
@@ -17,17 +17,7 @@ def load_cna(path, sort=False, change_coords=True):
     return cns
 
 
-def samples_df_from_cna_df(cna_df, fill_sex=True):
-    ids = cna_df["sample_id"].unique()
-    samples_df = pd.DataFrame({"sample_id": ids})
-    samples_df["sex"] = "NA"
-    samples_df.set_index("sample_id", inplace=True)
-    if fill_sex:
-        samples_df = fill_sex_if_missing(cna_df, samples_df)
-    return samples_df
-
-
-def save_cna(cns, path, sort=False, change_coords=True):
+def save_cns(cns, path, sort=False, change_coords=True):
     cns = cns.copy()
     if change_coords:
         cns.loc[:, "start"] += 1
@@ -44,6 +34,16 @@ def load_samples(path):
     if "sex" not in samples_df.columns:
         samples_df["sex"] = "NA"     
     return samples_df   
+
+
+def samples_df_from_cns_df(cns_df, fill_sex=True):
+    ids = cns_df["sample_id"].unique()
+    samples_df = pd.DataFrame({"sample_id": ids})
+    samples_df["sex"] = "NA"
+    samples_df.set_index("sample_id", inplace=True)
+    if fill_sex:
+        samples_df = fill_sex_if_missing(cns_df, samples_df)
+    return samples_df
 
 
 def save_regions(seg_df, path, change_coords=True):
@@ -67,11 +67,11 @@ def load_regions(path, change_coords=True):
     return segs
     
 
-def rename_columns(cna_df):
-    res_df = cna_df.copy()
+def rename_columns(cns_df):
+    res_df = cns_df.copy()
     if res_df.columns.size < 6:
         raise ValueError(
-            "cna_df must have first 6 columns in the following order: ",
+            "cns_df must have first 6 columns in the following order: ",
             "sample_id",
             "chrom",
             "start",

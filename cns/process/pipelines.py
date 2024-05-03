@@ -10,18 +10,18 @@ from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import breaks_to_segments, genome_to_segments, tuples_to_segments
 from cns.utils.assemblies import get_assembly
-from cns.utils.files import load_regions, samples_df_from_cna_df
+from cns.utils.files import load_regions, samples_df_from_cns_df
 
 
-def main_fill(cna_df, samples_df=None, assembly='hg38', cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):
+def main_fill(cns_df, samples_df=None, assembly='hg38', cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):
     if isinstance(assembly, str):
         assembly = get_assembly(assembly)
     if samples_df is None:
-        samples_df = samples_df_from_cna_df(cna_df)
+        samples_df = samples_df_from_cns_df(cns_df)
 
     # Fill missing values with NaNs
-    cna_df = cna_df.reset_index(drop=True)
-    cna_tailed_df = add_tails(cna_df,assembly.chr_lens, cn_columns, print_info=print_info)
+    cns_df = cns_df.reset_index(drop=True)
+    cna_tailed_df = add_tails(cns_df,assembly.chr_lens, cn_columns, print_info=print_info)
     cna_filled_df = fill_gaps(cna_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
         cna_filled_df = add_missing(cna_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
@@ -29,10 +29,10 @@ def main_fill(cna_df, samples_df=None, assembly='hg38', cn_columns=('major_cn', 
     return res
 
 
-def main_impute(cna_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
+def main_impute(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
     # Impute
-    cna_df = cna_df.reset_index(drop=True)
-    imputed_df = create_imputed_entries(cna_df, cn_columns, print_info=print_info)
+    cns_df = cns_df.reset_index(drop=True)
+    imputed_df = create_imputed_entries(cns_df, cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
     res = merge_neighbours(filled_df, cn_columns=cn_columns, print_info=print_info)
     assert len(res[res.isnull().any(axis=1)]) == 0, "NaNs still present in final_df."
@@ -40,9 +40,9 @@ def main_impute(cna_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
 
 
 # TODO: should have any and all option (any is nan, or all are nan)
-def main_coverage(cna_df, samples_df, assembly, print_info=False):
+def main_coverage(cns_df, samples_df, assembly, print_info=False):
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    cna_vals = cna_df.loc[~cna_df.isna().any(axis=1)].copy()
+    cna_vals = cns_df.loc[~cns_df.isna().any(axis=1)].copy()
     coverage = get_missing_chroms(cna_vals, samples_df, assembly)
     coverage = get_covered_bases(cna_vals, coverage)
     coverage = get_base_frac(coverage, assembly)

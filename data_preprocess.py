@@ -114,16 +114,16 @@ if __name__ == "__main__":
     dataset = args.dataset
     print_debug = args.verbose
     if dataset == "PCAWG":
-        cna_df, samples_df = pcawg(print_debug)
+        cns_df, samples_df = pcawg(print_debug)
     elif dataset == "TCGA_hg19":
-        cna_df, samples_df = tcga("hg19", print_debug)
+        cns_df, samples_df = tcga("hg19", print_debug)
     elif dataset == "TCGA_hg38":
-        cna_df, samples_df = tcga("hg38", print_debug)
+        cns_df, samples_df = tcga("hg38", print_debug)
     elif dataset == "TRACERx":
-        cna_df, samples_df = tracerx(print_debug)
+        cns_df, samples_df = tracerx(print_debug)
     else:
         raise ValueError(f"Dataset {dataset} not recognized.")
     
-    assert len(cna_df["sample_id"].unique()) == len(samples_df)
+    assert len(cns_df["sample_id"].unique()) == len(samples_df)
     samples_df.to_csv(f"./out/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
-    cna_df.to_csv(f"./out/{dataset}_cna_preprocess.tsv", sep="\t", index=False, header=True)
+    cns_df.to_csv(f"./out/{dataset}_cna_preprocess.tsv", sep="\t", index=False, header=True)
