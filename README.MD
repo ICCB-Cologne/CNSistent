@@ -54,7 +54,7 @@ awk 'BEGIN{FS="[ \t]+";OFS="\t"} {print "sample1", $1, $2, $3}' yourfile.txt | s
 
 The command line interface uses the following pattern:
 
-`python cns.py [command] cna_file_path [options]`
+`cnsistent [command] cna_file_path [options]`
 
 The following commands are available (see details below)
 

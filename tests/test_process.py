@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import pandas as pd
+
 from cns.process.pipelines import *
 from cns.process.segments import *
 from cns.process.imputation import *

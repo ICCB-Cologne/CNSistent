@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .labels import plot_x_ticks, plot_cytobands
+from cns.analyze.labels import plot_cytobands, plot_x_ticks
 
 
 def plot_nans(nans_df, dataset_name):

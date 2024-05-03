@@ -1,5 +1,6 @@
 import numpy as np
-from ..utils.conversions import cytobands_to_df
+
+from cns.utils.conversions import cytobands_to_df
 
 
 def calc_dist_breaks(reg_len, step_size, equidistant=True):

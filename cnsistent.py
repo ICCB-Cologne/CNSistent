@@ -143,8 +143,7 @@ def main_process(action, cna_df, samples_df, assembly, args):
             res_blocs = pool.starmap(main_fun, zip_blocks)            
         return pd.concat(res_blocs)
 
-
-if __name__ == "__main__":    
+def main():
     args = _parse_args()
     action = args.action
     assembly = get_assembly(args.assembly)
@@ -200,3 +199,7 @@ if __name__ == "__main__":
 
     if print_progress:
         print("Done.")
+
+
+if __name__ == "__main__":
+    main()

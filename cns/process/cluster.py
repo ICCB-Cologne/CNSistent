@@ -1,6 +1,7 @@
 import numpy as np
 from numba import jit
 
+
 @jit(nopython=True)
 def merge_clusters(clusters, threshold):
     merged = True

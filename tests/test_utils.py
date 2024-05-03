@@ -1,10 +1,10 @@
 import unittest
-from cns.utils.files import rename_columns
-from cns.utils.conversions import *
-
-import unittest
 import pandas as pd
 import numpy as np
+
+from cns.utils.conversions import chrom_to_sortable, column_to_label, cytobands_to_df, gaps_to_df, numeric_to_sampleid_df, sampleid_to_numeric_df, segs_to_chrom_dict, sortable_to_chrom
+from cns.utils.files import rename_columns
+
 
 class TestConversions(unittest.TestCase):
     def test_cytobands_to_df(self):

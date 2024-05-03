@@ -1,6 +1,6 @@
 
 
-from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, split_segments
+from cns.process.breakpoints import split_segments
 
 
 def genome_to_segments(chr_lens):

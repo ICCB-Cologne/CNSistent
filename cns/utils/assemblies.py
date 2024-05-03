@@ -1,6 +1,6 @@
-from .cytobands import hg19_cytobands, hg38_cytobands
-from .gaps import hg19_gaps, hg38_gaps
-from .genomes import chr_names, aut_names, human_chr_colors, hg19_chr_lengths, hg19_genome_length, hg19_autosome_length, hg19_chr_cum_starts, hg38_chr_lengths, hg38_genome_length, hg38_autosome_length, hg38_chr_cum_starts
+from cns.utils.cytobands import hg19_cytobands, hg38_cytobands
+from cns.utils.gaps import hg19_gaps, hg38_gaps
+from cns.utils.genomes import chr_names, aut_names, human_chr_colors, hg19_chr_lengths, hg19_genome_length, hg19_autosome_length, hg19_chr_cum_starts, hg38_chr_lengths, hg38_genome_length, hg38_autosome_length, hg38_chr_cum_starts
 
 class Assembly:
     def __init__(self, name, chr_names, chr_count, aut_names, aut_count, chr_lens, chr_starts, chr_colors, gen_len, aut_len, cytobands, gaps):

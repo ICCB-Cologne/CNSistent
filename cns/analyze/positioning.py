@@ -8,6 +8,7 @@
 #    Bottom: 0.46873017812050666
 #    Right: 0.9206458333333333
 #    Top: 0.5312698218794933
+
 def _get_pos(fig, ax, should_print=False):
     # Get the tight bounding box of the axes, including tick labels, in display units
     tight_bbox = ax.get_tightbbox(fig.canvas.get_renderer())

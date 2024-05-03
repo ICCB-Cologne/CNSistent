@@ -1,18 +1,16 @@
 import pandas as pd
 import numpy as np
-from .breakpoints import calc_arm_breaks, calc_cytoband_breaks
-from .segments import breaks_to_segments, tuples_to_segments, genome_to_segments
-from .cluster import get_breaks, created_merged_segs
-from .binning import add_derived
-from .imputation import (add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros,
-                         merge_neighbours)
-from ..utils.files import load_regions, samples_df_from_cna_df
-from ..utils.assemblies import get_assembly
-from ..analyze.coverage import get_base_frac, get_covered_bases
-from ..analyze.aneuploidy import (calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy,
-                                  norm_sex_aneuploidy)
-from ..analyze.signatures import add_breaks_per_sample
-from ..analyze.coverage import get_missing_chroms
+
+from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy, norm_sex_aneuploidy
+from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
+from cns.analyze.signatures import add_breaks_per_sample
+from cns.process.binning import add_derived
+from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
+from cns.process.cluster import created_merged_segs, get_breaks
+from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
+from cns.process.segments import breaks_to_segments, genome_to_segments, tuples_to_segments
+from cns.utils.assemblies import get_assembly
+from cns.utils.files import load_regions, samples_df_from_cna_df
 
 
 def main_fill(cna_df, samples_df=None, assembly='hg38', cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):

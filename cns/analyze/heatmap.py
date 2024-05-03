@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
-from ..utils.conversions import chrom_to_sortable, column_to_label
-from .labels import _plot_x_ticks, _plot_x_lines
-from .positioning import _get_pos
+
+from cns.analyze.labels import _plot_x_lines, _plot_x_ticks
+from cns.analyze.positioning import _get_pos
+from cns.utils.conversions import chrom_to_sortable, column_to_label
 
 
 # Define the colors for the custom colormap

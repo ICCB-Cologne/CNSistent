@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 from numba import njit
 
-from ..utils.conversions import segs_to_chrom_dict
-from .segments import breaks_to_segments
-from .breakpoints import get_breakpoints
+from cns.process.breakpoints import get_breakpoints
+from cns.process.segments import breaks_to_segments
+from cns.utils.conversions import segs_to_chrom_dict
 
 
 def add_derived(cna_df, assembly):
