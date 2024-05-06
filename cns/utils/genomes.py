@@ -84,7 +84,7 @@ hg19_chr_lengths = {
     "chrY": 59_373_566,
 }
 
-hg19_chr_cum_starts = {
+hg19_chr_starts = {
     "chr1": 0,
     "chr2": 249250621,
     "chr3": 492449994,
@@ -144,7 +144,7 @@ hg38_chr_lengths = {
     "chrY": 57_227_415,
 }
 
-hg38_chr_cum_starts = {
+hg38_chr_starts = {
     "chr1": 0,
     "chr2": 248956422,
     "chr3": 491149951,

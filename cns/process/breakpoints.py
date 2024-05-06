@@ -1,6 +1,7 @@
 import numpy as np
 
 from cns.utils.conversions import cytobands_to_df
+from cns.utils.assemblies import hg19
 
 
 def calc_dist_breaks(reg_len, step_size, equidistant=True):
@@ -41,7 +42,7 @@ def calc_bin_breaks(assembly, step_size, equidistant=True):
     ]
 
 
-def calc_arm_breaks(assembly):
+def calc_arm_breaks(assembly=hg19):
     cyto_df = cytobands_to_df(assembly.cytobands)
     acen = cyto_df.query("stain == 'acen' and name.str.contains('p')", engine="python")                                
     max_ends = cyto_df.groupby("chrom")["end"].max().to_dict()
@@ -53,7 +54,7 @@ def calc_arm_breaks(assembly):
 
 
 # all the breakpoints around cytobands
-def calc_cytoband_breaks(assembly):
+def calc_cytoband_breaks(assembly=hg19):
     cyto_df = cytobands_to_df(assembly.cytobands)
     return [
         (chrom, [0] + [end for end in cyto_df.query(f"chrom == '{chrom}'")["end"]])
@@ -61,7 +62,7 @@ def calc_cytoband_breaks(assembly):
     ]
 
 
-def get_breakpoints(break_type, assembly):
+def get_breakpoints(break_type, assembly=hg19):
     if break_type == "arms":
         return calc_arm_breaks(assembly)
     elif break_type == "cytobands":

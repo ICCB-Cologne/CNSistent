@@ -1,4 +1,5 @@
 import pandas as pd
+from cns.utils.assemblies import hg19
 
 
 def get_expected_ploidy(column, chrom, is_xy):
@@ -51,7 +52,7 @@ def calc_ane_per_chrom(cns, samples_indexed):
     return res
 
 
-def norm_chrom_aneuploidy(aneuploidies, assembly):
+def norm_chrom_aneuploidy(aneuploidies, assembly=hg19):
     res = aneuploidies.copy()
     for column in ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]:
         def chrom_norm(row):
@@ -71,7 +72,7 @@ def _sum_cn_columns(group):
     )
 
 # TODO: Should add a total fraction
-def calc_ane_per_sample(aneuploidies, assembly):
+def calc_ane_per_sample(aneuploidies, assembly=hg19):
     ids = aneuploidies["sample_id"].unique()
 
     res = []
@@ -89,14 +90,14 @@ def calc_ane_per_sample(aneuploidies, assembly):
     return res
 
 
-def norm_aut_aneuploidy(autosomes_sum, assembly):
+def norm_aut_aneuploidy(autosomes_sum, assembly=hg19):
     res = autosomes_sum.copy()
     for column in ['ane_major_cn', 'ane_minor_cn', 'ane_total_cn']:
         res[column + "_frac"] = res.apply(lambda x: x[column] / assembly.aut_len, axis=1)
     return res
 
 
-def norm_sex_aneuploidy(samples_indexed, sex_chromo_sum, assembly):
+def norm_sex_aneuploidy(samples_indexed, sex_chromo_sum, assembly=hg19):
     sex_info = samples_indexed[["sex"]]
     merged_df = sex_chromo_sum.merge(sex_info, left_index=True, right_index=True, how="left")
     xx_len = assembly.chr_lens["chrX"]

@@ -11,14 +11,11 @@ from cns.process.imputation import add_missing, add_tails, create_imputed_entrie
 from cns.process.segments import breaks_to_segments, genome_to_segments, tuples_to_segments
 from cns.utils.assemblies import get_assembly
 from cns.utils.files import load_regions, samples_df_from_cns_df
+from cns.utils.assemblies import hg19
 
 
-def main_fill(cns_df, samples_df=None, assembly='hg38', cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):
-    if isinstance(assembly, str):
-        assembly = get_assembly(assembly)
-    if samples_df is None:
-        samples_df = samples_df_from_cns_df(cns_df)
-
+def main_fill(cns_df, samples_df=None, assembly=hg19, cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):
+    samples_df = samples_df_from_cns_df(cns_df)
     # Fill missing values with NaNs
     cns_df = cns_df.reset_index(drop=True)
     cns_tailed_df = add_tails(cns_df,assembly.chr_lens, cn_columns, print_info=print_info)
@@ -40,7 +37,7 @@ def main_impute(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
 
 
 # TODO: should have any and all option (any is nan, or all are nan)
-def main_coverage(cns_df, samples_df, assembly, print_info=False):
+def main_coverage(cns_df, samples_df, assembly=hg19, print_info=False):
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     cns_vals = cns_df.loc[~cns_df.isna().any(axis=1)].copy()
     coverage = get_missing_chroms(cns_vals, samples_df, assembly)
@@ -49,7 +46,7 @@ def main_coverage(cns_df, samples_df, assembly, print_info=False):
     return coverage
 
 
-def main_ploidy(cns, samples, assembly, print_progress=False):
+def main_ploidy(cns, samples, assembly=hg19, print_progress=False):
     samples = add_breaks_per_sample(cns, samples, assembly)
     cns = add_derived(cns, assembly)
     pre_chr = calc_ane_per_chrom(cns, samples)
@@ -61,7 +58,7 @@ def main_ploidy(cns, samples, assembly, print_progress=False):
     return res
 
 
-def main_cluster(cns, dist, assembly, print_progress=False):
+def main_cluster(cns, dist, assembly=hg19, print_progress=False):
     dict_start = get_breaks(cns)
 
     if print_progress:
@@ -79,7 +76,7 @@ def main_cluster(cns, dist, assembly, print_progress=False):
     return df
 
 
-def regions_select(select, assembly):    
+def regions_select(select, assembly=hg19):    
     if select == "arms":
         breaks = calc_arm_breaks(assembly)
         return breaks_to_segments(breaks)
@@ -92,7 +89,7 @@ def regions_select(select, assembly):
         return load_regions(select)
     
 
-def regions_remove(remove, assembly):
+def regions_remove(remove, assembly=hg19):
     if remove == "gaps":
         breaks = assembly.gaps
         return tuples_to_segments(breaks)

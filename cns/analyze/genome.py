@@ -3,6 +3,7 @@ import numpy as np
 
 from cns.analyze.labels import plot_chr_bg, plot_x_ticks
 from cns.utils.conversions import column_to_label
+from cns.utils.assemblies import hg19
 
 
 def line_plot(
@@ -40,7 +41,7 @@ def scatter_plot(ax, grouped, column, color="red", label=None, alpha=1, dot_size
 
 def fig_genome(
     grouped,
-    assembly,
+    assembly=hg19,
     label=None,
     column="total_cn",
     max_cn=10,
@@ -69,7 +70,7 @@ def fig_genome(
 def fig_genome_groups(
     grouped_per_group,
     label_per_group,
-    assembly,
+    assembly=hg19,
     column="total_cn",
     max_cn=10,
     width=16,
@@ -102,7 +103,7 @@ def fig_genome_groups(
 
 def fig_manhattan(
     grouped,
-    assembly,
+    assembly=hg19,
     label=None,
     column="total_cn",
     max_cn=10,

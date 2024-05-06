@@ -1,3 +1,5 @@
+from cns.utils.assemblies import hg19
+
 # count segments per chromosome and subtract 1
 def calc_breaks_per_chr(cns):
     breaks = cns.reset_index().groupby(["sample_id", "chrom"]).size()
@@ -6,7 +8,7 @@ def calc_breaks_per_chr(cns):
     return breaks
 
 
-def add_breaks_per_sample(cns, samples, assembly):
+def add_breaks_per_sample(cns, samples, assembly=hg19):
     res = samples.copy()
     breaks_per_chr = calc_breaks_per_chr(cns)
     chrom_types = {"aut": assembly.aut_names, "sex": assembly.sex_names}

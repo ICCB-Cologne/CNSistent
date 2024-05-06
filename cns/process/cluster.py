@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-
+from cns.utils.assemblies import hg19
 
 @jit(nopython=True)
 def merge_clusters(clusters, threshold):
@@ -61,7 +61,7 @@ def clusters_to_breaks(clusters):
     return chrom_breaks
 
 
-def created_merged_segs(dict_start, dist, assembly, extend=True):
+def created_merged_segs(dict_start, dist, assembly=hg19, extend=True):
     res = []
     for chrom, old_breaks in dict_start.items():
         clusters = breaks_to_clusters(old_breaks)

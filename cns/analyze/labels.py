@@ -1,7 +1,7 @@
 
 from matplotlib.patches import Rectangle
 import matplotlib.patches as mpatches
-from cns.utils.conversions import *
+from cns.utils.assemblies import hg19
 
 def cytoband_color(gie_stain):
     if gie_stain == "acen":
@@ -42,7 +42,7 @@ def gap_color(gap_type):
         return "white"
 
 
-def plot_chr_bg(ax, assembly, y_min=0, y_max=1, colored=False):
+def plot_chr_bg(ax, assembly=hg19, y_min=0, y_max=1, colored=False):
     x_pos = 0
     is_even = True
     for chrom, length in assembly.chr_lens.items():        
@@ -61,7 +61,7 @@ def plot_chr_bg(ax, assembly, y_min=0, y_max=1, colored=False):
     ax.set_xlim(0, assembly.gen_len)
 
 
-def plot_cytobands(ax, assembly, y_min=0, y_max=1, alpha=.2, sel_chrom=None):
+def plot_cytobands(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, sel_chrom=None):
     for band in assembly.cytobands:
         chrom, start, end, name, gie_stain = band
         if (sel_chrom is not None) and (sel_chrom != chrom):
@@ -92,7 +92,7 @@ def add_cytoband_legend(ax):
     ax.legend(handles=legend_elements, bbox_to_anchor=(1, 1), loc='upper left')
 
 
-def plot_gaps(ax, assembly, y_min=0, y_max=1, alpha=.2, sel_chrom=None):
+def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, sel_chrom=None):
     for band in assembly.gaps:
         chrom, start, end, gap_type, bridge = band        
         if (sel_chrom is not None) and (sel_chrom != chrom):
@@ -153,7 +153,7 @@ def no_y_ticks(ax):
     ax.set_yticklabels([])
     
 
-def plot_x_ticks(ax, assembly, fontsize=8):
+def plot_x_ticks(ax, assembly=hg19, fontsize=8):
     positions = list(assembly.chr_lens.items())
     return _plot_x_ticks(ax, positions, fontsize)
 
@@ -169,6 +169,6 @@ def _plot_x_lines(ax, positions, width, alpha):
         )
 
 
-def plot_x_lines(ax, assembly, width=1, alpha=.5):    
+def plot_x_lines(ax, assembly=hg19, width=1, alpha=.5):    
     positions = list(assembly.chr_starts.values())[1:]
     _plot_x_lines(ax, positions, width, alpha)

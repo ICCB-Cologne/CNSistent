@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from cns.analyze.labels import plot_cytobands, plot_x_ticks
+from cns.utils.assemblies import hg19
 
 
 def plot_nans(nans_df, dataset_name):
@@ -64,7 +65,7 @@ def plot_segments_per_chr(info_df, dataset):
     plt.suptitle(f"CINs of the {dataset} dataset ({len(info_df)})", fontsize=16)
 
 
-def get_base_frac(samples, assembly):
+def get_base_frac(samples, assembly=hg19):
     res = samples.copy()
     x_length = assembly.chr_lens["chrX"]
     y_length = assembly.chr_lens["chrY"]
@@ -107,7 +108,7 @@ def get_covered_bases(cns, samples):
     return res
 
 
-def get_missing_chroms(cns, samples, assembly):
+def get_missing_chroms(cns, samples, assembly=hg19):
     res = samples.copy()
     # create a serise where the value is sex_xy if exhpected_chrs == 'xy' lese it is sex_xx
     xy_names = assembly.aut_names + ["chrX", "chrY"]

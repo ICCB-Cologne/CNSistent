@@ -5,9 +5,10 @@ from numba import njit
 from cns.process.breakpoints import get_breakpoints
 from cns.process.segments import breaks_to_segments
 from cns.utils.conversions import segs_to_chrom_dict
+from cns.utils.assemblies import hg19
 
 
-def add_derived(cns_df, assembly):
+def add_derived(cns_df, assembly=hg19):
     cns_df = cns_df.copy()
     cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
     cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
@@ -18,7 +19,7 @@ def add_derived(cns_df, assembly):
     return cns_df
 
 
-def mean_bins(bins_df, assembly):
+def mean_bins(bins_df, assembly=hg19):
     if "cum_mid" not in bins_df:
         bins_df = add_derived(bins_df, assembly)
     grouped = bins_df.drop("sample_id", axis=1).groupby(["cum_mid"])
@@ -119,7 +120,7 @@ def bin_by_breaks(cns_df, breaks, fun_type="mean", print_progress=True):
     return bin_by_segments(cns_df, segments, fun_type, print_progress)
 
 
-def bin_block(cns_df, break_type, assembly, fun_type="mean", print_progress=True):
+def bin_block(cns_df, break_type, assembly=hg19, fun_type="mean", print_progress=True):
     breaks = get_breakpoints(break_type, assembly)
     bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_progress)
     labelled_bins = add_derived(bin_df, assembly)
