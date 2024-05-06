@@ -11,6 +11,7 @@ from cns.process.cluster import *
 from cns.analyze.coverage import *
 from cns.analyze.aneuploidy import *
 from cns.analyze.signatures import *
+from cns.process.segments import add_seg_info
 from cns.utils.assemblies import hg19, hg38
 
 
@@ -290,7 +291,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
 
     def test_calc_ane_per_chrom(self):
-        derived = add_derived(self.cns, self.assembly)
+        derived = add_seg_info(self.cns, self.assembly)
         result = calc_ane_per_chrom(derived, self.samples)
         self.assertEqual(len(result), 6)
         self.assertEqual(list(result.columns), ["sample_id", "chrom", "ane_major_cn", "ane_minor_cn", "ane_total_cn"])
@@ -300,7 +301,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(test_row['ane_total_cn'].values[0], 100)
 
     def test_calc_ane_per_sample(self):
-        derived = add_derived(self.cns, self.assembly)
+        derived = add_seg_info(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         autosomes_sum, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
         self.assertEqual(len(autosomes_sum), 4)
@@ -312,7 +313,7 @@ class TestAneuploidy(unittest.TestCase):
         print(sex_chrom_sum)
 
     def test_norm_aut_aneuploidy(self):
-        derived = add_derived(self.cns, self.assembly)
+        derived = add_seg_info(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         autosomes_sum, _ = calc_ane_per_sample(cns, self.assembly)
         result = norm_aut_aneuploidy(autosomes_sum, self.assembly)
@@ -320,7 +321,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(len(result.columns), 6)
 
     def test_norm_sex_aneuploidy(self):
-        derived = add_derived(self.cns, self.assembly)
+        derived = add_seg_info(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         _, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
         result = norm_sex_aneuploidy(self.samples, sex_chrom_sum, self.assembly)

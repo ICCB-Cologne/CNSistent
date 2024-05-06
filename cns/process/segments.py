@@ -1,6 +1,8 @@
 
 
+import numpy as np
 from cns.process.breakpoints import split_segments
+from cns.utils.assemblies import hg19
 
 
 def genome_to_segments(chr_lens):
@@ -154,3 +156,17 @@ def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):
     if bin_size > 0:
         res = split_segments(res, bin_size)
     return res
+
+
+def add_seg_info(cns_df, assembly=hg19):
+    cns_df = cns_df.copy()
+    cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
+    cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
+    cns_df["cum_mid"] = cns_df["mid"] + cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
+    if "major_cn" and "minor_cn" in cns_df:
+        cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
+    if "cn_a" and "cn_b" in cns_df:
+        cns_df["total_cn"] = cns_df["cn_a"] + cns_df["cn_b"]
+    # order by cum_mid
+    cns_df = cns_df.sort_values(by=["sample_id", "cum_mid"])
+    return cns_df

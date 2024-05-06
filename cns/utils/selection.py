@@ -36,3 +36,11 @@ def sample_random(cns, n=5, seed=0):
     samples = np.random.choice(cns["sample_id"].unique(), n, replace=False)
     sample_random = cns.query('sample_id in @samples')
     return sample_random.copy()
+
+
+def get_autosomes(cns):
+    return cns.query("chrom != 'chrX' and chrom != 'chrY'")
+
+
+def get_sex_chroms(cns):
+    return cns.query("chrom == 'chrX' or chrom == 'chrY'")

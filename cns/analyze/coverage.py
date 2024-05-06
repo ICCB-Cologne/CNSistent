@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 
 from cns.analyze.labels import plot_cytobands, plot_x_ticks
+from cns.utils.selection import get_autosomes
+from cns.utils.selection import get_sex_chroms
 from cns.utils.assemblies import hg19
 
 
@@ -83,18 +85,10 @@ def get_base_frac(samples, assembly=hg19):
     return res
 
 
-def _get_sex_chroms(cns):
-    return cns.query("chrom == 'chrX' or chrom == 'chrY'")
-
-
-def _get_autosomes(cns):
-    return cns.query("chrom != 'chrX' and chrom != 'chrY'")
-
-
 def get_covered_bases(cns, samples):
     res = samples.copy()
-    aut_rows = _get_autosomes(cns)
-    sex_rows = _get_sex_chroms(cns)
+    aut_rows = get_autosomes(cns)
+    sex_rows = get_sex_chroms(cns)
     # Compute the differences between end and start
     aut_lens = aut_rows["end"] - aut_rows["start"]
     sex_lens = sex_rows["end"] - sex_rows["start"]

@@ -4,7 +4,7 @@ import numpy as np
 from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy, norm_sex_aneuploidy
 from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
-from cns.process.binning import add_derived
+from cns.process.segments import add_seg_info
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
 from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
@@ -48,7 +48,7 @@ def main_coverage(cns_df, samples_df, assembly=hg19, print_info=False):
 
 def main_ploidy(cns, samples, assembly=hg19, print_progress=False):
     samples = add_breaks_per_sample(cns, samples, assembly)
-    cns = add_derived(cns, assembly)
+    cns = add_seg_info(cns, assembly)
     pre_chr = calc_ane_per_chrom(cns, samples)
     autosomes_sum, sex_chrom_sum = calc_ane_per_sample(pre_chr, assembly)
     autosomes_sum = norm_aut_aneuploidy(autosomes_sum, assembly)

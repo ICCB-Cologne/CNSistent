@@ -3,13 +3,13 @@
 # %%
 from matplotlib import pyplot as plt
 import numpy as np
-from cns.process.binning import add_derived
+from cns.process.segments import add_seg_info
 from cns.utils.files import load_cns, load_samples
 from cns.utils.assemblies import hg19
 
 # %%  
 all_cns_df = load_cns("./out/PCAWG_cns_imp.tsv")
-derived = add_derived(all_cns_df, hg19)
+derived = add_seg_info(all_cns_df, hg19)
 samples = load_samples("./out/PCAWG_samples.tsv")
 cn_alt_df = samples.query("ane_minor_cn_frac_aut >= 0.01 & ane_major_cn_frac_aut >= 0.01").index
 covered_df = samples.query("cover_frac_aut >= 0.95").index

@@ -22,7 +22,7 @@ def load_samples_out(filename):
 
 
 def load_bins(dataset, bin_type):
-    return load_cns(pjoin(data_path, f"{dataset}_bins_{bin_type}.tsv"))
+    return load_cns(pjoin(out_path, f"{dataset}_bin_{bin_type}.tsv"))
 
 
 class Dataset:
