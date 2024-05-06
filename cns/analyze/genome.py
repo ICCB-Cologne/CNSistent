@@ -103,8 +103,8 @@ def fig_genome_groups(
 
 def fig_manhattan(
     grouped,
-    assembly=hg19,
     label=None,
+    assembly=hg19,
     column="total_cn",
     max_cn=10,
     width=16,
@@ -132,7 +132,7 @@ def fig_manhattan(
 def fig_manhattan_groups(
     grouped_per_group,
     label_per_group,
-    assembly,
+    assembly=hg19,
     column="total_cn",
     max_cn=10,
     width=16,
