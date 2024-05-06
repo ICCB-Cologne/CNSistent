@@ -38,9 +38,9 @@ def sample_random(cns, n=5, seed=0):
     return sample_random.copy()
 
 
-def get_autosomes(cns):
+def only_aut(cns):
     return cns.query("chrom != 'chrX' and chrom != 'chrY'")
 
 
-def get_sex_chroms(cns):
+def only_sex(cns):
     return cns.query("chrom == 'chrX' or chrom == 'chrY'")

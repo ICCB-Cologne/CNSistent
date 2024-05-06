@@ -6,6 +6,8 @@ from cns.utils.conversions import column_to_label
 from cns.utils.assemblies import hg19
 
 
+# TODO: Merge individual and group plots
+
 def line_plot(
     ax, grouped, column, color="red", label=None, alpha=1, line_width=1, sel_chrom=None
 ):
@@ -44,6 +46,7 @@ def fig_genome(
     assembly=hg19,
     label=None,
     column="total_cn",
+    min_cn=0,
     max_cn=10,
     width=16,
     dpi=100,
@@ -53,7 +56,7 @@ def fig_genome(
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     line_width = size * width * dpi / len(grouped)
-    plot_chr_bg(ax, assembly, 0, max_cn, colored)
+    plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     line_plot(ax, grouped, column, "red", label, alpha, line_width)
     if label != None:
@@ -72,6 +75,7 @@ def fig_genome_groups(
     label_per_group,
     assembly=hg19,
     column="total_cn",
+    min_cn=0,
     max_cn=10,
     width=16,
     dpi=100,
@@ -84,7 +88,7 @@ def fig_genome_groups(
     assert group_count == len(label_per_group)
     colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, group_count))
     line_width = size * width * dpi / len(grouped_per_group[0])
-    plot_chr_bg(ax, assembly, 0, max_cn, colored)
+    plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     alpha *= (1 / group_count) ** (1 / 3)
     for i, group in enumerate(grouped_per_group):
@@ -106,6 +110,7 @@ def fig_manhattan(
     label=None,
     assembly=hg19,
     column="total_cn",
+    min_cn=0,
     max_cn=10,
     width=16,
     dpi=100,
@@ -114,7 +119,7 @@ def fig_manhattan(
     alpha=0.3,
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
-    plot_chr_bg(ax, assembly, 0, max_cn, colored)
+    plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     dot_size = size * width * dpi / len(grouped)
     scatter_plot(ax, grouped, column, "red", label, alpha, dot_size)
@@ -134,6 +139,7 @@ def fig_manhattan_groups(
     label_per_group,
     assembly=hg19,
     column="total_cn",
+    min_cn=0,
     max_cn=10,
     width=16,
     dpi=100,
@@ -144,7 +150,7 @@ def fig_manhattan_groups(
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     group_count = len(grouped_per_group)
     assert group_count == len(label_per_group)
-    plot_chr_bg(ax, assembly, 0, max_cn, colored)
+    plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, group_count))
     alpha *= (1 / group_count) ** (1 / 3)
