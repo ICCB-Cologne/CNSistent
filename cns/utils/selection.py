@@ -44,3 +44,7 @@ def only_aut(cns):
 
 def only_sex(cns):
     return cns.query("chrom == 'chrX' or chrom == 'chrY'")
+
+
+def drop_Y(cns):
+    return cns.query("chrom != 'chrY'")

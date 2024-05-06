@@ -53,12 +53,13 @@ def fig_genome(
     colored=False,
     size=1,
     alpha=1,
+    color="red"
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     line_width = size * width * dpi / len(grouped)
     plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
-    line_plot(ax, grouped, column, "red", label, alpha, line_width)
+    line_plot(ax, grouped, column, color, label, alpha, line_width)
     if label != None:
         ax.legend(loc="upper right")
     y_label = column_to_label(column)
@@ -81,7 +82,7 @@ def fig_genome_groups(
     dpi=100,
     colored=False,
     size=1,
-    alpha=1,
+    alpha=1
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     group_count = len(grouped_per_group)
@@ -117,12 +118,13 @@ def fig_manhattan(
     colored=False,
     size=1,
     alpha=0.3,
+    color="red"
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     dot_size = size * width * dpi / len(grouped)
-    scatter_plot(ax, grouped, column, "red", label, alpha, dot_size)
+    scatter_plot(ax, grouped, column, color, label, alpha, dot_size)
     if label != None:
         ax.legend(loc="upper right")
     y_label = column_to_label(column)
@@ -146,6 +148,7 @@ def fig_manhattan_groups(
     colored=False,
     size=1,
     alpha=0.3,
+    color="red"
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     group_count = len(grouped_per_group)

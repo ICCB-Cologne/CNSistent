@@ -167,6 +167,10 @@ def add_seg_info(cns_df, assembly=hg19):
         cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
     if "cn_a" and "cn_b" in cns_df:
         cns_df["total_cn"] = cns_df["cn_a"] + cns_df["cn_b"]
+    if "hap_a" and "hap_b" in cns_df:
+        cns_df["total_cn"] = cns_df["hap_a"] + cns_df["hap_b"]
     # order by cum_mid
-    cns_df = cns_df.sort_values(by=["sample_id", "cum_mid"])
-    return cns_df
+    if "sample_id" in cns_df:
+        return cns_df.sort_values(by=["sample_id", "cum_mid"])
+    else:
+        return cns_df.sort_values(by=["cum_mid"])
