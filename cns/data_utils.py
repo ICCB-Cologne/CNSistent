@@ -1,11 +1,16 @@
+from pathlib import Path
 from cns.utils.files import load_cns, load_samples
 import pandas as pd
-from os.path import join as pjoin
+from os.path import join as pjoin, abspath, dirname
 
 
-out_path = "../../out"
-data_path = "../../data"
-docs_path = "../../docs"
+def get_root_path():
+    return abspath(pjoin(dirname(__file__), ".."))
+
+
+out_path = pjoin(get_root_path(), "out")
+data_path = pjoin(get_root_path(), "data")
+docs_path = pjoin(get_root_path(), "docs")
 
 
 def load_cns_out(filename):
@@ -16,6 +21,10 @@ def load_samples_out(filename):
     return load_samples(pjoin(out_path, filename))
 
 
+def load_bins(dataset, bin_type):
+    return load_cns(pjoin(data_path, f"{dataset}_bins_{bin_type}.tsv"))
+
+
 class Dataset:
     def __init__(self, name, color):
         self.name = name
@@ -24,10 +33,21 @@ class Dataset:
         self.color = color
 
 
+def load_pcawg():
+    return Dataset("PCAWG", "#1f77b4")
+
+
+def load_tcga():
+    return Dataset("TCGA_hg19", "#ff7f0e")
+
+
+def load_tracerx():
+    return Dataset("TRACERx", "#2ca02c")
+
+
 def load_data():
-    data = {
-        "PCAWG" : Dataset("PCAWG", "#1f77b4"),
-        "TCGA": Dataset("TCGA_hg19", "#ff7f0e"),
-        "TRACERx": Dataset("TRACERx", "#2ca02c")
+    return {
+        "PCAWG" : load_pcawg(),
+        "TCGA": load_tcga(),
+        "TRACERx": load_tracerx()
     }
-    return data
