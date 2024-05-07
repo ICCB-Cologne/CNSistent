@@ -35,7 +35,7 @@ def calc_dist_breaks(reg_len, step_size, equidistant=True):
        
 
 # Calculate breakpoints at the given resolution. The boundaries either use half
-def calc_bin_breaks(assembly, step_size, equidistant=True):
+def calc_bin_breaks(step_size, equidistant=True, assembly=hg19):
     return [
         (chrom, calc_dist_breaks(length, step_size, equidistant))
         for chrom, length in assembly.chr_lens.items()
@@ -75,7 +75,7 @@ def get_breakpoints(break_type, assembly=hg19):
                 "break_type must be 'arms', 'cytobands' or an integer, got "
                 + break_type
             )
-        return calc_bin_breaks(assembly, bin_size)
+        return calc_bin_breaks(bin_size, equidistant=True, assembly=assembly)
 
 
 def split_segment(segment, step_size, equidisant=True):
@@ -92,3 +92,12 @@ def split_segments(segments, step_size, equidisant=True):
     for segment in segments:
         res += split_segment(segment, step_size, equidisant)
     return res
+
+
+def breaks_to_positions(breaks, assembly=hg19):
+    positions = [0]
+    for chrom, break_list in breaks:
+        offset = assembly.chr_starts[chrom]
+        for i in range(len(break_list) - 1):
+            positions.append(np.uint32(break_list[i + 1]) + offset)
+    return positions
