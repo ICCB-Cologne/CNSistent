@@ -8,9 +8,9 @@ CNSistent is available both as a [stand-alone](#cli) tool and as a [Python libra
 
 ## Quickstart (from Bash)
 
-1. Create the conda environment: `conda env create -f ./cnsistent.yml`
-2. Activate the environment: `conda activate cns`
-3. Install the package: `pip install .`
+1. Install the package from location: `pip install -e .`
+2. Create the conda environment: `conda env create -f ./cnsistent.yml`
+3. Activate the environment: `conda activate cns`
 4. Process data: `bash ./scripts/data_process.sh`
 5. Bin processed data: `bash ./scripts/data_bin.sh`
 6. Run example analysis: `python ./example_analysis.py`
@@ -20,6 +20,7 @@ NOTES:
 
 * By default, 15 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_bin.sh` scripts.
 * The `example_analysis.py` is split into cells that can be run individually in an IDE.
+* You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
 
 # Input
 
