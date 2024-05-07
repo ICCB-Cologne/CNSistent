@@ -2,8 +2,6 @@ __pycache__/
 .vscode/
 temp/
 out/
-debug/
-scratch/
 pycns.out.tsv
 pycns.egg-info
 *.pdf

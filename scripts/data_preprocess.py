@@ -56,6 +56,18 @@ def pcawg(print_debug=False):
     ids["submitted_donor_id"] = np.where(ids["submitted_donor_id"].str.startswith("TCGA"), ids["submitted_donor_id"], "")
     samples_df["TCGA_id"] = ids
 
+    # Add TCGA type
+    msi_df = pd.read_csv(f"{data_dir}/MS_analysis.PCAWG_release_v1.RIKEN.tsv", sep="\t")
+    type_df = msi_df[["ID", "cancer"]].copy()
+    TCGA_type_list  =[]
+    for row in type_df.iterrows():
+        id = row[1]["ID"]
+        # find all the rows in specimen_df where id is in any column
+        found = specimen_df.isin([id]).any(axis=1)
+        if np.any(found):
+            TCGA_type_list.append((specimen_df[found]["# icgc_specimen_id"].values[0], row[1]["cancer"]))# %%
+    TCGA_type_df = pd.DataFrame(TCGA_type_list, columns=["sample_id", "cancer"]).set_index("sample_id")
+    samples_df = samples_df.join(TCGA_type_df).rename(columns={"cancer": "TCGA_type"})
 
     if print_debug:
         print(samples_df.head())

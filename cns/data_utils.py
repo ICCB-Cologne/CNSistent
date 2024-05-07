@@ -51,3 +51,8 @@ def load_data():
         "TCGA": load_tcga(),
         "TRACERx": load_tracerx()
     }
+
+
+def load_data_file(filename):
+    sep = "\t" if filename.endswith(".tsv") else ","
+    return pd.read_csv(pjoin(data_path, filename), sep=sep)
