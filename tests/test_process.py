@@ -107,6 +107,7 @@ class TestSegments(unittest.TestCase):
         
         self.assertEqual(result, expected_result)
 
+
 class TestImputation(unittest.TestCase):
     def setUp(self):
         self.cns_df = pd.DataFrame({
@@ -334,22 +335,19 @@ class TestBreakpoints(unittest.TestCase):
         pass
     
     def test_arm_breaks(self):
-        assembly = hg19
-        result = calc_arm_breaks(assembly)
+        result = calc_arm_breaks()
         self.assertEqual(result[0][0], 'chr1')
         self.assertEqual(result[0][1], [0, 125000000, 249250621])
         
     def test_cytoband_breaks(self):
-        assembly = hg19
-        result = calc_cytoband_breaks(assembly)
+        result = calc_cytoband_breaks()
         self.assertEqual(result[0][0], 'chr1')
         sum_of_breaks = sum([len(x[1]) - 1 for x in result])
-        sum_of_bands = len(assembly.cytobands)
+        sum_of_bands = len(hg19.cytobands)
         self.assertEqual(sum_of_breaks, sum_of_bands)
 
     def test_bin_breaks(self):
-        assembly = hg19
-        result = calc_bin_breaks(assembly, 1000000, True)
+        result = calc_bin_breaks(1000000, True)
         self.assertEqual(result[0][0], 'chr1')
         self.assertEqual(result[0][1][0], 0)
         self.assertEqual(result[0][1][-1], 249250621)
@@ -407,7 +405,7 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(act, exp)
 
     def test_diffs(self):
-        bin_breaks = calc_bin_breaks(hg19, 10_000_000)
+        bin_breaks = calc_bin_breaks(10_000_000)
         for chrom, chrom_breaks in bin_breaks:
             diffs = np.diff(np.diff(chrom_breaks))
             self.assertTrue(np.abs(np.sum(diffs)) <= 1)
@@ -434,12 +432,12 @@ class TestBreakpoints(unittest.TestCase):
 class TestBinning(unittest.TestCase):
     def setUp(self):
         self.cns = pd.DataFrame({
-            'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4', 's4', 's4', 's4'],
-            'chrom': ['chr1', 'chr1', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
-            'start': [0, 50, 200, 300, 400, 0, 50, 99, 50, 100, 120],
-            'end': [50, 100, 300, 400, 500, 50, 99, 100, 100, 120, 130],
-            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0, 2, 1, 1],
-            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0, 1, 0, 1],
+            'sample_id': ['s1', 's1', 's2', 's2', 's2', 's3', 's4', 's4', 's4', 's4', 's4', 's4'],
+            'chrom': ['chr1', 'chr1', 'chr2', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
+            'start': [0, 50, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
+            'end': [50, 100, 150, 300, 400, 500, 50, 99, 100, 100, 120, 130],
+            'major_cn': [1, 2, 1, 3, 4, 5, 2, 1, 0, 2, 1, 1],
+            'minor_cn': [0, 2, np.NaN, 0, 4, 3, 1, 0, 0, 1, 0, 1],
         })        
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
@@ -454,7 +452,13 @@ class TestBinning(unittest.TestCase):
         })
 
     def test_bin_by_breaks(self):
-        pass
+        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        breaks = [('chr1', [0, 100]), ('chr2', [100, 200])]
+        seg_bin = bin_by_segments(self.cns, segments, print_progress=False)
+        break_bin = bin_by_breaks(self.cns, breaks, print_progress=False)
+        self.assertEqual(seg_bin.shape[0], 4)
+        pd.testing.assert_frame_equal(seg_bin, break_bin)
+    
 
     def test_bin_by_segments(self):
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
@@ -467,6 +471,12 @@ class TestBinning(unittest.TestCase):
         self.assertEqual(result.at[0, "minor_cn"], 1.0)
         self.assertEqual(result.at[1, "start"], 100)
         self.assertTrue(np.isnan(result.at[1, "major_cn"]))
+
+    
+    def test_bin_none(self):        
+        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        result = bin_by_segments(self.cns, segments, fun_type="none")
+        print(result)
 
 
 class TestMCS(unittest.TestCase):

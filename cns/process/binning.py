@@ -43,7 +43,7 @@ def min_func(major_cn, minor_cn, length):
     return np.min(major_cn), np.min(minor_cn)
 
 
-def _get_bin_for_seg(sample_id, chrom, sample_rows, segment, agg_func):
+def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
     row_id = 0
     seg_cns = []
     seg_start, seg_end = segment
@@ -71,14 +71,38 @@ def _get_bin_for_seg(sample_id, chrom, sample_rows, segment, agg_func):
     return (sample_id, chrom, seg_start, seg_end, major_cn, minor_cn)
 
 
+def _cns_in_seg(sample_id, chrom, sample_rows, segment):
+    row_id = 0
+    seg_cns = []
+    seg_start, seg_end = segment
+    while sample_rows[row_id][1] <= seg_start:
+        row_id += 1
+        if row_id >= len(sample_rows):
+            break
+    while sample_rows[row_id][0] < seg_end:
+        row = sample_rows[row_id]
+        start = max(row[0], seg_start)
+        end = min(row[1], seg_end)
+        seg_cns.append((sample_id, chrom, start, end, row[2], row[3]))
+        if row[1] >= seg_end:  # last row ends behind the segment
+            break
+        row_id += 1
+        if row_id >= len(sample_rows):
+            break
+
+    return seg_cns
+
+
 def _get_agg_func(fun_type):
+    if fun_type == "" or fun_type is None or fun_type == "none":
+        return None
     if fun_type == "mean":
         return mean_func
     if fun_type == "max":
         return max_func
     if fun_type == "min":
         return min_func
-    raise ValueError("fun_type must be 'mean', 'max' or 'min', got " + fun_type)
+    raise ValueError("fun_type must be one of ['mean', 'max', 'min', 'none', '']  got " + fun_type)
 
 
 # Add column names
@@ -95,12 +119,18 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
             print(f"Binning chr ({i}/{len(indices)})", end="\r")
         if chrom in chrom_segments:
             for segment in chrom_segments[chrom]:
-                bin = _get_bin_for_seg(sample, chrom, group.values, segment, agg_func)
-                new_rows.append(bin)
+                if agg_func != None:
+                    bin = _regs_to_bin(sample, chrom, group.values, segment, agg_func)
+                    new_rows.append(bin)
+                else:
+                    bin = _cns_in_seg(sample, chrom, group.values, segment)
+                    new_rows.extend(bin)
     if print_progress:
         print("")
     df_cols = ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"]
     bin_df = pd.DataFrame(new_rows, columns=df_cols)
+    bin_df["start"] = bin_df["start"].astype(np.uint32)
+    bin_df["end"] = bin_df["end"].astype(np.uint32)
     return bin_df
 
 

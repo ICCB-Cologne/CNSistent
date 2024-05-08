@@ -57,7 +57,7 @@ print(filtered["type"].value_counts())
 
 # Plot mean total_cn per bin along the genome for liver and pancreas
 # %% 
-liver = filtered.query("type == 'Liver-HCC'").index
+liver = filtered.query("type_TCGA == 'Liver-HCC'").index
 liver_group = mean_bins(derived.query("sample_id in @liver"), hg19)
 pancreas = filtered.query("type == 'Panc-AdenoCA'").index
 pancreas_group = mean_bins(derived.query("sample_id in @pancreas"), hg19)
