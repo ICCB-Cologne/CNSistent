@@ -16,7 +16,7 @@ print(bins.head())
 
 # Add derived columns (length, cumulative mid,...)
 # %%
-derived = add_seg_info(bins, hg19)
+derived = add_seg_info(bins)
 print(derived.head())
 
 # Plot heatmap for the first 50 bins
@@ -27,8 +27,8 @@ plt.show()
 
 # Plot mean total_cn per bin along the genome
 # %%
-groups = mean_bins(derived, hg19)
-fig_genome(groups, hg19, max_cn=10, width=12, dpi = 200, size=.5, colored=True)
+groups = mean_bins(derived)
+fig_genome(groups, max_cn=10, width=12, dpi = 200, size=.5, colored=True)
 plt.show()
 
 # Load sample information
@@ -57,9 +57,9 @@ print(filtered["type"].value_counts())
 
 # Plot mean total_cn per bin along the genome for liver and pancreas
 # %% 
-liver = filtered.query("type_TCGA == 'Liver-HCC'").index
-liver_group = mean_bins(derived.query("sample_id in @liver"), hg19)
+liver = filtered.query("type == 'Liver-HCC'").index
+liver_group = mean_bins(derived.query("sample_id in @liver"))
 pancreas = filtered.query("type == 'Panc-AdenoCA'").index
-pancreas_group = mean_bins(derived.query("sample_id in @pancreas"), hg19)
+pancreas_group = mean_bins(derived.query("sample_id in @pancreas"))
 fig_genome_groups([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], hg19, column="major_cn", max_cn=3, width=12, dpi=200, size=.5, colored=False)
 plt.show()
