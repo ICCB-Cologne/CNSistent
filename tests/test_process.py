@@ -17,9 +17,11 @@ from cns.utils.assemblies import hg19, hg38
 
 class TestSegments(unittest.TestCase):
     def test_genome_to_segments(self):
-        chr_lens = {'chr1': 100, 'chr2': 200}
+        assembly = type('Assembly', (object,), {
+            'chr_lens':{'chr1': 100, 'chr2': 200 }
+        })
         exp = [('chr1', 0, 100), ('chr2', 0, 200)]
-        self.assertEqual(genome_to_segments(chr_lens), exp)
+        self.assertEqual(genome_to_segments(assembly), exp)
 
     def test_breaks_to_segments(self):
         breakpoints = [('chr1', [0, 50, 100]), ('chr2', [0, 125, 150, 176])]

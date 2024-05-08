@@ -8,6 +8,7 @@ from cns.utils.conversions import segs_to_chrom_dict
 from cns.utils.assemblies import hg19
 
 
+# TODO: work with single-column
 def mean_bins(bins_df, assembly=hg19):
     if "cum_mid" not in bins_df:
         bins_df = add_seg_info(bins_df, assembly)
@@ -43,6 +44,7 @@ def min_func(major_cn, minor_cn, length):
     return np.min(major_cn), np.min(minor_cn)
 
 
+# TODO: work with single-column
 def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
     row_id = 0
     seg_cns = []
@@ -71,6 +73,7 @@ def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
     return (sample_id, chrom, seg_start, seg_end, major_cn, minor_cn)
 
 
+# TODO: work with single-column
 def _cns_in_seg(sample_id, chrom, sample_rows, segment):
     row_id = 0
     seg_cns = []
@@ -139,8 +142,7 @@ def bin_by_breaks(cns_df, breaks, fun_type="mean", print_progress=True):
     return bin_by_segments(cns_df, segments, fun_type, print_progress)
 
 
-def bin_block(cns_df, break_type, assembly=hg19, fun_type="mean", print_progress=True):
+def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", print_progress=True):
     breaks = get_breakpoints(break_type, assembly)
     bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_progress)
-    labelled_bins = add_seg_info(bin_df, assembly)
-    return labelled_bins
+    return bin_df

@@ -5,9 +5,9 @@ from cns.process.breakpoints import split_segments
 from cns.utils.assemblies import hg19
 
 
-def genome_to_segments(chr_lens):
+def genome_to_segments(assembly=hg19):
     regions = []
-    for chrom, len in chr_lens.items():
+    for chrom, len in assembly.chr_lens.items():
         regions.append((chrom, 0, len))
     return regions
 

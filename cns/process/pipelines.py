@@ -9,7 +9,6 @@ from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
 from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import breaks_to_segments, genome_to_segments, tuples_to_segments
-from cns.utils.assemblies import get_assembly
 from cns.utils.files import load_regions, samples_df_from_cns_df
 from cns.utils.assemblies import hg19
 
@@ -84,7 +83,7 @@ def regions_select(select, assembly=hg19):
         breaks = calc_cytoband_breaks(assembly)
         return breaks_to_segments(breaks)
     elif select =="":
-        return genome_to_segments(assembly.chr_lens)
+        return genome_to_segments(assembly)
     else:
         return load_regions(select)
     
