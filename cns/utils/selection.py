@@ -74,3 +74,10 @@ def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whiteli
 
 def select_CNS_samples(cns, samples):
     return cns.query("sample_id in @samples.index")
+
+
+def get_cns_for_type(cns, samples, type):
+    query = f"type == '{type}'"
+    ids = samples.query(query).index
+    select_cns = cns.set_index("sample_id").loc[ids].reset_index()
+    return select_cns

@@ -7,7 +7,6 @@ from cns.utils.assemblies import hg19
 
 
 # TODO: Merge individual and group plots
-
 def line_plot(
     ax, grouped, column, color="red", label=None, alpha=1, line_width=1, sel_chrom=None
 ):
@@ -56,7 +55,7 @@ def fig_genome(
     color="red"
 ):
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
-    line_width = size * width * dpi / len(grouped)
+    line_width = size * width * 100 / len(grouped)
     plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     line_plot(ax, grouped, column, color, label, alpha, line_width)
@@ -88,7 +87,7 @@ def fig_genome_groups(
     group_count = len(grouped_per_group)
     assert group_count == len(label_per_group)
     colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, group_count))
-    line_width = size * width * dpi / len(grouped_per_group[0])
+    line_width = size * width * 100 / len(grouped_per_group[0])
     plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
     alpha *= (1 / group_count) ** (1 / 3)
@@ -123,7 +122,7 @@ def fig_manhattan(
     fig, ax = plt.subplots(1, figsize=(width, width / 4), dpi=dpi)
     plot_chr_bg(ax, assembly, min_cn, max_cn, colored)
     plot_x_ticks(ax, assembly)
-    dot_size = size * width * dpi / len(grouped)
+    dot_size = size * width * 100 / len(grouped)
     scatter_plot(ax, grouped, column, color, label, alpha, dot_size)
     if label != None:
         ax.legend(loc="upper right")
@@ -157,7 +156,7 @@ def fig_manhattan_groups(
     plot_x_ticks(ax, assembly)
     colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, group_count))
     alpha *= (1 / group_count) ** (1 / 3)
-    dot_size = size * width * dpi / len(grouped_per_group[0])
+    dot_size = size * width * 100 / len(grouped_per_group[0])
     for i, grouped in enumerate(grouped_per_group):
         color = colors[i]
         label = label_per_group[i]
