@@ -8,7 +8,7 @@ from cns.analyze.labels import plot_chr_bg, plot_x_ticks
 from cns.utils.assemblies import hg19
 
 
-def plot_line(ax, grouped, column, color="red", label=None, alpha=1, line_width=1, chrom=None):
+def plot_line(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None):
 	chroms = grouped["chrom"].unique() if chrom is None else [chrom]
 	for chr in chroms:
 		df = grouped.query(f"chrom == '{chr}'").copy()
@@ -16,8 +16,17 @@ def plot_line(ax, grouped, column, color="red", label=None, alpha=1, line_width=
 		# plot consecutive segments
 		for _, group_df in df.groupby(df["is_consecutive"].cumsum()):
 			x = group_df["cum_mid" if chrom is None else "mid"]
-			ax.plot(x, group_df[column], c=color, linewidth=line_width, label=label, alpha=alpha,)
+			ax.plot(x, group_df[column], c=color, linewidth=line_width, label=label, alpha=alpha)
 			label = None  # only use label for the first chromosome
+	return ax
+
+
+def plot_scatter(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None):
+	chroms = grouped["chrom"].unique() if chrom is None else [chrom]
+	for chr in chroms:		
+		df = grouped.query(f"chrom == '{chr}'")
+		ax.scatter(df["cum_mid"], df[column], s=dot_size, label=label, color=color, alpha=alpha)
+		label = None  # only use label for the first chromosome
 	return ax
 
 
@@ -44,7 +53,12 @@ def _check_fig_input(data, column, label, chrom, assembly):
 	else:
 		raise ValueError("data must be a pandas DataFrame or a list of pandas DataFrames")
 
-	if isinstance(column, str):
+	if column == None:
+		# set column to all columns in data that end with "_cn"
+		column = [c for c in data[0].columns if c.endswith("_cn")]
+		if len(column) == 0:
+			raise ValueError("If column is not specified, at least one column ending with '_cn' must exist in data")
+	elif isinstance(column, str):
 		if not column in data[0].columns:
 			raise ValueError("column must be a column in data")
 		column = [column]	
@@ -67,7 +81,7 @@ def _get_min_max_cn(dfs, columns):
 		for column in columns:
 			min_cn = min(min_cn, df[column].min())
 			max_cn = max(max_cn, df[column].max())
-	return min_cn - min_cn/10, max_cn + max_cn/10
+	return min_cn, max_cn
 
 
 def _get_colors(colors, line_count):	
@@ -80,22 +94,14 @@ def _get_colors(colors, line_count):
 	return colors
 
 
-def fig_line(
-	data,
-	assembly=hg19,
-	label=None,
-	column="total_cn",
-	color=None,
-	chrom=None,
-	width=18,
-	dpi=100,
-):
+def fig_line(data, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
 	height = width / 6 if chrom == None else width
 	fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
 	dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly)
 	min_cn, max_cn = _get_min_max_cn(dfs, columns)	
 	colors = _get_colors(color, line_count)
-	plot_chr_bg(ax, assembly, min_cn, max_cn)
+	alpha = (1 / line_count) ** (1/3)
+	plot_chr_bg(ax, assembly, min_cn * .95, max_cn * 1.05)
 	plot_x_ticks(ax, assembly)
 	for i in range(len(dfs)):
 		for j in range(len(columns)):
@@ -106,11 +112,43 @@ def fig_line(
 					label += " - " + columns[j]
 			else:
 				label = None
-			label = labels[i] if has_label else None
-			plot_line(ax, dfs[i], columns[j], color, label, chrom)
-	if has_label:
-		ax.legend(loc="upper right")
-	fontdict = {"fontsize": width}
-	ax.set_ylabel("mean CN per bin", fontdict=fontdict)
-	ax.set_xlabel("position on a chromosome", fontdict=fontdict, labelpad=width / 2)
+			column = columns[j]
+			plot_scatter(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
+	if has_label: 
+		if len(columns) > 1:
+			ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
+		else:
+			ax.legend(loc='upper right')
+	ax.set_ylabel("mean CN per bin")
+	ax.set_xlabel("position on a chromosome")
+	return fig, ax
+
+
+def fig_scatter(data,  label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+	height = width / 6 if chrom == None else width
+	fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
+	dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly)
+	min_cn, max_cn = _get_min_max_cn(dfs, columns)	
+	colors = _get_colors(color, line_count)
+	alpha = 1 / line_count
+	plot_chr_bg(ax, assembly, min_cn * .95, max_cn * 1.05)
+	plot_x_ticks(ax, assembly)
+	for i in range(len(dfs)):
+		for j in range(len(columns)):
+			color = colors[i*len(columns) + j]
+			if has_label:
+				label = labels[i]
+				if len(columns) > 1:
+					label += " - " + columns[j]
+			else:
+				label = None
+			column = columns[j]
+			plot_scatter(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
+	if has_label: 
+		if len(columns) > 1:
+			ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
+		else:
+			ax.legend(loc='upper right')
+	ax.set_ylabel("mean CN per bin")
+	ax.set_xlabel("position on a chromosome")
 	return fig, ax

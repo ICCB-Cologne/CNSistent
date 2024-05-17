@@ -12,6 +12,7 @@ from cns.analyze.coverage import *
 from cns.analyze.aneuploidy import *
 from cns.analyze.signatures import *
 from cns.process.segments import add_seg_info
+from cns.process.segments import split_segment
 from cns.utils.assemblies import hg19, hg38
 
 

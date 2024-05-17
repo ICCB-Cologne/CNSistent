@@ -1,7 +1,7 @@
 
 
 import numpy as np
-from cns.process.breakpoints import split_segments
+from cns.process.breakpoints import calc_dist_breaks
 from cns.utils.assemblies import hg19
 
 
@@ -42,8 +42,8 @@ def do_segments_overlap(segs, sorted=False):
         segs.sort(key=lambda x: (x[0], x[1]))    
     # Check for overlaps
     for i in range(len(segs) - 1):
-        current_group, current_start, current_end = segs[i]
-        next_group, next_start, next_end = segs[i+1]
+        current_group, current_end = segs[i][0], segs[i][2]
+        next_group, next_start = segs[i+1][0], segs[i+1][1]
         
         # Check if they are in the same group and overlap
         if current_group == next_group and current_end > next_start:
@@ -141,6 +141,22 @@ def segment_difference(segs_a, segs_b, sorted=False):
 
 def filter_min_size(segs, min_size):
     return [seg for seg in segs if seg[2] - seg[1] >= min_size]
+
+
+def split_segment(segment, step_size, equidisant=True):
+    chrom_no, seg_start, seg_end = segment
+    length = seg_end - seg_start
+    breaks = calc_dist_breaks(length, step_size, equidisant)
+    breaks = (np.array(breaks) + seg_start).tolist()
+    res = [(chrom_no, breaks[i], breaks[i + 1]) for i in range(len(breaks) - 1)]
+    return res
+
+
+def split_segments(segments, step_size, equidisant=True):
+    res = []
+    for segment in segments:
+        res += split_segment(segment, step_size, equidisant)
+    return res
 
 
 def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):

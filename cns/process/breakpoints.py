@@ -78,22 +78,6 @@ def get_breakpoints(break_type, assembly=hg19):
         return calc_bin_breaks(bin_size, equidistant=True, assembly=assembly)
 
 
-def split_segment(segment, step_size, equidisant=True):
-    chrom_no, seg_start, seg_end = segment
-    length = seg_end - seg_start
-    breaks = calc_dist_breaks(length, step_size, equidisant)
-    breaks = (np.array(breaks) + seg_start).tolist()
-    res = [(chrom_no, breaks[i], breaks[i + 1]) for i in range(len(breaks) - 1)]
-    return res
-
-
-def split_segments(segments, step_size, equidisant=True):
-    res = []
-    for segment in segments:
-        res += split_segment(segment, step_size, equidisant)
-    return res
-
-
 def breaks_to_positions(breaks, assembly=hg19):
     positions = [0]
     for chrom, break_list in breaks:
