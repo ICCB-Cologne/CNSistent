@@ -33,7 +33,7 @@ def scatter_plot(ax, grouped, column, color="red", label=None, alpha=1, dot_size
     ax.scatter(
         grouped["cum_mid"],
         grouped[column],
-        s=dot_size * (grouped[column]),
+        s=dot_size,
         label=label,
         color=color,
         alpha=alpha,
