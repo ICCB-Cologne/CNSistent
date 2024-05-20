@@ -8,7 +8,7 @@ import argparse
 from os.path import join as exists
 
 from cns.process.binning import bin_by_segments
-from cns.process.imputation import fill_sex_if_missing
+from cns.utils.files import fill_sex_if_missing
 from cns.process.segments import get_genome_segments
 from cns.utils.assemblies import get_assembly
 from cns.utils.files import load_cns, save_cns, save_regions

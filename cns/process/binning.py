@@ -3,9 +3,27 @@ import pandas as pd
 from numba import njit
 
 from cns.process.breakpoints import get_breakpoints
-from cns.process.segments import add_seg_info, breaks_to_segments
+from cns.utils.conversions import breaks_to_segments
 from cns.utils.conversions import segs_to_chrom_dict
-from cns.utils.assemblies import hg19
+from cns.utils import hg19
+
+
+def add_seg_info(cns_df, assembly=hg19):
+    cns_df = cns_df.copy()
+    cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
+    cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
+    cns_df["cum_mid"] = cns_df["mid"] + cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
+    if "major_cn" and "minor_cn" in cns_df:
+        cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
+    if "cn_a" and "cn_b" in cns_df:
+        cns_df["total_cn"] = cns_df["cn_a"] + cns_df["cn_b"]
+    if "hap_a" and "hap_b" in cns_df:
+        cns_df["total_cn"] = cns_df["hap_a"] + cns_df["hap_b"]
+    # order by cum_mid
+    if "sample_id" in cns_df:
+        return cns_df.sort_values(by=["sample_id", "cum_mid"])
+    else:
+        return cns_df.sort_values(by=["cum_mid"])
 
 
 # TODO: work with single-column

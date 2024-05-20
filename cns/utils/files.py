@@ -1,8 +1,7 @@
 from os.path import join as exists
 import pandas as pd
 
-from cns.process.segments import regions_to_segments
-from cns.process.imputation import fill_sex_if_missing
+from cns.utils.conversions import cns_to_segments
 
 
 def load_cns(path, sort=False, change_coords=True):
@@ -36,6 +35,16 @@ def load_samples(path):
     return samples_df   
 
 
+def fill_sex_if_missing(cns, samples):
+    res = samples.copy()
+    # Set found_sex to True for each sample if there is chrY, otherwise set it to False
+    found_sex = cns.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
+    found_sex = found_sex.map({True: "xy", False: "xx"})
+    # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
+    res.loc[~res["sex"].isin(["xy", "xx"]), "sex"] = found_sex
+    return res
+
+
 def samples_df_from_cns_df(cns_df, fill_sex=True):
     ids = cns_df["sample_id"].unique()
     samples_df = pd.DataFrame({"sample_id": ids})
@@ -63,7 +72,7 @@ def load_regions(path, change_coords=True):
     # check that columns "chrom", "start" and "end" exist, more colums may be present
     if not all([col in regs.columns for col in ["chrom", "start", "end"]]):
         raise ValueError(f"File {path} must have columns 'chrom', 'start' and 'end'.")
-    segs = regions_to_segments(regs, change_coords)
+    segs = cns_to_segments(regs, change_coords)
     return segs
     
 

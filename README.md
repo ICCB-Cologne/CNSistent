@@ -193,10 +193,27 @@ Additional arguments:
 
 The library is split into three blocks:
 * `cns.process`: The methods for processing the data, including filling, imputing, and calculating coverage.
-* `cns.analyze`: The methods for deriving sample metrics from the CNS data and plotting.
-* `cns.utils`: Miscellaneous utilities, mainly for converstion and file IO.
+* `cns.analyze`: Statistics and summary metrics.
+* `cns.display`: Plotting of binned data.
+* `cns.utils`: Conversion, selection, file IO.
 
 > For examples of using the Library, you can check the file `example_API.py`.
+
+## Data types:
+
+### CNS
+
+### Breakpoints
+
+### Segments
+
+### Assemblies
+
+## Processing
+
+## Analysis
+
+## Display
 
 # REFERENCE
 

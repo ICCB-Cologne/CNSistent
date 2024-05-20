@@ -4,13 +4,14 @@ import numpy as np
 from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy, norm_sex_aneuploidy
 from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
-from cns.process.segments import add_seg_info
+from cns.process.binning import add_seg_info
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
 from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
-from cns.process.segments import breaks_to_segments, genome_to_segments, tuples_to_segments
+from cns.utils.conversions import genome_to_segments
+from cns.utils.conversions import breaks_to_segments, tuples_to_segments
 from cns.utils.files import load_regions, samples_df_from_cns_df
-from cns.utils.assemblies import hg19
+from cns.utils import hg19
 
 
 def main_fill(cns_df, samples_df=None, assembly=hg19, cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):

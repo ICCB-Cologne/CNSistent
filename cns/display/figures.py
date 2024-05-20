@@ -8,7 +8,7 @@ from cns.analyze.labels import plot_chr_bg, plot_x_ticks
 from cns.utils.assemblies import hg19
 
 
-def plot_line(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None):
+def plot_lines(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None):
 	chroms = grouped["chrom"].unique() if chrom is None else [chrom]
 	for chr in chroms:
 		df = grouped.query(f"chrom == '{chr}'").copy()
@@ -21,7 +21,7 @@ def plot_line(ax, grouped, column, color="green", label=None, alpha=1, line_widt
 	return ax
 
 
-def plot_scatter(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None):
+def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None):
 	chroms = grouped["chrom"].unique() if chrom is None else [chrom]
 	for chr in chroms:		
 		df = grouped.query(f"chrom == '{chr}'")
@@ -94,7 +94,7 @@ def _get_colors(colors, line_count):
 	return colors
 
 
-def fig_line(data, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+def fig_lines(data, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
 	height = width / 6 if chrom == None else width
 	fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
 	dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly)
@@ -113,7 +113,7 @@ def fig_line(data, label=None, column=None, color=None, chrom=None, width=18, dp
 			else:
 				label = None
 			column = columns[j]
-			plot_scatter(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
+			plot_lines(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
 	if has_label: 
 		if len(columns) > 1:
 			ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
@@ -124,7 +124,7 @@ def fig_line(data, label=None, column=None, color=None, chrom=None, width=18, dp
 	return fig, ax
 
 
-def fig_scatter(data,  label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+def fig_dots(data,  label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
 	height = width / 6 if chrom == None else width
 	fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
 	dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly)
@@ -143,7 +143,7 @@ def fig_scatter(data,  label=None, column=None, color=None, chrom=None, width=18
 			else:
 				label = None
 			column = columns[j]
-			plot_scatter(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
+			plot_dots(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
 	if has_label: 
 		if len(columns) > 1:
 			ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))

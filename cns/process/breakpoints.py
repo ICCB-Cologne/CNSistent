@@ -1,8 +1,6 @@
-import numpy as np
-
 from cns.utils.conversions import cytobands_to_df
-from cns.utils.assemblies import hg19
-
+from cns.utils import hg19
+import numpy as np
 
 def calc_dist_breaks(reg_len, step_size, equidistant=True):
     if (step_size < 1) or (reg_len < step_size):

@@ -1,1 +1,1 @@
-from cns.display.figures import fig_line, fig_scatter
+from cns.display.figures import fig_lines, fig_dots

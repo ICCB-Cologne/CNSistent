@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
+from cns.process.binning import add_seg_info
 from cns.process.pipelines import *
 from cns.process.segments import *
 from cns.process.imputation import *
@@ -11,9 +12,11 @@ from cns.process.cluster import *
 from cns.analyze.coverage import *
 from cns.analyze.aneuploidy import *
 from cns.analyze.signatures import *
-from cns.process.segments import add_seg_info
+from cns.process.binning import add_seg_info
 from cns.process.segments import split_segment
 from cns.utils.assemblies import hg19, hg38
+from cns.utils.conversions import breaks_to_segments, cns_to_segments, genome_to_segments, tuples_to_segments
+from cns.utils.files import fill_sex_if_missing
 
 
 class TestSegments(unittest.TestCase):
@@ -36,7 +39,7 @@ class TestSegments(unittest.TestCase):
             'end': [100, 150]
         })
         exp = [('chr1', 0, 100), ('chr2', 50, 150)]
-        self.assertEqual(regions_to_segments(regions), exp)
+        self.assertEqual(cns_to_segments(regions), exp)
 
     def test_tuples_to_segments(self):
         gaps = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]

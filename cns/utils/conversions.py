@@ -1,5 +1,6 @@
-import numpy as np
 import pandas as pd
+
+from cns.utils.assemblies import hg19
 
 
 def cytobands_to_df(cytobands):
@@ -67,3 +68,34 @@ def segs_to_chrom_dict(segments):
             res[chrom] = []
         res[chrom].append((start, end))
     return res
+
+
+def tuples_to_segments(tuples):
+    segments = []
+    if len(tuples) > 0 and len(tuples[0]) >= 3:
+        for tuple in tuples:
+            segments.append((tuple[0], tuple[1], tuple[2]))
+    return segments
+
+
+def cns_to_segments(regions, change_coords = False):
+    segments = []
+    for chrom, start, end in regions[["chrom", "start", "end"]].values:
+        segments.append((chrom, start - 1 if change_coords else start, end))
+    return segments
+
+
+def breaks_to_segments(breakpoints):
+    segments = []
+    for chrom, breaks in breakpoints:
+        last_break = len(breaks) - 1
+        for i in range(last_break):
+            segments.append((chrom, breaks[i], breaks[i + 1]))
+    return segments
+
+
+def genome_to_segments(assembly=hg19):
+    regions = []
+    for chrom, len in assembly.chr_lens.items():
+        regions.append((chrom, 0, len))
+    return regions

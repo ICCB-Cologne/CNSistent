@@ -1,39 +1,5 @@
-
-
 import numpy as np
 from cns.process.breakpoints import calc_dist_breaks
-from cns.utils.assemblies import hg19
-
-
-def genome_to_segments(assembly=hg19):
-    regions = []
-    for chrom, len in assembly.chr_lens.items():
-        regions.append((chrom, 0, len))
-    return regions
-
-
-def breaks_to_segments(breakpoints):
-    segments = []
-    for chrom, breaks in breakpoints:
-        last_break = len(breaks) - 1
-        for i in range(last_break):
-            segments.append((chrom, breaks[i], breaks[i + 1]))
-    return segments
-
-
-def regions_to_segments(regions, change_coords = False):
-    segments = []
-    for chrom, start, end in regions[["chrom", "start", "end"]].values:
-        segments.append((chrom, start - 1 if change_coords else start, end))
-    return segments
-
-
-def tuples_to_segments(tuples):
-    segments = []
-    if len(tuples) > 0 and len(tuples[0]) >= 3:
-        for tuple in tuples:
-            segments.append((tuple[0], tuple[1], tuple[2]))
-    return segments
 
 
 def do_segments_overlap(segs, sorted=False):
@@ -58,14 +24,14 @@ def find_overlaps(segs, sorted=False):
     # Iterate through all pairs of triplets to check for overlap
     n = len(segs)
     for i in range(n):
-        group1, start1, end1 = segs[i]
+        current_group, current_end = segs[i][0], segs[i][2]
         for j in range(i+1, n):
-            group2, start2, end2 = segs[j]
-            if group1 != group2 or end1 <= start2:
+            next_group, next_start = segs[j][0], segs[j][1]
+            if current_group != next_group or current_end <= next_start:
                 break
             
             # Store the overlap along with the group identifiers
-            overlaps.append((group1, start2, end1))
+            overlaps.append((current_group, next_start, current_end))
     
     return overlaps
 
@@ -77,11 +43,10 @@ def merge_segments(segs):
     merged = [segs[0]]
 
     for current in segs[1:]:
-        last_group, last_start, last_end = merged[-1]
+        last_group, last_start, last_end = merged[-1][0], merged[-1][1], merged[-1][2]
 
         # If the current segment starts at the end of the last one plus one
         if current[1] <= last_end and current[0] == last_group:
-            # Merge the two segments
             merged[-1] = (last_group, last_start, current[2])
         else:
             # Add the current segment as is
@@ -172,21 +137,3 @@ def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):
     if bin_size > 0:
         res = split_segments(res, bin_size)
     return res
-
-
-def add_seg_info(cns_df, assembly=hg19):
-    cns_df = cns_df.copy()
-    cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
-    cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
-    cns_df["cum_mid"] = cns_df["mid"] + cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
-    if "major_cn" and "minor_cn" in cns_df:
-        cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
-    if "cn_a" and "cn_b" in cns_df:
-        cns_df["total_cn"] = cns_df["cn_a"] + cns_df["cn_b"]
-    if "hap_a" and "hap_b" in cns_df:
-        cns_df["total_cn"] = cns_df["hap_a"] + cns_df["hap_b"]
-    # order by cum_mid
-    if "sample_id" in cns_df:
-        return cns_df.sort_values(by=["sample_id", "cum_mid"])
-    else:
-        return cns_df.sort_values(by=["cum_mid"])

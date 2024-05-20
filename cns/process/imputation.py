@@ -213,13 +213,3 @@ def fill_nans_with_zeros(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info
     for col in cn_columns:
         res_df[col] = res_df[col].fillna(0).astype(int)
     return res_df
-
-
-def fill_sex_if_missing(cns, samples):
-    res = samples.copy()
-    # Set found_sex to True for each sample if there is chrY, otherwise set it to False
-    found_sex = cns.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
-    found_sex = found_sex.map({True: "xy", False: "xx"})
-    # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
-    res.loc[~res["sex"].isin(["xy", "xx"]), "sex"] = found_sex
-    return res

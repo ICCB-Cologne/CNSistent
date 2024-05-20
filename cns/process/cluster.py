@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-from cns.utils.assemblies import hg19
+from cns.utils import hg19
 
 @jit(nopython=True)
 def merge_clusters(clusters, threshold):
