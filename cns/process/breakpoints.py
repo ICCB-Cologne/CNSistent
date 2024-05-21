@@ -2,7 +2,8 @@ from cns.utils.conversions import cytobands_to_df
 from cns.utils import hg19
 import numpy as np
 
-def calc_dist_breaks(reg_len, step_size, equidistant=True):
+
+def create_step_breaks(reg_len, step_size, equidistant=True):
     if (step_size < 1) or (reg_len < step_size):
         return [0, reg_len]
     padding = reg_len % step_size
@@ -35,7 +36,7 @@ def calc_dist_breaks(reg_len, step_size, equidistant=True):
 # Calculate breakpoints at the given resolution. The boundaries either use half
 def calc_bin_breaks(step_size, equidistant=True, assembly=hg19):
     return [
-        (chrom, calc_dist_breaks(length, step_size, equidistant))
+        (chrom, create_step_breaks(length, step_size, equidistant))
         for chrom, length in assembly.chr_lens.items()
     ]
 
@@ -74,12 +75,3 @@ def get_breakpoints(break_type, assembly=hg19):
                 + break_type
             )
         return calc_bin_breaks(bin_size, equidistant=True, assembly=assembly)
-
-
-def breaks_to_positions(breaks, assembly=hg19):
-    positions = [0]
-    for chrom, break_list in breaks:
-        offset = assembly.chr_starts[chrom]
-        for i in range(len(break_list) - 1):
-            positions.append(np.uint32(break_list[i + 1]) + offset)
-    return positions

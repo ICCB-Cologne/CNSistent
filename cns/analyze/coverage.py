@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from cns.analyze.labels import plot_cytobands, plot_x_ticks
+from cns.display.label import plot_cytobands, plot_x_ticks
 from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
@@ -93,9 +93,9 @@ def get_covered_bases(cns, samples):
     sex_lens = sex_rows["end"] - sex_rows["start"]
 
     # Group the differences by sample_id and compute the sum for each group
-    res["cover_bases_aut"] = aut_lens.groupby(cns["sample_id"]).sum()
+    res["cover_bases_aut"] = aut_lens.groupby(cns.index).sum()
     res["cover_bases_aut"] = res["cover_bases_aut"].fillna(0).astype(np.int64)
-    res["cover_bases_sex"] = sex_lens.groupby(cns["sample_id"]).sum()
+    res["cover_bases_sex"] = sex_lens.groupby(cns.index).sum()
     res["cover_bases_sex"] = res["cover_bases_sex"].fillna(0).astype(np.int64)
     res["cover_bases_tot"] = res["cover_bases_aut"] + res["cover_bases_sex"]
     return res

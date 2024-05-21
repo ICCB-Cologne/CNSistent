@@ -4,10 +4,11 @@ import numpy as np
 from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy, norm_sex_aneuploidy
 from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
-from cns.process.binning import add_seg_info
+from cns.process.binning import add_cns_loc
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
 from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
+from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments
 from cns.utils.conversions import breaks_to_segments, tuples_to_segments
 from cns.utils.files import load_regions, samples_df_from_cns_df
@@ -48,7 +49,7 @@ def main_coverage(cns_df, samples_df, assembly=hg19, print_info=False):
 
 def main_ploidy(cns, samples, assembly=hg19, print_progress=False):
     samples = add_breaks_per_sample(cns, samples, assembly)
-    cns = add_seg_info(cns, assembly)
+    cns = add_cns_loc(cns, assembly)
     pre_chr = calc_ane_per_chrom(cns, samples)
     autosomes_sum, sex_chrom_sum = calc_ane_per_sample(pre_chr, assembly)
     autosomes_sum = norm_aut_aneuploidy(autosomes_sum, assembly)
@@ -97,4 +98,19 @@ def regions_remove(remove, assembly=hg19):
         return None
     else:
         return load_regions(remove)
+
+
+def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):
+    res = select
+    if filter_size > 0:
+        res = filter_min_size(res, filter_size)
+    if remove != None:
+        if filter_size > 0:
+            remove = filter_min_size(remove, filter_size)
+        res = segment_difference(res, remove)
+        if filter_size > 0:
+            res = filter_min_size(res, filter_size)
+    if bin_size > 0:
+        res = split_segments(res, bin_size)
+    return res
 

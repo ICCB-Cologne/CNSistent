@@ -73,7 +73,7 @@ def _sum_cn_columns(group):
 
 # TODO: Should add a total fraction
 def calc_ane_per_sample(aneuploidies, assembly=hg19):
-    ids = aneuploidies["sample_id"].unique()
+    ids = aneuploidies.index.unique()
 
     res = []
     for filter in [assembly.aut_names, assembly.sex_names]:

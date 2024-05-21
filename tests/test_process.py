@@ -2,8 +2,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.binning import add_seg_info
+from cns.process.binning import add_cns_loc
 from cns.process.pipelines import *
+from cns.process.pipelines import get_genome_segments
 from cns.process.segments import *
 from cns.process.imputation import *
 from cns.process.binning import *
@@ -12,7 +13,7 @@ from cns.process.cluster import *
 from cns.analyze.coverage import *
 from cns.analyze.aneuploidy import *
 from cns.analyze.signatures import *
-from cns.process.binning import add_seg_info
+from cns.process.binning import add_cns_loc
 from cns.process.segments import split_segment
 from cns.utils.assemblies import hg19, hg38
 from cns.utils.conversions import breaks_to_segments, cns_to_segments, genome_to_segments, tuples_to_segments
@@ -298,7 +299,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
 
     def test_calc_ane_per_chrom(self):
-        derived = add_seg_info(self.cns, self.assembly)
+        derived = add_cns_loc(self.cns, self.assembly)
         result = calc_ane_per_chrom(derived, self.samples)
         self.assertEqual(len(result), 6)
         self.assertEqual(list(result.columns), ["sample_id", "chrom", "ane_major_cn", "ane_minor_cn", "ane_total_cn"])
@@ -308,7 +309,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(test_row['ane_total_cn'].values[0], 100)
 
     def test_calc_ane_per_sample(self):
-        derived = add_seg_info(self.cns, self.assembly)
+        derived = add_cns_loc(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         autosomes_sum, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
         self.assertEqual(len(autosomes_sum), 4)
@@ -320,7 +321,7 @@ class TestAneuploidy(unittest.TestCase):
         print(sex_chrom_sum)
 
     def test_norm_aut_aneuploidy(self):
-        derived = add_seg_info(self.cns, self.assembly)
+        derived = add_cns_loc(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         autosomes_sum, _ = calc_ane_per_sample(cns, self.assembly)
         result = norm_aut_aneuploidy(autosomes_sum, self.assembly)
@@ -328,7 +329,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(len(result.columns), 6)
 
     def test_norm_sex_aneuploidy(self):
-        derived = add_seg_info(self.cns, self.assembly)
+        derived = add_cns_loc(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         _, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
         result = norm_sex_aneuploidy(self.samples, sex_chrom_sum, self.assembly)
@@ -359,54 +360,54 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(result[0][1][-1], 249250621)
 
     def test_dist_breaks_equidistant(self):
-        act = calc_dist_breaks(10, 1)
+        act = create_step_breaks(10, 1)
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(10, 2, True)
+        act = create_step_breaks(10, 2, True)
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(10, 2.5, True)
+        act = create_step_breaks(10, 2.5, True)
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(10, 3)
+        act = create_step_breaks(10, 3)
         exp = [0, 3, 7, 10]
         self.assertEqual(act, exp)        
-        act = calc_dist_breaks(13, 10)
+        act = create_step_breaks(13, 10)
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(17, 10)
+        act = create_step_breaks(17, 10)
         exp = [0, 9, 17]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(33, 10, True)
+        act = create_step_breaks(33, 10, True)
         exp = [0, 11, 22, 33]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(37, 10, True)
+        act = create_step_breaks(37, 10, True)
         exp = [0, 9, 19, 28, 37]
         self.assertEqual(act, exp)
         
     def test_dist_breaks_unequidistant(self):
-        act = calc_dist_breaks(10, 1, False)
+        act = create_step_breaks(10, 1, False)
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(10, 2, False)
+        act = create_step_breaks(10, 2, False)
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(10, 2.5, False)
+        act = create_step_breaks(10, 2.5, False)
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(10, 3, False)
+        act = create_step_breaks(10, 3, False)
         exp = [0, 4, 7, 10]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(13, 10, False)
+        act = create_step_breaks(13, 10, False)
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(17, 10, False)
+        act = create_step_breaks(17, 10, False)
         exp = [0, 9, 17]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(33, 10, False)
+        act = create_step_breaks(33, 10, False)
         exp = [0, 12, 22, 33]
         self.assertEqual(act, exp)
-        act = calc_dist_breaks(37, 10, False)
+        act = create_step_breaks(37, 10, False)
         exp = [0, 9, 19, 29, 37]
         self.assertEqual(act, exp)
 
@@ -444,7 +445,7 @@ class TestBinning(unittest.TestCase):
             'end': [50, 100, 150, 300, 400, 500, 50, 99, 100, 100, 120, 130],
             'major_cn': [1, 2, 1, 3, 4, 5, 2, 1, 0, 2, 1, 1],
             'minor_cn': [0, 2, np.NaN, 0, 4, 3, 1, 0, 0, 1, 0, 1],
-        })        
+        }).set_index('sample_id')        
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
             'sex': ['xx', 'xy', 'xx', 'xy']

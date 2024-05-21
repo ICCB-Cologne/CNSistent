@@ -8,7 +8,7 @@ from cns.utils.conversions import segs_to_chrom_dict
 from cns.utils import hg19
 
 
-def add_seg_info(cns_df, assembly=hg19):
+def add_cns_loc(cns_df, assembly=hg19):
     cns_df = cns_df.copy()
     cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
     cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
@@ -29,7 +29,7 @@ def add_seg_info(cns_df, assembly=hg19):
 # TODO: work with single-column
 def mean_bins(bins_df, assembly=hg19):
     if "cum_mid" not in bins_df:
-        bins_df = add_seg_info(bins_df, assembly)
+        bins_df = add_cns_loc(bins_df, assembly)
     grouped = bins_df.drop("sample_id", axis=1).groupby(["cum_mid"])
     # calculate mean on grouped except for chrom, where take the first value
     grouped = grouped.agg(
@@ -130,15 +130,24 @@ def _get_agg_func(fun_type):
 def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
     agg_func = _get_agg_func(fun_type)
     chrom_segments = segs_to_chrom_dict(segments)
-    cns_df_view = cns_df.set_index(["sample_id", "chrom"])
     new_rows = []
-    indices = cns_df_view.index.unique()
     i = 0
-    for (sample, chrom), group in cns_df_view.groupby(level=[0, 1]):
+    sample_ids = cns_df.index.unique()
+    sample_count = len(sample_ids)
+    # TODO: check if smarter indexing is possible
+    for sample in sample_ids:
+        sample_cns_df = cns_df.loc[[sample]].set_index("chrom", drop=True)
         if print_progress:
             i += 1
-            print(f"Binning chr ({i}/{len(indices)})", end="\r")
-        if chrom in chrom_segments:
+            print(f"Binning sample ({i}/{sample_count})", end="\r")            
+        for chrom in chrom_segments.keys():
+            # check if chrom is in the sample_cns_df
+            if chrom not in sample_cns_df.index:
+                continue
+            group = sample_cns_df.loc[chrom]                
+            print(group.values)
+            if chrom not in chrom_segments:
+                continue
             for segment in chrom_segments[chrom]:
                 if agg_func != None:
                     bin = _regs_to_bin(sample, chrom, group.values, segment, agg_func)

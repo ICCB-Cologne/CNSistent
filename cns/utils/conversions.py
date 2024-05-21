@@ -11,22 +11,6 @@ def gaps_to_df(gaps):
     return pd.DataFrame( gaps, columns=["chrom", "start", "end", "type", "bridge"])
 
 
-def sampleid_to_numeric_df(cns_df):
-    cns_df = cns_df.copy()
-    samples = cns_df["sample_id"].unique().tolist()
-    # replace sampleid with numeric values
-    sample_dict = {samples[i]: i for i in range(len(samples))}
-    cns_df["sample_id"] = cns_df["sample_id"].replace(sample_dict)
-    return samples, cns_df
-
-
-def numeric_to_sampleid_df(samples, cns_df):
-    cns_df = cns_df.copy()
-    sample_dict = {i: samples[i] for i in range(len(samples))}
-    cns_df["sample_id"] = cns_df["sample_id"].replace(sample_dict)
-    return cns_df
-
-
 def chrom_to_sortable(chrom, aut_count = 22):
     if chrom == "chrX":
         return aut_count + 1  # Make 'chrX' sort last

@@ -1,9 +1,9 @@
 # %%
 from matplotlib import pyplot as plt
 from cns.analyze.genome import fig_genome, fig_genome_groups
-from cns.analyze.heatmap import fig_CN_heatmap
+from cns.display.heatmap import fig_CN_heatmap
 from cns.process.binning import mean_bins
-from cns.process.binning import add_seg_info
+from cns.process.binning import add_cns_loc
 from cns.utils.selection import cns_head
 from cns.utils.files import load_cns, load_samples
 from cns.utils.assemblies import get_assembly
@@ -11,12 +11,12 @@ hg19 = get_assembly("hg19")
 
 # Load bins
 # %%  
-bins = load_cns("./out/PCAWG_bin_3MB.tsv")
+bins, cn_cols = load_cns("./out/PCAWG_bin_3MB.tsv")
 print(bins.head())
 
 # Add derived columns (length, cumulative mid,...)
 # %%
-derived = add_seg_info(bins)
+derived = add_cns_loc(bins)
 print(derived.head())
 
 # Plot heatmap for the first 50 bins

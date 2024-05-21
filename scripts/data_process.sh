@@ -14,7 +14,7 @@ mkdir -p $out
 for dataset in TRACERx PCAWG TCGA_hg19 TCGA_hg38;
 do
     echo "Processing $dataset"
-    ./data_preprocess.py ${dataset} --verbose
+    ./data_preprocess.py ${dataset}
     if [ "$preprocess_only" = true ]; then
         continue      
     fi

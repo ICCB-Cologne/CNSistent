@@ -6,6 +6,10 @@ CNSistent is a Python tool for processing and analyzing copy number data. It is 
 
 CNSistent is available both as a [stand-alone](#cli) tool and as a [Python library](#library).
 
+Requires:
+* Python 3.8+
+* Pip 21.3+
+
 ## Quickstart (from Bash)
 
 1. Install the package from location: `pip install -e .`

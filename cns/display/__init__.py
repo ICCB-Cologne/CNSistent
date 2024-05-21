@@ -1,1 +1,1 @@
-from cns.display.figures import fig_lines, fig_dots
+from cns.display.plot import fig_lines, fig_dots

@@ -28,7 +28,7 @@ def pcawg(print_debug=False):
     donor_to_sex_map = donor_to_sex_df.set_index("donor_id").to_dict()["donor_sex"]
     if print_debug:
         print(donor_to_sex_df.head())
-    ids = cns_raw_df["sample_id"].unique()
+    ids = cns_raw_df.index.unique()
     donors = map(lambda x: sample_to_donor_map[x], ids)
     sexes = map(lambda x: donor_to_sex_map[x], donors)
     samples_df = pd.DataFrame([ids, sexes]).T
@@ -36,7 +36,7 @@ def pcawg(print_debug=False):
     samples_df = samples_df.set_index("sample_id")
     samples_df["sex"] = samples_df["sex"].replace({"male": "xy", "female": "xx"})
     # sanity check  
-    assert len(cns_raw_df["sample_id"].unique()) == len(samples_df)
+    assert len(cns_raw_df.index.unique()) == len(samples_df)
 
     # Add whitelist information
     whitelist = pd.read_csv(f"{data_dir}/pcawg_supplementary_table_1.tsv", sep="\t")
@@ -115,7 +115,7 @@ def tracerx(print_debug=False):
     merged = pd.merge(left, right, left_on="patient_id", right_on="cruk_id")
     merged["sex"] = np.where(merged["sex"] == "Female", "xx", "xy")
     samples_df = merged[["sample", "sex", "histology_multi_full"]].rename(columns={"sample": "sample_id", "histology_multi_full": "type"})
-    samples_df.set_index(["sample_id"], inplace=True)
+    samples_df.set_index(.index, inplace=True)
     if print_debug:
         print(samples_df.head())
 
@@ -140,6 +140,6 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Dataset {dataset} not recognized.")
     
-    assert len(cns_df["sample_id"].unique()) == len(samples_df)
+    assert len(cns_df.index.unique()) == len(samples_df)
     samples_df.to_csv(f"{out_dir}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
     cns_df.to_csv(f"{out_dir}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)

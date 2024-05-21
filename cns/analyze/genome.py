@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from cns.analyze.labels import plot_chr_bg, plot_x_ticks
+from cns.display.label import plot_chr_bg, plot_x_ticks
 from cns.utils.conversions import column_to_label
 from cns.utils.assemblies import hg19
 

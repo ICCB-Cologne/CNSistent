@@ -9,7 +9,7 @@ from os.path import join as exists
 
 from cns.process.binning import bin_by_segments
 from cns.utils.files import fill_sex_if_missing
-from cns.process.segments import get_genome_segments
+from cns.process.pipelines import get_genome_segments
 from cns.utils.assemblies import get_assembly
 from cns.utils.files import load_cns, save_cns, save_regions
 from cns.process.pipelines import main_fill, main_impute, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select
@@ -17,13 +17,14 @@ from cns.utils.files import dataframe_array_split, samples_df_from_cns_df, load_
 
 
 def _add_common_args(parser):
-    parser.add_argument("data", type=str, help="Path to the TSV file with copy number segments")
-    parser.add_argument("--samples", type=str, help="Path to the samples file", required=False, default="")
-    parser.add_argument("--out", type=str, help="Output file.", required=False, default="./cns.out.tsv")
-    parser.add_argument("--assembly", type=str, help="Assembly to use. One of: hg19, hg38.", required=False, default="hg19")
-    parser.add_argument("--threads", type=int, help="Number of threads to use", required=False, default=1)
-    parser.add_argument("--verbose", help="Print progress", action="store_true")
-    parser.add_argument("--time", help="Save runtime", action="store_true")
+    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments")
+    parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
+    parser.add_argument("--cols", type=int, help="number of copy number columns in the CNS file", required=False, default=-1)
+    parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
+    parser.add_argument("--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19")
+    parser.add_argument("--threads", type=int, help="number of threads to use", required=False, default=1)
+    parser.add_argument("--verbose", help="print progress to console", action="store_true")
+    parser.add_argument("--time", help="save runtime info", action="store_true")
 
 
 def _parse_args():
@@ -44,8 +45,6 @@ def _parse_args():
     for sp in sp_dict.values():
         _add_common_args(sp)
 
-    # TODO: Add argument to remove a file other than gaps
-    # TODO: Move arms/bands to regions
     sp_dict["bin"].add_argument("--bins", type=int, help="Size of the bins, can be a positive integer or 0 for no bins (whole regions).", required=False, default=0)
     sp_dict["bin"].add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
     sp_dict["bin"].add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
@@ -161,7 +160,7 @@ def main():
 
     if not exists(cns_file_path):
         raise ValueError(f"File {cns_file_path} not found.")
-    cns_df = load_cns(cns_file_path)
+    cns_df, cn_cols = load_cns(cns_file_path)
 
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)

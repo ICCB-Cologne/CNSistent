@@ -2,8 +2,8 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from cns.utils.conversions import chrom_to_sortable, column_to_label, cytobands_to_df, gaps_to_df, numeric_to_sampleid_df, sampleid_to_numeric_df, segs_to_chrom_dict, sortable_to_chrom
-from cns.utils.files import rename_columns
+from cns.utils.conversions import chrom_to_sortable, column_to_label, cytobands_to_df, gaps_to_df, segs_to_chrom_dict, sortable_to_chrom
+from cns.utils.files import canonize_cns_df
 
 
 class TestConversions(unittest.TestCase):
@@ -20,18 +20,6 @@ class TestConversions(unittest.TestCase):
         self.assertTrue(isinstance(df, pd.DataFrame))
         self.assertEqual(df.columns.tolist(), ["chrom", "start", "end", "type", "bridge"])
         self.assertEqual(df.values.tolist(), gaps)
-
-    def test_sampleid_to_numeric_df(self):
-        cns_df = pd.DataFrame({'sample_id': ['sample1', 'sample2']})
-        samples, df = sampleid_to_numeric_df(cns_df)
-        self.assertEqual(samples, ['sample1', 'sample2'])
-        self.assertTrue((df['sample_id'] == [0, 1]).all())
-
-    def test_numeric_to_sampleid_df(self):
-        samples = ['sample1', 'sample2']
-        cns_df = pd.DataFrame({'sample_id': [0, 1]})
-        df = numeric_to_sampleid_df(samples, cns_df)
-        self.assertTrue((df['sample_id'] == ['sample1', 'sample2']).all())
 
     def test_chrom_to_sortable(self):
         self.assertEqual(chrom_to_sortable('chr1'), 1)
@@ -51,10 +39,14 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(column_to_label('minor_cn'), 'Minor CN')
         self.assertEqual(column_to_label('other'), 'other')
 
-    def test_rename_columns(self):
-        cns_df = pd.DataFrame(np.zeros((5, 6)))
-        df = rename_columns(cns_df)
-        self.assertEqual(df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
+    def test_canonize_cns_df(self):
+        cns_df = pd.DataFrame([["sample1", "chr1", 0, 20, 0,  0, 1], ["sample1", "chr1", 0, 20, 0, 0, 1]])
+        print(cns_df)
+        cns_df.columns = ["", "", "", "", "foo", "major_cn", "minor_cn"]
+        print(cns_df)                            
+        cns_df, cols = canonize_cns_df(cns_df)
+        self.assertEqual(cns_df.columns.tolist(), ["chrom", "start", "end", "major_cn", "minor_cn"])
+        self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_segs_to_chrom_dict(self):
         segs = [('chr1', 1, 5), ('chr1', 4, 8), ('chr2', 10, 15)]

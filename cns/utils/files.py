@@ -2,18 +2,17 @@ from os.path import join as exists
 import pandas as pd
 
 from cns.utils.conversions import cns_to_segments
+from cns.utils.assemblies import hg19
 
 
-def load_cns(path, sort=False, change_coords=True):
+def load_cns(path, cn_columns=0, sort=False, change_coords=True):
     cns = pd.read_csv(path, sep="\t")
-    cns = rename_columns(cns)
-    cns["start"] = cns["start"].astype(int)
-    cns["end"] = cns["end"].astype(int)
+    cns, cn_columns = canonize_cns_df(cns, cn_columns)
     if change_coords:
         cns.loc[:, "start"] -= 1
     if sort:
-        cns.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
-    return cns
+        cns.sort_values(by=["chrom", "start"], inplace=True)    
+    return cns, cn_columns
 
 
 def save_cns(cns, path, sort=False, change_coords=True):
@@ -21,7 +20,7 @@ def save_cns(cns, path, sort=False, change_coords=True):
     if change_coords:
         cns.loc[:, "start"] += 1
     if sort:
-        cns.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
+        cns.sort_values(by=["chrom", "start"], inplace=True, ignore_index=True)
     cns.to_csv(path, sep="\t", index=False)
 
 
@@ -46,7 +45,7 @@ def fill_sex_if_missing(cns, samples):
 
 
 def samples_df_from_cns_df(cns_df, fill_sex=True):
-    ids = cns_df["sample_id"].unique()
+    ids = cns_df.index.unique()
     samples_df = pd.DataFrame({"sample_id": ids})
     samples_df["sex"] = "NA"
     samples_df.set_index("sample_id", inplace=True)
@@ -76,29 +75,63 @@ def load_regions(path, change_coords=True):
     return segs
     
 
-def rename_columns(cns_df):
-    res_df = cns_df.copy()
-    if res_df.columns.size < 6:
-        raise ValueError(
-            "cns_df must have first 6 columns in the following order: ",
-            "sample_id",
-            "chrom",
-            "start",
-            "end",
-            "major_cn",
-            "minor_cn",
-        )
-    # drop columns aftr the 6th
-    res_df = res_df.iloc[:, :6]
-    res_df.columns = ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"]
-    # check if any value in column chrom starts with "chr"
-    res_df["chrom"] = res_df["chrom"].astype(str)
-    if not res_df.chrom.str.startswith("chr").any():
-        res_df.chrom = "chr" + res_df.chrom.astype(str)
-    res_df.sort_values(
-        by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
-    )
-    return res_df
+def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
+    if cn_columns_no > 0:
+        if cns_df.columns.size < 4 + cn_columns_no:
+            raise ValueError(f"Not enough columns in the CNS file, expected at least 4 + {cn_columns_no}, got {cns_df.columns.size}.")
+    else:
+        if cns_df.columns.size < 5:
+            raise ValueError("Not enough columns in the CNS file, expected at least 5, got {cns_df.columns.size}.")
+
+    # if the column sample_id does not exist, rename the first column to sample_id
+    if "sample_id" not in cns_df.columns:
+        cns_df.columns = ["sample_id"] + cns_df.columns[1:].tolist()
+
+    # if the column chrom does not exist, rename the second column to chrom
+    if "chrom" not in cns_df.columns:
+        cns_df.columns = cns_df.columns[:1].tolist() + ["chrom"] + cns_df.columns[2:].tolist()
+    chrom_vals = cns_df["chrom"].unique()
+    if not any([chrom in assembly.chr_names for chrom in chrom_vals]):
+        raise ValueError(f"No chrom found. Chromosome values must be in {assembly.chr_names}, got {chrom_vals}.")
+    not_known = [chrom not in assembly.chr_names for chrom in chrom_vals]
+    if len(not_known) > 0 and print_info:
+        print(f"Found chromosomes not in assembly: {chrom_vals}, these will be dropped.")
+    cns_df = cns_df[~cns_df["chrom"].isin(chrom_vals[not_known])]
+
+    # if the column start does not exist, rename the third column to start
+    if "start" not in cns_df.columns:
+        cns_df.columns = cns_df.columns[:2].tolist() + ["start"] + cns_df.columns[3:].tolist()    
+    cns_df["start"] = cns_df["start"].astype(int)
+
+    # if the column end does not exist, rename the fourth column to end
+    if "end" not in cns_df.columns:
+        cns_df.columns = cns_df.columns[:3].tolist() + ["end"] + cns_df.columns[4:].tolist()
+    cns_df["end"] = cns_df["end"].astype(int)
+    
+    if cn_columns_no <= 0:
+        cn_columns = get_cn_columns(cns_df)
+        # if cn_columns is empty, take the 5 + columns
+        if len(cn_columns) == 0:
+            cn_columns = cns_df.columns[5:].tolist()
+    else:
+        cn_columns = cns_df.columns[4:4 + cn_columns_no].tolist()
+    if print_info:
+        print(f"Using CN columns: {cn_columns}")
+    
+    sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
+    cns_df = cns_df[sel_columns]    
+    cns_df.set_index("sample_id", inplace=True)
+    return cns_df, cn_columns
+
+
+def is_cn_column(column):
+    if not isinstance(column, str):
+        return False
+    return column.endswith("cn") or column.endswith("CN") or column.startswith("cn") or column.startswith("CN")
+
+
+def get_cn_columns(df):
+    return [col for col in df.columns if is_cn_column(col)]
 
 
 def dataframe_array_split(df, n_splits):

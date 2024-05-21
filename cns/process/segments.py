@@ -1,5 +1,5 @@
 import numpy as np
-from cns.process.breakpoints import calc_dist_breaks
+from cns.process.breakpoints import create_step_breaks
 
 
 def do_segments_overlap(segs, sorted=False):
@@ -111,7 +111,7 @@ def filter_min_size(segs, min_size):
 def split_segment(segment, step_size, equidisant=True):
     chrom_no, seg_start, seg_end = segment
     length = seg_end - seg_start
-    breaks = calc_dist_breaks(length, step_size, equidisant)
+    breaks = create_step_breaks(length, step_size, equidisant)
     breaks = (np.array(breaks) + seg_start).tolist()
     res = [(chrom_no, breaks[i], breaks[i + 1]) for i in range(len(breaks) - 1)]
     return res
@@ -121,19 +121,4 @@ def split_segments(segments, step_size, equidisant=True):
     res = []
     for segment in segments:
         res += split_segment(segment, step_size, equidisant)
-    return res
-
-
-def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):
-    res = select
-    if filter_size > 0:
-        res = filter_min_size(res, filter_size)
-    if remove != None:
-        if filter_size > 0:
-            remove = filter_min_size(remove, filter_size)
-        res = segment_difference(res, remove)
-        if filter_size > 0:
-            res = filter_min_size(res, filter_size)
-    if bin_size > 0:
-        res = split_segments(res, bin_size)
     return res
