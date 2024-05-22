@@ -72,14 +72,14 @@ def _sum_cn_columns(group):
     )
 
 # TODO: Should add a total fraction
-def calc_ane_per_sample(aneuploidies, assembly=hg19):
-    ids = aneuploidies.index.unique()
+def calc_ane_per_sample(cns_df, assembly=hg19):
+    ids = cns_df["sample_id"].unique()
 
     res = []
     for filter in [assembly.aut_names, assembly.sex_names]:
-        selection = aneuploidies["chrom"].isin(filter)
+        selection = cns_df["chrom"].isin(filter)
         sample_sum = (
-            aneuploidies[selection]
+            cns_df[selection]
             .groupby("sample_id")
             .apply(_sum_cn_columns)
         )

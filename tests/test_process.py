@@ -124,7 +124,7 @@ class TestImputation(unittest.TestCase):
             'end': [100, 150, 100, 150, 175, 200],
             'major_cn': [1, 2, 3, np.nan, 1, 1],
             'minor_cn': [1, 2, 1, 0, 0, 0]
-        })
+        }) 
         self.chr_lengths = {'chr1': 100, 'chr2': 200}
         self.total_len = sum(self.chr_lengths.values())
         self.samples_df = pd.DataFrame({
@@ -137,6 +137,7 @@ class TestImputation(unittest.TestCase):
 
     def test_add_tails(self):
         result = add_tails(self.cns_df, self.chr_lengths)
+        print(result)
         self.assertEqual(result.shape[0], 8)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 50)
@@ -238,7 +239,7 @@ class TestSignatures(unittest.TestCase):
             'chrom': ['chr1', 'chr1', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [100, 200, 300, 400, 500, 50, 99, 100, 100, 120, 130],
-        })        
+        })       
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
             'sex': ['xx', 'xy', 'xx', 'xy']
@@ -271,7 +272,7 @@ class TestAneuploidy(unittest.TestCase):
             'chrom': ['chr1', 'chr1', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [100, 200, 300, 400, 500, 50, 99, 100, 100, 120, 130],
-        })        
+        })       
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
             'sex': ['xx', 'xy', 'xx', 'xy']
@@ -318,14 +319,12 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(test_row['ane_minor_cn'].values[0], 70)
         self.assertEqual(test_row['ane_total_cn'].values[0], 170)
         self.assertEqual(len(sex_chrom_sum), 4)
-        print(sex_chrom_sum)
 
     def test_norm_aut_aneuploidy(self):
         derived = add_cns_loc(self.cns, self.assembly)
         cns = calc_ane_per_chrom(derived, self.samples)
         autosomes_sum, _ = calc_ane_per_sample(cns, self.assembly)
         result = norm_aut_aneuploidy(autosomes_sum, self.assembly)
-        print(result.columns)
         self.assertEqual(len(result.columns), 6)
 
     def test_norm_sex_aneuploidy(self):
@@ -333,7 +332,6 @@ class TestAneuploidy(unittest.TestCase):
         cns = calc_ane_per_chrom(derived, self.samples)
         _, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
         result = norm_sex_aneuploidy(self.samples, sex_chrom_sum, self.assembly)
-        print(result.columns)
         self.assertEqual(len(result.columns), 6)
 
 
@@ -445,7 +443,7 @@ class TestBinning(unittest.TestCase):
             'end': [50, 100, 150, 300, 400, 500, 50, 99, 100, 100, 120, 130],
             'major_cn': [1, 2, 1, 3, 4, 5, 2, 1, 0, 2, 1, 1],
             'minor_cn': [0, 2, np.NaN, 0, 4, 3, 1, 0, 0, 1, 0, 1],
-        }).set_index('sample_id')        
+        })       
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
             'sex': ['xx', 'xy', 'xx', 'xy']

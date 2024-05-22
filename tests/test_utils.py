@@ -45,7 +45,7 @@ class TestConversions(unittest.TestCase):
         cns_df.columns = ["", "", "", "", "foo", "major_cn", "minor_cn"]
         print(cns_df)                            
         cns_df, cols = canonize_cns_df(cns_df)
-        self.assertEqual(cns_df.columns.tolist(), ["chrom", "start", "end", "major_cn", "minor_cn"])
+        self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
         self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_segs_to_chrom_dict(self):

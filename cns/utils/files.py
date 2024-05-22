@@ -45,7 +45,7 @@ def fill_sex_if_missing(cns, samples):
 
 
 def samples_df_from_cns_df(cns_df, fill_sex=True):
-    ids = cns_df.index.unique()
+    ids = cns_df["sample_id"].unique()
     samples_df = pd.DataFrame({"sample_id": ids})
     samples_df["sex"] = "NA"
     samples_df.set_index("sample_id", inplace=True)
@@ -120,7 +120,6 @@ def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
     
     sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df = cns_df[sel_columns]    
-    cns_df.set_index("sample_id", inplace=True)
     return cns_df, cn_columns
 
 

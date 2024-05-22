@@ -84,18 +84,18 @@ def get_base_frac(samples, assembly=hg19):
     return res
 
 
-def get_covered_bases(cns, samples):
+def get_covered_bases(cns_df, samples):
     res = samples.copy()
-    aut_rows = only_aut(cns)
-    sex_rows = only_sex(cns)
+    aut_df = only_aut(cns_df)
+    sex_df = only_sex(cns_df)
     # Compute the differences between end and start
-    aut_lens = aut_rows["end"] - aut_rows["start"]
-    sex_lens = sex_rows["end"] - sex_rows["start"]
+    aut_lens = aut_df["end"] - aut_df["start"]
+    sex_lens = sex_df["end"] - sex_df["start"]
 
     # Group the differences by sample_id and compute the sum for each group
-    res["cover_bases_aut"] = aut_lens.groupby(cns.index).sum()
+    res["cover_bases_aut"] = aut_lens.groupby(aut_df["sample_id"]).sum()
     res["cover_bases_aut"] = res["cover_bases_aut"].fillna(0).astype(np.int64)
-    res["cover_bases_sex"] = sex_lens.groupby(cns.index).sum()
+    res["cover_bases_sex"] = sex_lens.groupby(sex_df["sample_id"]).sum()
     res["cover_bases_sex"] = res["cover_bases_sex"].fillna(0).astype(np.int64)
     res["cover_bases_tot"] = res["cover_bases_aut"] + res["cover_bases_sex"]
     return res

@@ -140,6 +140,6 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Dataset {dataset} not recognized.")
     
-    assert len(cns_df.index.unique()) == len(samples_df)
+    assert len(cns_df["sample_id"].unique()) == len(samples_df)
     samples_df.to_csv(f"{out_dir}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
     cns_df.to_csv(f"{out_dir}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)

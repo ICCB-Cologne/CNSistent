@@ -130,24 +130,15 @@ def _get_agg_func(fun_type):
 def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
     agg_func = _get_agg_func(fun_type)
     chrom_segments = segs_to_chrom_dict(segments)
+    cns_df_view = cns_df.set_index(["sample_id", "chrom"])
     new_rows = []
+    indices = cns_df_view.index.unique()
     i = 0
-    sample_ids = cns_df.index.unique()
-    sample_count = len(sample_ids)
-    # TODO: check if smarter indexing is possible
-    for sample in sample_ids:
-        sample_cns_df = cns_df.loc[[sample]].set_index("chrom", drop=True)
+    for (sample, chrom), group in cns_df_view.groupby(level=[0, 1]):
         if print_progress:
             i += 1
-            print(f"Binning sample ({i}/{sample_count})", end="\r")            
-        for chrom in chrom_segments.keys():
-            # check if chrom is in the sample_cns_df
-            if chrom not in sample_cns_df.index:
-                continue
-            group = sample_cns_df.loc[chrom]                
-            print(group.values)
-            if chrom not in chrom_segments:
-                continue
+            print(f"Binning chr ({i}/{len(indices)})", end="\r")
+        if chrom in chrom_segments:
             for segment in chrom_segments[chrom]:
                 if agg_func != None:
                     bin = _regs_to_bin(sample, chrom, group.values, segment, agg_func)
