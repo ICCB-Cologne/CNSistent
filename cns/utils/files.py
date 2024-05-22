@@ -5,23 +5,29 @@ from cns.utils.conversions import cns_to_segments
 from cns.utils.assemblies import hg19
 
 
-def load_cns(path, cn_columns=0, sort=False, change_coords=True):
-    cns = pd.read_csv(path, sep="\t")
-    cns, cn_columns = canonize_cns_df(cns, cn_columns)
+def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False, no_header=False):
+    cns_df = pd.read_csv(path, sep="\t", header=None if no_header else 0)
+    if no_sample:
+        cns_df["sample"] = "dummy"
+    cns_df, cn_cols = canonize_cns_df(cns_df, cn_col_no)
     if change_coords:
-        cns.loc[:, "start"] -= 1
+        cns_df.loc[:, "start"] -= 1
     if sort:
-        cns.sort_values(by=["chrom", "start"], inplace=True)    
-    return cns, cn_columns
+        cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
+    return cns_df, cn_cols
 
 
-def save_cns(cns, path, sort=False, change_coords=True):
-    cns = cns.copy()
-    if change_coords:
-        cns.loc[:, "start"] += 1
+def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, no_header=False):
     if sort:
-        cns.sort_values(by=["chrom", "start"], inplace=True, ignore_index=True)
-    cns.to_csv(path, sep="\t", index=False)
+        cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
+    if change_coords:
+        cns_df.loc[:, "start"] += 1
+
+    to_save = cns_df.drop(columns="sample_id") if no_sample else cns_df
+    to_save.to_csv(path, sep="\t", index=False, header=False if no_header else True)
+
+    if change_coords:
+        cns_df.loc[:, "start"] -= 1
 
 
 def load_samples(path):
@@ -169,3 +175,9 @@ def dataframe_array_split(df, n_splits):
         current_row += rows_in_split
     
     return splits
+
+
+def get_cn_cols(cns_df, cn_cols):
+    if cn_cols is None:
+        cn_cols = cns_df.columns[4:]
+    return cn_cols

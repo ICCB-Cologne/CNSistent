@@ -75,11 +75,14 @@ The `cns_file_path` must point to a CNS file as described in the [Input](#input)
 
 The following additional optional arguments are shared:
 
+* `--cols int`: Number of copy number columns. If specified the columns on position `5:5+cols` are used as copy numbers. If not specified, the parser will consider columns that start or end with `"CN"` or `"cn"`.
 * `--samples string`: Path to the file with labelling of the samples. The file should be a TSV with the following columns: `sample_id, sex`. This is an optional argument. 
     * If `sex` is not provided, it is derived from the presence of `chrY` in the dataset. 
     * If `--samples` is used, only the samples in the file are processed.
     * If the samples file contains additional columns, and the program outputs a `samples` file (e.g. `coverage`), these columns are copied to the output file.
 * `--out string`: Output file. This is an optional argument. If not provided, it defaults to `./cns.out.tsv`.
+* `--noheader`: If provided, the header is not expected in the input file.
+* `--nosample`: If provided, the sample_id column is not expected in the input file.
 * `--assembly [hg19, hg38]`: Assembly to use.  If not provided, it defaults to `hg19`.
 * `--threads int`: Number of threads to use, defaults to `1`. (Note: `cluster` is not parallelizeable).	
 * `--verbose`: If provided, progress will be printed.
@@ -120,12 +123,8 @@ The following statistics are calculated and stored in a *samples* file:
 * `sex`: `xy` for male, `xx` for female. If this information is not specified, `xy` is used if and only if `chrY` is present in the sample.
 * `chrom_count`: the number of autosomes that had any CN values assigned
 * `chrom_missing`: the list of chromosomes that have no CN values assigned
-* `bases_aut`: total number of bases found to have an assigned copy number on autosomes
-* `bases_sex`: total number of bases found to have an assigned copy number on sex chromosomes
-* `bases_tot`: sum of the two above
-* `frac_aut`: the number of autosomal bases that had an assigned CN value divided by the total number of autosomal bases
-* `frac_sex`: the number of sex bases that had an assigned CN value divided by the total number
-* `frac_tot`: the number of chromosomes that have no CN values assigned
+* `bases_*`: total number of bases with CNS values assigned. `*` is for `aut`, `sex`, `tot`, referring to autosomes, sex chromosomes, and the sum of both, respectively
+* `frac_*`: fraction of bases with CNS values assigned over the total number of bases
 
 ## `ploidy`
 
@@ -135,14 +134,9 @@ Calculates the portions of the genome that are aneuploid, or for absent in case 
 
 The following statistics are calculated and stored in a *samples* file:
 
-* `breaks_aut`: the number of autosomal breakpoints, a healthy genome should have 0
-* `breaks_sex`: the number of breakpoints on sex chromosomes
-* `breaks_tot`: the sum of the two above
-* `ane_major_cn_aut`: the fraction of major copy number on autosomes that is not 1	
-* `ane_minor_cn_aut`: the fraction of minor copy number on autosomes that is not 1
-* `ane_total_cn_aut`: the fraction of total copy number on autosomes that is not 2 - note that this does not prevent e.g. 0 + 2 from being counted as diploid
-* `ane_major_cn_frac_aut`, `ane_minor_cn_frac_aut`, `ane_total_cn_frac_aut`: the fraction of the genome that has a CN different from 1, 1, and 2, respectively, on autosomes.
-* `ane_major_cn_sex`, `ane_minor_cn_sex`, `ane_total_cn_sex`, `ane_major_cn_frac_sex`, `ane_minor_cn_frac_sex`, `ane_total_cn_frac_sex`: the same as above, but for the sex chromosomes
+* `breaks_*`: the number of breakpoints, a healthy genome should have 0
+* `ane_+_*`: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), `+` expands into CN columns names
+* `ane_+_frac_*`: the fraction of aneuploid bases over the total number of bases
 
 ## `bin`
 

@@ -4,22 +4,21 @@ import numpy as np
 from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy, norm_sex_aneuploidy
 from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
-from cns.process.binning import add_cns_loc
+from cns.process.binning import add_cns_loc, bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
 from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import filter_min_size, segment_difference, split_segments
-from cns.utils.conversions import genome_to_segments
-from cns.utils.conversions import breaks_to_segments, tuples_to_segments
-from cns.utils.files import load_regions, samples_df_from_cns_df
-from cns.utils import hg19
+from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
+from cns.utils.files import load_regions, samples_df_from_cns_df, get_cn_cols
+from cns.utils.assemblies import hg19
 
 
-def main_fill(cns_df, samples_df=None, assembly=hg19, cn_columns=('major_cn', 'minor_cn'), add_missing_chromosomes=True, print_info=False):
+def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     samples_df = samples_df_from_cns_df(cns_df)
-    # Fill missing values with NaNs
-    cns_df = cns_df.reset_index(drop=True)
-    cns_tailed_df = add_tails(cns_df,assembly.chr_lens, cn_columns, print_info=print_info)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+
+    cns_tailed_df = add_tails(cns_df, assembly.chr_lens, cn_columns, print_info=print_info)
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
         cns_filled_df = add_missing(cns_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
@@ -27,9 +26,9 @@ def main_fill(cns_df, samples_df=None, assembly=hg19, cn_columns=('major_cn', 'm
     return res
 
 
-def main_impute(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
-    # Impute
-    cns_df = cns_df.reset_index(drop=True)
+def main_impute(cns_df, cn_columns=None, print_info=False):
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+
     imputed_df = create_imputed_entries(cns_df, cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
     res = merge_neighbours(filled_df, cn_columns=cn_columns, print_info=print_info)
@@ -37,8 +36,12 @@ def main_impute(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=False):
     return res
 
 
+def main_bin(cns_df, segs, cn_columns=None, fun_type='mean', print_info=False):
+    return bin_by_segments(cns_df, segs, fun_type, print_info)
+
+
 # TODO: should have any and all option (any is nan, or all are nan)
-def main_coverage(cns_df, samples_df, assembly=hg19, print_info=False):
+def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     cns_vals = cns_df.loc[~cns_df.isna().any(axis=1)].copy()
     coverage = get_missing_chroms(cns_vals, samples_df, assembly)
@@ -47,7 +50,7 @@ def main_coverage(cns_df, samples_df, assembly=hg19, print_info=False):
     return coverage
 
 
-def main_ploidy(cns, samples, assembly=hg19, print_progress=False):
+def main_ploidy(cns, samples, cn_columns=None, assembly=hg19, print_info=False):
     samples = add_breaks_per_sample(cns, samples, assembly)
     cns = add_cns_loc(cns, assembly)
     pre_chr = calc_ane_per_chrom(cns, samples)
@@ -59,7 +62,7 @@ def main_ploidy(cns, samples, assembly=hg19, print_progress=False):
     return res
 
 
-def main_cluster(cns, dist, assembly=hg19, print_progress=False):
+def main_cluster(cns, dist, cn_columns=None, assembly=hg19, print_progress=False):
     dict_start = get_breaks(cns)
 
     if print_progress:

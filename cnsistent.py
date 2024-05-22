@@ -12,7 +12,7 @@ from cns.utils.files import fill_sex_if_missing
 from cns.process.pipelines import get_genome_segments
 from cns.utils.assemblies import get_assembly
 from cns.utils.files import load_cns, save_cns, save_regions
-from cns.process.pipelines import main_fill, main_impute, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select
+from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select
 from cns.utils.files import dataframe_array_split, samples_df_from_cns_df, load_samples
 
 
@@ -25,6 +25,8 @@ def _add_common_args(parser):
     parser.add_argument("--threads", type=int, help="number of threads to use", required=False, default=1)
     parser.add_argument("--verbose", help="print progress to console", action="store_true")
     parser.add_argument("--time", help="save runtime info", action="store_true")
+    parser.add_argument("--noheader", help="if set, the input/file file does not have a header", action="store_true")
+    parser.add_argument("--nosample", help="if set, the input/output file does not have an sample column. Not compatible with the --samples option.", action="store_true")
 
 
 def _parse_args():
@@ -74,6 +76,9 @@ def _parse_args():
             print("WARNING: Clustering is not data parallelizable, --threads option will be ignored.")
             args.threads = 1
 
+    if args.nosample and args["samples"] != "":
+        raise ValueError("The --nosample and --samples options are incompatible.")
+
     return args
 
 
@@ -87,7 +92,7 @@ def _action_to_fun(action):
     elif action == "ploidy":
         return main_ploidy   
     elif action == "bin":
-        return bin_by_segments
+        return main_bin
     elif action == "cluster":
         return main_cluster
     else:
@@ -103,43 +108,41 @@ def _get_segments(args, assembly):
     return segs
 
 
-def _get_blocks(action, cns_blocks, samples_blocks, assembly, threads, args):
+def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, threads, args):
     # Apply process_block to each pair of blocks
     ass_block = [assembly]*threads
     ver_block = [False]*threads
     ver_block[0] = args.verbose
+    cols_block = [cols_block]*threads
     if action in ["impute"]:
-        column_block = [['major_cn', 'minor_cn']]*threads
-        return zip(cns_blocks, column_block, ver_block)
+        return zip(cns_blocks, cols_block, ver_block)
     if action in ["fill"]:
-        column_block = [['major_cn', 'minor_cn']]*threads
         add_missing = [True]*threads
-        return zip(cns_blocks, samples_blocks, ass_block, column_block, add_missing, ver_block)        
+        return zip(cns_blocks, cols_block, samples_blocks, ass_block, add_missing, ver_block)        
     elif action in ["cluster"]:
         dist_block = [args.dist]*threads
-        return zip(cns_blocks, dist_block, ass_block, ver_block)
+        return zip(cns_blocks, dist_block, cols_block, ass_block, ver_block)
     elif action in ["coverage", "ploidy"]:
-        return zip(cns_blocks, samples_blocks, ass_block, ver_block)
+        return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "bin":
         segs = _get_segments(args, assembly)
         segs_block = [segs]*threads
         fun_block = [args.aggregate]*threads
-        return zip(cns_blocks, segs_block, fun_block, ver_block)
+        return zip(cns_blocks, segs_block, cols_block, fun_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
 
 
-def _process(action, cns_df, samples_df, assembly, args):   
+def _process(action, cns_df, samples_df, cn_cols, assembly, args):   
     main_fun = _action_to_fun(action)
     threads = args.threads
     samples_blocks = dataframe_array_split(samples_df, threads)
     cns_blocks = [cns_df.query("sample_id in @block.index").reset_index(drop=True) for block in samples_blocks]
+    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, assembly, threads, args)
     if threads == 1:
-        zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, assembly, threads, args)
         return main_fun(*list(*zip_blocks))
     else:
         with Pool(threads) as pool:
-            zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, assembly, threads, args)
             res_blocs = pool.starmap(main_fun, zip_blocks)            
         return pd.concat(res_blocs)
     
@@ -152,6 +155,9 @@ def main():
     samples_path = args.samples
     out_file = args.out
     print_progress = args.verbose
+    cols_no = args.cols
+    no_header = args.noheader
+    no_sample = args.nosample
 
     # Read the input
     if print_progress:
@@ -160,7 +166,7 @@ def main():
 
     if not exists(cns_file_path):
         raise ValueError(f"File {cns_file_path} not found.")
-    cns_df, cn_cols = load_cns(cns_file_path)
+    cns_df, cn_cols = load_cns(cns_file_path, cn_col_no=cols_no, no_header=no_header, no_sample=no_sample)
 
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
@@ -178,7 +184,7 @@ def main():
         if print_progress:
             print(f"Processing {cns_file_path}...")    
         start = time.time()
-        res_df = _process(action, cns_df, samples_df, assembly, args)
+        res_df = _process(action, cns_df, samples_df, cn_cols, assembly, args)
 
     # write out the results
     end = time.time()
@@ -192,11 +198,12 @@ def main():
                 f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
         
     if action == "bin" and args.onlybins:
-        save_regions(res_df, out_file, True)
+        save_regions(res_df, out_file, change_coords=True)
     elif action in ["fill", "impute", "bin"]:
-        save_cns(res_df, out_file, sort=True)
+        save_cns(res_df, out_file, sort=True, change_coords=True, no_sample=no_sample, no_header=no_header)
     else:
-        res_df.sort_index()
+        if no_sample:
+            res_df.reset_index(drop=True)
         res_df.to_csv(out_file, sep="\t", index=True)
 
     if print_progress:

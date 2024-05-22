@@ -7,7 +7,7 @@ def get_nan_segs(cns_df):
     return nans
 
 
-def add_tails(cns_df,  chr_lengths, cn_columns=("major_cn", "minor_cn"), print_info=True):
+def add_tails(cns_df, chr_lengths, cn_columns=("major_cn", "minor_cn"), print_info=True):
     nr_cn_cols = len(cn_columns)
     grouped = cns_df.groupby(["sample_id", "chrom"]).agg({"start": "min", "end": "max"})
     grouped = grouped.rename(columns={"start": "min_start", "end": "max_end"})
@@ -141,10 +141,7 @@ def merge_neighbours(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=Tru
         print(f"Merged entries: {len(idx_to_remove)}")
 
     # remove from cns_df where idx_to_remove is in the index
-    res_df = res_df.drop(res_df.index[idx_to_remove])
-    res_df.sort_values(
-        by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
-    )
+    res_df = res_df.drop(res_df.index[idx_to_remove]).sort_values(by=["sample_id", "chrom", "start"], ignore_index=True)
     return res_df
 
 
