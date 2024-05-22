@@ -7,13 +7,9 @@ import time
 import argparse
 from os.path import join as exists
 
-from cns.process.binning import bin_by_segments
-from cns.utils.files import fill_sex_if_missing
-from cns.process.pipelines import get_genome_segments
 from cns.utils.assemblies import get_assembly
-from cns.utils.files import load_cns, save_cns, save_regions
-from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select
-from cns.utils.files import dataframe_array_split, samples_df_from_cns_df, load_samples
+from cns.utils.files import load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
+from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select, get_genome_segments
 
 
 def _add_common_args(parser):
@@ -114,21 +110,24 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
     ver_block = [False]*threads
     ver_block[0] = args.verbose
     cols_block = [cols_block]*threads
-    if action in ["impute"]:
+    if action == "impute":
         return zip(cns_blocks, cols_block, ver_block)
-    if action in ["fill"]:
+    if action == "fill":
         add_missing = [True]*threads
         return zip(cns_blocks, cols_block, samples_blocks, ass_block, add_missing, ver_block)        
-    elif action in ["cluster"]:
+    elif action == "cluster":
         dist_block = [args.dist]*threads
         return zip(cns_blocks, dist_block, cols_block, ass_block, ver_block)
-    elif action in ["coverage", "ploidy"]:
+    elif action == "coverage":        
+        any_nan_block = [True]*threads
+        return zip(cns_blocks, samples_blocks, cols_block, ass_block, any_nan_block, ver_block)
+    elif action == "ploidy":
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "bin":
         segs = _get_segments(args, assembly)
         segs_block = [segs]*threads
         fun_block = [args.aggregate]*threads
-        return zip(cns_blocks, segs_block, cols_block, fun_block, ver_block)
+        return zip(cns_blocks, segs_block, fun_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
 

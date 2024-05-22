@@ -3,69 +3,66 @@ import pandas as pd
 from numba import njit
 
 from cns.process.breakpoints import get_breakpoints
-from cns.utils.conversions import breaks_to_segments
-from cns.utils.conversions import segs_to_chrom_dict
+from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
+from cns.utils.files import get_cn_cols
 from cns.utils import hg19
 
 
 def add_cns_loc(cns_df, assembly=hg19):
-    cns_df = cns_df.copy()
     cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
     cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
     cns_df["cum_mid"] = cns_df["mid"] + cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
-    if "major_cn" and "minor_cn" in cns_df:
-        cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
-    if "cn_a" and "cn_b" in cns_df:
-        cns_df["total_cn"] = cns_df["cn_a"] + cns_df["cn_b"]
-    if "hap_a" and "hap_b" in cns_df:
-        cns_df["total_cn"] = cns_df["hap_a"] + cns_df["hap_b"]
-    # order by cum_mid
-    if "sample_id" in cns_df:
-        return cns_df.sort_values(by=["sample_id", "cum_mid"])
-    else:
-        return cns_df.sort_values(by=["cum_mid"])
+    return cns_df
+
+
+def sum_cns(cns_df, cn_columns=None):
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
 
 
 # TODO: work with single-column
-def mean_bins(bins_df, assembly=hg19):
-    if "cum_mid" not in bins_df:
-        bins_df = add_cns_loc(bins_df, assembly)
-    grouped = bins_df.drop("sample_id", axis=1).groupby(["cum_mid"])
+def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):    
+    if fun_type not in ["mean", "max", "min"]:
+        raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    if "cum_mid" not in cns_df:
+        cns_df = add_cns_loc(cns_df, assembly)
+    grouped = cns_df.drop("sample_id", axis=1).groupby(["cum_mid"])
     # calculate mean on grouped except for chrom, where take the first value
-    grouped = grouped.agg(
-        {
-            "chrom": "first",
-            "start": "first",
-            "end": "first",
-            "major_cn": "mean",
-            "minor_cn": "mean",
-            "mid": "first",
-            "length": "first",
-        }
-    ).reset_index()
-    grouped["total_cn"] = grouped["major_cn"] + grouped["minor_cn"]
+    agg_scheme = {
+        "chrom": "first",
+        "start": "first",
+        "end": "first",
+        "mid": "first",
+        "length": "first" 
+    }
+    for column in cn_columns:
+        agg_scheme[column] = fun_type
+    grouped = grouped.agg(agg_scheme).reset_index()
+    if len(cn_columns) > 1:
+        grouped["total_cn"] = grouped[cn_columns].sum(axis=1)
     return grouped
 
 
-@njit
-def mean_func(major_cn, minor_cn, length):
-    return np.average(major_cn, weights=length), np.average(minor_cn, weights=length)
+# @njit
+def mean_func(cns_array):
+    return np.average(cns_array[:, :-1], weights=cns_array[:,-1], axis=0)
 
 
-@njit
-def max_func(major_cn, minor_cn, length):
-    return np.max(major_cn), np.max(minor_cn)
+# @njit
+def max_func(cns_array):
+    return np.max(cns_array[:, :-1], axis=0)
 
 
-@njit
-def min_func(major_cn, minor_cn, length):
-    return np.min(major_cn), np.min(minor_cn)
+# @njit
+def min_func(cns_array):
+    return np.min(cns_array[:, :-1], axis=0)
 
 
-# TODO: work with single-column
 def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
     row_id = 0
     seg_cns = []
+    cns_cols = sample_rows.shape[1] - 2
     seg_start, seg_end = segment
     while sample_rows[row_id][1] <= seg_start:
         row_id += 1
@@ -75,8 +72,7 @@ def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
         row = sample_rows[row_id]
         start = max(row[0], seg_start)
         end = min(row[1], seg_end)
-        length = end - start
-        seg_cns.append((row[2], row[3], length))
+        seg_cns.append(np.concatenate([row[2:],  [end - start]]))
         if row[1] >= seg_end:  # last row ends behind the segment
             break
         row_id += 1
@@ -84,14 +80,14 @@ def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
             break
     
     seg_cns = [x for x in seg_cns if not np.isnan(x[0]) and not np.isnan(x[1])]
+    
     if seg_cns == []:
-        return (sample_id, chrom, seg_start, seg_end, np.nan, np.nan)
+        return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols
     sel_array = np.array(seg_cns, dtype=np.uint32)
-    major_cn, minor_cn = agg_func(sel_array[:, 0], sel_array[:, 1], sel_array[:, 2])
-    return (sample_id, chrom, seg_start, seg_end, major_cn, minor_cn)
+    cns = agg_func(sel_array)
+    return [sample_id, chrom, seg_start, seg_end] + cns.tolist()
 
 
-# TODO: work with single-column
 def _cns_in_seg(sample_id, chrom, sample_rows, segment):
     row_id = 0
     seg_cns = []
@@ -104,7 +100,7 @@ def _cns_in_seg(sample_id, chrom, sample_rows, segment):
         row = sample_rows[row_id]
         start = max(row[0], seg_start)
         end = min(row[1], seg_end)
-        seg_cns.append((sample_id, chrom, start, end, row[2], row[3]))
+        seg_cns.append([sample_id, chrom, start, end] + list(row[2:]))
         if row[1] >= seg_end:  # last row ends behind the segment
             break
         row_id += 1
@@ -148,8 +144,7 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
                     new_rows.extend(bin)
     if print_progress:
         print("")
-    df_cols = ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"]
-    bin_df = pd.DataFrame(new_rows, columns=df_cols)
+    bin_df = pd.DataFrame(new_rows, columns=cns_df.columns)
     bin_df["start"] = bin_df["start"].astype(np.uint32)
     bin_df["end"] = bin_df["end"].astype(np.uint32)
     return bin_df

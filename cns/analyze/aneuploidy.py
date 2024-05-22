@@ -34,42 +34,45 @@ def _sum_chrom_different(values, expected_ploidy=1):
 
 
 # per chromosome and and allele find the number of aneuploid bases
-def calc_ane_per_chrom(cns, samples_indexed):
+def calc_ane_per_chrom(cns_df, samples_indexed):
     aneuploidy = []
-    cns_indexed = cns.set_index(["sample_id", "chrom"])
+    cns_indexed = cns_df.set_index(["sample_id", "chrom"])
+    ane_columns = []
     for (sample, chrom), group in cns_indexed.groupby(level=[0, 1]):
         is_xy = samples_indexed.loc[sample]["sex"] == "xy"
         sample_data = [sample, chrom]
         for column in ["major_cn", "minor_cn", "total_cn"]:
+            if column not in group.columns:
+                continue
             values = group[["length", column]].values
             expected_ploidy = get_expected_ploidy(column, chrom, is_xy)
             anu_len = _sum_chrom_different(values, expected_ploidy)
             sample_data.append(anu_len)
+            ane_columns.append("ane_" + column)
         aneuploidy.append(sample_data)
-    res = pd.DataFrame(
-        aneuploidy, columns=["sample_id", "chrom", "ane_major_cn", "ane_minor_cn", "ane_total_cn"]
-    )
+    res = pd.DataFrame(aneuploidy, columns=["sample_id", "chrom"] + ane_columns)
     return res
 
 
-def norm_chrom_aneuploidy(aneuploidies, assembly=hg19):
-    res = aneuploidies.copy()
+def norm_chrom_aneuploidy(cns_df, assembly=hg19):
+    res_df = cns_df.copy()
+    # columns in res_df starting with ane_ 
     for column in ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]:
+        if column not in res_df.columns:
+            continue
         def chrom_norm(row):
             chrom = row["chrom"]
             return row[column] / assembly.chr_lens[chrom]
-        res[column + "_frac"] = res.apply(chrom_norm, axis=1)
-    return res
+        res_df[column + "_frac"] = res_df.apply(chrom_norm, axis=1)
+    return res_df
 
 
 def _sum_cn_columns(group):
-    return pd.Series(
-        {
-            "ane_major_cn": group["ane_major_cn"].sum(),
-            "ane_minor_cn": group["ane_minor_cn"].sum(),
-            "ane_total_cn": group["ane_total_cn"].sum(),
-        }
-    )
+    res = {}
+    for column in ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]:
+        if column in group.columns:
+            res[column] = group[column].sum()
+    return pd.Series(res)
 
 # TODO: Should add a total fraction
 def calc_ane_per_sample(cns_df, assembly=hg19):
@@ -93,6 +96,8 @@ def calc_ane_per_sample(cns_df, assembly=hg19):
 def norm_aut_aneuploidy(autosomes_sum, assembly=hg19):
     res = autosomes_sum.copy()
     for column in ['ane_major_cn', 'ane_minor_cn', 'ane_total_cn']:
+        if column not in res.columns:
+            continue
         res[column + "_frac"] = res.apply(lambda x: x[column] / assembly.aut_len, axis=1)
     return res
 
@@ -105,6 +110,8 @@ def norm_sex_aneuploidy(samples_indexed, sex_chromo_sum, assembly=hg19):
     # map xy_len to merged_df
     merged_df["expected_length"] = merged_df.apply(lambda x: xy_len if x["sex"] == "xy" else xx_len, axis=1)
     for column in ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]:
+        if column not in merged_df.columns:
+            continue
         merged_df[column + "_frac"] = merged_df[column] / merged_df["expected_length"]
     # drop the sex column
     merged_df = merged_df.drop(columns=["sex", "expected_length"])

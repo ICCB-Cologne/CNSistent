@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from cns.utils.files import get_cn_cols
 
 
 def get_nan_segs(cns_df):
@@ -7,8 +8,7 @@ def get_nan_segs(cns_df):
     return nans
 
 
-def add_tails(cns_df, chr_lengths, cn_columns=("major_cn", "minor_cn"), print_info=True):
-    nr_cn_cols = len(cn_columns)
+def add_tails(cns_df, chr_lengths, print_info=True):
     grouped = cns_df.groupby(["sample_id", "chrom"]).agg({"start": "min", "end": "max"})
     grouped = grouped.rename(columns={"start": "min_start", "end": "max_end"})
     grouped = grouped.reset_index()
@@ -16,16 +16,21 @@ def add_tails(cns_df, chr_lengths, cn_columns=("major_cn", "minor_cn"), print_in
     for _, row in grouped.iterrows():
         if row.min_start > 0:
             missing_ranges.append(
-                [row.sample_id, row.chrom, 0, row.min_start] + [np.nan]*nr_cn_cols
+                {
+                    "sample_id": row.sample_id,
+                    "chrom": row.chrom,
+                    "start": 0,
+                    "end": row.min_start
+                }
             )
         if row.max_end < chr_lengths[f"{row.chrom}"]:
             missing_ranges.append(
-                [
-                    row.sample_id,
-                    row.chrom,
-                    row.max_end,
-                    chr_lengths[str(row.chrom)],
-                ] + [np.nan]*nr_cn_cols
+                    {
+                        "sample_id": row.sample_id,
+                        "chrom":  row.chrom,
+                        "start": row.max_end,
+                        "end": chr_lengths[str(row.chrom)]
+                    }
             )
 
     if len(missing_ranges) == 0:
@@ -35,8 +40,8 @@ def add_tails(cns_df, chr_lengths, cn_columns=("major_cn", "minor_cn"), print_in
     else:
         if print_info:
             print(f"Adding {len(missing_ranges)} missing ends")
-        missing_ends = pd.DataFrame(missing_ranges, columns=cns_df.columns)
-        res_df = pd.concat([cns_df, missing_ends])
+        new_cns_df = pd.DataFrame(missing_ranges, columns=cns_df.columns)
+        res_df = pd.concat([cns_df, new_cns_df])
         res_df.sort_values(
             by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
         )
@@ -74,10 +79,9 @@ def fill_gaps(cns_df, print_info=True):
         # Concatenate the cns_dfs
         if print_info:
             print(f"Filling {len(new_rows)} gaps.")
-        res_df = pd.concat([cns_df, pd.DataFrame(new_rows, columns=cns_df.columns)])
-        res_df.sort_values(
-            by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True
-        )
+        new_cns_df = pd.DataFrame(new_rows, columns=cns_df.columns)
+        res_df = pd.concat([cns_df, new_cns_df])
+        res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
         return res_df
 
 
@@ -117,7 +121,7 @@ def add_missing(cns_df, samples_df, chr_lengths, print_info=True):
 
 
 # Makes sure that the columns are of the correct type
-def _are_mergeable(a, b, cn_columns=('major_cn', 'minor_cn')):
+def _are_mergeable(a, b, cn_columns):
     return (
         a.sample_id == b.sample_id
         and a.chrom == b.chrom
@@ -126,7 +130,8 @@ def _are_mergeable(a, b, cn_columns=('major_cn', 'minor_cn')):
     )
 
 
-def merge_neighbours(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=True):
+def merge_neighbours(cns_df, cn_columns=None, print_info=True):
+    cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     idx_to_remove = []
 
@@ -149,7 +154,8 @@ def _is_same_chrom(df, i, j):
     return df.at[j, "sample_id"] == df.at[i, "sample_id"] and df.at[j, "chrom"] == df.at[i, "chrom"]
 
 
-def create_imputed_entries(cns_df, cn_columns=("major_cn", "minor_cn"), print_info=True):
+def create_imputed_entries(cns_df, cn_columns=None, print_info=True):
+    cn_columns = get_cn_cols(cns_df, cn_columns)    
     new_entries = []
     for i in range(len(cns_df)):
         if np.isnan(cns_df.at[i, cn_columns[0]]) or np.isnan(cns_df.at[i, cn_columns[1]]):
@@ -202,7 +208,8 @@ def create_imputed_entries(cns_df, cn_columns=("major_cn", "minor_cn"), print_in
     return res_df
 
 
-def fill_nans_with_zeros(cns_df, cn_columns=('major_cn', 'minor_cn'), print_info=True):
+def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    
+    cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     if print_info:
         print(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")

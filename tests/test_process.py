@@ -2,9 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.binning import add_cns_loc
 from cns.process.pipelines import *
-from cns.process.pipelines import get_genome_segments
 from cns.process.segments import *
 from cns.process.imputation import *
 from cns.process.binning import *
@@ -13,8 +11,6 @@ from cns.process.cluster import *
 from cns.analyze.coverage import *
 from cns.analyze.aneuploidy import *
 from cns.analyze.signatures import *
-from cns.process.binning import add_cns_loc
-from cns.process.segments import split_segment
 from cns.utils.assemblies import hg19, hg38
 from cns.utils.conversions import breaks_to_segments, cns_to_segments, genome_to_segments, tuples_to_segments
 from cns.utils.files import fill_sex_if_missing
@@ -137,7 +133,6 @@ class TestImputation(unittest.TestCase):
 
     def test_add_tails(self):
         result = add_tails(self.cns_df, self.chr_lengths)
-        print(result)
         self.assertEqual(result.shape[0], 8)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 50)
@@ -207,7 +202,7 @@ class TestCoverage(unittest.TestCase):
         self.assertEqual(result.loc['s4', 'sex'], 'xx')
 
     def test_get_missing_chroms(self):
-        result = get_missing_chroms(self.cns, self.samples, self.assembly)
+        result = get_missing_chroms(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(result.loc['s1', 'chrom_count'], 2)
 
     def test_get_covered_bases(self):
@@ -216,13 +211,13 @@ class TestCoverage(unittest.TestCase):
 
     def test_get_base_frac(self):
         samples = get_covered_bases(self.cns, self.samples)
-        result = get_base_frac(samples, self.assembly)
+        result = get_base_frac(samples, assembly=self.assembly)
         self.assertEqual(result.loc['s1', 'cover_frac_aut'], 1/3)
         self.assertEqual(result.loc['s2', 'cover_frac_sex'], 1)
         self.assertEqual(result.loc['s4', 'cover_frac_tot'], 1/4)
 
     def test_calculate_coverage(self):
-        result = main_coverage(self.cns, self.samples, self.assembly)
+        result = main_coverage(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(result['cover_bases_aut']['s1'], 100)
         self.assertEqual(result['cover_bases_sex']['s1'], 100)
         self.assertEqual(result['cover_bases_tot']['s1'], 200)
@@ -291,11 +286,9 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("major_cn", "chrX", True), 1)
         self.assertEqual(get_expected_ploidy("total_cn", "chrX", False), 2)
         self.assertEqual(get_expected_ploidy("major_cn", "chrX", False), 1)
-
         self.assertEqual(get_expected_ploidy("minor_cn", "chrY", True), 0)
         self.assertEqual(get_expected_ploidy("major_cn", "chrY", True), 1)
         self.assertEqual(get_expected_ploidy("total_cn", "chrY", False), 0)
-
         self.assertEqual(get_expected_ploidy("total_cn", "chr1", True), 2)
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
 
@@ -464,7 +457,6 @@ class TestBinning(unittest.TestCase):
         self.assertEqual(seg_bin.shape[0], 4)
         pd.testing.assert_frame_equal(seg_bin, break_bin)
     
-
     def test_bin_by_segments(self):
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
         result = bin_by_segments(self.cns, segments)
@@ -476,12 +468,12 @@ class TestBinning(unittest.TestCase):
         self.assertEqual(result.at[0, "minor_cn"], 1.0)
         self.assertEqual(result.at[1, "start"], 100)
         self.assertTrue(np.isnan(result.at[1, "major_cn"]))
-
     
     def test_bin_none(self):        
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
         result = bin_by_segments(self.cns, segments, fun_type="none")
         print(result)
+        # TODO
 
 
 class TestMCS(unittest.TestCase):
@@ -528,9 +520,7 @@ class TestMCS(unittest.TestCase):
     def test_created_merged_segs(self):
         dict_start = {'chr1': [50, 99], 'chr2': [200, 300]}
         dist = 100
-        assembly = type('Assembly', (object,), {
-            'chr_lens': {'chr1': 100, 'chr2': 400, 'chr3': 300, 'chrX': 100, 'chrY': 100}
-        })
+        assembly = type('Assembly', (object,), {'chr_lens': {'chr1': 100, 'chr2': 400, 'chr3': 300, 'chrX': 100, 'chrY': 100}})
         result = created_merged_segs(dict_start, dist, assembly, False)
         exp = [('chr1', 1, 74), ('chr1', 75, 100), ('chr2', 1, 200), ('chr2', 201, 300), ('chr2', 301, 400)]
         self.assertEqual(result, exp)
@@ -538,7 +528,6 @@ class TestMCS(unittest.TestCase):
         exp = [('chr1', 1, 100), ('chr2', 1, 200), ('chr2', 201, 300), ('chr2', 301, 400)]
         self.assertEqual(result, exp)
 
-    
 
 if __name__ == "__main__":
     unittest.main()

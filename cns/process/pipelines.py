@@ -18,11 +18,11 @@ def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missi
     samples_df = samples_df_from_cns_df(cns_df)
     cn_columns = get_cn_cols(cns_df, cn_columns)
 
-    cns_tailed_df = add_tails(cns_df, assembly.chr_lens, cn_columns, print_info=print_info)
+    cns_tailed_df = add_tails(cns_df, assembly.chr_lens, print_info=print_info)
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
         cns_filled_df = add_missing(cns_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
-    res = merge_neighbours(cns_filled_df, cn_columns=cn_columns, print_info=print_info)
+    res = merge_neighbours(cns_filled_df, cn_columns, print_info=print_info)
     return res
 
 
@@ -30,30 +30,49 @@ def main_impute(cns_df, cn_columns=None, print_info=False):
     cn_columns = get_cn_cols(cns_df, cn_columns)
 
     imputed_df = create_imputed_entries(cns_df, cn_columns, print_info=print_info)
-    filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
-    res = merge_neighbours(filled_df, cn_columns=cn_columns, print_info=print_info)
+    filled_df = fill_nans_with_zeros(imputed_df, cn_columns, print_info=print_info)
+    res = merge_neighbours(filled_df, cn_columns, print_info=print_info)
     assert len(res[res.isnull().any(axis=1)]) == 0, "NaNs still present in final_df."
     return res
 
 
-def main_bin(cns_df, segs, cn_columns=None, fun_type='mean', print_info=False):
+def main_bin(cns_df, segs, fun_type='mean', print_info=False):
     return bin_by_segments(cns_df, segs, fun_type, print_info)
 
 
-# TODO: should have any and all option (any is nan, or all are nan)
-def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
+def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any_nan=True, print_info=False):
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    cns_vals = cns_df.loc[~cns_df.isna().any(axis=1)].copy()
+    nan_vals = cns_df[cn_columns].isna()
+    nan_filter = ~nan_vals.any(axis=1) if any_nan else ~nan_vals.all(axis=1)
+    cns_vals = cns_df.loc[nan_filter].copy()
     coverage = get_missing_chroms(cns_vals, samples_df, assembly)
     coverage = get_covered_bases(cns_vals, coverage)
     coverage = get_base_frac(coverage, assembly)
     return coverage
 
 
-def main_ploidy(cns, samples, cn_columns=None, assembly=hg19, print_info=False):
-    samples = add_breaks_per_sample(cns, samples, assembly)
-    cns = add_cns_loc(cns, assembly)
-    pre_chr = calc_ane_per_chrom(cns, samples)
+def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=False):
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    if len(cn_columns) > 2:
+        raise ValueError("To calculate aneuploidy, only one (sum) or two (major, minor) CN columns are allowed.")
+    elif len(cn_columns) == 2:
+        cn_columns_df = cns_df[cn_columns]
+        major_col = cn_columns_df.values.max(axis=1)  
+        minor_col = cn_columns_df.values.min(axis=1)
+        cns_df = cns_df.drop(columns=cn_columns)
+        cns_df["major_cn"] = major_col
+        cns_df["minor_cn"] = minor_col
+        cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
+    elif len(cn_columns) == 1:
+        cns_df.rename(columns={cn_columns[0]: "total_cn"}, inplace=True)
+    else:
+        raise ValueError("No CN columns found.")
+
+
+    samples = add_breaks_per_sample(cns_df, samples, assembly)
+    cns_df = add_cns_loc(cns_df, assembly)
+    pre_chr = calc_ane_per_chrom(cns_df, cn_columns, samples)
     autosomes_sum, sex_chrom_sum = calc_ane_per_sample(pre_chr, assembly)
     autosomes_sum = norm_aut_aneuploidy(autosomes_sum, assembly)
     sex_chrom_sum = norm_sex_aneuploidy(samples, sex_chrom_sum, assembly)
@@ -62,8 +81,8 @@ def main_ploidy(cns, samples, cn_columns=None, assembly=hg19, print_info=False):
     return res
 
 
-def main_cluster(cns, dist, cn_columns=None, assembly=hg19, print_progress=False):
-    dict_start = get_breaks(cns)
+def main_cluster(cns_df, dist, assembly=hg19, print_progress=False):    
+    dict_start = get_breaks(cns_df)
 
     if print_progress:
         orig_count = sum(len(values) for values in dict_start.values())

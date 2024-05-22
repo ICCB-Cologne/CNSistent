@@ -1,1 +1,1 @@
-from cns.process.binning import bin_by_break_type, bin_by_breaks, bin_by_segments, mean_bins, add_cns_loc
+from cns.process.binning import bin_by_break_type, bin_by_breaks, bin_by_segments, group_bins, add_cns_loc

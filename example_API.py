@@ -2,7 +2,7 @@
 from matplotlib import pyplot as plt
 from cns.analyze.genome import fig_genome, fig_genome_groups
 from cns.display.heatmap import fig_CN_heatmap
-from cns.process.binning import mean_bins
+from cns.process.binning import group_bins
 from cns.process.binning import add_cns_loc
 from cns.utils.selection import cns_head
 from cns.utils.files import load_cns, load_samples
@@ -27,7 +27,7 @@ plt.show()
 
 # Plot mean total_cn per bin along the genome
 # %%
-groups = mean_bins(derived)
+groups = group_bins(derived)
 fig_genome(groups, max_cn=10, width=12, dpi = 200, size=.5, colored=True)
 plt.show()
 
@@ -58,8 +58,8 @@ print(filtered["type"].value_counts())
 # Plot mean total_cn per bin along the genome for liver and pancreas
 # %% 
 liver = filtered.query("type == 'Liver-HCC'").index
-liver_group = mean_bins(derived.query("sample_id in @liver"))
+liver_group = group_bins(derived.query("sample_id in @liver"))
 pancreas = filtered.query("type == 'Panc-AdenoCA'").index
-pancreas_group = mean_bins(derived.query("sample_id in @pancreas"))
+pancreas_group = group_bins(derived.query("sample_id in @pancreas"))
 fig_genome_groups([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], hg19, column="major_cn", max_cn=3, width=12, dpi=200, size=.5, colored=False)
 plt.show()
