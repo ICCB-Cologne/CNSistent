@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt, colors as mcolors
 from cns.display.label import plot_chr_bg, plot_x_ticks
 from cns.utils.conversions import column_to_label, chrom_to_sortable
 from cns.utils.assemblies import hg19
+from cns.utils.files import get_cn_columns
 
 
 def plot_lines(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None):
@@ -55,8 +56,7 @@ def _check_fig_input(data, column, label, chrom, assembly):
 		raise ValueError("data must be a pandas DataFrame or a list of pandas DataFrames")
 
 	if column == None:
-		# set column to all columns in data that end with "_cn"
-		column = [c for c in data[0].columns if c.endswith("cn") or c.endswith("CN") or c.startswith("cn") or c.startswith("CN")]
+		column = get_cn_columns(data)
 		if len(column) == 0:
 			raise ValueError("If column is not specified, at least one column ending with '_cn' must exist in data")
 	elif isinstance(column, str):

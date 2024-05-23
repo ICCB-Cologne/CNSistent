@@ -117,7 +117,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         return zip(cns_blocks, cols_block, samples_blocks, ass_block, add_missing, ver_block)        
     elif action == "cluster":
         dist_block = [args.dist]*threads
-        return zip(cns_blocks, dist_block, cols_block, ass_block, ver_block)
+        return zip(cns_blocks, dist_block, ass_block, ver_block)
     elif action == "coverage":        
         any_nan_block = [True]*threads
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, any_nan_block, ver_block)

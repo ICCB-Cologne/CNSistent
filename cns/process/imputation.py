@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from cns.utils.files import get_cn_cols
+from cns.utils.files import find_cn_cols_if_none
 
 
 def get_nan_segs(cns_df):
@@ -131,7 +131,7 @@ def _are_mergeable(a, b, cn_columns):
 
 
 def merge_neighbours(cns_df, cn_columns=None, print_info=True):
-    cn_columns = get_cn_cols(cns_df, cn_columns)    
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
     res_df = cns_df.copy()
     idx_to_remove = []
 
@@ -155,7 +155,7 @@ def _is_same_chrom(df, i, j):
 
 
 def create_imputed_entries(cns_df, cn_columns=None, print_info=True):
-    cn_columns = get_cn_cols(cns_df, cn_columns)    
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
     new_entries = []
     for i in range(len(cns_df)):
         if np.isnan(cns_df.at[i, cn_columns[0]]) or np.isnan(cns_df.at[i, cn_columns[1]]):
@@ -209,7 +209,7 @@ def create_imputed_entries(cns_df, cn_columns=None, print_info=True):
 
 
 def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    
-    cn_columns = get_cn_cols(cns_df, cn_columns)    
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
     res_df = cns_df.copy()
     if print_info:
         print(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")

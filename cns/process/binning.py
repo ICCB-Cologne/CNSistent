@@ -4,7 +4,7 @@ from numba import njit
 
 from cns.process.breakpoints import get_breakpoints
 from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
-from cns.utils.files import get_cn_cols
+from cns.utils.files import find_cn_cols_if_none
 from cns.utils import hg19
 
 
@@ -16,15 +16,16 @@ def add_cns_loc(cns_df, assembly=hg19):
 
 
 def sum_cns(cns_df, cn_columns=None):
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
+    return cns_df
 
 
 # TODO: work with single-column
 def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):    
     if fun_type not in ["mean", "max", "min"]:
         raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if "cum_mid" not in cns_df:
         cns_df = add_cns_loc(cns_df, assembly)
     grouped = cns_df.drop("sample_id", axis=1).groupby(["cum_mid"])

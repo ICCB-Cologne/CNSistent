@@ -258,6 +258,7 @@ class TestSignatures(unittest.TestCase):
         self.assertEqual(result.query('sample_id == "s1"')['breaks_aut'].values[0], 1)
         self.assertEqual(result.query('sample_id == "s4"')['breaks_tot'].values[0], 4)
 
+
 class TestAneuploidy(unittest.TestCase):
     def setUp(self):
         self.cns = pd.DataFrame({
@@ -279,6 +280,7 @@ class TestAneuploidy(unittest.TestCase):
             'aut_len': 300,
             'sex_names': ['chrX', 'chrY']
         })
+        self.ane_cols = ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]
 
 
     def test_get_expected_ploidy(self):
@@ -293,19 +295,19 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
 
     def test_calc_ane_per_chrom(self):
-        derived = add_cns_loc(self.cns, self.assembly)
+        derived = sum_cns(add_cns_loc(self.cns, self.assembly))
         result = calc_ane_per_chrom(derived, self.samples)
         self.assertEqual(len(result), 6)
-        self.assertEqual(list(result.columns), ["sample_id", "chrom", "ane_major_cn", "ane_minor_cn", "ane_total_cn"])
+        self.assertEqual(list(result.columns), ["sample_id", "chrom"] +  self.ane_cols)
         test_row = result.query('sample_id == "s4" and chrom == "chr1"')
         self.assertEqual(test_row['ane_major_cn'].values[0], 51)
         self.assertEqual(test_row['ane_minor_cn'].values[0], 50)
         self.assertEqual(test_row['ane_total_cn'].values[0], 100)
 
     def test_calc_ane_per_sample(self):
-        derived = add_cns_loc(self.cns, self.assembly)
+        derived = sum_cns(add_cns_loc(self.cns, self.assembly))
         cns = calc_ane_per_chrom(derived, self.samples)
-        autosomes_sum, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
+        autosomes_sum, sex_chrom_sum = calc_ane_per_sample(cns, self.ane_cols, self.assembly)
         self.assertEqual(len(autosomes_sum), 4)
         test_row = autosomes_sum.query('sample_id == "s4"')
         self.assertEqual(test_row['ane_major_cn'].values[0], 101)
@@ -314,17 +316,17 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(len(sex_chrom_sum), 4)
 
     def test_norm_aut_aneuploidy(self):
-        derived = add_cns_loc(self.cns, self.assembly)
+        derived = sum_cns(add_cns_loc(self.cns, self.assembly))
         cns = calc_ane_per_chrom(derived, self.samples)
-        autosomes_sum, _ = calc_ane_per_sample(cns, self.assembly)
-        result = norm_aut_aneuploidy(autosomes_sum, self.assembly)
+        autosomes_sum, _ = calc_ane_per_sample(cns, None, self.assembly)
+        result = norm_aut_aneuploidy(autosomes_sum, None, self.assembly)
         self.assertEqual(len(result.columns), 6)
 
     def test_norm_sex_aneuploidy(self):
-        derived = add_cns_loc(self.cns, self.assembly)
+        derived = sum_cns(add_cns_loc(self.cns, self.assembly))
         cns = calc_ane_per_chrom(derived, self.samples)
-        _, sex_chrom_sum = calc_ane_per_sample(cns, self.assembly)
-        result = norm_sex_aneuploidy(self.samples, sex_chrom_sum, self.assembly)
+        _, sex_chrom_sum = calc_ane_per_sample(cns, None, self.assembly)
+        result = norm_sex_aneuploidy(self.samples, sex_chrom_sum, None, self.assembly)
         self.assertEqual(len(result.columns), 6)
 
 

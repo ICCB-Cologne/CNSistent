@@ -10,13 +10,13 @@ from cns.process.cluster import created_merged_segs, get_breaks
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
-from cns.utils.files import load_regions, samples_df_from_cns_df, get_cn_cols
+from cns.utils.files import get_ane_cols_if_none, load_regions, samples_df_from_cns_df, find_cn_cols_if_none
 from cns.utils.assemblies import hg19
 
 
 def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     samples_df = samples_df_from_cns_df(cns_df)
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
     cns_tailed_df = add_tails(cns_df, assembly.chr_lens, print_info=print_info)
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
@@ -27,7 +27,7 @@ def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missi
 
 
 def main_impute(cns_df, cn_columns=None, print_info=False):
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
     imputed_df = create_imputed_entries(cns_df, cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns, print_info=print_info)
@@ -41,7 +41,7 @@ def main_bin(cns_df, segs, fun_type='mean', print_info=False):
 
 
 def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any_nan=True, print_info=False):
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     nan_vals = cns_df[cn_columns].isna()
     nan_filter = ~nan_vals.any(axis=1) if any_nan else ~nan_vals.all(axis=1)
@@ -53,7 +53,7 @@ def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any_nan=Tr
 
 
 def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=False):
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if len(cn_columns) > 2:
         raise ValueError("To calculate aneuploidy, only one (sum) or two (major, minor) CN columns are allowed.")
     elif len(cn_columns) == 2:
@@ -69,13 +69,13 @@ def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=Fals
     else:
         raise ValueError("No CN columns found.")
 
-
     samples = add_breaks_per_sample(cns_df, samples, assembly)
     cns_df = add_cns_loc(cns_df, assembly)
-    pre_chr = calc_ane_per_chrom(cns_df, cn_columns, samples)
-    autosomes_sum, sex_chrom_sum = calc_ane_per_sample(pre_chr, assembly)
-    autosomes_sum = norm_aut_aneuploidy(autosomes_sum, assembly)
-    sex_chrom_sum = norm_sex_aneuploidy(samples, sex_chrom_sum, assembly)
+    pre_chr = calc_ane_per_chrom(cns_df, samples, cn_columns)
+    ane_cols = get_ane_cols_if_none(cns_df, cn_columns)
+    autosomes_sum, sex_chrom_sum = calc_ane_per_sample(pre_chr, ane_cols, assembly)
+    autosomes_sum = norm_aut_aneuploidy(autosomes_sum, ane_cols, assembly)
+    sex_chrom_sum = norm_sex_aneuploidy(samples, sex_chrom_sum, ane_cols, assembly)
     merged_df = autosomes_sum.merge(sex_chrom_sum, left_index=True, right_index=True, suffixes=('_aut', '_sex'))
     res = samples.merge(merged_df, left_index=True, right_index=True)
     return res

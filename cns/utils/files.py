@@ -139,6 +139,20 @@ def get_cn_columns(df):
     return [col for col in df.columns if is_cn_column(col)]
 
 
+def find_cn_cols_if_none(cns_df, cn_cols):
+    if cn_cols is None:
+        cn_cols = get_cn_columns(cns_df)
+    if len(cn_cols) == 0:
+        raise ValueError("No CN columns found.")
+    return cn_cols
+
+
+def get_ane_cols_if_none(cns_df, ane_cols):
+    if ane_cols is None:
+        return [col for col in cns_df.columns if col.startswith("ane_") and not col.endswith("_frac")]
+    return ane_cols
+
+
 def dataframe_array_split(df, n_splits):
     """
     Splits a DataFrame into n_splits parts as equally as possible.
@@ -176,8 +190,3 @@ def dataframe_array_split(df, n_splits):
     
     return splits
 
-
-def get_cn_cols(cns_df, cn_cols):
-    if cn_cols is None:
-        cn_cols = cns_df.columns[4:]
-    return cn_cols
