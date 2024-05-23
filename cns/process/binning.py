@@ -45,19 +45,28 @@ def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):
     return grouped
 
 
-# @njit
+@njit
 def mean_func(cns_array):
-    return np.average(cns_array[:, :-1], weights=cns_array[:,-1], axis=0)
+    result = []
+    for i in range(cns_array.shape[1] - 1):
+        result.append(np.average(cns_array[:, i], weights=cns_array[:, -1]))
+    return result
 
 
-# @njit
+@njit
 def max_func(cns_array):
-    return np.max(cns_array[:, :-1], axis=0)
+    result = []
+    for i in range(cns_array.shape[1] - 1):
+        result.append(np.max(cns_array[:, i]))
+    return result
 
 
-# @njit
+@njit
 def min_func(cns_array):
-    return np.min(cns_array[:, :-1], axis=0)
+    result = []
+    for i in range(cns_array.shape[1] - 1):
+        result.append(np.min(cns_array[:, i]))
+    return result
 
 
 def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
@@ -86,7 +95,7 @@ def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
         return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols
     sel_array = np.array(seg_cns, dtype=np.uint32)
     cns = agg_func(sel_array)
-    return [sample_id, chrom, seg_start, seg_end] + cns.tolist()
+    return [sample_id, chrom, seg_start, seg_end] + cns
 
 
 def _cns_in_seg(sample_id, chrom, sample_rows, segment):

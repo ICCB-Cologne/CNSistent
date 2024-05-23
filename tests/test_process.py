@@ -462,7 +462,6 @@ class TestBinning(unittest.TestCase):
     def test_bin_by_segments(self):
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
         result = bin_by_segments(self.cns, segments)
-        print(result)
         self.assertEqual(result.shape[0], 4)
         self.assertEqual(result.at[0, "start"], 0)
         self.assertEqual(result.at[0, "end"], 100)
@@ -474,8 +473,14 @@ class TestBinning(unittest.TestCase):
     def test_bin_none(self):        
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
         result = bin_by_segments(self.cns, segments, fun_type="none")
-        print(result)
-        # TODO
+        self.assertEqual(result.shape[0], 8)
+        for i in range(result.shape[0]):
+            if result.at[i, "chrom"] == "chr1":
+                self.assertTrue(result.at[i, "start"] >= 0)
+                self.assertTrue(result.at[i, "end"] <= 100)
+            elif result.at[i, "chrom"] == "chr2":
+                self.assertTrue(result.at[i, "start"] >= 100)
+                self.assertTrue(result.at[i, "end"] <= 200)
 
 
 class TestMCS(unittest.TestCase):
