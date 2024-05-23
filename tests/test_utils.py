@@ -2,11 +2,37 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from cns.utils.conversions import chrom_to_sortable, column_to_label, cytobands_to_df, gaps_to_df, segs_to_chrom_dict, sortable_to_chrom
-from cns.utils.files import canonize_cns_df
+from cns.utils.conversions import *
+from cns.utils.files import *
 
 
 class TestConversions(unittest.TestCase):
+    def test_genome_to_segments(self):
+        assembly = type('Assembly', (object,), {
+            'chr_lens':{'chr1': 100, 'chr2': 200 }
+        })
+        exp = [('chr1', 0, 100), ('chr2', 0, 200)]
+        self.assertEqual(genome_to_segments(assembly), exp)
+
+    def test_breaks_to_segments(self):
+        breakpoints = [('chr1', [0, 50, 100]), ('chr2', [0, 125, 150, 176])]
+        exp = [('chr1', 0, 50), ('chr1', 50, 100), ('chr2', 0, 125), ('chr2', 125, 150), ('chr2', 150, 176)]
+        self.assertEqual(breaks_to_segments(breakpoints), exp)
+
+    def test_regions_to_segments(self):
+        regions = pd.DataFrame({
+            'chrom': ['chr1', 'chr2'],
+            'start': [0, 50],
+            'end': [100, 150]
+        })
+        exp = [('chr1', 0, 100), ('chr2', 50, 150)]
+        self.assertEqual(cns_to_segments(regions), exp)
+
+    def test_tuples_to_segments(self):
+        gaps = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]
+        exp = [('chr1', 1, 5), ('chr2', 10, 15)]
+        self.assertEqual(tuples_to_segments(gaps), exp)
+
     def test_cytobands_to_df(self):
         cytobands = [['chr1', 0, 2300000, 'p36.33', 'gneg']]
         df = cytobands_to_df(cytobands)
@@ -53,6 +79,29 @@ class TestConversions(unittest.TestCase):
         chrom_dict = segs_to_chrom_dict(segs)
         expected =  {'chr1': [(1, 5), (4, 8)], 'chr2': [(10, 15)]}
         self.assertEqual(chrom_dict, expected)
+
+
+class TestFiles(unittest.TestCase):
+    def setUp(self):
+        self.cns = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4'],
+            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
+            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0],
+            'chrom': ['chr1', 'chrX', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1'],
+            'start': [0, 100, 200, 300, 400, 0, 50, 99],
+            'end': [100, 200, 300, 400, 500, 50, 99, 100],
+        })        
+        self.samples = pd.DataFrame({
+            'sex': ['xy', 'NA', 'xx', 'NA']
+        }, index=['s1', 's2', 's3', 's4'])
+        self.samples.index.name = "sample_id"
+
+    def test_fill_sex_if_missing(self):
+        result = fill_sex_if_missing(self.cns, self.samples)
+        self.assertEqual(result.loc['s1', 'sex'], 'xy')
+        self.assertEqual(result.loc['s2', 'sex'], 'xy')
+        self.assertEqual(result.loc['s4', 'sex'], 'xx')
+
 
 if __name__ == '__main__':
     unittest.main()
