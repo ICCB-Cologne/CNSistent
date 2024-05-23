@@ -1,6 +1,7 @@
 from cns.utils.conversions import cytobands_to_df
 from cns.utils import hg19
 import numpy as np
+import pandas as pd
 
 
 def create_step_breaks(reg_len, step_size, equidistant=True):
@@ -61,7 +62,8 @@ def calc_cytoband_breaks(assembly=hg19):
     ]
 
 
-def get_breakpoints(break_type, assembly=hg19):
+# Create breakpoints
+def make_breaks(break_type, assembly=hg19):
     if break_type == "arms":
         return calc_arm_breaks(assembly)
     elif break_type == "cytobands":
@@ -75,3 +77,20 @@ def get_breakpoints(break_type, assembly=hg19):
                 + break_type
             )
         return calc_bin_breaks(bin_size, equidistant=True, assembly=assembly)
+    
+
+# Obtain breakpoints from a cns dataframe
+def get_breaks(cns_df, keep_ends=True, assembly=hg19):
+    breaks_start = cns_df[["chrom", "start"]].copy().drop_duplicates().rename(columns={"start": "break"})
+    breaks_end = cns_df[["chrom", "end"]].copy().drop_duplicates().rename(columns={"end": "break"})
+    breaks = pd.concat([breaks_start, breaks_end]).drop_duplicates()
+    if not keep_ends:
+        breaks = breaks[breaks["break"] != breaks["chrom"].map(assembly.chr_lens)]
+        breaks = breaks[breaks["break"] > 0]
+    breaks.sort_values(by=['chrom', 'break'], inplace=True)
+    dict_start = breaks.groupby('chrom')['break'].agg(list).to_dict()
+    # insert empty for chromosomes without breakpoints
+    for chrom in assembly.chr_names:
+        if chrom not in dict_start:
+            dict_start[chrom] = []
+    return dict_start

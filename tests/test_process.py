@@ -110,6 +110,23 @@ class TestSegments(unittest.TestCase):
         
         self.assertEqual(result, expected_result)
 
+    def test_split_segment(self):
+        # Test case 1
+        segment = (1, 1, 11)
+        step_size = 2
+        equidisant = True
+        expected_output = [(1, 1, 3), (1, 3, 5), (1, 5, 7), (1, 7, 9), (1, 9, 11)]
+        actual_output = split_segment(segment, step_size, equidisant)
+        self.assertEqual(actual_output, expected_output)
+
+        # Test case 2
+        segment = (1, 1, 11)
+        step_size = 3
+        equidisant = False
+        expected_output = [(1, 1, 5), (1, 5, 8), (1, 8, 11)]
+        actual_output = split_segment(segment, step_size, equidisant)
+        self.assertEqual(actual_output, expected_output)
+
 
 class TestImputation(unittest.TestCase):
     def setUp(self):
@@ -411,22 +428,30 @@ class TestBreakpoints(unittest.TestCase):
             self.assertTrue(np.abs(np.sum(diffs)) <= 1)
             self.assertTrue(np.max(np.abs(diffs) <= 1))
 
-    def test_split_segment(self):
-        # Test case 1
-        segment = (1, 1, 11)
-        step_size = 2
-        equidisant = True
-        expected_output = [(1, 1, 3), (1, 3, 5), (1, 5, 7), (1, 7, 9), (1, 9, 11)]
-        actual_output = split_segment(segment, step_size, equidisant)
-        self.assertEqual(actual_output, expected_output)
+    def test_get_breaks(self):
+        cns = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's2', 's2', 's2', 's2'],
+            'chrom': ['chr1', 'chr2', 'chr2', 'chr2', 'chr2', 'chr2'],
+            'start': [0, 0, 50, 125, 150, 175],
+            'end': [100, 150, 100, 150, 175, 200],
+            'major_cn': [1, 2, 3, np.nan, 1, 1],
+            'minor_cn': [1, 2, 1, 0, 0, 0]
+        }) 
+        breaks = get_breaks(cns, keep_ends=True)
+        self.assertEqual(breaks['chr1'], [0, 100])
+        self.assertEqual(breaks['chr2'], [0, 50, 100, 125, 150, 175, 200])
+        self.assertEqual(breaks['chr3'], [])
+        breaks = get_breaks(cns, keep_ends=False)
+        self.assertEqual(breaks['chr1'], [100])
+        # self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175, 200])
+        assembly = type('Assembly', (object,), {
+            'chr_lens': {'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
+            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY']
+        })
+        breaks = get_breaks(cns, assembly=assembly, keep_ends=False)
+        self.assertEqual(breaks['chr1'], [])
+        self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
 
-        # Test case 2
-        segment = (1, 1, 11)
-        step_size = 3
-        equidisant = False
-        expected_output = [(1, 1, 5), (1, 5, 8), (1, 8, 11)]
-        actual_output = split_segment(segment, step_size, equidisant)
-        self.assertEqual(actual_output, expected_output)
 
 
 class TestBinning(unittest.TestCase):
@@ -496,12 +521,6 @@ class TestMCS(unittest.TestCase):
         self.assembly = type('Assembly', (object,), {
             'chr_lens': {'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100}
         })
-
-    def test_get_breaks(self):
-        breaks = get_breaks(self.cns)
-        print(breaks)
-        self.assertEqual(breaks['chr1'], [50, 99])
-        self.assertEqual(breaks['chrY'], [300])
 
     def test_prep_clusters(self):
         chrom_breaks = [50, 99]

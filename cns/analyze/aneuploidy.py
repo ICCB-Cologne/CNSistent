@@ -63,7 +63,6 @@ def _sum_cn_columns(group, columns):
     return pd.Series(res)
     
 
-# TODO: Should add a total fraction
 def calc_ane_per_sample(cns_df, ane_columns=None, assembly=hg19):
     ids = cns_df["sample_id"].unique()
     ane_columns = get_ane_cols_if_none(cns_df, ane_columns)

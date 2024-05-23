@@ -5,8 +5,8 @@ from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm
 from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import add_cns_loc, bin_by_segments
-from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks
-from cns.process.cluster import created_merged_segs, get_breaks
+from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
+from cns.process.cluster import created_merged_segs
 from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
@@ -82,13 +82,13 @@ def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=Fals
 
 
 def main_cluster(cns_df, dist, assembly=hg19, print_progress=False):    
-    dict_start = get_breaks(cns_df)
+    dict_start = get_breaks(cns_df, keep_ends=False, assembly=assembly)
 
     if print_progress:
         orig_count = sum(len(values) for values in dict_start.values())
         print(f"Reducing {orig_count} breakpoints, merge distance {dist} ... ")   
 
-    res = created_merged_segs(dict_start, dist, assembly)
+    res = created_merged_segs(dict_start, dist, assembly, extend=True)
 
     if print_progress:
         new_count = len(res) - len(dict_start) # number of segments is breakpoints + 1 per chrom

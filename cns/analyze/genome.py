@@ -6,10 +6,8 @@ from cns.utils.conversions import column_to_label
 from cns.utils.assemblies import hg19
 
 
-# TODO: Merge individual and group plots
-def line_plot(
-    ax, grouped, column, color="red", label=None, alpha=1, line_width=1, sel_chrom=None
-):
+# Will plot lines between consecutive segments
+def line_plot(ax, grouped, column, color="red", label=None, alpha=1, line_width=1, sel_chrom=None):
     chroms = grouped["chrom"].unique() if sel_chrom is None else [sel_chrom]
     for chr in chroms:
         df = grouped.query(f"chrom == '{chr}'").copy()

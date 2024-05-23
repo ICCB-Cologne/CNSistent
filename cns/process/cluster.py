@@ -42,13 +42,6 @@ def merge_clusters(clusters, threshold):
     rounded = np.round(filtered).astype(np.int64)
     return rounded
 
-# TODO: make consistent with cns.process.breakpoints
-def get_breaks(cns):
-    breaks = cns[["chrom", "start"]].query("start > 0").copy().drop_duplicates()
-    breaks.sort_values(by=['chrom', 'start'], inplace=True)
-    dict_start = breaks.groupby('chrom')['start'].agg(list).to_dict()
-    return dict_start
-
 
 def breaks_to_clusters(chrom_breaks):
     return np.array([[val, 1] for val in chrom_breaks], dtype=np.float64)
@@ -61,6 +54,7 @@ def clusters_to_breaks(clusters):
     return chrom_breaks
 
 
+# Merge breakpoints that are within a certain distance, extend the first and last to the telomeres
 def created_merged_segs(dict_start, dist, assembly=hg19, extend=True):
     res = []
     for chrom, old_breaks in dict_start.items():

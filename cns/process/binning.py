@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from numba import njit
 
-from cns.process.breakpoints import get_breakpoints
+from cns.process.breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
 from cns.utils.files import find_cn_cols_if_none
 from cns.utils import hg19
@@ -21,7 +21,6 @@ def sum_cns(cns_df, cn_columns=None):
     return cns_df
 
 
-# TODO: work with single-column
 def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):    
     if fun_type not in ["mean", "max", "min"]:
         raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
@@ -166,6 +165,6 @@ def bin_by_breaks(cns_df, breaks, fun_type="mean", print_progress=True):
 
 
 def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", print_progress=True):
-    breaks = get_breakpoints(break_type, assembly)
+    breaks = make_breaks(break_type, assembly)
     bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_progress)
     return bin_df
