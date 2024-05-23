@@ -14,7 +14,7 @@ from cns.utils.assemblies import hg19
 #    Right: 0.9206458333333333
 #    Top: 0.5312698218794933
 
-def get_pos(fig, ax, should_print=False):
+def get_size_and_bounds(fig, ax, should_print=False):
     # Get the tight bounding box of the axes, including tick labels, in display units
     tight_bbox = ax.get_tightbbox(fig.canvas.get_renderer())
     # Transform the bounding box to figure fraction coordinates

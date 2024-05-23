@@ -111,7 +111,6 @@ class TestAneuploidy(unittest.TestCase):
         })
         self.ane_cols = ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]
 
-
     def test_get_expected_ploidy(self):
         self.assertEqual(get_expected_ploidy("minor_cn", "chrX", True), 0)
         self.assertEqual(get_expected_ploidy("major_cn", "chrX", True), 1)

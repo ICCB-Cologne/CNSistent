@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.pipelines import get_genome_segments
+from cns.process.pipelines import get_genome_segments, regions_remove, regions_select
 from cns.process.segments import *
 from cns.process.imputation import *
 from cns.process.binning import *
@@ -366,6 +366,16 @@ class TestMCS(unittest.TestCase):
         result = created_merged_segs(dict_start, dist, assembly, True)
         exp = [('chr1', 1, 100), ('chr2', 1, 200), ('chr2', 201, 300), ('chr2', 301, 400)]
         self.assertEqual(result, exp)
+
+    
+class TestPipelines(unittest.TestCase):
+    def test_get_segments(self):
+        bin_size = 10000000
+        filter_size = 1000000
+        select = regions_select("")
+        remove = regions_remove("gaps")
+        segs = get_genome_segments(select, bin_size, remove, filter_size)
+        print(segs)
 
 
 if __name__ == "__main__":
