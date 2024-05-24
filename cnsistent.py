@@ -160,7 +160,7 @@ def main():
 
     # Read the input
     if print_progress:
-        print(f"cns {action}.")
+        print(f"**cns {action}**")
         print("Parsing input...")
 
     if not exists(cns_file_path):
@@ -194,7 +194,9 @@ def main():
         print(f"Writing to {out_file}...")
         # Add to file times.tsv
         if args.time:
-            with open("./out/times.tsv", "a") as f:
+            # check if the file exists
+            write = "a" if exists("./out/times.tsv") else "w"
+            with open("./times.tsv", write) as f:
                 f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
         
     if action == "bin" and args.onlybins:

@@ -162,6 +162,10 @@ def add_gap_legend(ax):
 
 def plot_x_ticks(ax, assembly=hg19):    
     positions = list(assembly.chr_lens.items())
+    return plot_x_ticks_pos(ax, positions)
+
+
+def plot_x_ticks_pos(ax, position):
     x_pos=0
     tick_pos = [x_pos]
     for chrom, length in positions:

@@ -95,7 +95,7 @@ def fig_CN_heatmap(
     print_info=False,
     vertical_legend_correction = 0.0025
 ):
-    sample_ids = cn_bins.index.unique()
+    sample_ids = cn_bins["sample_id"].unique()
     height = (ratio * len(sample_ids) * width) + 1  
     fig = plt.figure(figsize=(width, height), dpi=dpi)
     ax = fig.gca()
@@ -107,10 +107,8 @@ def fig_CN_heatmap(
     _add_y_ticks(ax, sample_ids, pixels_per_row, width)
     ax.set_ylabel("sample", fontdict={"fontsize": width})
 
-    x_tick_pos =  plot_x_ticks(ax)
-
-    # add vertical dashed line at each tick pos
-    plot_x_lines(ax, x_tick_pos, width / len(x_tick_pos), alpha=0.5)
+    # pos = plot_x_ticks(ax)
+    # plot_x_lines(ax)
     ax.set_xlabel("chromosome", fontdict={"fontsize": width}, labelpad=5)
 
     # Add a color bar for the heatmap

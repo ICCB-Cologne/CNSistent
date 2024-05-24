@@ -10,7 +10,7 @@ dataset=PCAWG
 for threads in 1 2 4 8 16 32;
 do
     echo "Processing $threads thread/s"
-    common_args="--threads $threads --verbose"
+    common_args="--threads $threads --verbose --time"
     cns fill "${out}/${dataset}_cns_preprocess.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${temp_folder}/${dataset}_cns_fill.tsv" $common_args
     cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${temp_folder}/${dataset}_samples.tsv" $common_args
     cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${temp_folder}/${dataset}_cns_imp.tsv" $common_args

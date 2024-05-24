@@ -1,39 +1,39 @@
 import numpy as np
 
 def cns_head(cns_df, n=5):
-    samples = np.sort(cns_df.index.unique())[:n]
+    samples = np.sort(cns_df["sample_id"].unique())[:n]
     cns_head = cns_df.query('sample_id in @samples')
     return cns_head.copy()
 
 
 def cns_tail(cns_df, n=5):
-    samples = np.sort(cns_df.index.unique())[-n:]
+    samples = np.sort(cns_df["sample_id"].unique())[-n:]
     cns_tail = cns_df.query('sample_id in @samples')
     return cns_tail.copy()
 
 
 def cns_random(cns_df, n=5, seed=0):
     np.random.seed(seed)
-    samples = np.random.choice(cns_df.index.unique(), n, replace=False)
+    samples = np.random.choice(cns_df["sample_id"].unique(), n, replace=False)
     cns_random = cns_df.query('sample_id in @samples')
     return cns_random.copy()
 
 
 def sample_head(cns_df, n=5):
-    samples = np.sort(cns_df.index.unique())[:n]
+    samples = np.sort(cns_df["sample_id"].unique())[:n]
     sample_head = cns_df.query('sample_id in @samples')
     return sample_head.copy()
 
 
 def sample_tail(cns_df, n=5):
-    samples = np.sort(cns_df.index.unique())[-n:]
+    samples = np.sort(cns_df["sample_id"].unique())[-n:]
     sample_tail = cns_df.query('sample_id in @samples')
     return sample_tail.copy()
 
 
 def sample_random(cns_df, n=5, seed=0):
     np.random.seed(seed)
-    samples = np.random.choice(cns_df.index.unique(), n, replace=False)
+    samples = np.random.choice(cns_df["sample_id"].unique(), n, replace=False)
     sample_random = cns_df.query('sample_id in @samples')
     return sample_random.copy()
 
