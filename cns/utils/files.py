@@ -9,12 +9,12 @@ def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False,
     cns_df = pd.read_csv(path, sep="\t", header=None if no_header else 0)
     if no_sample:
         cns_df["sample"] = "dummy"
-    cns_df, cn_cols = canonize_cns_df(cns_df, cn_col_no)
+    cns_df = canonize_cns_df(cns_df, cn_col_no)
     if change_coords:
         cns_df.loc[:, "start"] -= 1
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
-    return cns_df, cn_cols
+    return cns_df
 
 
 def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, no_header=False):
@@ -121,12 +121,13 @@ def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
             cn_columns = cns_df.columns[5:].tolist()
     else:
         cn_columns = cns_df.columns[4:4 + cn_columns_no].tolist()
+        cn_columns = [col if is_cn_column(col) else f"{col}_cn" for col in cn_columns]
     if print_info:
         print(f"Using CN columns: {cn_columns}")
     
     sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df = cns_df[sel_columns]    
-    return cns_df, cn_columns
+    return cns_df
 
 
 def is_cn_column(column):

@@ -4,10 +4,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt, colors as mcolors
 
-from cns.display.label import plot_chr_bg, plot_x_ticks, get_size_and_bounds
-from cns.utils.conversions import column_to_label, chrom_to_sortable
-from cns.utils.assemblies import hg19
+from cns.display.label import plot_chr_bg, plot_x_ticks
 from cns.utils.files import get_cn_columns
+from cns.utils.assemblies import hg19
 
 
 def plot_lines(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None):
@@ -46,7 +45,8 @@ def _check_fig_input(data, column, label, chrom, assembly):
 		label = [label]
 		data = [data]
 	elif isinstance(data, Sequence) and len(data) > 0 and isinstance(data[0], pd.DataFrame):
-		if label == None:
+		label = list(label) # numpy array would cause problems here
+		if list(label) == None:
 			has_label = False
 		elif isinstance(label, Sequence) and len(label) == len(data) and all(isinstance(l, str) for l in label):
 			has_label = True
@@ -56,7 +56,7 @@ def _check_fig_input(data, column, label, chrom, assembly):
 		raise ValueError("data must be a pandas DataFrame or a list of pandas DataFrames")
 
 	if column == None:
-		column = get_cn_columns(data)
+		column = get_cn_columns(data[0])
 		if len(column) == 0:
 			raise ValueError("If column is not specified, at least one column ending with '_cn' must exist in data")
 	elif isinstance(column, str):
@@ -116,7 +116,7 @@ def _fig_main(data, plot_func, label=None, column=None, color=None, chrom=None, 
             column = columns[j]
             plot_func(ax, dfs[i], column=column, color=color, label=label, chrom=chrom, alpha=alpha)
     if has_label: 
-        if len(columns) > 1:
+        if line_count > 3:
             ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
         else:
             ax.legend(loc='upper right')

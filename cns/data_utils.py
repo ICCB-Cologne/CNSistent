@@ -1,10 +1,8 @@
-from pathlib import Path
-from cns.utils.files import load_cns, load_samples
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 
 from cns.utils.selection import filter_samples, select_CNS_samples
-
+from cns.utils.files import load_cns, load_samples
 
 def get_root_path():
     return abspath(pjoin(dirname(__file__), ".."))

@@ -1,6 +1,6 @@
 # %%
 from matplotlib import pyplot as plt
-from cns.analyze.genome import fig_genome, fig_genome_groups
+from cns.display.plot import fig_lines
 from cns.display.heatmap import fig_CN_heatmap
 from cns.process.binning import group_bins
 from cns.process.binning import add_cns_loc
@@ -11,7 +11,7 @@ hg19 = get_assembly("hg19")
 
 # Load bins
 # %%  
-bins, cn_cols = load_cns("./out/PCAWG_bin_3MB.tsv")
+bins = load_cns("./out/PCAWG_bin_3MB.tsv")
 print(bins.head())
 
 # Add derived columns (length, cumulative mid,...)
@@ -28,7 +28,7 @@ plt.show()
 # Plot mean total_cn per bin along the genome
 # %%
 groups = group_bins(derived)
-fig_genome(groups, max_cn=10, width=12, dpi = 200, size=.5, colored=True)
+fig_lines(groups, max_cn=10, width=12, dpi = 200, size=.5, colored=True)
 plt.show()
 
 # Load sample information
@@ -61,5 +61,5 @@ liver = filtered.query("type == 'Liver-HCC'").index
 liver_group = group_bins(derived.query("sample_id in @liver"))
 pancreas = filtered.query("type == 'Panc-AdenoCA'").index
 pancreas_group = group_bins(derived.query("sample_id in @pancreas"))
-fig_genome_groups([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], hg19, column="major_cn", max_cn=3, width=12, dpi=200, size=.5, colored=False)
+fig_lines([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], hg19, column="major_cn", max_cn=3, width=12, dpi=200, size=.5, colored=False)
 plt.show()

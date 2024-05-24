@@ -26,7 +26,7 @@ def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):
         raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if "cum_mid" not in cns_df:
-        cns_df = add_cns_loc(cns_df, assembly)
+        cns_df = add_cns_loc(cns_df.copy(), assembly)
     grouped = cns_df.drop("sample_id", axis=1).groupby(["cum_mid"])
     # calculate mean on grouped except for chrom, where take the first value
     agg_scheme = {
@@ -39,8 +39,6 @@ def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):
     for column in cn_columns:
         agg_scheme[column] = fun_type
     grouped = grouped.agg(agg_scheme).reset_index()
-    if len(cn_columns) > 1:
-        grouped["total_cn"] = grouped[cn_columns].sum(axis=1)
     return grouped
 
 

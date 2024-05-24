@@ -8,7 +8,7 @@ import argparse
 from os.path import join as exists
 
 from cns.utils.assemblies import get_assembly
-from cns.utils.files import load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
+from cns.utils.files import get_cn_columns, load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
 from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select, get_genome_segments
 
 
@@ -165,7 +165,8 @@ def main():
 
     if not exists(cns_file_path):
         raise ValueError(f"File {cns_file_path} not found.")
-    cns_df, cn_cols = load_cns(cns_file_path, cn_col_no=cols_no, no_header=no_header, no_sample=no_sample)
+    cns_df = load_cns(cns_file_path, cn_col_no=cols_no, no_header=no_header, no_sample=no_sample)
+    cn_cols = get_cn_columns(cns_df)
 
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
