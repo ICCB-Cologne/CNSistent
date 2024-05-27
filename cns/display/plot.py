@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt, colors as mcolors
 from collections.abc import Sequence
 
-from cns.display.label import plot_chr_bg, plot_x_ticks, plot_x_lines, get_size_and_bounds
+from cns.display.label import no_y_ticks, plot_chr_bg, plot_x_ticks, plot_x_lines, get_size_and_bounds
 from cns.utils.files import get_cn_columns
 from cns.utils.conversions import chrom_to_sortable, column_to_label
 from cns.utils.assemblies import hg19
@@ -111,10 +111,11 @@ def _get_colors(colors, line_count):
     return colors
 
 
-def _fig_main(data, plot_func, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19, pos_col="cum_mid"):
+def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19, pos_col="cum_mid"):
+    width = width if width != None else (18 if chrom == None else 3)
     height = width / 6 if chrom == None else width
     fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
-    dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly, pos_col)
+    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly, pos_col)
     min_cn, max_cn = _get_min_max_cn(dfs, columns)    
     colors = _get_colors(color, line_count)
     alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
@@ -157,7 +158,9 @@ def fig_bars(data, label=None, column=None, color=None, chrom=None, width=18, dp
 __heatmap_colors__ = ["red", "white", "blue"]
 
 
-def _get_column_table(cn_bins, cn_column="total_cn"):
+def _get_column_table(cn_bins, cn_column="total_cn", chrom=None):
+    if chrom is not None:
+        cn_bins = cn_bins.query(f"chrom == '{chrom}'")
     sample_heatmap_df = cn_bins[["sample_id", cn_column]].copy()
     sample_heatmap_df["position"] = (
         sample_heatmap_df.groupby("sample_id").cumcount() + 1
@@ -175,22 +178,15 @@ def _get_im_data(data, max_cn, pixels_per_row):
     return np.repeat(data, pixels_per_row, axis=0)
 
 
-def _plot_heatmap_legend(fig, vpos, top_size, cn_column, max_cn):
+def _plot_heatmap_legend(fig, vpos, top_size, max_cn, font_size=None):
     Z_dummy = np.linspace(0, 1, 10).reshape(1, 10)
     width, height = fig.get_size_inches()
     ax_dummy = fig.add_axes(
-        [0.5, vpos + top_size * 2, 0.4, top_size]
+        [0.5, vpos + top_size, 0.4, top_size]
     )  # [left, bottom, width, height]
     cmap = mcolors.LinearSegmentedColormap.from_list("custom_colormap", __heatmap_colors__[1:])
     img = ax_dummy.imshow(Z_dummy, cmap=cmap, aspect="auto")
     cbar = fig.colorbar(img, cax=ax_dummy, orientation="horizontal")
-
-    # Add a label to the color bar
-    ax_dummy.yaxis.set_label_position("left")
-    font = {"fontsize": width, "fontweight": "bold"}
-    ax_dummy.set_xlabel(
-        column_to_label(cn_column), rotation=0, labelpad=-0.1, va="top", fontdict=font
-    )
 
     # Add tick marks to the color bar
     tick_vals = list(range(max_cn + 1))
@@ -205,20 +201,20 @@ def _plot_heatmap_legend(fig, vpos, top_size, cn_column, max_cn):
     for label in ax_dummy.get_xticklabels():
         if label.get_text() == "0":
             label.set_color("red")
-        label.set_fontsize(width * 0.8)
+        label.set_fontsize(font_size)
 
 
-def _add_track_y_ticks(ax, sample_ids, pixels_per_row, width):
+def _add_track_y_ticks(ax, sample_ids, pixels_per_row, font_size):
     tick_pos = np.arange(
         pixels_per_row / 2, (len(sample_ids)) * pixels_per_row + pixels_per_row / 2, pixels_per_row
     )
-    ax.set_yticks(tick_pos, sample_ids, fontsize=width * 0.8)
+    ax.set_yticks(tick_pos, sample_ids, fontsize=font_size)
     ax.tick_params(axis="y", length=0)  # Hide y-tick marks
     return tick_pos
 
 
-def plot_CN_heatmap(ax, cn_bins, cn_column="total_cn", ratio=0.02, max_cn=10):
-    data = _get_column_table(cn_bins, cn_column)
+def plot_CN_heatmap(ax, cn_bins, cn_column="total_cn", chrom=None, ratio=0.02, max_cn=10):
+    data = _get_column_table(cn_bins, cn_column, chrom)
     pixels_per_row = max(1, int(np.round(data.shape[1] * ratio)))  
     im_data = _get_im_data(data, max_cn, pixels_per_row)    
     cmap = mcolors.LinearSegmentedColormap.from_list("custom_colormap", __heatmap_colors__)
@@ -226,63 +222,76 @@ def plot_CN_heatmap(ax, cn_bins, cn_column="total_cn", ratio=0.02, max_cn=10):
     return im_data
 
 
-# for really long plots, the top legend is off by about the correction factor
-# I could not figure out why, so I added a correction factor of .25%
-# It has almost no effect on smaller plots
-# 
-# ratio = the height / width of a single sample
 def fig_CN_heatmap(
-    data,
+    data_df,
     label="CN Tracks",
-    column="total_cn",
+    column=None,
     chrom=None,
     max_cn=10,
-    width=10,
-    ratio=0.02,
+    width=None,
     dpi=100,
     assembly=hg19,	
     vertical_legend_correction=0.0025,
     print_info=False
 ):
-    sample_ids = data["sample_id"].unique()
-    height = (ratio * len(sample_ids) * width) + 1     
+    if chrom != None and not (isinstance(chrom, str) or not chrom in assembly.keys()):
+        raise ValueError("chrom must be None or a string")
+    data_df = data_df.query(f"chrom == '{chrom}'") if chrom is not None else data_df
+    sample_ids = data_df["sample_id"].unique()
     pos_col = "cum_mid" 
-    dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly, pos_col)
-    fig = plt.figure(figsize=(width, height), dpi=dpi)
-    ax = fig.gca()
-
+    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly, pos_col)
     max_cn = min(max_cn, int(np.ceil(_get_min_max_cn(dfs, columns)[1])))
 
-    im_data = plot_CN_heatmap(ax, data, column, ratio, max_cn)
-    pixels_per_row = im_data.shape[0] // len(sample_ids)
+    width = width if width != None else (18 if chrom == None else 2) 
+    ratio= 0.02 if chrom is None else 0.2
+    height = ((ratio * len(sample_ids) / len(columns) * width) + 1) 
+    font_size = (width * 0.8 if chrom is None else width * 3) / len(columns)
+    
+    fig, axs = plt.subplots(1, len(columns), figsize=(width, height), dpi=dpi)
 
-    # Create y-ticks for each sample
-    _add_track_y_ticks(ax, sample_ids, pixels_per_row, width)
-    ax.set_ylabel("sample")
+    im_datas = []
+    for i, column in enumerate(columns):
+        ax = axs[i] if len(columns) > 1 else axs
 
-    pos_per_chr = data.groupby("chrom")[pos_col].nunique()
-    chrom_sizes = pos_per_chr.sort_index(key=lambda x: x.map(chrom_to_sortable)).items()
-    pos = plot_x_ticks(ax, positions=chrom_sizes)
-    plot_x_lines(ax, positions=pos)
-    ax.set_xlabel("chromosome")
+        im_data = plot_CN_heatmap(ax, data_df, column, chrom, ratio, max_cn)
+        pixels_per_row = im_data.shape[0] // len(sample_ids)
+
+        # Create y-ticks for each sample
+        if i == 0:
+            ax.set_ylabel("sample", fontsize=font_size*1.25)
+            _add_track_y_ticks(ax, sample_ids, pixels_per_row, font_size)
+        else:
+            no_y_ticks(ax)
+
+        pos_per_chr = data_df.groupby("chrom")[pos_col].nunique()
+        chrom_sizes = pos_per_chr.sort_index(key=lambda x: x.map(chrom_to_sortable)).items()
+        pos = plot_x_ticks(ax, positions=chrom_sizes, font_size=font_size)
+        plot_x_lines(ax, positions=pos)
+        ax.set_xlabel(column, fontsize=font_size*1.25)
+
+        im_datas.append(im_data)
+
+    plt.tight_layout()
 
     # Add a color bar for the heatmap
-    fig_size, _, bound_box = get_size_and_bounds(fig, ax, print_info)
-    top_size = 1.5 * fig_size[0] / (fig_size[1] * dpi)
+    ax = axs[1] if len(columns) > 1 else axs
+    fig_size, _, bound_box = get_size_and_bounds(fig, ax, len(columns), print_info)
+    top_size = 50 * ratio * fig_size[0] / (fig_size[1] * dpi) / len(columns)
     top_pos = bound_box[3] + vertical_legend_correction
     if print_info:
-        print("image_pixes: ", im_data.shape)
+        print("image_pixes: ", [im_data.shape for im_data in im_datas])
         print("dpi: ", dpi)
         print("Top size: ", top_size)
 
-    _plot_heatmap_legend(fig, top_pos, top_size, column, max_cn)
+    _plot_heatmap_legend(fig, top_pos, top_size, max_cn, font_size)
 
     # Add title to the top-left corner of the figure
     fig.text(
-        0.10,
+        bound_box[0],
         top_pos + top_size,
         label,
         verticalalignment="center",
-        horizontalalignment="left",
-        fontdict={"fontsize": width * 1.5, "fontweight": "bold"},
+        fontdict={"fontsize": font_size*2, "fontweight": "bold", "ha": "left"},
     )
+
+    return fig, axs

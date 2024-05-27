@@ -65,14 +65,6 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(column_to_label('minor_cn'), 'Minor CN')
         self.assertEqual(column_to_label('other'), 'other')
 
-    def test_canonize_cns_df(self):
-        cns_df = pd.DataFrame([["sample1", "chr1", 0, 20, 0,  0, 1], ["sample1", "chr1", 0, 20, 0, 0, 1]])
-        print(cns_df)
-        cns_df.columns = ["", "", "", "", "foo", "major_cn", "minor_cn"]
-        print(cns_df)                            
-        cns_df, cols = canonize_cns_df(cns_df)
-        self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
-        self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_segs_to_chrom_dict(self):
         segs = [('chr1', 1, 5), ('chr1', 4, 8), ('chr2', 10, 15)]
@@ -83,7 +75,7 @@ class TestConversions(unittest.TestCase):
 
 class TestFiles(unittest.TestCase):
     def setUp(self):
-        self.cns = pd.DataFrame({
+        self.cns_df = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4'],
             'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
             'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0],
@@ -97,10 +89,18 @@ class TestFiles(unittest.TestCase):
         self.samples.index.name = "sample_id"
 
     def test_fill_sex_if_missing(self):
-        result = fill_sex_if_missing(self.cns, self.samples)
+        result = fill_sex_if_missing(self.cns_df, self.samples)
         self.assertEqual(result.loc['s1', 'sex'], 'xy')
         self.assertEqual(result.loc['s2', 'sex'], 'xy')
         self.assertEqual(result.loc['s4', 'sex'], 'xx')
+
+    def test_canonize_cns_df(self):                      
+        cns_df = canonize_cns_df(self.cns_df)
+        self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
+
+    def test_get_cn_columns(self):
+        cols = get_cn_columns(self.cns_df)
+        self.assertEqual(cols, ["major_cn", "minor_cn"])
 
 
 if __name__ == '__main__':

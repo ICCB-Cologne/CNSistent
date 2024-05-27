@@ -39,15 +39,15 @@ def sample_random(cns_df, n=5, seed=0):
 
 
 def only_aut(cns_df):
-    return cns_df.query("chrom != 'chrX' and chrom != 'chrY'")
+    return cns_df.query("chrom != 'chrX' and chrom != 'chrY'").copy()
 
 
 def only_sex(cns_df):
-    return cns_df.query("chrom == 'chrX' or chrom == 'chrY'")
+    return cns_df.query("chrom == 'chrX' or chrom == 'chrY'").copy()
 
 
 def drop_Y(cns_df):
-    return cns_df.query("chrom != 'chrY'")
+    return cns_df.query("chrom != 'chrY'").copy()
 
 
 def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, print_info = False):

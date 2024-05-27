@@ -11,7 +11,8 @@ from cns.utils import hg19
 def add_cns_loc(cns_df, assembly=hg19):
     cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
     cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
-    cns_df["cum_mid"] = cns_df["mid"] + cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
+    offset = cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
+    cns_df["cum_mid"] = cns_df["mid"] + offset
     return cns_df
 
 
