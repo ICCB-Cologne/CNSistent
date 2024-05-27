@@ -192,17 +192,17 @@ def create_imputed_entries(cns_df, cn_columns=None, print_info=True):
                 new_entries.append(first_half)                    
                 new_entries.append(second_half)                
         
-    imputataion_df = pd.DataFrame(new_entries, columns=cns_df.columns)
+    imputation_df = pd.DataFrame(new_entries, columns=cns_df.columns)
     query = ' or '.join([f"{col}.isnull()" for col in cn_columns])
     idx_to_remove = cns_df.query(query).index
 
     if print_info:
-        print(f"New entries: {imputataion_df.shape[0]}")
+        print(f"New entries: {imputation_df.shape[0]}")
         print(f"Removed entries: {len(idx_to_remove)}")
     # remove from cns_df where idx_to_remove is in the index
     filtered_df = cns_df.drop(idx_to_remove)
     # concat the new_table to cns_df
-    res_df = pd.concat([filtered_df, imputataion_df])
+    res_df = pd.concat([filtered_df, imputation_df])
     # sort cns_df by sample_id, chr, start
     res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     return res_df

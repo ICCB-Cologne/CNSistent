@@ -36,9 +36,9 @@ def find_overlaps(segs, sorted=False):
     return overlaps
 
 
-def merge_segments(segs):
-    # Sort segments by start time
-    segs.sort(key=lambda x: (x[0], x[1]))
+def merge_segments(segs, sort=False):
+    if sort:        
+        segs.sort(key=lambda x: (x[0], x[1]))
 
     merged = [segs[0]]
 
@@ -58,6 +58,7 @@ def merge_segments(segs):
 def segment_union(segs_a, segs_b):
     # Combine and sort the segments first by group, then by start time
     segs = segs_a + segs_b
+    segs.sort(key=lambda x: (x[0], x[1]))
     merged = merge_segments(segs)
     return merged
 

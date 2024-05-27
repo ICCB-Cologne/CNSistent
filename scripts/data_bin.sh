@@ -1,6 +1,6 @@
 #!/bin/bash
 
-threads=30
+threads=16
 data="../data"
 out="../out"
 cd "$(dirname "$0")" # Set path to the script's path

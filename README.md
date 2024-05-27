@@ -17,23 +17,23 @@ Requires:
 3. Activate the environment: `conda activate cns`
 4. Process data: `bash ./scripts/data_process.sh`
 5. Bin processed data: `bash ./scripts/data_bin.sh`
-6. Run example analysis: `python ./example_analysis.py`
+6. Run example analysis: `python ./example_API.py`
 
 
 NOTES:
 
-* By default, 15 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_bin.sh` scripts.
-* The `example_analysis.py` is split into cells that can be run individually in an IDE.
+* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_bin.sh` scripts.
+* The `example_API.py` is split into cells that can be run individually in an IDE.
 * You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
 
 # Input
 
-The tool expects an unprocessed copy number dataset in the form of a `TSV` file with the following column scheme: `sample_id, chrom, start, end, major_cn, minor_cn`. The names of the columns can be different, but the order must be the same. 
+The tool expects an unprocessed copy number dataset in the form of a `TSV` file with the following column scheme: `sample_id, chrom, start, end, [*_cn]`. 
 
 * The `sample_id` is the identifier of the sample, 
 * `chrom` is the name of the chromosome, 
 * `start` and `end` are the start and end positions of the segment, 
-* `major_cn` and `minor_cn` are the copy numbers of the segment.
+* `[*_cn]` is typically one or two copy number segments.
 
 E.g.:
 
@@ -84,7 +84,7 @@ The following additional optional arguments are shared:
 * `--noheader`: If provided, the header is not expected in the input file.
 * `--nosample`: If provided, the sample_id column is not expected in the input file.
 * `--assembly [hg19, hg38]`: Assembly to use.  If not provided, it defaults to `hg19`.
-* `--threads int`: Number of threads to use, defaults to `1`. (Note: `cluster` is not parallelizeable).	
+* `--threads int`: Number of threads to use, defaults to `1`. (Note: `cluster` is not parallelizable).	
 * `--verbose`: If provided, progress will be printed.
 
 
@@ -103,7 +103,7 @@ Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
-1. Assign telomers the values of the closest neighbouring region is not NaN.
+1. Assign telomeres the values of the closest neighbouring region is not NaN.
 2. Split the gaps and to each side, assign the values of the closes neighbouring region that is not NaN, in the direction from the center towards the side (see example below). 
 3. If a whole chromosome is missing, or declared as NaN, its assigned to 0 for its whole length.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major CN values must match to be merged.
@@ -153,7 +153,7 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
 4. If `--bins` is provided, the data is binned into segments of the given size. The segments are created by aggregating the CN values of the selected segments. 
     * The aggregation can be done using one of the following `--aggregate` functions: `mean`, `min`, `max`. For `mean`, the aggregation is weighted by the segment length.
 5. The binned data is stored in a TSV file with the following columns: `sample_id, chrom, start, end, major_cn, minor_cn`. The names of the columns can be different, but the order must be the same.
-    * If `--onlybins` is provided, only the segemnents are created, with the columns `chrom, start, end`.
+    * If `--onlybins` is provided, only the segments are created, with the columns `chrom, start, end`.
 
 
 ![Example Binning](./docs/example_bins.png)
@@ -183,7 +183,7 @@ Calculates consistent regions using breakpoints clustering.
 
 Additional arguments:
 
-* `--dist`: Maximum distance between breakpoints to be considered a part of the same segment. If not provided, the default value is `0`, which will create the exact segements of the dataset.
+* `--dist`: Maximum distance between breakpoints to be considered a part of the same segment. If not provided, the default value is `0`, which will create the exact segments of the dataset.
 
 > NOTE: If first or last breakpoint is less than `--dist` from the end of the chromosome, the segment is extended to the end of the chromosome.
 
@@ -195,23 +195,89 @@ The library is split into three blocks:
 * `cns.display`: Plotting of binned data.
 * `cns.utils`: Conversion, selection, file IO.
 
-> For examples of using the Library, you can check the file `example_API.py`.
+> Note that many functions have assembly as an optional parameter, if not provided, the default assembly is `hg19`.
 
 ## Data types:
 
-### CNS
+### CNS DataFrame
+
+The CNS DataFrame is a pandas DataFrame with the following columns: `sample_id, chrom, start, end` followed by copy number column or columns. Typically, the columns are `major_cn, minor_cn` or `total_cn`. CNSiststen considers any column whose name starts or ends with `CN` or `cn` as a copy number column. 
+
+```tsv
+sample_id   	chrom   start   end     major_cn    minor_cn
+sample1         chr1    100     200     1           0
+sample1         chr1    550     1000    2           0
+...
+```
+
+This is the main data type used in the library.
 
 ### Breakpoints
 
+Breakpoints are stored in a dictionary mapping a set of breakpoints to a chromosome. Boundaries are normally included, e.g.
+```
+{
+    'chr1' : [0, 125000000, 249250621],
+    ...
+}
+```
+would be the arm breakpoints for hg19 chromosome 1.
+
 ### Segments
+
+Segments are a list of triples: `[(chrom, start, end), ...]`, used to map into chromosomes. The range is start-inclusive, end-exclusive.
 
 ### Assemblies
 
-## Processing
+Assembly a class that provides information about the species. CNSistent currently supports `hg19` and `hg38` assemblies, if you want to use it with a different assembly, you need to create a new object.
 
-## Analysis
+Note that sex chromosomes are always expected to be named `chrX` and `chrY`.	
+
+## Process
+
+### Pipelines
+
+The commands that are available from CMD are executed via a main function for each command, e.g. `main_impute`.
+
+The file also contains high-level functions for region manipulation, in particular `get_genome_segments` has the following procedure:
+
+1. Select regions from the assembly (emptystring for the whole assembly), filter those below `filter_size`.
+2. If `remove` is specified, remove regions from the selection, and filter the remaining regions.
+3. If `bin_size` is specified, bin the regions into equidistant segments of the given size.
+
+### Segment
+
+Functions for working with segments. Segments are tuples `(chrom, start, end)`, where the start is inclusive, and the end is exclusive.
+
+Note that you can pass longer tuples, but the result will discard the 4th and further elements.
+
+Notable functions:
+
+* `merge_segments`: Will merge overlapping segments, merging is possible if `end==start` for two consecutive segments on the same chromosome. Note that if the segments are not sorted, you need to set `sort=True` to sort them first.
+* `split_segments`: Will split into equidistant chunks based on specified size (useful for binning).
+* `segment_difference`: Will remove regions from a list of segments found in another list of segments.
+* `filter_min_size`: Will remove segments strictly smaller than the specified size.
+
+### Imputation
+
+Functions for adding missing segments and values in the CNS data. The process is to first add missing regions with NaN values and then impute the missing values.
+
+There are separate functions to fill the telomeres, fill the gaps, and add missing chromosomes. 
+
+If guessing values in imputation is not desired, the `fill_nans_with_zeros` function can be used to simply fill with 0 instead.
+
+
+### Breakpoints
+
+Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create denovo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
+
+### Binning
+
+## Analyze
 
 ## Display
+
+## Utils
 
 # REFERENCE
 
@@ -245,8 +311,8 @@ Cite: https://www.nature.com/articles/35057062
 
 Copyright © 2023 Dr. Adam Streck, adam.streck@gmail.com
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the â€œSoftwareâ€), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED â€œAS ISâ€, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
