@@ -194,7 +194,6 @@ def no_y_ticks(ax):
 def plot_x_lines(ax, assembly=hg19, positions=None, width=1, alpha=.5):        
     if positions is None:
         positions = list(accumulate(assembly.chr_lens.values()))
-    print(positions)
     for pos in positions:
         ax.axvline(
             pos,

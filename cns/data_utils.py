@@ -116,3 +116,11 @@ def load_merged_bins(samples, bin_size):
     all_cns = pd.concat(cns.values())
     all_cns = select_CNS_samples(all_cns, samples)
     return all_cns
+
+
+def load_COSMIC():
+    return pd.read_csv(pjoin(data_path, "COSMIC_consensus_genes.tsv"), sep="\t")
+
+
+def load_ENSEMBL():
+    return pd.read_csv(pjoin(data_path, "ENSEMBL_coding_genes.tsv"), sep="\t")
