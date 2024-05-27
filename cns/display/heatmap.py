@@ -3,7 +3,7 @@ import matplotlib.colors as mcolors
 import numpy as np
 
 from cns.display.label import plot_x_ticks, plot_x_lines, get_size_and_bounds
-from cns.utils.conversions import column_to_label
+from cns.utils.conversions import chrom_to_sortable, column_to_label
 
 
 # Define the colors for the custom heatmap
@@ -79,6 +79,28 @@ def plot_CN_heatmap(ax, cn_bins, cn_column="total_cn", ratio=0.02, max_cn=10):
     return im_data
 
 
+
+def _get_x_tick_pos(ax, chr_lens, fontsize):
+    x_pos=0
+    tick_pos = [x_pos]
+    for chrom, length in chr_lens:
+        label_text = "\n" + chrom[3:]
+        ax.text(
+            x_pos + length / 2,
+            ax.get_ylim()[0],
+            label_text,
+            ha="center",
+            va="center_baseline",
+            fontsize=fontsize,
+            linespacing=1.25,
+        )
+        # Update the x position for the next chromosome
+        x_pos += length
+        tick_pos.append(x_pos)
+
+
+
+
 # for really long plots, the top legend is off by about the correction factor
 # I could not figure out why, so I added a correction factor of .25%
 # It has almost no effect on smaller plots
@@ -105,11 +127,14 @@ def fig_CN_heatmap(
 
     # Create y-ticks for each sample
     _add_y_ticks(ax, sample_ids, pixels_per_row, width)
-    ax.set_ylabel("sample", fontdict={"fontsize": width})
+    ax.set_ylabel("sample")
 
-    # pos = plot_x_ticks(ax)
-    # plot_x_lines(ax)
-    ax.set_xlabel("chromosome", fontdict={"fontsize": width}, labelpad=5)
+
+    pos_per_chr = cn_bins.groupby("chrom")["cum_mid"].nunique()
+    chrom_sizes = pos_per_chr.sort_index(key=lambda x: x.map(chrom_to_sortable)).items()
+    pos = plot_x_ticks(ax, positions=chrom_sizes)
+    plot_x_lines(ax, positions=pos)
+    ax.set_xlabel("chromosome")
 
     # Add a color bar for the heatmap
     fig_size, _, bound_box = get_size_and_bounds(fig, ax, print_info)

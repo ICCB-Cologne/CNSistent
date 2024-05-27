@@ -2,6 +2,7 @@
 from matplotlib.patches import Rectangle
 import matplotlib.patches as mpatches
 from cns.utils.assemblies import hg19
+from itertools import accumulate
 
 # Get the tight bounding box of the specified ax, including tick labels, in display units
 #
@@ -160,12 +161,9 @@ def add_gap_legend(ax):
     ax.legend(handles=legend_elements, bbox_to_anchor=(1, 1), loc='upper left')
 
 
-def plot_x_ticks(ax, assembly=hg19):    
-    positions = list(assembly.chr_lens.items())
-    return plot_x_ticks_pos(ax, positions)
-
-
-def plot_x_ticks_pos(ax, position):
+def plot_x_ticks(ax, assembly=hg19, positions=None):
+    if positions is None:
+        positions = list(assembly.chr_lens.items())
     x_pos=0
     tick_pos = [x_pos]
     for chrom, length in positions:
@@ -193,8 +191,10 @@ def no_y_ticks(ax):
     ax.set_yticklabels([])
     
 
-def plot_x_lines(ax, assembly=hg19, width=1, alpha=.5):    
-    positions = list(assembly.chr_starts.values())[1:]
+def plot_x_lines(ax, assembly=hg19, positions=None, width=1, alpha=.5):        
+    if positions is None:
+        positions = list(accumulate(assembly.chr_lens.values()))
+    print(positions)
     for pos in positions:
         ax.axvline(
             pos,

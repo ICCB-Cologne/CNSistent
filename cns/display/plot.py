@@ -9,29 +9,31 @@ from cns.utils.files import get_cn_columns
 from cns.utils.assemblies import hg19
 
 
-def plot_lines(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None):
+def plot_lines(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None, pos_col=None):
 	chroms = grouped["chrom"].unique() if chrom is None else [chrom]
+	pos_col = ("cum_mid" if chrom is None else "mid") if pos_col is None else pos_col
 	for chr in chroms:
 		df = grouped.query(f"chrom == '{chr}'").copy()
 		df["is_consecutive"] = df["start"] - df["end"].shift(1) != 0
 		# plot consecutive segments
 		for _, group_df in df.groupby(df["is_consecutive"].cumsum()):
-			x = group_df["cum_mid" if chrom is None else "mid"]
+			x = group_df[pos_col]
 			ax.plot(x, group_df[column], c=color, linewidth=line_width, label=label, alpha=alpha)
 			label = None  # only use label for the first chromosome
 	return ax
 
 
-def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None):
+def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None, pos_col=None):
 	chroms = grouped["chrom"].unique() if chrom is None else [chrom]
+	pos_col = ("cum_mid" if chrom is None else "mid") if pos_col is None else pos_col
 	for chr in chroms:		
 		df = grouped.query(f"chrom == '{chr}'")
-		ax.scatter(df["cum_mid"], df[column], s=dot_size, label=label, color=color, alpha=alpha)
+		ax.scatter(df[pos_col], df[column], s=dot_size, label=label, color=color, alpha=alpha)
 		label = None  # only use label for the first chromosome
 	return ax
 
 
-def _check_fig_input(data, column, label, chrom, assembly):
+def _check_fig_input(data, column, label, chrom, assembly, pos_col):
 	if chrom != None and not (isinstance(chrom, str) or not chrom in assembly.keys()):
 		raise ValueError("chrom must be None or a string")
 	
@@ -71,6 +73,10 @@ def _check_fig_input(data, column, label, chrom, assembly):
 	else:
 		raise ValueError("column must be a string or a list of strings")	
 	
+	for df in data:
+		if pos_col not in df.columns:
+			raise ValueError(f"all dataframes must have a column '{pos_col}'")
+	
 	line_count = len(data)*len(column)
 	return data, label, column, line_count, has_label
 	
@@ -95,15 +101,15 @@ def _get_colors(colors, line_count):
 	return colors
 
 
-def _fig_main(data, plot_func, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+def _fig_main(data, plot_func, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19, pos_col="cum_mid"):
     height = width / 6 if chrom == None else width
     fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
-    dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly)
+    dfs, labels, columns, line_count, has_label = _check_fig_input(data, column, label, chrom, assembly, pos_col)
     min_cn, max_cn = _get_min_max_cn(dfs, columns)    
     colors = _get_colors(color, line_count)
     alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
     plot_chr_bg(ax, assembly, min_cn * .95, max_cn * 1.05)
-    plot_x_ticks(ax, assembly)
+    plot_x_ticks(ax, assembly=assembly)
     for i in range(len(dfs)):
         for j in range(len(columns)):
             color = colors[i*len(columns) + j]

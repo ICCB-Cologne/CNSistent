@@ -4,7 +4,7 @@ from numba import njit
 
 from cns.process.breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
-from cns.utils.files import find_cn_cols_if_none
+from cns.utils.files import find_cn_cols_if_none, get_cn_columns
 from cns.utils import hg19
 
 
@@ -21,21 +21,24 @@ def sum_cns(cns_df, cn_columns=None):
     return cns_df
 
 
-def group_bins(cns_df, cn_columns=None, fun_type="mean", assembly=hg19):    
+def group_bins(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid', assembly=hg19):    
     if fun_type not in ["mean", "max", "min"]:
         raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if "cum_mid" not in cns_df:
-        cns_df = add_cns_loc(cns_df.copy(), assembly)
-    grouped = cns_df.drop("sample_id", axis=1).groupby(["cum_mid"])
+    if group_col not in cns_df.columns:
+        raise ValueError(f"cns_df must have a column '{group_col}' to group the bins on")
+    grouped = cns_df.drop("sample_id", axis=1).groupby([group_col])
+
     # calculate mean on grouped except for chrom, where take the first value
     agg_scheme = {
         "chrom": "first",
         "start": "first",
         "end": "first",
-        "mid": "first",
-        "length": "first" 
     }
+    if "mid" in cns_df.columns:
+        agg_scheme["mid"] = "first"
+    if "length" in cns_df.columns:
+        agg_scheme["length"] = "first"
     for column in cn_columns:
         agg_scheme[column] = fun_type
     grouped = grouped.agg(agg_scheme).reset_index()
@@ -133,7 +136,9 @@ def _get_agg_func(fun_type):
 def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
     agg_func = _get_agg_func(fun_type)
     chrom_segments = segs_to_chrom_dict(segments)
-    cns_df_view = cns_df.set_index(["sample_id", "chrom"])
+    cn_columns = get_cn_columns(cns_df)
+    sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
+    cns_df_view = cns_df[sel_cols].set_index(["sample_id", "chrom"])
     new_rows = []
     indices = cns_df_view.index.unique()
     i = 0
@@ -151,7 +156,7 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
                     new_rows.extend(bin)
     if print_progress:
         print("")
-    bin_df = pd.DataFrame(new_rows, columns=cns_df.columns)
+    bin_df = pd.DataFrame(new_rows, columns=sel_cols)
     bin_df["start"] = bin_df["start"].astype(np.uint32)
     bin_df["end"] = bin_df["end"].astype(np.uint32)
     return bin_df
