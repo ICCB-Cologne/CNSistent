@@ -269,11 +269,30 @@ If guessing values in imputation is not desired, the `fill_nans_with_zeros` func
 
 ### Breakpoints
 
-Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create denovo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
+Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create de-novo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
 
 ### Binning
 
+Binning will produce segments of a certain size, aggregating the copy number values of the segments within the bin. 
+
+There are the following aggregate functions: `mean`, `min`, `max`, and `none`. The `none` function will just split exiting bins, without additional aggregation. This is useful if you want to introduce additional breakpoints into the data.
+
+Binning can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. `arms`, `1000000`).
+
+Three utility functions are included with binning:
+
+* `add_cns_loc`: For a CNS df, will add the center (`mid`) of a segment within the chromosome, within the linear genome (`cum_mid`) and the length of the segment (`length`).
+* `group_bins`: Will group all samples in a a CNS df, by default using the `mean` function. Segments are grouped on `cum_mid`.
+* `sum_cns`: Finds columns that match the CN column pattern and sums them up into the column `total_cn`.
+
+
 ## Analyze
+
+The analyze module calculates statistics for the CNS data.
+
+* `coverage`: Calculates the proportion of genome with assigned (not NaN) CN values.
+* `ploidy`: Calculates the proportion of genome with aneuploid CN values (different from 2 or 1 for male sex chroms).
+* `signatures`: Calculates the signatures related statistics - currently it only calculates breakpoints per sample/chromosome.
 
 ## Display
 
