@@ -2,7 +2,7 @@ import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 
 from cns.process.binning import add_cns_loc, sum_cns
-from cns.utils.selection import filter_samples, select_CNS_samples
+from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples
 
 def get_root_path():
@@ -57,6 +57,28 @@ def load_data():
 def load_data_file(filename):
     sep = "\t" if filename.endswith(".tsv") else ","
     return pd.read_csv(pjoin(data_path, filename), sep=sep)
+
+
+def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, print_info = False):
+    cn_neutral = samples.query(f"ane_major_cn_frac_aut < {ane_min_frac} & ane_major_cn_frac_aut < {ane_min_frac}").index
+    if print_info:
+        print(len(cn_neutral), "samples are CN neutral")
+    filtered = samples.query("(index not in @cn_neutral)")
+
+    # Find samples with low coverage (below 95% in autosomes)
+    low_coverage = samples.query(f"cover_frac_aut < {cover_min_frac}").index
+    if print_info:
+        print(len(low_coverage), "samples have low coverage")
+    filtered = samples.query("(index not in @low_coverage)")
+
+    # Filter out CN neutral and low coverage samples 
+    if whitelist:
+        blacklisted = samples.query("whitelist == False").index
+        if print_info:
+            print(len(blacklisted), "samples are blacklisted")
+        filtered = samples.query("(index not in @blacklisted)")
+
+    return filtered.copy()
 
 
 def load_filter_samples(print_info=False):

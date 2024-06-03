@@ -2,7 +2,7 @@
 
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
-# Usage
+## Usage
 
 CNSistent is available both as a [stand-alone](#cli) tool and as a [Python library](#library).
 
@@ -10,7 +10,7 @@ Requires:
 * Python 3.8+
 * Pip 21.3+
 
-## Quickstart (from Bash)
+### Quickstart (from Bash)
 
 1. Install the package from location: `pip install -e .`
 2. Create the conda environment: `conda env create -f ./cnsistent.yml`
@@ -26,7 +26,7 @@ NOTES:
 * The `example_API.py` is split into cells that can be run individually in an IDE.
 * You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
 
-# Input
+## Input
 
 The tool expects an unprocessed copy number dataset in the form of a `TSV` file with the following column scheme: `sample_id, chrom, start, end, [*_cn]`. 
 
@@ -48,7 +48,7 @@ sample1         chr1    550     1000    2           0
 > **NOTE:** For conformation with the standard, the start and end positions are 1-based, and the end position is inclusive. 
 > However, for the sake of sanity of the author, these are converted to 0-based, and the end position is exclusive. See details on usage: TODO: link.
 
-## BED File Input
+### BED File Input
 
 BED files do not have a sample identifier, so the `sample_id` column is not present. If you aim to process just a single sample, you can format it for input using the following command:
 
@@ -56,7 +56,7 @@ BED files do not have a sample identifier, so the `sample_id` column is not pres
 awk 'BEGIN{FS="[ \t]+";OFS="\t"} {print "sample1", $1, $2, $3}' yourfile.txt | sed '1isample_id\tchrom\tstart\tend' > modified_file.tsv
 ```
 
-# CLI
+## CLI
 
 The command line interface uses the following pattern:
 
@@ -90,7 +90,7 @@ The following additional optional arguments are shared:
 
 > For examples of using the CLI, you can refer to  the file `example_CLI.sh`.
 
-## `fill`
+### `fill`
 
 Fills any gaps in *CNS* file with Nan values. The following steps are performed: 
 
@@ -99,7 +99,7 @@ Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 3. Add missing chromosomes, if they are missing compared to the reference.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major must match.
 
-## `impute`
+### `impute`
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
@@ -112,7 +112,7 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 | -- | -- |
 
 
-## `coverage`
+### `coverage`
 
 Calculates the coverage of the *CNS* file. The coverage is calculated as the fraction of the genome that has a CN value assigned.
 
@@ -126,7 +126,7 @@ The following statistics are calculated and stored in a *samples* file:
 * `bases_*`: total number of bases with CNS values assigned. `*` is for `aut`, `sex`, `tot`, referring to autosomes, sex chromosomes, and the sum of both, respectively
 * `frac_*`: fraction of bases with CNS values assigned over the total number of bases
 
-## `ploidy`
+### `ploidy`
 
 Calculates the portions of the genome that are aneuploid, or for absent in case of male sex chromosomes.
 
@@ -138,7 +138,7 @@ The following statistics are calculated and stored in a *samples* file:
 * `ane_+_*`: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), `+` expands into CN columns names
 * `ane_+_frac_*`: the fraction of aneuploid bases over the total number of bases
 
-## `bin`
+### `bin`
 
 Conducts the binning - for selected segments, the aggregate CN value for selected samples are calculated. 
 
@@ -171,13 +171,13 @@ Additional arguments:
 An example of use:
 
 ```bash	
-# Create bins of 1Mb size, exclude gaps, and filter out small segments
+## Create bins of 1Mb size, exclude gaps, and filter out small segments
 cns bin cns.tsv --bins 200000 --remove gaps --filter 
-# Sample copy numbers of genes, take the minimum CN value across the gene to exclude fractional segments
+## Sample copy numbers of genes, take the minimum CN value across the gene to exclude fractional segments
 cns bin cns.tsv --select genes.tsv --aggregate min
 ```
 
-## `cluster`
+### `cluster`
 
 Calculates consistent regions using breakpoints clustering.
 
@@ -187,7 +187,7 @@ Additional arguments:
 
 > NOTE: If first or last breakpoint is less than `--dist` from the end of the chromosome, the segment is extended to the end of the chromosome.
 
-# API (Python library)
+## API (Python library)
 
 The library is split into three blocks:
 * `cns.process`: The methods for processing the data, including filling, imputing, and calculating coverage.
@@ -197,9 +197,11 @@ The library is split into three blocks:
 
 > Note that many functions have assembly as an optional parameter, if not provided, the default assembly is `hg19`.
 
-## Data types:
+### Data types:
 
-### CNS DataFrame
+Functions for conversions between data types can be found in `cns.utils.conversions`.
+
+#### CNS DataFrame
 
 The CNS DataFrame is a pandas DataFrame with the following columns: `sample_id, chrom, start, end` followed by copy number column or columns. Typically, the columns are `major_cn, minor_cn` or `total_cn`. CNSiststen considers any column whose name starts or ends with `CN` or `cn` as a copy number column. 
 
@@ -212,7 +214,7 @@ sample1         chr1    550     1000    2           0
 
 This is the main data type used in the library.
 
-### Breakpoints
+#### Breakpoints
 
 Breakpoints are stored in a dictionary mapping a set of breakpoints to a chromosome. Boundaries are normally included, e.g.
 ```
@@ -223,19 +225,19 @@ Breakpoints are stored in a dictionary mapping a set of breakpoints to a chromos
 ```
 would be the arm breakpoints for hg19 chromosome 1.
 
-### Segments
+#### Segments
 
 Segments are a list of triples: `[(chrom, start, end), ...]`, used to map into chromosomes. The range is start-inclusive, end-exclusive.
 
-### Assemblies
+#### Assemblies
 
 Assembly a class that provides information about the species. CNSistent currently supports `hg19` and `hg38` assemblies, if you want to use it with a different assembly, you need to create a new object.
 
 Note that sex chromosomes are always expected to be named `chrX` and `chrY`.	
 
-## Process
+### Process
 
-### Pipelines
+#### Pipelines
 
 The commands that are available from CMD are executed via a main function for each command, e.g. `main_impute`.
 
@@ -245,7 +247,7 @@ The file also contains high-level functions for region manipulation, in particul
 2. If `remove` is specified, remove regions from the selection, and filter the remaining regions.
 3. If `bin_size` is specified, bin the regions into equidistant segments of the given size.
 
-### Segment
+#### Segment
 
 Functions for working with segments. Segments are tuples `(chrom, start, end)`, where the start is inclusive, and the end is exclusive.
 
@@ -258,7 +260,7 @@ Notable functions:
 * `segment_difference`: Will remove regions from a list of segments found in another list of segments.
 * `filter_min_size`: Will remove segments strictly smaller than the specified size.
 
-### Imputation
+#### Imputation
 
 Functions for adding missing segments and values in the CNS data. The process is to first add missing regions with NaN values and then impute the missing values.
 
@@ -267,21 +269,90 @@ There are separate functions to fill the telomeres, fill the gaps, and add missi
 If guessing values in imputation is not desired, the `fill_nans_with_zeros` function can be used to simply fill with 0 instead.
 
 
-### Breakpoints
+#### Breakpoints
 
-Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create denovo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
+Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create de-novo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
 
-### Binning
+#### Binning
 
-## Analyze
+Binning will produce segments of a certain size, aggregating the copy number values of the segments within the bin. 
 
-## Display
+There are the following aggregate functions: `mean`, `min`, `max`, and `none`. The `none` function will just split exiting bins, without additional aggregation. This is useful if you want to introduce additional breakpoints into the data.
 
-## Utils
+Binning can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. `arms`, `1000000`).
 
-# REFERENCE
+Three utility functions are included with binning:
 
-## Data
+* `add_cns_loc`: For a CNS df, will add the center (`mid`) of a segment within the chromosome, within the linear genome (`cum_mid`) and the length of the segment (`length`).
+* `group_bins`: Will group all samples in a a CNS df, by default using the `mean` function. Segments are grouped on `cum_mid`.
+* `sum_cns`: Finds columns that match the CN column pattern and sums them up into the column `total_cn`.
+
+
+### Analyze
+
+The analyze module calculates statistics for the CNS data.
+
+* `coverage`: Calculates the proportion of genome with assigned (not NaN) CN values.
+* `ploidy`: Calculates the proportion of genome with aneuploid CN values (different from 2 or 1 for male sex chroms).
+* `signatures`: Calculates the signatures related statistics - currently it only calculates breakpoints per sample/chromosome.
+
+### Display
+
+Display functions are in three categories:
+
+* `fig`: A Whole figure with labels.
+* `plot`: Only plots an individual axis.
+* `labels`: Either labels or backgrounds for individual axes.
+
+There are two main plot types:
+
+* joint plots: `fig_line, fig_dots, fig_bars` - these display joint CN data from aggregates. Line plot is the primary plot, compared to a normal line plot, segments are connected only if they overlap. Dots are more practical for small regions, e.g. genes. Bars are useful for coarse data, e.g. arms.
+
+![Lines Plot](./docs/lines.png)
+![Dots Plot](./docs/dots.png)
+![Bars Plot](./docs/bars.png)
+
+* individual plots: `fig_CN_tracks` - this plot inserts all bins into a heatmap per sample, being more practical for dense data or equalized representation. Unlike the joint plots, the position on the genome is not considered and there are no gaps, so the sizes of chromosomes and the position therein are only for orientation.
+
+![CN Tracks](./docs/tracks.png)
+
+For the figures, the first parameter is always the `CNS_df`, or a list thereof in the case of joint plots. Following optional parameters:
+* column: a string describing the column to plot or a list thereof. If none is specified, all columns matching the CN column pattern are used.
+* chrom: a string describing the chromosome to plot. If none is specified, all chromosomes are used.
+* label: string describing the CNS_df or a list thereof. If none is specified, no label is output.
+* width: width of the figure in inches, is calculated automatically if not specified.
+* max_cn: The CN tracks values are cropped to avoid outliers collapsing the color scale. If not specified, `10` is used.
+
+
+### Utils
+
+Utils contain the specification for the hg19, hg38 assemblies, including the gaps and cytobands. In addition, functions for files and data are provided:
+
+#### Files
+
+* `load_cns/save_cns`: Load/Save CNS data from a TSV file, with optional header and sample_id. By default, this moves from 1-based to 0-based coordinates.
+* `load_regions/save_regions`: Load/Save regions from a TSV file, reading only the `chrom, start, end` columns. By default, this moves from 1-based to 0-based coordinates.
+* `load_samples/save_samples`: Load samples from a TSV file. The first column is used as "sample_id" index and should match the CNS sample names.
+* `get_cn_columns`: Get the CN columns from a CNS DataFrame (start or end with `CN` or `cn`).
+
+
+#### Selection
+
+Functions to select samples set from CNS df (head, tail, random), to filter chromosomes (autosomes, sex chromosomes...) and samples/CNS by type.
+
+#### Conversions
+
+Converts between CNS df, breakpoints, and segments. 
+
+### Data Utils
+
+* Functions to load the datasets (PCAWG, TCGA, TRACERx) and gene sets (Ensembl, COSMIC).
+* Default filtering to remove samples from the datasets (low coverage, diploid, blacklisted, ...)
+* Loading binned data / processed samples.
+
+## REFERENCE
+
+### Data
 
 The data are obtained and processed using the code in `./notebooks/data/data_obtain.ipynb`. The sources are as follows:
 
@@ -303,11 +374,11 @@ Cite: https://academic.oup.com/nar/article/51/D1/D933/6786199
 Cytoband, Gap data obtained from: https://genome.ucsc.edu
 Cite: https://www.nature.com/articles/35057062
 
-## Please cite
+### Please cite
 
 ...
 
-## The MIT License
+### The MIT License
 
 Copyright © 2023 Dr. Adam Streck, adam.streck@gmail.com
 

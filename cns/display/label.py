@@ -146,7 +146,6 @@ def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
     ax.set_xlim(0, assembly.gen_len if chrom is None else assembly.chr_lens[chrom])
 
 
-
 def add_gap_legend(ax):
     legend_elements = [
         mpatches.Patch(color='red', label='Centromere'),

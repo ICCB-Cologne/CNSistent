@@ -244,7 +244,7 @@ def fig_CN_heatmap(
     dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly, pos_col)
     max_cn = min(max_cn, int(np.ceil(_get_min_max_cn(dfs, columns)[1])))
 
-    width = width if width != None else (18 if chrom == None else 2) 
+    width = width if width != None else (18 if chrom == None else 6) 
     ratio= 0.02 if chrom is None else 0.2
     height = ((ratio * len(sample_ids) / len(columns) * width) + 1) 
     font_size = (width * 0.8 if chrom is None else width * 3) / len(columns)

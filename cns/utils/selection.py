@@ -50,28 +50,6 @@ def drop_Y(cns_df):
     return cns_df.query("chrom != 'chrY'").copy()
 
 
-def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, print_info = False):
-    cn_netural = samples.query(f"ane_major_cn_frac_aut < {ane_min_frac} & ane_major_cn_frac_aut < {ane_min_frac}").index
-    if print_info:
-        print(len(cn_netural), "samples are CN neutral")
-    filtered = samples.query("(index not in @cn_netural)")
-
-    # Find samples with low coverage (below 95% in autosomes)
-    low_coverage = samples.query(f"cover_frac_aut < {cover_min_frac}").index
-    if print_info:
-        print(len(low_coverage), "samples have low coverage")
-    filtered = samples.query("(index not in @low_coverage)")
-
-    # Filter out CN neutral and low coverage samples 
-    if whitelist:
-        blacklisted = samples.query("whitelist == False").index
-        if print_info:
-            print(len(blacklisted), "samples are blacklisted")        
-        filtered = samples.query("(index not in @blacklisted)")
-
-    return filtered.copy()
-
-
 def select_CNS_samples(cns_df, samples):
     return cns_df.query("sample_id in @samples.index")
 
