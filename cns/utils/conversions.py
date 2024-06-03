@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from cns.utils.assemblies import hg19
 
@@ -67,6 +68,15 @@ def cns_to_segments(regions, change_coords = False):
     for chrom, start, end in regions[["chrom", "start", "end"]].values:
         segments.append((chrom, start - 1 if change_coords else start, end))
     return segments
+
+
+def breaks_to_locations(breakpoints, assembly=hg19):
+    locations = []
+    for chrom, breaks in breakpoints:
+        offset = np.int64(assembly.chr_starts[chrom])
+        for break_loc in breaks:
+            locations.append(break_loc + offset)
+    return locations
 
 
 def breaks_to_segments(breakpoints):

@@ -103,24 +103,26 @@ def _get_min_max_cn(dfs, columns):
 
 def _get_colors(colors, line_count):	
     if colors == None:
-        colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, line_count))
-    elif line_count == 1:
-        colors = [colors]
+        if line_count == 1:
+            colors = ["blue"]
+        else:            
+            colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, line_count))
     elif line_count != len(colors):
         raise ValueError("colors must be None or a list with the same length as the number of lines")
     return colors
 
 
 def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19, pos_col="cum_mid"):
-    width = width if width != None else (18 if chrom == None else 3)
+    width = width if width != None else (18 if chrom == None else 4)
     height = width / 6 if chrom == None else width
     fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
     dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly, pos_col)
-    min_cn, max_cn = _get_min_max_cn(dfs, columns)    
     colors = _get_colors(color, line_count)
     alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
-    plot_chr_bg(ax, assembly, min_cn * .95, max_cn * 1.05)
-    plot_x_ticks(ax, assembly=assembly)
+    if chrom == None:
+        min_cn, max_cn = _get_min_max_cn(dfs, columns) 
+        plot_chr_bg(ax, assembly, min_cn * .95, max_cn * 1.05)
+        plot_x_ticks(ax, assembly=assembly)
     for i in range(len(dfs)):
         for j in range(len(columns)):
             color = colors[i*len(columns) + j]
@@ -138,19 +140,19 @@ def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=Non
         else:
             ax.legend(loc='upper right')
     ax.set_ylabel("mean CN per bin")
-    ax.set_xlabel("position on a chromosome")
+    ax.set_xlabel(f"position on {chrom if chrom != None else 'linear genome'}")
     return fig, ax
 
 
-def fig_lines(data, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+def fig_lines(data, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19):
     return _fig_main(data, plot_lines, label, column, color, chrom, width, dpi, assembly)
 
 
-def fig_dots(data, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+def fig_dots(data, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19):
     return _fig_main(data, plot_dots, label, column, color, chrom, width, dpi, assembly)
 
 
-def fig_bars(data, label=None, column=None, color=None, chrom=None, width=18, dpi=100, assembly=hg19):
+def fig_bars(data, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19):
     return _fig_main(data, plot_bars, label, column, color, chrom, width, dpi, assembly)
 
 

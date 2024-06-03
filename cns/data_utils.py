@@ -1,6 +1,7 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 
+from cns.process.binning import add_cns_loc, sum_cns
 from cns.utils.selection import filter_samples, select_CNS_samples
 from cns.utils.files import load_cns, load_samples
 
@@ -14,7 +15,7 @@ docs_path = pjoin(get_root_path(), "docs")
 
 
 def load_cns_out(filename):
-    return load_cns(pjoin(out_path, filename))
+    return sum_cns(add_cns_loc(load_cns(pjoin(out_path, filename))))
 
 
 def load_samples_out(filename):
@@ -22,7 +23,7 @@ def load_samples_out(filename):
 
 
 def load_bins(dataset, bin_type):
-    return load_cns(pjoin(out_path, f"{dataset}_bin_{bin_type}.tsv"))
+    return sum_cns(add_cns_loc(load_cns(pjoin(out_path, f"{dataset}_bin_{bin_type}.tsv"))))
 
 
 class Dataset:
@@ -118,9 +119,15 @@ def load_merged_bins(samples, bin_size):
     return all_cns
 
 
-def load_COSMIC():
-    return pd.read_csv(pjoin(data_path, "COSMIC_consensus_genes.tsv"), sep="\t")
+def load_COSMIC(change_coords=True):
+    res = pd.read_csv(pjoin(data_path, "COSMIC_consensus_genes.tsv"), sep="\t")
+    if change_coords:
+        res.loc[:, "start"] -= 1
+    return res
 
 
-def load_ENSEMBL():
-    return pd.read_csv(pjoin(data_path, "ENSEMBL_coding_genes.tsv"), sep="\t")
+def load_ENSEMBL(change_coords=True):
+    res = pd.read_csv(pjoin(data_path, "ENSEMBL_coding_genes.tsv"), sep="\t")
+    if change_coords:
+        res.loc[:, "start"] -= 1
+    return res
