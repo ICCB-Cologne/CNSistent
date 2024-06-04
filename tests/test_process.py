@@ -361,10 +361,10 @@ class TestMCS(unittest.TestCase):
         dist = 100
         assembly = type('Assembly', (object,), {'chr_lens': {'chr1': 100, 'chr2': 400, 'chr3': 300, 'chrX': 100, 'chrY': 100}})
         result = created_merged_segs(dict_start, dist, assembly, False)
-        exp = [('chr1', 1, 74), ('chr1', 75, 100), ('chr2', 1, 200), ('chr2', 201, 300), ('chr2', 301, 400)]
+        exp = [('chr1', 0, 74), ('chr1', 74, 100), ('chr2', 0, 200), ('chr2', 200, 300), ('chr2', 300, 400)]
         self.assertEqual(result, exp)
         result = created_merged_segs(dict_start, dist, assembly, True)
-        exp = [('chr1', 1, 100), ('chr2', 1, 200), ('chr2', 201, 300), ('chr2', 301, 400)]
+        exp = [('chr1', 0, 100), ('chr2', 0, 200), ('chr2', 200, 300), ('chr2', 300, 400)]
         self.assertEqual(result, exp)
 
     

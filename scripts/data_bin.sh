@@ -6,7 +6,7 @@ out="../out"
 cd "$(dirname "$0")" # Set path to the script's path
 
 # TRACERx PCAWG TCGA_hg19 TCGA_hg38
-for dataset in TCGA_hg19 TCGA_hg38 PCAWG TRACERx; 
+for dataset in TRACERx PCAWG TCGA_hg19 TCGA_hg38 ; 
 do    
     echo "Processing $dataset"
     common_input="${out}/${dataset}_cns_imp.tsv --samples ${out}/${dataset}_samples.tsv"

@@ -121,12 +121,14 @@ def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
             cn_columns = cns_df.columns[5:].tolist()
     else:
         cn_columns = cns_df.columns[4:4 + cn_columns_no].tolist()
-        cn_columns = [col if is_cn_column(col) else f"{col}_cn" for col in cn_columns]
+        cn_columns_map = {col : (col if is_cn_column(col) else f"{col}_cn") for col in cn_columns}
+        cns_df.rename(columns=cn_columns_map, inplace=True)
+        cn_columns = list(cn_columns_map.values())
     if print_info:
         print(f"Using CN columns: {cn_columns}")
-    
+
     sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
-    cns_df = cns_df[sel_columns]    
+    cns_df = cns_df[sel_columns]
     return cns_df
 
 

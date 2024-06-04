@@ -64,16 +64,18 @@ def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=Fals
         cns_df["major_cn"] = major_col
         cns_df["minor_cn"] = minor_col
         cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
+        cn_columns = ["major_cn", "minor_cn", "total_cn"]
     elif len(cn_columns) == 1:
         cns_df.rename(columns={cn_columns[0]: "total_cn"}, inplace=True)
+        cn_columns = ["total_cn"]
     else:
         raise ValueError("No CN columns found.")
 
     samples = add_breaks_per_sample(cns_df, samples, assembly)
     cns_df = add_cns_loc(cns_df, assembly)
-    pre_chr = calc_ane_per_chrom(cns_df, samples, cn_columns)
+    per_chr = calc_ane_per_chrom(cns_df, samples, cn_columns)
     ane_cols = get_ane_cols_if_none(cns_df, cn_columns)
-    autosomes_sum, sex_chrom_sum = calc_ane_per_sample(pre_chr, ane_cols, assembly)
+    autosomes_sum, sex_chrom_sum = calc_ane_per_sample(per_chr, ane_cols, assembly)
     autosomes_sum = norm_aut_aneuploidy(autosomes_sum, ane_cols, assembly)
     sex_chrom_sum = norm_sex_aneuploidy(samples, sex_chrom_sum, ane_cols, assembly)
     merged_df = autosomes_sum.merge(sex_chrom_sum, left_index=True, right_index=True, suffixes=('_aut', '_sex'))

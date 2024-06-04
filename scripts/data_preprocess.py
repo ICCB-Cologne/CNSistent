@@ -3,7 +3,8 @@
 import argparse
 import pandas as pd
 import numpy as np
-from cns.utils.files import rename_columns
+from cns.utils.files import canonize_cns_df
+from cns.utils.assemblies import get_assembly
 
 
 data_dir = "../data"
@@ -12,7 +13,7 @@ out_dir = "../out"
 
 def pcawg(print_debug=False):
     cns_raw_df = pd.read_csv(f"{data_dir}/pcawg_cns_source.tsv", sep="\t")
-    cns_raw_df = rename_columns(cns_raw_df)
+    cns_raw_df = canonize_cns_df(cns_raw_df)
     if print_debug:
         print(cns_raw_df.head())
     specimen_df = pd.read_csv(f"{data_dir}/pcawg_specimen_histology_August.tsv", sep="\t")
@@ -76,8 +77,9 @@ def pcawg(print_debug=False):
 
 
 def tcga(hg_ver, print_debug=False):
+    assembly = get_assembly(hg_ver)
     cns_source_df = pd.read_csv(f"{data_dir}/tcga_{hg_ver}_cns_source.tsv", sep="\t")
-    cns_raw_df = rename_columns(cns_source_df)
+    cns_raw_df = canonize_cns_df(cns_source_df, assembly=assembly)
     if print_debug:
         print(cns_raw_df.head())
 
@@ -102,7 +104,7 @@ def tracerx(print_debug=False):
 
     cns_subset = prim_cns_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
     cns_subset["chr"] = "chr" + cns_subset["chr"].astype(str)
-    cns_raw_df = rename_columns(cns_subset)
+    cns_raw_df = canonize_cns_df(cns_subset, 2)
     if print_debug:
         print(cns_raw_df.head())
 
@@ -115,7 +117,7 @@ def tracerx(print_debug=False):
     merged = pd.merge(left, right, left_on="patient_id", right_on="cruk_id")
     merged["sex"] = np.where(merged["sex"] == "Female", "xx", "xy")
     samples_df = merged[["sample", "sex", "histology_multi_full"]].rename(columns={"sample": "sample_id", "histology_multi_full": "type"})
-    samples_df.set_index(.index, inplace=True)
+    samples_df.set_index(["sample_id"], inplace=True)
     if print_debug:
         print(samples_df.head())
 

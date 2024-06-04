@@ -58,18 +58,22 @@ def clusters_to_breaks(clusters):
 def created_merged_segs(dict_start, dist, assembly=hg19, extend=True):
     res = []
     for chrom, old_breaks in dict_start.items():
-        clusters = breaks_to_clusters(old_breaks)
-        merged = merge_clusters(clusters, dist)
-        new_breaks = clusters_to_breaks(merged)
-        if extend and new_breaks[0] < dist:
-            new_breaks[0] = 0
-        elif new_breaks[0] != 0:
-            new_breaks = [0] + new_breaks
-        if extend and new_breaks[-1] + dist > assembly.chr_lens[chrom]:
-            new_breaks[-1] = assembly.chr_lens[chrom]
-        elif new_breaks[-1] != assembly.chr_lens[chrom]:
-            new_breaks = new_breaks + [assembly.chr_lens[chrom]]
+        if len(old_breaks) > 0:
+            clusters = breaks_to_clusters(old_breaks)
+            merged = merge_clusters(clusters, dist)
+            new_breaks = clusters_to_breaks(merged)
+            
+            if extend and new_breaks[0] < dist:
+                new_breaks[0] = 0
+            elif new_breaks[0] != 0:
+                new_breaks = [0] + new_breaks
+            if extend and new_breaks[-1] + dist > assembly.chr_lens[chrom]:
+                new_breaks[-1] = assembly.chr_lens[chrom]
+            elif new_breaks[-1] != assembly.chr_lens[chrom]:
+                new_breaks = new_breaks + [assembly.chr_lens[chrom]]
+        else:
+            new_breaks = [0, assembly.chr_lens[chrom]]
         
         for i in range(len(new_breaks) - 1):
-            res.append((chrom, new_breaks[i] + 1, new_breaks[i + 1]))
+            res.append((chrom, new_breaks[i], new_breaks[i + 1]))
     return res
