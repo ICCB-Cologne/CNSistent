@@ -107,6 +107,8 @@ def _get_colors(colors, line_count):
             colors = ["blue"]
         else:            
             colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, line_count))
+    elif line_count == 1:
+        colors = [colors]
     elif line_count != len(colors):
         raise ValueError("colors must be None or a list with the same length as the number of lines")
     return colors
