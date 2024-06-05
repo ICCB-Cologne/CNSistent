@@ -101,10 +101,10 @@ def plot_chr_bg(ax, assembly=hg19, y_min=0, y_max=1, colored=False):
 # TODO: overlap issues
 def plot_cytobands(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
     for band in assembly.cytobands:
-        chrom, start, end, name, gie_stain = band
-        if (chrom is not None) and (chrom != chrom):
+        band_chr, start, end, name, gie_stain = band
+        if (chrom is not None) and (band_chr != chrom):
             continue
-        x_pos = (start + assembly.chr_starts[chrom]) if chrom is None else start
+        x_pos = (start + assembly.chr_starts[band_chr]) if chrom is None else start
         color = cytoband_color(gie_stain)
         length = end - start
         rect = Rectangle(
@@ -132,11 +132,11 @@ def add_cytoband_legend(ax):
 
 # TODO: overlap issues
 def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
-    for band in assembly.gaps:
-        chrom, start, end, gap_type, bridge = band        
-        if (chrom is not None) and (chrom != chrom):
+    for gap in assembly.gaps:
+        gap_chrom, start, end, gap_type, bridge = gap        
+        if (chrom is not None) and (chrom != gap_chrom):
             continue
-        x_pos = (start + assembly.chr_starts[chrom]) if chrom is None else start
+        x_pos = (start + assembly.chr_starts[gap_chrom]) if chrom is None else start
         color = gap_color(gap_type)
         length = end - start + 1
         rect = Rectangle(

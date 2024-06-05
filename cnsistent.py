@@ -199,7 +199,7 @@ def main():
             with open("./times.tsv", write) as f:
                 f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
         
-    if action == "bin" and args.onlybins:
+    if action == "bin" and args.onlybins or action == "cluster":
         save_regions(res_df, out_file, change_coords=True)
     elif action in ["fill", "impute", "bin"]:
         save_cns(res_df, out_file, sort=True, change_coords=True, no_sample=no_sample, no_header=no_header)

@@ -10,6 +10,8 @@ Requires:
 * Python 3.8+
 * Pip 21.3+
 
+> Git Clone the will also download all source datasets, in total around ~1GB.
+
 ### Quickstart (from Bash)
 
 1. Install the package from location: `pip install -e .`

@@ -97,7 +97,7 @@ def main_cluster(cns_df, dist, assembly=hg19, print_progress=False):
         reduction = np.round(new_count / orig_count, 2)
         print(f"Merged breakpoints: {new_count}, reduced by {1 - reduction:.2%}.")
 
-    df = pd.DataFrame(res, columns=["chrom", "start", "end"]).set_index("chrom")
+    df = pd.DataFrame(res, columns=["chrom", "start", "end"])
     return df
 
 
