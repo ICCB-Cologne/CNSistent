@@ -22,6 +22,7 @@ def sum_cns(cns_df, cn_columns=None):
     return cns_df
 
 
+# TODO: Add empty check
 def group_bins(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid', assembly=hg19):    
     if fun_type not in ["mean", "max", "min"]:
         raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
