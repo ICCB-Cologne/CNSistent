@@ -36,32 +36,24 @@ def create_step_breaks(reg_len, step_size, equidistant=True):
 
 # Calculate breakpoints at the given resolution. The boundaries either use half
 def calc_bin_breaks(step_size, equidistant=True, assembly=hg19):
-    return [
-        (chrom, create_step_breaks(length, step_size, equidistant))
-        for chrom, length in assembly.chr_lens.items()
-    ]
+    return { chrom: create_step_breaks(length, step_size, equidistant) for chrom, length in assembly.chr_lens.items() }
 
 
 def calc_arm_breaks(assembly=hg19):
     cyto_df = cytobands_to_df(assembly.cytobands)
     acen = cyto_df.query("stain == 'acen' and name.str.contains('p')", engine="python")                                
     max_ends = cyto_df.groupby("chrom")["end"].max().to_dict()
-    result = [
-        (row["chrom"], [0, row["end"], max_ends[row["chrom"]]])
-        for _, row in acen.iterrows()
-    ]
+    result = { row["chrom"]: [0, row["end"], max_ends[row["chrom"]]] for _, row in acen.iterrows() }
     return result
 
 
 # all the breakpoints around cytobands
 def calc_cytoband_breaks(assembly=hg19):
     cyto_df = cytobands_to_df(assembly.cytobands)
-    return [
-        (chrom, [0] + [end for end in cyto_df.query(f"chrom == '{chrom}'")["end"]])
-        for chrom in cyto_df["chrom"].unique()
-    ]
+    return { chrom: [0] + [end for end in cyto_df.query(f"chrom == '{chrom}'")["end"]] 
+            for chrom in cyto_df["chrom"].unique() }
 
-
+# TODO: Make breaks should be a dict
 # Create breakpoints
 def make_breaks(break_type, assembly=hg19):
     if break_type == "arms":
@@ -72,10 +64,7 @@ def make_breaks(break_type, assembly=hg19):
         try:
             bin_size = int(break_type)
         except:
-            raise ValueError(
-                "break_type must be 'arms', 'cytobands' or an integer, got "
-                + break_type
-            )
+            raise ValueError("break_type must be 'arms', 'cytobands' or an integer, got " + break_type)
         return calc_bin_breaks(bin_size, equidistant=True, assembly=assembly)
     
 
