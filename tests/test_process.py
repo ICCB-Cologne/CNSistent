@@ -166,21 +166,21 @@ class TestBreakpoints(unittest.TestCase):
     
     def test_arm_breaks(self):
         result = calc_arm_breaks()
-        self.assertEqual(result[0][0], 'chr1')
-        self.assertEqual(result[0][1], [0, 125000000, 249250621])
+        self.assertEqual(list(result.keys())[0], 'chr1')
+        self.assertEqual(list(result.values())[0], [0, 125000000, 249250621])
         
     def test_cytoband_breaks(self):
         result = calc_cytoband_breaks()
-        self.assertEqual(result[0][0], 'chr1')
-        sum_of_breaks = sum([len(x[1]) - 1 for x in result])
+        self.assertEqual(list(result.keys())[0], 'chr1')
+        sum_of_breaks = sum([len(breaks) - 1 for breaks in result.values()])
         sum_of_bands = len(hg19.cytobands)
         self.assertEqual(sum_of_breaks, sum_of_bands)
 
     def test_bin_breaks(self):
         result = calc_bin_breaks(1000000, True)
-        self.assertEqual(result[0][0], 'chr1')
-        self.assertEqual(result[0][1][0], 0)
-        self.assertEqual(result[0][1][-1], 249250621)
+        self.assertEqual(list(result.keys())[0], 'chr1')
+        self.assertEqual(list(result.values())[0][0], 0)
+        self.assertEqual(list(result.values())[0][-1], 249250621)
 
     def test_dist_breaks_equidistant(self):
         act = create_step_breaks(10, 1)
@@ -236,7 +236,7 @@ class TestBreakpoints(unittest.TestCase):
 
     def test_diffs(self):
         bin_breaks = calc_bin_breaks(10_000_000)
-        for chrom, chrom_breaks in bin_breaks:
+        for chrom, chrom_breaks in bin_breaks.items():
             diffs = np.diff(np.diff(chrom_breaks))
             self.assertTrue(np.abs(np.sum(diffs)) <= 1)
             self.assertTrue(np.max(np.abs(diffs) <= 1))
@@ -291,7 +291,7 @@ class TestBinning(unittest.TestCase):
 
     def test_bin_by_breaks(self):
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
-        breaks = [('chr1', [0, 100]), ('chr2', [100, 200])]
+        breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
         seg_bin = bin_by_segments(self.cns, segments, print_progress=False)
         break_bin = bin_by_breaks(self.cns, breaks, print_progress=False)
         self.assertEqual(seg_bin.shape[0], 4)

@@ -15,7 +15,7 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(genome_to_segments(assembly), exp)
 
     def test_breaks_to_segments(self):
-        breakpoints = [('chr1', [0, 50, 100]), ('chr2', [0, 125, 150, 176])]
+        breakpoints = {'chr1': [0, 50, 100], 'chr2': [0, 125, 150, 176]}
         exp = [('chr1', 0, 50), ('chr1', 50, 100), ('chr2', 0, 125), ('chr2', 125, 150), ('chr2', 150, 176)]
         self.assertEqual(breaks_to_segments(breakpoints), exp)
 

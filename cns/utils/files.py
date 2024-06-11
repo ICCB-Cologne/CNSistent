@@ -150,7 +150,7 @@ def find_cn_cols_if_none(cns_df, cn_cols):
     return cn_cols
 
 
-def get_ane_cols_if_none(cns_df, ane_cols):
+def get_ane_cols_if_none(cns_df, ane_cols=None):
     if ane_cols is None:
         return [col for col in cns_df.columns if col.startswith("ane_") and not col.endswith("_frac")]
     return ane_cols

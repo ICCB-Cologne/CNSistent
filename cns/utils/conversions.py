@@ -72,7 +72,7 @@ def cns_to_segments(regions, change_coords = False):
 
 def breaks_to_locations(breakpoints, assembly=hg19):
     locations = []
-    for chrom, breaks in breakpoints:
+    for chrom, breaks in breakpoints.items():
         offset = np.int64(assembly.chr_starts[chrom])
         for break_loc in breaks:
             locations.append(break_loc + offset)
@@ -81,7 +81,7 @@ def breaks_to_locations(breakpoints, assembly=hg19):
 
 def breaks_to_segments(breakpoints):
     segments = []
-    for chrom, breaks in breakpoints:
+    for chrom, breaks in breakpoints.items():
         last_break = len(breaks) - 1
         for i in range(last_break):
             segments.append((chrom, breaks[i], breaks[i + 1]))

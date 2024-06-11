@@ -5,6 +5,7 @@ from cns.process.binning import add_cns_loc, sum_cns
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples
 
+
 def get_root_path():
     return abspath(pjoin(dirname(__file__), ".."))
 
@@ -47,11 +48,12 @@ def load_tracerx():
 
 
 def load_data():
-    return {
+    data = {
         "PCAWG" : load_pcawg(),
         "TCGA": load_tcga(),
         "TRACERx": load_tracerx()
     }
+    return data
 
 
 def load_data_file(filename):
@@ -105,7 +107,7 @@ def load_filter_bins(samples, bin_size):
         cns[k] = select_CNS_samples(v, samples[k])
     return cns
 
-
+# TODO: Double check if works
 def get_cns_for_type(cns, samples, type):
 	query = f"type == '{type}' | TCGA_type == '{type}'" if "TCGA_type" in samples.columns else f"type == '{type}'"
 	ids = samples.query(query).index
@@ -139,6 +141,23 @@ def load_merged_bins(samples, bin_size):
     all_cns = pd.concat(cns.values())
     all_cns = select_CNS_samples(all_cns, samples)
     return all_cns
+
+
+def load_merged_cns(samples):
+    cns = {
+        "PCAWG": load_cns_out("PCAWG_cns_imp.tsv"),
+        "TRACERx": load_cns_out("TRACERx_cns_imp.tsv"),
+        "TCGA": load_cns_out("TCGA_hg19_cns_imp.tsv")
+    }
+    all_cns = pd.concat(cns.values())
+    all_cns = select_CNS_samples(all_cns, samples)
+    return all_cns
+
+
+def main_load_data():
+    samples = load_merged_samples()
+    cns = load_merged_cns(samples)
+    return samples, cns
 
 
 def load_COSMIC(change_coords=True):
