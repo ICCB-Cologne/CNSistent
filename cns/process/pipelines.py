@@ -74,7 +74,7 @@ def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=Fals
     samples = add_breaks_per_sample(cns_df, samples, assembly)
     cns_df = add_cns_loc(cns_df, assembly)
     per_chr = calc_ane_per_chrom(cns_df, samples, cn_columns)
-    ane_cols = get_ane_cols_if_none(cns_df, cn_columns)
+    ane_cols = get_ane_cols_if_none(per_chr)
     autosomes_sum, sex_chrom_sum = calc_ane_per_sample(per_chr, ane_cols, assembly)
     autosomes_sum = norm_aut_aneuploidy(autosomes_sum, ane_cols, assembly)
     sex_chrom_sum = norm_sex_aneuploidy(samples, sex_chrom_sum, ane_cols, assembly)

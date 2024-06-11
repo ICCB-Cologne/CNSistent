@@ -5,6 +5,7 @@ from cns.process.binning import add_cns_loc, sum_cns
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples
 
+
 def get_root_path():
     return abspath(pjoin(dirname(__file__), ".."))
 
@@ -151,6 +152,12 @@ def load_merged_cns(samples):
     all_cns = pd.concat(cns.values())
     all_cns = select_CNS_samples(all_cns, samples)
     return all_cns
+
+
+def main_load_data():
+    samples = load_merged_samples()
+    cns = load_merged_cns(samples)
+    return samples, cns
 
 
 def load_COSMIC(change_coords=True):

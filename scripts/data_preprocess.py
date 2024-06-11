@@ -1,35 +1,34 @@
 #!/usr/bin/env python
 
 import argparse
+import os
 import pandas as pd
 import numpy as np
 from cns.utils.files import canonize_cns_df
 from cns.utils.assemblies import get_assembly
 
-
-data_dir = "../data"
-out_dir = "../out"
-
+_data_dir = "../data"
+_out_dir = "../out"
 
 def pcawg(print_debug=False):
-    cns_raw_df = pd.read_csv(f"{data_dir}/pcawg_cns_source.tsv", sep="\t")
+    cns_raw_df = pd.read_csv(f"{_data_dir}/pcawg_cns_source.tsv", sep="\t")
     cns_raw_df = canonize_cns_df(cns_raw_df)
     if print_debug:
         print(cns_raw_df.head())
-    specimen_df = pd.read_csv(f"{data_dir}/pcawg_specimen_histology_August.tsv", sep="\t")
+    specimen_df = pd.read_csv(f"{_data_dir}/pcawg_specimen_histology_August.tsv", sep="\t")
     sample_to_donor_df = specimen_df[["# icgc_specimen_id", "icgc_donor_id"]].rename(columns={"# icgc_specimen_id": "sample_id", "icgc_donor_id": "donor_id"})
     sample_to_donor_df = sample_to_donor_df.drop_duplicates().sort_values(by="sample_id").reset_index(drop=True)
     sample_to_donor_map = sample_to_donor_df.set_index("sample_id").to_dict()["donor_id"]
     if print_debug:
         print(sample_to_donor_df.head())
 
-    donor_df = pd.read_csv(f"{data_dir}/pcawg_donor_clinical_August2016.tsv", sep="\t")
+    donor_df = pd.read_csv(f"{_data_dir}/pcawg_donor_clinical_August2016.tsv", sep="\t")
     donor_to_sex_df = donor_df[["icgc_donor_id", "donor_sex"]].rename(columns={"icgc_donor_id": "donor_id"})
     donor_to_sex_df = donor_to_sex_df.drop_duplicates().sort_values(by="donor_id").reset_index(drop=True)
     donor_to_sex_map = donor_to_sex_df.set_index("donor_id").to_dict()["donor_sex"]
     if print_debug:
         print(donor_to_sex_df.head())
-    ids = cns_raw_df.index.unique()
+    ids = cns_raw_df["sample_id"].unique()
     donors = map(lambda x: sample_to_donor_map[x], ids)
     sexes = map(lambda x: donor_to_sex_map[x], donors)
     samples_df = pd.DataFrame([ids, sexes]).T
@@ -37,10 +36,10 @@ def pcawg(print_debug=False):
     samples_df = samples_df.set_index("sample_id")
     samples_df["sex"] = samples_df["sex"].replace({"male": "xy", "female": "xx"})
     # sanity check  
-    assert len(cns_raw_df.index.unique()) == len(samples_df)
+    assert len(cns_raw_df["sample_id"].unique()) == len(samples_df)
 
     # Add whitelist information
-    whitelist = pd.read_csv(f"{data_dir}/pcawg_supplementary_table_1.tsv", sep="\t")
+    whitelist = pd.read_csv(f"{_data_dir}/pcawg_supplementary_table_1.tsv", sep="\t")
     whitelist_sp = whitelist["icgc_specimen_id"].unique()
     assert(len(whitelist_sp) == 2583) # 2583 white-listed samples (https://www.nature.com/articles/s41586-020-1969-6)
     samples_df['whitelist'] = samples_df.index.isin(whitelist_sp)
@@ -58,7 +57,7 @@ def pcawg(print_debug=False):
     samples_df["TCGA_id"] = ids
 
     # Add TCGA type
-    msi_df = pd.read_csv(f"{data_dir}/MS_analysis.PCAWG_release_v1.RIKEN.tsv", sep="\t")
+    msi_df = pd.read_csv(f"{_data_dir}/MS_analysis.PCAWG_release_v1.RIKEN.tsv", sep="\t")
     type_df = msi_df[["ID", "cancer"]].copy()
     TCGA_type_list  =[]
     for row in type_df.iterrows():
@@ -78,13 +77,13 @@ def pcawg(print_debug=False):
 
 def tcga(hg_ver, print_debug=False):
     assembly = get_assembly(hg_ver)
-    cns_source_df = pd.read_csv(f"{data_dir}/tcga_{hg_ver}_cns_source.tsv", sep="\t")
+    cns_source_df = pd.read_csv(f"{_data_dir}/tcga_{hg_ver}_cns_source.tsv", sep="\t")
     cns_raw_df = canonize_cns_df(cns_source_df, assembly=assembly)
     if print_debug:
         print(cns_raw_df.head())
 
     labels = f"summary.ascatv3TCGA.penalty70.{hg_ver}.tsv"
-    specimen_df = pd.read_csv(f"{data_dir}/{labels}", sep="\t")
+    specimen_df = pd.read_csv(f"{_data_dir}/{labels}", sep="\t")
     if print_debug:
         print(specimen_df.head())
 
@@ -98,7 +97,7 @@ def tcga(hg_ver, print_debug=False):
 
 
 def tracerx(print_debug=False):
-    prim_cns_file = pd.read_csv(f"{data_dir}/20220803_TxPri_mphase_by_sample_df.reduced.csv")
+    prim_cns_file = pd.read_csv(f"{_data_dir}/20220803_TxPri_mphase_by_sample_df.reduced.csv")
     if print_debug:
         print(prim_cns_file.head())
 
@@ -108,7 +107,7 @@ def tracerx(print_debug=False):
     if print_debug:
         print(cns_raw_df.head())
 
-    labels = pd.read_csv(f"{data_dir}/20221109_TRACERx421_all_patient_df.tsv", sep="\t")
+    labels = pd.read_csv(f"{_data_dir}/20221109_TRACERx421_all_patient_df.tsv", sep="\t")
     if print_debug:
         print(labels.head())
 
@@ -131,6 +130,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     dataset = args.dataset
     print_debug = args.verbose
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     if dataset == "PCAWG":
         cns_df, samples_df = pcawg(print_debug)
     elif dataset == "TCGA_hg19":
@@ -143,5 +144,5 @@ if __name__ == "__main__":
         raise ValueError(f"Dataset {dataset} not recognized.")
     
     assert len(cns_df["sample_id"].unique()) == len(samples_df)
-    samples_df.to_csv(f"{out_dir}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
-    cns_df.to_csv(f"{out_dir}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)
+    samples_df.to_csv(f"{_out_dir}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
+    cns_df.to_csv(f"{_out_dir}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)

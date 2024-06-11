@@ -142,7 +142,11 @@ def _process(action, cns_df, samples_df, cn_cols, assembly, args):
         return main_fun(*list(*zip_blocks))
     else:
         with Pool(threads) as pool:
+            print(f"Multiprocessing with {threads} threads..")
             res_blocs = pool.starmap(main_fun, zip_blocks)            
+            pool.close()
+            pool.join()
+            print("Multiprocessing finished, merging results...")
         return pd.concat(res_blocs)
     
 
