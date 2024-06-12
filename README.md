@@ -87,6 +87,7 @@ The following additional optional arguments are shared:
 * `--nosample`: If provided, the sample_id column is not expected in the input file.
 * `--assembly [hg19, hg38]`: Assembly to use.  If not provided, it defaults to `hg19`.
 * `--threads int`: Number of threads to use, defaults to `1`. (Note: `cluster` is not parallelizable).	
+* `--subsplit int`: Number of segments to split the data into for parallel processing. If not provided, the default value is `1` for no splitting. This helps to limit memory consumption for large datasets.
 * `--verbose`: If provided, progress will be printed.
 
 

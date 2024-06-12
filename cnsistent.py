@@ -21,8 +21,9 @@ def _add_common_args(parser):
     parser.add_argument("--threads", type=int, help="number of threads to use", required=False, default=1)
     parser.add_argument("--verbose", help="print progress to console", action="store_true")
     parser.add_argument("--time", help="save runtime info", action="store_true")
-    parser.add_argument("--noheader", help="if set, the input/file file does not have a header", action="store_true")
+    parser.add_argument("--noheader", help="if set, the input/output file does not have a header", action="store_true")
     parser.add_argument("--nosample", help="if set, the input/output file does not have an sample column. Not compatible with the --samples option.", action="store_true")
+    parser.add_argument("--subsplit", type=int, help="will split the processing into chunks to lower memory needs", required=False, default=1)
 
 
 def _parse_args():
@@ -69,11 +70,20 @@ def _parse_args():
 
     if args.action == "cluster":
         if args.threads > 1:
-            print("WARNING: Clustering is not data parallelizable, --threads option will be ignored.")
+            print("cluster is not data parallelizable, --threads option will be ignored.")
             args.threads = 1
+        if args.subsplit > 1:
+            print("cluster is not data parallelizable, --subsplit option will be ignored.")
+            args.subsplit = 1        
 
     if args.nosample and args["samples"] != "":
         raise ValueError("The --nosample and --samples options are incompatible.")
+    
+    if args.threads <= 0:
+        raise ValueError("The --threads option must be greater than 0.")
+    
+    if args.subsplit <= 0:
+        raise ValueError("The --subsplit option must be greater than 0.")
 
     return args
 
@@ -108,7 +118,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
     # Apply process_block to each pair of blocks
     ass_block = [assembly]*threads
     ver_block = [False]*threads
-    ver_block[0] = args.verbose
+    ver_block[-1] = args.verbose
     cols_block = [cols_block]*threads
     if action == "impute":
         return zip(cns_blocks, cols_block, ver_block)
@@ -132,22 +142,23 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         raise ValueError(f"Unknown action {action}")
 
 
+
 def _process(action, cns_df, samples_df, cn_cols, assembly, args):   
     main_fun = _action_to_fun(action)
-    threads = args.threads
-    samples_blocks = dataframe_array_split(samples_df, threads)
+    blocks = abs(args.threads)
+    samples_blocks = dataframe_array_split(samples_df, blocks)
     cns_blocks = [cns_df.query("sample_id in @block.index").reset_index(drop=True) for block in samples_blocks]
-    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, assembly, threads, args)
-    if threads == 1:
-        return main_fun(*list(*zip_blocks))
+    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, assembly, blocks, args)
+    if blocks == 1:
+        return [main_fun(*list(*zip_blocks))]
     else:
-        with Pool(threads) as pool:
-            print(f"Multiprocessing with {threads} threads..")
-            res_blocs = pool.starmap(main_fun, zip_blocks)            
-            pool.close()
-            pool.join()
-            print("Multiprocessing finished, merging results...")
-        return pd.concat(res_blocs)
+        with Pool(blocks) as pool:
+            if args.verbose:
+                print(f"Multiprocessing with {blocks} threads..")
+            res_blocs = pool.starmap(main_fun, zip_blocks)        
+            pool.close()   
+            pool.join()    
+        return res_blocs
     
 
 def main():
@@ -161,15 +172,27 @@ def main():
     cols_no = args.cols
     no_header = args.noheader
     no_sample = args.nosample
+    subsplit = args.subsplit
 
     # Read the input
     if print_progress:
-        print(f"**cns {action}**")
-        print("Parsing input...")
+        print(f"***** cns {action} *****")
+        print(f"CNS path is {cns_file_path}...") 
+
+    # Calculate bin regions without the binning itself
+    if action == "bin" and args.onlybins:        
+        if print_progress:
+            print(f"Calculating binning segments...")  
+        segs = _get_segments(args, assembly)
+        res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
+        save_regions(res_df, out_file, change_coords=True, header=not no_header)
+        if print_progress:
+            print("Done.")
+        return    
 
     if not exists(cns_file_path):
         raise ValueError(f"File {cns_file_path} not found.")
-    cns_df = load_cns(cns_file_path, cn_col_no=cols_no, no_header=no_header, no_sample=no_sample)
+    cns_df = load_cns(cns_file_path, cn_col_no=cols_no, header=not no_header, no_sample=no_sample)
     cn_cols = get_cn_columns(cns_df)
 
     if samples_path == "":
@@ -178,39 +201,46 @@ def main():
         samples_df = load_samples(samples_path)
         samples_df = fill_sex_if_missing(cns_df, samples_df)
 
-    # Perform the action
-    if action == "bin" and args.onlybins:        
-        if print_progress:
-            print(f"Calculating binning segments...")  
-        segs = _get_segments(args, assembly)
-        res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
-    else:
-        if print_progress:
-            print(f"Processing {cns_file_path}...")    
-        start = time.time()
-        res_df = _process(action, cns_df, samples_df, cn_cols, assembly, args)
+    samples_blocks = dataframe_array_split(samples_df, subsplit)
 
-    # write out the results
-    end = time.time()
-    if print_progress:
-        runtime = end - start
-        print(f"Finished in {runtime:.3f} seconds.")
-        print(f"Writing to {out_file}...")
-        # Add to file times.tsv
-        if args.time:
-            # check if the file exists
-            write = "a" if exists("./out/times.tsv") else "w"
-            with open("./times.tsv", write) as f:
-                f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
+    for i in range(subsplit):
+        if print_progress:
+            print(f"Processing block {i+1}/{subsplit}...")
         
-    if action == "bin" and args.onlybins or action == "cluster":
-        save_regions(res_df, out_file, change_coords=True)
-    elif action in ["fill", "impute", "bin"]:
-        save_cns(res_df, out_file, sort=True, change_coords=True, no_sample=no_sample, no_header=no_header)
-    else:
-        if no_sample:
-            res_df.reset_index(drop=True)
-        res_df.to_csv(out_file, sep="\t", index=True)
+        samples_block = samples_blocks[i]
+        
+        start = time.time()
+
+        # Perform the action
+        res_dfs = _process(action, cns_df, samples_block, cn_cols, assembly, args)
+
+        # write out the results
+        end = time.time()
+
+        if print_progress:
+            runtime = end - start
+            print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")            
+            # Add to file times.tsv
+            if args.time:
+                # check if the file exists
+                write = "a" if exists("./out/times.tsv") else "w"
+                with open("./times.tsv", write) as f:
+                    f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
+
+
+        for j in range(len(res_dfs)): 
+            write_mode = "w" if i == 0 and j == 0 else "a"
+            header = not no_header and i == 0 and j == 0
+            res_df = res_dfs[j]
+            if action == "bin" and args.onlybins or action == "cluster":
+                save_regions(res_df, out_file, change_coords=True, header=header, write_mode=write_mode)
+            elif action in ["fill", "impute", "bin"]:
+                save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, 
+                        header=header, write_mode=write_mode)
+            else:
+                if no_sample:
+                    res_df.reset_index(drop=True)
+                res_df.to_csv(out_file, sep="\t", index=True, header=header,  mode=write_mode)
 
     if print_progress:
         print("Done.")
