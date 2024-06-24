@@ -5,8 +5,8 @@ from cns.utils.conversions import cns_to_segments
 from cns.utils.assemblies import hg19
 
 
-def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False, no_header=False):
-    cns_df = pd.read_csv(path, sep="\t", header=None if no_header else 0)
+def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False, header=True):
+    cns_df = pd.read_csv(path, sep="\t", header=0 if header else None)
     if no_sample:
         cns_df["sample"] = "dummy"
     cns_df = canonize_cns_df(cns_df, cn_col_no)
@@ -17,14 +17,14 @@ def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False,
     return cns_df
 
 
-def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, no_header=False):
+def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, header=False, write_mode="w"):
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:
         cns_df.loc[:, "start"] += 1
 
     to_save = cns_df.drop(columns="sample_id") if no_sample else cns_df
-    to_save.to_csv(path, sep="\t", index=False, header=False if no_header else True)
+    to_save.to_csv(path, sep="\t", index=False, header=header, mode=write_mode)
 
     if change_coords:
         cns_df.loc[:, "start"] -= 1
@@ -60,12 +60,12 @@ def samples_df_from_cns_df(cns_df, fill_sex=True):
     return samples_df
 
 
-def save_regions(seg_df, path, change_coords=True):
+def save_regions(seg_df, path, change_coords=True, header=False, write_mode="w"):
     if change_coords:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
     sel = seg_df[["chrom", "start", "end"]]
-    sel.to_csv(path, sep="\t", index=False)
+    sel.to_csv(path, sep="\t", index=False, header=header, mode=write_mode)
 
 
 def load_regions(path, change_coords=True):

@@ -49,27 +49,15 @@ def group_bins(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid', as
 
 @njit
 def mean_func(cns_array):
-    result = []
-    for i in range(cns_array.shape[1] - 1):
-        result.append(np.average(cns_array[:, i], weights=cns_array[:, -1]))
-    return result
-
+    return [np.average(cns_array[:, i], weights=cns_array[:, -1]) for i in range(cns_array.shape[1] - 1)]
 
 @njit
 def max_func(cns_array):
-    result = []
-    for i in range(cns_array.shape[1] - 1):
-        result.append(np.max(cns_array[:, i]))
-    return result
-
+    return [np.max(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
 @njit
 def min_func(cns_array):
-    result = []
-    for i in range(cns_array.shape[1] - 1):
-        result.append(np.min(cns_array[:, i]))
-    return result
-
+    return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
 def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
     row_id = 0
@@ -157,10 +145,12 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
                     bin = _cns_in_seg(sample, chrom, group.values, segment)
                     new_rows.extend(bin)
     if print_progress:
-        print("")
+        print(f"Binning finished. Converting {len(new_rows)} rows...", end="\r")
     bin_df = pd.DataFrame(new_rows, columns=sel_cols)
     bin_df["start"] = bin_df["start"].astype(np.uint32)
     bin_df["end"] = bin_df["end"].astype(np.uint32)
+    if print_progress:
+        print(f"Binned into {len(new_rows)} CNS." + " " * 40)
     return bin_df
 
 
