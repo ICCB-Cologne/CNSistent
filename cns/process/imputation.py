@@ -154,8 +154,7 @@ def _is_same_chrom(df, i, j):
     return df.at[j, "sample_id"] == df.at[i, "sample_id"] and df.at[j, "chrom"] == df.at[i, "chrom"]
 
 
-def create_imputed_entries(cns_df, cn_columns=None, print_info=True):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
+def _impute_extend(cns_df, cn_columns, print_info=True):
     new_entries = []
     for i in range(len(cns_df)):
         if np.isnan(cns_df.at[i, cn_columns[0]]) or np.isnan(cns_df.at[i, cn_columns[1]]):
@@ -206,6 +205,57 @@ def create_imputed_entries(cns_df, cn_columns=None, print_info=True):
     # sort cns_df by sample_id, chr, start
     res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     return res_df
+
+
+def _impute_diploid(cns_df, samples_df, cn_columns, print_info=True):
+    if len(cn_columns) > 2 or len(cn_columns) < 1:
+        raise ValueError("Diploid imputation can only be done for one (total CN) or two (major, minor CN) columns.")
+    
+    aut_df = cns_df.query("chrom != 'chrX' and chrom != 'chrY'")
+    xx_samples = samples_df.query("sex == 'xx'").index
+    xy_samples = samples_df.query("sex == 'xy'").index
+    xx_cns_df = cns_df[cns_df["sample_id"].isin(xx_samples)]
+    xx_x_chrom_df = xx_cns_df.query("chrom == 'chrX'")
+    xx_y_chrom_df = xx_cns_df.query("chrom == 'chrY'")
+    xy_cns_df = cns_df[cns_df["sample_id"].isin(xy_samples)]
+    xy_x_chrom_df = xy_cns_df.query("chrom == 'chrX'")
+    xy_y_chrom_df = xy_cns_df.query("chrom == 'chrY'")
+    if len(cn_columns) == 2:
+        aut_df[cn_columns] = aut_df[cn_columns].fillna(1)
+        xx_x_chrom_df[cn_columns] = xx_x_chrom_df[cn_columns].fillna(1)      
+        xx_y_chrom_df[cn_columns] = xx_y_chrom_df[cn_columns].fillna(0)
+        xy_x_chrom_df[cn_columns[0]] = xy_x_chrom_df[cn_columns[0]].fillna(1)
+        xy_x_chrom_df[cn_columns[1]] = xy_x_chrom_df[cn_columns[1]].fillna(0)
+        xy_y_chrom_df[cn_columns[0]] = xy_y_chrom_df[cn_columns[0]].fillna(1)
+        xy_y_chrom_df[cn_columns[0]] = xy_y_chrom_df[cn_columns[0]].fillna(0)
+    else:
+        col = cn_columns[0]
+        aut_df[col] = aut_df[col].fillna(2)
+        xx_x_chrom_df[col] = xx_x_chrom_df[col].fillna(2)
+        xx_y_chrom_df[col] = xx_y_chrom_df[col].fillna(0)
+        xy_x_chrom_df[col] = xy_x_chrom_df[col].fillna(1)
+        xy_y_chrom_df[col] = xy_y_chrom_df[col].fillna(1)
+
+        # Update the original dataframe in place
+    cns_df.update(aut_df)
+    cns_df.update(xx_x_chrom_df)
+    cns_df.update(xx_y_chrom_df)
+    cns_df.update(xy_x_chrom_df)
+    cns_df.update(xy_y_chrom_df)
+
+    return cns_df
+
+
+def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=True):    
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    if method ==  'extend':
+        return _impute_extend(cns_df, cn_columns, print_info)
+    if method == 'diploid':
+        return _impute_diploid(cns_df, samples_df, cn_columns, print_info)
+    if method == 'zero':
+        return fill_nans_with_zeros(cns_df, cn_columns, print_info)
+    else:
+        raise ValueError(f"Unknown imputation method: {method}")
 
 
 def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    

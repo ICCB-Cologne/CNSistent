@@ -7,7 +7,7 @@ from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import add_cns_loc, bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
 from cns.process.cluster import created_merged_segs
-from cns.process.imputation import add_missing, add_tails, create_imputed_entries, fill_gaps, fill_nans_with_zeros, merge_neighbours
+from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
 from cns.utils.files import get_ane_cols_if_none, load_regions, samples_df_from_cns_df, find_cn_cols_if_none
@@ -15,7 +15,10 @@ from cns.utils.assemblies import hg19
 
 
 def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
-    samples_df = samples_df_from_cns_df(cns_df)
+    if samples_df is None:
+        if print_info:
+            print("No samples provided, creating samples from CNS data.")
+        samples_df = samples_df_from_cns_df(cns_df)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
     cns_tailed_df = add_tails(cns_df, assembly.chr_lens, print_info=print_info)
@@ -26,12 +29,15 @@ def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missi
     return res
 
 
-def main_impute(cns_df, cn_columns=None, print_info=False):
+def main_impute(cns_df, cn_columns=None, samples_df=None, method='extend', print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-
-    imputed_df = create_imputed_entries(cns_df, cn_columns, print_info=print_info)
-    filled_df = fill_nans_with_zeros(imputed_df, cn_columns, print_info=print_info)
-    res = merge_neighbours(filled_df, cn_columns, print_info=print_info)
+    if method == 'diploid' and samples_df is None:
+        if print_info:  
+            print("Diploid imputation requires samples, but none provided, creating samples from CNS data.")
+        samples_df = samples_df_from_cns_df(cns_df)
+    imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
+    filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
+    res = merge_neighbours(filled_df, cn_columns=cn_columns, print_info=print_info)
     assert len(res[res.isnull().any(axis=1)]) == 0, "NaNs still present in final_df."
     return res
 

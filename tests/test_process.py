@@ -97,6 +97,7 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
 
 
+# TODO: Add sex chromosome checks
 class TestImputation(unittest.TestCase):
     def setUp(self):
         self.cns_df = pd.DataFrame({
@@ -146,11 +147,11 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.minor_cn.isnull().sum(), 0)
 
-    def test_create_imputed_entries(self):
+    def test_impute_extend(self):
         result = add_tails(self.cns_df, self.chr_lengths)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
-        result = create_imputed_entries(result, print_info=False)
+        result = cns_impute(result, self.samples_df, print_info=False)
         result = merge_neighbours(result, print_info=False)
         result = fill_nans_with_zeros(result, print_info=False)    
         self.assertEqual(result.shape[0], 7)        
@@ -158,6 +159,18 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.at[6, "start"], 137)
         self.assertEqual(result.at[6, "end"], 200)
         self.assertEqual(result.major_cn.isnull().sum(), 0)
+
+    def test_impute_diploid(self):
+        print(self.cns_df)
+        result = add_tails(self.cns_df, self.chr_lengths)
+        result = fill_gaps(result, print_info=False)    
+        result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
+        result = cns_impute(result, self.samples_df, method='diploid', print_info=False)
+        result = merge_neighbours(result, print_info=False)    
+        print(result)
+        self.assertEqual(result.major_cn.isnull().sum(), 0)
+        self.assertEqual(result.shape[0], 8)
+
 
 
 class TestBreakpoints(unittest.TestCase):
