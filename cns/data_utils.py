@@ -61,7 +61,7 @@ def load_data_file(filename):
     return pd.read_csv(pjoin(data_path, filename), sep=sep)
 
 
-def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, print_info = False):
+def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, remove_uncertain = False, print_info = False):
     cn_neutral = samples.query(f"ane_major_cn_frac_aut < {ane_min_frac} & ane_major_cn_frac_aut < {ane_min_frac}").index
     if print_info:
         print(len(cn_neutral), "samples are CN neutral")
@@ -71,14 +71,25 @@ def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whiteli
     low_coverage = samples.query(f"cover_frac_aut < {cover_min_frac}").index
     if print_info:
         print(len(low_coverage), "samples have low coverage")
-    filtered = samples.query("(index not in @low_coverage)")
+    filtered = filtered.query("(index not in @low_coverage)")
 
     # Filter out CN neutral and low coverage samples 
     if whitelist:
         blacklisted = samples.query("whitelist == False").index
         if print_info:
             print(len(blacklisted), "samples are blacklisted")
-        filtered = samples.query("(index not in @blacklisted)")
+        filtered = filtered.query("(index not in @blacklisted)")
+
+    if remove_uncertain:
+        samples["type"] = samples["type"].replace({"LUADx2": "LUAD"})
+        samples["type"] = samples["type"].replace({"LUADx3": "LUAD"})
+        untyped = samples[samples["type"].fillna('').apply(lambda x: any(not c.isupper() for c in x))].index
+        if print_info:
+            print(len(untyped), "samples do not have exact type")
+        filtered = filtered.query("(index not in @untyped)")
+
+    if print_info:
+        print("Filtered samples:", len(filtered))
 
     return filtered.copy()
 
@@ -93,7 +104,7 @@ def load_filter_samples(print_info=False):
         if print_info:
             print(k)
         min_frac = 0.95 if k != "TRACERx" else 0.85
-        samples[k] = filter_samples(v, cover_min_frac=min_frac, whitelist=k=="PCAWG", print_info=print_info)
+        samples[k] = filter_samples(v, cover_min_frac=min_frac, whitelist=k=="PCAWG", remove_uncertain=k=="TRACERx", print_info=print_info)
     return samples
 
 
@@ -129,6 +140,8 @@ def load_merged_samples(print_info=False):
     samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
     samples["PCAWG"].head()
     all_samp = pd.concat(samples.values())
+    if print_info:
+        print("Total samples:", len(all_samp))
     return all_samp
 
 

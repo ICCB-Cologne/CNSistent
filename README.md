@@ -45,7 +45,10 @@ sample1         chr1    100     200     1           0
 sample1         chr1    550     1000    2           0
 ...
 ```
-![Example Data](./docs/example_data.png)
+
+| ![Example Data](./docs/example_data.png) | -- | 
+| -- | -- |
+
 
 > **NOTE:** For conformation with the standard, the start and end positions are 1-based, and the end position is inclusive. 
 > However, for the sake of sanity of the author, these are converted to 0-based, and the end position is exclusive. See details on usage: TODO: link.
