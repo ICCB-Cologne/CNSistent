@@ -130,7 +130,9 @@ def load_merged_samples(print_info=False):
     samples = load_filter_samples(print_info)
     for k, v in samples.items():
         v["source"] = k
-    samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]
+    samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
+    samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx2": "LUAD"})
+    samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx3": "LUAD"})
     # drop where TCGA_id is != NaN
     overlap_with_tcga = samples["PCAWG"].index[samples["PCAWG"]["TCGA_id"].notna()]
     if print_info:
