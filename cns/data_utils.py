@@ -62,7 +62,7 @@ def load_data_file(filename):
 
 
 def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, remove_uncertain = False, print_info = False):
-    cn_neutral = samples.query(f"ane_major_cn_frac_aut < {ane_min_frac} & ane_major_cn_frac_aut < {ane_min_frac}").index
+    cn_neutral = samples.query(f"ane_total_cn_frac_aut < {ane_min_frac}").index
     if print_info:
         print(len(cn_neutral), "samples are CN neutral")
     filtered = samples.query("(index not in @cn_neutral)")
