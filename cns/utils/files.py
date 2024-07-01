@@ -60,7 +60,7 @@ def samples_df_from_cns_df(cns_df, fill_sex=True):
     return samples_df
 
 
-def save_regions(seg_df, path, change_coords=True, header=False, write_mode="w"):
+def save_regions(seg_df, path, change_coords=True, header=True, write_mode="w"):
     if change_coords:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
@@ -68,15 +68,20 @@ def save_regions(seg_df, path, change_coords=True, header=False, write_mode="w")
     sel.to_csv(path, sep="\t", index=False, header=header, mode=write_mode)
 
 
-def load_regions(path, change_coords=True):
+def load_regions(path, change_coords=True, header=True):
     if path == "" or path is None:
         return None
     if not exists(path):
         raise ValueError(f"File {path} not found.")
-    regs = pd.read_csv(path, sep="\t")
+    regs = pd.read_csv(path, sep="\t", header=0 if header else None)
     # check that columns "chrom", "start" and "end" exist, more colums may be present
-    if not all([col in regs.columns for col in ["chrom", "start", "end"]]):
-        raise ValueError(f"File {path} must have columns 'chrom', 'start' and 'end'.")
+    if header:
+        if not all([col in regs.columns for col in ["chrom", "start", "end"]]):
+            raise ValueError(f"File {path} must have columns 'chrom', 'start' and 'end'.")
+    else:
+        if len(regs.columns) < 3:
+            raise ValueError(f"File {path} must have at least 3 columns.")
+        regs.columns = ["chrom", "start", "end"]    
     segs = cns_to_segments(regs, change_coords)
     return segs
     

@@ -94,12 +94,15 @@ def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whiteli
     return filtered.copy()
 
 
-def load_filter_samples(print_info=False):
+def load_all_samples(filter=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
         "TCGA": load_samples_out("TCGA_hg19_samples.tsv")
     }
+    if not filter:
+        return samples
+    
     for k, v in samples.items():
         if print_info:
             print(k)
@@ -127,7 +130,7 @@ def get_cns_for_type(cns, samples, type):
 
 
 def load_merged_samples(print_info=False):
-    samples = load_filter_samples(print_info)
+    samples = load_all_samples(True, print_info)
     for k, v in samples.items():
         v["source"] = k
     samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
@@ -147,25 +150,27 @@ def load_merged_samples(print_info=False):
     return all_samp
 
 
-def load_merged_bins(samples, bin_size):
+def load_merged_bins(select_samples, bin_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
         "TRACERx": load_cns_out(f"TRACERx_bin_{bin_size}.tsv"),
         "TCGA": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
     }
     all_cns = pd.concat(cns.values())
-    all_cns = select_CNS_samples(all_cns, samples)
+    if select_samples is not None:
+        all_cns = select_CNS_samples(all_cns, select_samples)
     return all_cns
 
 
-def load_merged_cns(samples):
+def load_merged_cns(select_samples=None):
     cns = {
         "PCAWG": load_cns_out("PCAWG_cns_imp.tsv"),
         "TRACERx": load_cns_out("TRACERx_cns_imp.tsv"),
         "TCGA": load_cns_out("TCGA_hg19_cns_imp.tsv")
     }
     all_cns = pd.concat(cns.values())
-    all_cns = select_CNS_samples(all_cns, samples)
+    if select_samples is not None:
+        all_cns = select_CNS_samples(all_cns, select_samples)
     return all_cns
 
 

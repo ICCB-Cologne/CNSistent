@@ -1,0 +1,24 @@
+import os
+from cns.data_utils import *
+from cns.process.pipelines import main_cluster
+from cns.utils.files import save_regions
+import argparse
+
+if __name__ == "__main__":
+	# require 1 integer parameter
+	parser = argparse.ArgumentParser()
+	parser.add_argument("dist", type=int, help="distance for clustering")
+	args = parser.parse_args()
+	dist = args.dist
+	if dist <= 0:
+		raise ValueError("Distance must be greater than 0")
+
+	samples = load_merged_samples(False)
+	cns = load_merged_cns(samples)
+
+	clustered = main_cluster(cns, dist)
+	file = os.path.join(out_path, f'joint_clust_{dist}.tsv')
+	print("Saving to file:", file)
+	save_regions(clustered, file)
+
+

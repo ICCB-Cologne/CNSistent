@@ -6,16 +6,16 @@ data="../data"
 out="../out"
 cd "$(dirname "$0")" # Set path to the script's path
 
+
+for dist in 1000000 500000 250000; do
+    python ./data_cluster.py $dist
+done
+
 # TRACERx PCAWG TCGA_hg19 TCGA_hg38
 for dataset in TRACERx PCAWG TCGA_hg19 TCGA_hg38; 
 do    
     echo "Processing $dataset"
     bin_shared_args="${out}/${dataset}_cns_imp.tsv --samples ${out}/${dataset}_samples.tsv  --verbose --threads $threads --subsplit $subsplit"
-    for dist in 100000 300000 1000000; do
-        let filter_dist=$dist/2
-        cns cluster "${out}/${dataset}_cns_imp.tsv" --dist $dist --out "${out}/${dataset}_cluster_${dist}.tsv" --verbose
-        cns bin $bin_shared_args --out "${out}/${dataset}_bin_cluster_${dist}.tsv" --select "${out}/${dataset}_cluster_${dist}.tsv" --remove gaps --filter $filter_dist
-    done
     cns bin $bin_shared_args --out "${out}/${dataset}_bin_10MB.tsv" --bins 10000000 --remove gaps --filter 1000000
     cns bin $bin_shared_args --out "${out}/${dataset}_bin_3MB.tsv" --bins 3000000 --remove gaps --filter 300000
     cns bin $bin_shared_args --out "${out}/${dataset}_bin_1MB.tsv" --bins 1000000 --remove gaps --filter 100000
@@ -24,4 +24,9 @@ do
     cns bin $bin_shared_args --select "${data}/ENSEMBL_coding_genes.tsv" --out "${out}/${dataset}_bin_ENSEMBL.tsv" --aggregate min
     cns bin $bin_shared_args --select "arms" --out "${out}/${dataset}_bin_arms.tsv" --aggregate min --remove gaps --filter 1000000
     cns bin $bin_shared_args --select "bands" --out "${out}/${dataset}_bin_bands.tsv" --aggregate min --remove gaps --filter 100000
+    for dist in 1000000 500000 250000; do
+        let filter_dist=$dist/10
+        cns bin $bin_shared_args --out "${out}/${dataset}_bin_cluster_${dist}.tsv" --select "${out}/joint_clust_${dist}.tsv" --remove gaps --filter $filter_dist
+    done
 done
+
