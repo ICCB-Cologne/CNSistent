@@ -81,8 +81,7 @@ def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whiteli
         filtered = filtered.query("(index not in @blacklisted)")
 
     if remove_uncertain:
-        samples["type"] = samples["type"].replace({"LUADx2": "LUAD"})
-        samples["type"] = samples["type"].replace({"LUADx3": "LUAD"})
+        samples["type"] = samples["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
         untyped = samples[samples["type"].fillna('').apply(lambda x: any(not c.isupper() for c in x))].index
         if print_info:
             print(len(untyped), "samples do not have exact type")
@@ -94,7 +93,7 @@ def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whiteli
     return filtered.copy()
 
 
-def load_all_samples(filter=True, print_info=False):
+def load_all_samples(filter=True, retype=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
@@ -106,8 +105,12 @@ def load_all_samples(filter=True, print_info=False):
     for k, v in samples.items():
         if print_info:
             print(k)
-        min_frac = 0.95 if k != "TRACERx" else 0.85
+        min_frac = 0.95 if k != "TRACERx" else 0.875
         samples[k] = filter_samples(v, cover_min_frac=min_frac, whitelist=k=="PCAWG", remove_uncertain=k=="TRACERx", print_info=print_info)
+    
+    if retype:
+        samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
+        samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
     return samples
 
 
@@ -130,12 +133,9 @@ def get_cns_for_type(cns, samples, type):
 
 
 def load_merged_samples(print_info=False):
-    samples = load_all_samples(True, print_info)
+    samples = load_all_samples(True, True, print_info)
     for k, v in samples.items():
         v["source"] = k
-    samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
-    samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx2": "LUAD"})
-    samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx3": "LUAD"})
     # drop where TCGA_id is != NaN
     overlap_with_tcga = samples["PCAWG"].index[samples["PCAWG"]["TCGA_id"].notna()]
     if print_info:
