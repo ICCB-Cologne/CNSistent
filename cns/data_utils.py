@@ -3,7 +3,7 @@ from os.path import join as pjoin, abspath, dirname
 
 from cns.process.binning import add_cns_loc, sum_cns
 from cns.utils.selection import select_CNS_samples
-from cns.utils.files import load_cns, load_samples
+from cns.utils.files import load_cns, load_samples, get_cn_columns
 
 
 def get_root_path():
@@ -50,7 +50,7 @@ def load_tracerx():
 def load_data():
     data = {
         "PCAWG" : load_pcawg(),
-        "TCGA": load_tcga(),
+        "TCGA_hg19": load_tcga(),
         "TRACERx": load_tracerx()
     }
     return data
@@ -97,7 +97,7 @@ def load_all_samples(filter=True, retype=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
-        "TCGA": load_samples_out("TCGA_hg19_samples.tsv")
+        "TCGA_hg19": load_samples_out("TCGA_hg19_samples.tsv")
     }
     if not filter:
         return samples
@@ -118,7 +118,7 @@ def load_filter_bins(samples, bin_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
         "TRACERx": load_cns_out(f"TRACERx_bin_{bin_size}.tsv"),
-        "TCGA": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
+        "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
     }
     for k, v in cns.items():
         cns[k] = select_CNS_samples(v, samples[k])
@@ -150,11 +150,15 @@ def load_merged_samples(print_info=False):
     return all_samp
 
 
+def rename_cns_columns(cns):
+    cn_columns = get_cn_columns(cns)
+    return cns.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
+
 def load_merged_bins(select_samples, bin_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
-        "TRACERx": load_cns_out(f"TRACERx_bin_{bin_size}.tsv"),
-        "TCGA": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
+        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{bin_size}.tsv")),
+        "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
     }
     all_cns = pd.concat(cns.values())
     if select_samples is not None:
@@ -165,8 +169,8 @@ def load_merged_bins(select_samples, bin_size):
 def load_merged_cns(select_samples=None):
     cns = {
         "PCAWG": load_cns_out("PCAWG_cns_imp.tsv"),
-        "TRACERx": load_cns_out("TRACERx_cns_imp.tsv"),
-        "TCGA": load_cns_out("TCGA_hg19_cns_imp.tsv")
+        "TRACERx": rename_cns_columns(load_cns_out("TRACERx_cns_imp.tsv")),
+        "TCGA_hg19": load_cns_out("TCGA_hg19_cns_imp.tsv")
     }
     all_cns = pd.concat(cns.values())
     if select_samples is not None:
@@ -174,9 +178,12 @@ def load_merged_cns(select_samples=None):
     return all_cns
 
 
-def main_load_data():
+def main_load_data(bins = None):
     samples = load_merged_samples()
-    cns = load_merged_cns(samples)
+    if bins == None:
+        cns = load_merged_cns(samples)
+    else:
+        cns = load_merged_bins(samples, bins)
     return samples, cns
 
 
