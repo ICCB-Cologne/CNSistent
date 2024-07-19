@@ -16,7 +16,7 @@ docs_path = pjoin(get_root_path(), "docs")
 
 
 def load_cns_out(filename):
-    return sum_cns(add_cns_loc(load_cns(pjoin(out_path, filename))))
+    return sum_cns(add_cns_loc(rename_cns_columns(load_cns(pjoin(out_path, filename)))))
 
 
 def load_samples_out(filename):
@@ -30,7 +30,7 @@ def load_bins(dataset, bin_type):
 class Dataset:
     def __init__(self, name, color):
         self.name = name
-        self.cns = load_cns_out(f"{name}_cns_imp.tsv")
+        self.cns = rename_cns_columns(load_cns_out(f"{name}_cns_imp.tsv"))
         self.samples = load_samples_out(f"{name}_samples.tsv")
         self.color = color
 
@@ -117,7 +117,7 @@ def load_all_samples(filter=True, retype=True, print_info=False):
 def load_filter_bins(samples, bin_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
-        "TRACERx": load_cns_out(f"TRACERx_bin_{bin_size}.tsv"),
+        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{bin_size}.tsv")),
         "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
     }
     for k, v in cns.items():
