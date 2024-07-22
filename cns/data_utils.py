@@ -114,6 +114,7 @@ def load_all_samples(filter=True, retype=True, print_info=False):
     return samples
 
 
+# TODO: delete if unused
 def load_filter_bins(samples, bin_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
@@ -124,12 +125,12 @@ def load_filter_bins(samples, bin_size):
         cns[k] = select_CNS_samples(v, samples[k])
     return cns
 
-# TODO: Double check if works
+
 def get_cns_for_type(cns, samples, type):
-	query = f"type == '{type}' | TCGA_type == '{type}'" if "TCGA_type" in samples.columns else f"type == '{type}'"
-	ids = samples.query(query).index
-	select_cns = cns.set_index("sample_id").loc[ids].reset_index()
-	return select_cns
+    query = f"type == '{type}'"
+    ids = samples.query(query).index
+    select_cns = cns.set_index("sample_id").loc[ids].reset_index()
+    return select_cns
 
 
 def load_merged_samples(print_info=False):
@@ -137,13 +138,12 @@ def load_merged_samples(print_info=False):
     for k, v in samples.items():
         v["source"] = k
     # drop where TCGA_id is != NaN
-    overlap_with_tcga = samples["PCAWG"].index[samples["PCAWG"]["TCGA_id"].notna()]
+    overlap_with_tcga = samples["PCAWG"]["TCGA_id"].dropna().unique()
     if print_info:
-        print(f"Overlapping samples with TCGA: {len(overlap_with_tcga)}")
-    samples["PCAWG"] = samples["PCAWG"].drop(overlap_with_tcga)
+        print(f"Overlapping samples with PCAWG: {len(overlap_with_tcga)}")
+    samples["TCGA_hg19"][~samples["TCGA_hg19"].isin(overlap_with_tcga)]
     # drop columns TCGA_id and TCGA_type
     samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
-    samples["PCAWG"].head()
     all_samp = pd.concat(samples.values())
     if print_info:
         print("Total samples:", len(all_samp))
@@ -173,6 +173,7 @@ def load_merged_cns(select_samples=None):
         "TCGA_hg19": load_cns_out("TCGA_hg19_cns_imp.tsv")
     }
     all_cns = pd.concat(cns.values())
+    cns = None
     if select_samples is not None:
         all_cns = select_CNS_samples(all_cns, select_samples)
     return all_cns
