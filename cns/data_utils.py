@@ -62,6 +62,9 @@ def load_data_file(filename):
 
 
 def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, remove_uncertain = False, print_info = False):
+    if print_info:
+        print("Total samples:", len(samples))
+    
     cn_neutral = samples.query(f"ane_total_cn_frac_aut < {ane_min_frac}").index
     if print_info:
         print(len(cn_neutral), "samples are CN neutral")
@@ -139,9 +142,10 @@ def load_merged_samples(print_info=False):
         v["source"] = k
     # drop where TCGA_id is != NaN
     overlap_with_tcga = samples["PCAWG"]["TCGA_id"].dropna().unique()
+    samples["TCGA_hg19"] = samples["TCGA_hg19"].query("sample_id not in @overlap_with_tcga") 
     if print_info:
         print(f"Overlapping samples with PCAWG: {len(overlap_with_tcga)}")
-    samples["TCGA_hg19"][~samples["TCGA_hg19"].isin(overlap_with_tcga)]
+        print(f"After overlap removal: {len(samples['TCGA_hg19'])}")
     # drop columns TCGA_id and TCGA_type
     samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
     all_samp = pd.concat(samples.values())
