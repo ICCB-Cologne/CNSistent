@@ -18,6 +18,9 @@ def add_cns_loc(cns_df, assembly=hg19):
 
 def sum_cns(cns_df, cn_columns=None):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    # remove total_cn from cn_columns if it is there
+    if "total_cn" in cn_columns:
+        cn_columns.remove("total_cn")
     cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
     return cns_df
 
