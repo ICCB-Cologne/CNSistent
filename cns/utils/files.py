@@ -40,6 +40,10 @@ def load_samples(path):
     return samples_df   
 
 
+def save_samples(samples_df, path, write_mode="w"):
+    samples_df.to_csv(path, sep="\t", index=True, header=True, mode=write_mode)
+
+
 def fill_sex_if_missing(cns, samples):
     res = samples.copy()
     # Set found_sex to True for each sample if there is chrY, otherwise set it to False

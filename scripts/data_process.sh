@@ -1,6 +1,8 @@
 #!/bin/bash
 
-preprocess_only=false
+preprocess=true
+process=true
+postprocess=true
 
 threads=30
 
@@ -10,18 +12,22 @@ cd "$(dirname "$0")" # Set path to the script's path
 
 
 mkdir -p $out
-# TRACERx PCAWG TCGA_hg19 TCGA_hg38
-for dataset in TRACERx PCAWG TCGA_hg19 TCGA_hg38;
+# TRACERx_met TRACERx_prim PCAWG TCGA_hg19 TCGA_hg38
+for dataset in TRACERx_met TRACERx_prim;
 do
-    echo "Processing $dataset"
-    ./data_preprocess.py ${dataset}
-    if [ "$preprocess_only" = true ]; then
-        continue      
+    echo "Processing $dataset"    
+    if [ "$postprocess" = true ]; then        
+        ./data_preprocess.py ${dataset}
     fi
-    common_args="--threads $threads --verbose"
-    cns fill "${out}/${dataset}_cns_preprocess.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
-    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
-    cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
-    cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
+    if [ "$process" = true ]; then        
+        common_args="--threads $threads --verbose"
+        cns fill "${out}/${dataset}_cns_preprocess.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
+        cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
+        cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
+        cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
+    fi
 done
 
+if [ "$postprocess" = true ]; then
+    ./data_postprocess.py
+fi

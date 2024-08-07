@@ -94,12 +94,15 @@ def tcga(hg_ver, print_debug=False):
     return cns_raw_df, samples_df
 
 
-def tracerx(print_debug=False):
-    prim_cns_file = pd.read_csv(f"{data_path}/20220803_TxPri_mphase_by_sample_df.reduced.csv")
+def tracerx(primary, print_debug=False):
+    if primary:
+        cns_file = pd.read_csv(f"{data_path}/20220803_TxPri_mphase_by_sample_df.reduced.csv")
+    else:
+        cns_file = pd.read_csv(f"{data_path}/20220807_TxMets_prim_and_met_mphase_by_sample_df.reduced.csv")
     if print_debug:
-        print(prim_cns_file.head())
+        print(cns_file.head())
 
-    cns_subset = prim_cns_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
+    cns_subset = cns_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
     cns_subset["chr"] = "chr" + cns_subset["chr"].astype(str)
     cns_raw_df = canonize_cns_df(cns_subset, 2)
     if print_debug:
@@ -109,7 +112,7 @@ def tracerx(print_debug=False):
     if print_debug:
         print(labels.head())
 
-    left = prim_cns_file[["sample", "patient_id"]].drop_duplicates()
+    left = cns_file[["sample", "patient_id"]].drop_duplicates()
     right = labels[["cruk_id", "sex", "histology_multi_full"]].drop_duplicates()
     merged = pd.merge(left, right, left_on="patient_id", right_on="cruk_id")
     merged["sex"] = np.where(merged["sex"] == "Female", "xx", "xy")
@@ -124,7 +127,7 @@ def tracerx(print_debug=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Converts source datasets into format usable by cns")
     parser.add_argument("dataset", type=str, help="Name of the dataset")  
-    parser.add_argument("--verbose", action="store_true", help="Print debug information")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print debug information")
     args = parser.parse_args()
     dataset = args.dataset
     print_debug = args.verbose
@@ -136,8 +139,10 @@ if __name__ == "__main__":
         cns_df, samples_df = tcga("hg19", print_debug)
     elif dataset == "TCGA_hg38":
         cns_df, samples_df = tcga("hg38", print_debug)
-    elif dataset == "TRACERx":
-        cns_df, samples_df = tracerx(print_debug)
+    elif dataset == "TRACERx_prim":
+        cns_df, samples_df = tracerx(True, print_debug)
+    elif dataset == "TRACERx_met":
+        cns_df, samples_df = tracerx(False, print_debug)
     else:
         raise ValueError(f"Dataset {dataset} not recognized.")
     
