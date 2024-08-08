@@ -6,7 +6,7 @@ import numpy as np
 from cns.data_utils import load_samples_out, load_cns_out, out_path
 from cns.process.breakpoints import get_breaks  
 from cns.process.binning import add_cns_loc, bin_by_breaks, group_bins
-from cns.utils.files import save_cns, save_samples
+from cns.utils.files import get_cn_columns, save_cns, save_samples
 
 def merge_samples(print_info=False):
     # Load the sample data
@@ -69,12 +69,13 @@ def merge_cns(print_info=False):
         binned_prim = add_cns_loc(bin_by_breaks(sel_prim, merged_breaks, print_progress=False))
         binned_met = add_cns_loc(bin_by_breaks(sel_met, merged_breaks, print_progress=False))
         binned_merge = group_bins(pd.concat([binned_prim, binned_met]))
+        cn_columns = get_cn_columns(binned_merge)
         binned_merge["sample_id"] = sample_id
-        binned_merge = binned_merge[["sample_id", "chrom", "start", "end", "nMajor_cn", "nMinor_cn"]]
+        binned_merge = binned_merge[["sample_id", "chrom", "start", "end"] + cn_columns]
         binned_samples.append(binned_merge)
 
     binned_df = pd.concat(binned_samples).sort_values(["sample_id", "chrom", "start"])
-    save_cns(binned_df, f"{out_path}/TRACERx_binned_cns.tsv")
+    save_cns(binned_df, f"{out_path}/TRACERx_cns_imp.tsv")
 
 
 if __name__ == "__main__":
