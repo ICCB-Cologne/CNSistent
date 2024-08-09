@@ -17,7 +17,7 @@ def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False,
     return cns_df
 
 
-def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, header=False, write_mode="w"):
+def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, header=True, write_mode="w"):
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:

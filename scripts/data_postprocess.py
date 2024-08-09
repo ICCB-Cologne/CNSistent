@@ -45,10 +45,11 @@ def merge_samples(print_info=False):
     # Save the merged DataFrame
     save_samples(merged_df, f"{out_path}/TRACERx_samples.tsv")
 
-def merge_cns(print_info=False):
-    prim_cns = load_cns_out("TRACERx_prim_cns_imp.tsv")
+def merge_cns(print_info=False, filled=False):
+    suffix = "fill" if filled else "imp"
+    prim_cns = load_cns_out(f"TRACERx_prim_cns_{suffix}.tsv")
     prim_cns.set_index(["sample_id"], inplace=True)
-    met_cns = load_cns_out("TRACERx_met_cns_imp.tsv")
+    met_cns = load_cns_out(f"TRACERx_met_cns_{suffix}.tsv")
     met_cns.set_index(["sample_id"], inplace=True)
 
     common_samples = list(set(prim_cns.index).intersection(set(met_cns.index)))
@@ -75,7 +76,7 @@ def merge_cns(print_info=False):
         binned_samples.append(binned_merge)
 
     binned_df = pd.concat(binned_samples).sort_values(["sample_id", "chrom", "start"])
-    save_cns(binned_df, f"{out_path}/TRACERx_cns_imp.tsv")
+    save_cns(binned_df, f"{out_path}/TRACERx_cns_{suffix}.tsv")
 
 
 if __name__ == "__main__":
@@ -87,5 +88,8 @@ if __name__ == "__main__":
         print("Merging samples for TRACERx...")
     merge_samples(print_debug)
     if print_debug:
-        print("Merging CNS for TRACERx...")
-    merge_cns(print_debug)
+        print("Merging filled CNS for TRACERx...")
+    merge_cns(print_debug, True)    
+    if print_debug:
+        print("Merging imputed CNS for TRACERx...")
+    merge_cns(print_debug, False)
