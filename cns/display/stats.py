@@ -60,3 +60,16 @@ def plot_segments_per_chr(info_df, dataset):
 
     # set title to "CNS of the PCAWG dataset"
     plt.suptitle(f"CINs of the {dataset} dataset ({len(info_df)})", fontsize=16)
+
+
+def plot_bends(cutoffs, counts, knee_point, elbow_point):
+    # set plot aspect ratio 1:1 
+    plt.figure(figsize=(6, 6))
+    plt.plot(cutoffs, counts)
+    plt.axvline(x=cutoffs[knee_point], color='r', linestyle='--')
+    plt.axvline(x=cutoffs[elbow_point], color='g', linestyle='--')
+    plt.xlabel("Cutoff")
+    plt.ylabel("Count")
+    plt.title("Knee and Elbow points")
+    plt.legend(["Counts", f"Knee: {cutoffs[knee_point]}", f"Elbow: {cutoffs[elbow_point]}"])
+    plt.show()
