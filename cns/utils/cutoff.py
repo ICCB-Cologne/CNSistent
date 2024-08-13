@@ -9,7 +9,7 @@ def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
     #  effectively counting the number of elements less than or equal to each cutoff.
     counts = np.searchsorted(np.sort(vals), cutoffs, side='right') / len(vals)	
     max_count = np.max(counts)
-    delta_x=(max_val - min_val)/(len(cutoffs) * np.max(counts)) if max_count > 0 else 0
+    delta_x=(max_val-min_val)/(steps*np.max(counts)) if max_count > 0 else 0
     return cutoffs, counts, delta_x # x, y
 
 

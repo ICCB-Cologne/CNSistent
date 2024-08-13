@@ -4,6 +4,7 @@ import numpy as np
 
 from cns.utils.conversions import *
 from cns.utils.files import *
+from cns.utils.cutoff import *
 
 
 class TestConversions(unittest.TestCase):
@@ -101,6 +102,28 @@ class TestFiles(unittest.TestCase):
     def test_get_cn_columns(self):
         cols = get_cn_columns(self.cns_df)
         self.assertEqual(cols, ["major_cn", "minor_cn"])
+
+
+class TestCutoff(unittest.TestCase):
+    def test_count_below_lim(self):
+        vals = np.array([1, 2, 3, 4, 5])
+        cutoffs, counts, delta_x = count_below_lim(vals, min_val=0, max_val=5, steps=5)
+        self.assertTrue(np.array_equal(cutoffs, np.array([0., 1., 2., 3., 4., 5.])))
+        self.assertTrue(np.array_equal(counts, np.array([0., 0.2, 0.4, 0.6, 0.8, 1.])))
+        self.assertEqual(delta_x, 1)
+
+    def test_calculate_signed_angle(self):
+        angle = calculate_signed_angle(0, 1)
+        self.assertEqual(angle, 45)
+        angle = calculate_signed_angle(1, 0)
+        self.assertEqual(angle, -45)
+
+    def test_find_knee(self):
+        test_vals = [0, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14]
+        knee, _ = find_knee(test_vals, delta_x=1, convex=True, allow_pad=False)
+        self.assertEqual(knee, 2)
+        elbow, _ = find_knee(test_vals, delta_x=1, convex=False, allow_pad=False)
+        self.assertEqual(elbow, 8)
 
 
 if __name__ == '__main__':
