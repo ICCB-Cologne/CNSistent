@@ -1,6 +1,5 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-
 from cns.process.binning import add_cns_loc, sum_cns
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples, get_cn_columns
@@ -63,7 +62,7 @@ def load_data_file(filename):
     return pd.read_csv(pjoin(data_path, filename), sep=sep)
 
 
-def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whitelist = False, filter_types = False, print_info = False):
+def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):
     if print_info:
         print("Total samples:", len(samples))
     
@@ -98,31 +97,42 @@ def filter_samples(samples, ane_min_frac = 0.001, cover_min_frac = 0.95, whiteli
     return filtered.copy()
 
 
-def load_all_samples(filter=True, retype=True, print_info=False):
+def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
         "TCGA_hg19": load_samples_out("TCGA_hg19_samples.tsv")
     }
-    if not filter:
-        return samples
     
-    for k, v in samples.items():
+    overlap_with_tcga = samples["PCAWG"]["TCGA_id"].dropna().unique()
+    
+    if filter:
+        for k, v in samples.items():
+            if print_info:
+                print(k)
+            ane_vals = v["ane_total_cn_frac_aut"]
+            ane_bends = find_bends(ane_vals, max_val=0.01, steps=100)
+            ane_min_frac = ane_bends[0][ane_bends[2]]
+            cover_vals = v["cover_frac_aut"]
+            cover_bends = find_bends(cover_vals, min_val=0.75, steps=250)
+            cover_min_frac = cover_bends[0][cover_bends[3]]
+            whitelist = k=="PCAWG"
+            filter_types = k=="TRACERx"
+            samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, whitelist, filter_types, print_info)
+    
+    if drop_tcga:
+        # drop where TCGA_id is != NaN
+        samples["TCGA_hg19"] = samples["TCGA_hg19"].query("sample_id not in @overlap_with_tcga") 
         if print_info:
-            print(k)
-        ane_vals = v["ane_total_cn_frac_aut"]
-        ane_bends = find_bends(ane_vals, max_val=0.025, steps=250)
-        ane_min_frac = ane_bends[0][ane_bends[2]]
-        cover_vals = v["cover_frac_aut"]
-        cover_bends = find_bends(cover_vals, min_val=0.75, steps=250)
-        cover_min_frac = cover_bends[0][cover_bends[3]]
-        whitelist = k=="PCAWG"
-        filter_types = k=="TRACERx"
-        samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, whitelist, filter_types, print_info)
-    
+            print(f"Overlapping samples with PCAWG: {len(overlap_with_tcga)}")
+            print(f"After overlap removal: {len(samples['TCGA_hg19'])}")
+
     if retype:
         samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
         samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
+    
+    samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
+
     return samples
 
 
@@ -146,26 +156,19 @@ def get_cns_for_type(cns, samples, type):
 
 
 def load_merged_samples(print_info=False):
-    samples = load_all_samples(True, True, print_info)
+    samples = load_all_samples(True, True, True, print_info)
     for k, v in samples.items():
         v["source"] = k
-    # drop where TCGA_id is != NaN
-    overlap_with_tcga = samples["PCAWG"]["TCGA_id"].dropna().unique()
-    samples["TCGA_hg19"] = samples["TCGA_hg19"].query("sample_id not in @overlap_with_tcga") 
+    all_samples = pd.concat(samples.values())        
     if print_info:
-        print(f"Overlapping samples with PCAWG: {len(overlap_with_tcga)}")
-        print(f"After overlap removal: {len(samples['TCGA_hg19'])}")
-    # drop columns TCGA_id and TCGA_type
-    samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
-    all_samp = pd.concat(samples.values())
-    if print_info:
-        print("Total samples:", len(all_samp))
-    return all_samp
+        print("Total samples:", len(all_samples))
+    return all_samples
 
 
 def rename_cns_columns(cns):
     cn_columns = get_cn_columns(cns)
     return cns.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
+
 
 def load_merged_bins(select_samples, bin_size):
     cns = {

@@ -8,6 +8,7 @@ from cns.process.breakpoints import get_breaks
 from cns.process.binning import add_cns_loc, bin_by_breaks, group_bins
 from cns.utils.files import get_cn_columns, save_cns, save_samples
 
+
 def merge_samples(print_info=False):
     # Load the sample data
     prim_samples = load_samples_out("TRACERx_prim_samples.tsv")
@@ -15,6 +16,11 @@ def merge_samples(print_info=False):
 
     # Merge the DataFrames on the common key 'sample_id'
     merged_df = pd.merge(prim_samples, met_samples, on='sample_id', suffixes=('_prim', '_met'))
+
+    # Filtered indices
+    common_samples = merged_df.index.unique()
+    prim_only = prim_samples[~prim_samples.index.isin(common_samples)]
+    met_only = met_samples[~met_samples.index.isin(common_samples)]
 
     # Identify numerical and non-numerical columns
     numerical_cols = merged_df.select_dtypes(include='number').columns
@@ -42,8 +48,11 @@ def merge_samples(print_info=False):
     for col in prim_samples.select_dtypes(include='int').columns:
         merged_df[col] = np.floor(merged_df[col]).astype(np.int64)
 
+    all_df = pd.concat([merged_df, prim_only, met_only], axis=0)
+
     # Save the merged DataFrame
-    save_samples(merged_df, f"{out_path}/TRACERx_samples.tsv")
+    save_samples(all_df, f"{out_path}/TRACERx_samples.tsv")
+
 
 def merge_cns(print_info=False, filled=False):
     suffix = "fill" if filled else "imp"
