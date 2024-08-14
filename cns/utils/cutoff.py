@@ -25,10 +25,7 @@ def calculate_signed_angle(s1, s2):
 
 
 # finds a knee/elbow in the curve when using covex/concave cureves
-def find_knee(vals, delta_x = None, convex=True, dist=1, allow_boundary=True):
-    if delta_x is None:
-        delta_x = 1 / len(vals)
-
+def find_knee(vals, aspect_ratio = 1, convex=True, dist=1, allow_boundary=True):
     steps = len(vals) - 1
     y = vals
     for i in range(dist):
@@ -37,7 +34,7 @@ def find_knee(vals, delta_x = None, convex=True, dist=1, allow_boundary=True):
         # insert last value at the end of the array dist times
         y = np.append(y, y[-1])
     
-    dy = np.diff(y) / delta_x
+    dy = np.diff(y) / aspect_ratio
 
     # calculate the difference between slopes on the left and right side of each point 
     ddy_abs = []

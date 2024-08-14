@@ -1,7 +1,6 @@
 import unittest
 import pandas as pd
 import numpy as np
-
 from cns.utils.conversions import *
 from cns.utils.files import *
 from cns.utils.cutoff import *
@@ -66,7 +65,6 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(column_to_label('minor_cn'), 'Minor CN')
         self.assertEqual(column_to_label('other'), 'other')
 
-
     def test_segs_to_chrom_dict(self):
         segs = [('chr1', 1, 5), ('chr1', 4, 8), ('chr2', 10, 15)]
         chrom_dict = segs_to_chrom_dict(segs)
@@ -120,9 +118,9 @@ class TestCutoff(unittest.TestCase):
 
     def test_find_knee(self):
         test_vals = [0, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14]
-        knee, _ = find_knee(test_vals, delta_x=1, convex=True, allow_boundary=False)
+        knee, _ = find_knee(test_vals, aspect_ratio=1, convex=True, allow_boundary=False)
         self.assertEqual(knee, 2)
-        elbow, _ = find_knee(test_vals, delta_x=1, convex=False, allow_boundary=False)
+        elbow, _ = find_knee(test_vals, aspect_ratio=1, convex=False, allow_boundary=False)
         self.assertEqual(elbow, 8)
 
     def test_find_bends(self):
@@ -133,7 +131,6 @@ class TestCutoff(unittest.TestCase):
         self.assertEqual(len(res[1]), 6)
         self.assertEqual(res[2], 1)
         self.assertEqual(res[4], 2)
-
 
 
 if __name__ == '__main__':
