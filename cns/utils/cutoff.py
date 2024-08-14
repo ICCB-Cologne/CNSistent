@@ -25,7 +25,7 @@ def calculate_signed_angle(s1, s2):
 
 
 # finds a knee/elbow in the curve when using covex/concave cureves
-def find_knee(vals, delta_x = None, convex=True, dist=1, allow_pad=True):
+def find_knee(vals, delta_x = None, convex=True, dist=1, allow_boundary=True):
     if delta_x is None:
         delta_x = 1 / len(vals)
 
@@ -41,8 +41,8 @@ def find_knee(vals, delta_x = None, convex=True, dist=1, allow_pad=True):
 
     # calculate the difference between slopes on the left and right side of each point 
     ddy_abs = []
-    for i in range(steps):
-        if not allow_pad and (i < dist or i > steps - dist):
+    for i in range(steps + 1):
+        if not allow_boundary and (i < dist or i > steps - dist):
             ddy_abs.append(0)
             continue
         left = np.mean(dy[i:i+dist])
@@ -70,8 +70,8 @@ def find_knee(vals, delta_x = None, convex=True, dist=1, allow_pad=True):
 # dist - number of points left and right of a cutoff to be considered when calculating the slope
 # allow_pad - if True, the slope is calculated for all points, 
 #   otherwise the slope is calculated only for points that are not within dist from the beginning or end
-def find_bends(vals, min_val=0, max_val=1, steps=1000, dist=10, allow_pad=True):    
+def find_bends(vals, min_val=0, max_val=1, steps=1000, dist=10, allow_boundary=True):    
     cutoffs, counts, delta_x = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
-    knee_index, knee_value = find_knee(counts, delta_x, convex=True, dist=dist, allow_pad=allow_pad)
-    elbow_index, elbow_value = find_knee(counts, delta_x, convex=False, dist=dist, allow_pad=allow_pad)
-    return cutoffs, counts, knee_index, elbow_index
+    knee_index, knee_value = find_knee(counts, delta_x, convex=True, dist=dist, allow_boundary=allow_boundary)
+    elbow_index, elbow_value = find_knee(counts, delta_x, convex=False, dist=dist, allow_boundary=allow_boundary)
+    return cutoffs, counts, knee_index, knee_value, elbow_index, elbow_value

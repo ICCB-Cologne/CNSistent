@@ -57,11 +57,6 @@ def load_data():
     return data
 
 
-def load_data_file(filename):
-    sep = "\t" if filename.endswith(".tsv") else ","
-    return pd.read_csv(pjoin(data_path, filename), sep=sep)
-
-
 def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):
     if print_info:
         print("Total samples:", len(samples))
@@ -115,7 +110,7 @@ def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False)
             ane_min_frac = ane_bends[0][ane_bends[2]]
             cover_vals = v["cover_frac_aut"]
             cover_bends = find_bends(cover_vals, min_val=0.75, steps=250)
-            cover_min_frac = cover_bends[0][cover_bends[3]]
+            cover_min_frac = cover_bends[0][cover_bends[4]]
             whitelist = k=="PCAWG"
             filter_types = k=="TRACERx"
             samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, whitelist, filter_types, print_info)
@@ -134,18 +129,6 @@ def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False)
     samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
 
     return samples
-
-
-# TODO: delete if unused
-def load_filter_bins(samples, bin_size):
-    cns = {
-        "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
-        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{bin_size}.tsv")),
-        "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
-    }
-    for k, v in cns.items():
-        cns[k] = select_CNS_samples(v, samples[k])
-    return cns
 
 
 def get_cns_for_type(cns, samples, type):

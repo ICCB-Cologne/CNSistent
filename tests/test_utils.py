@@ -120,10 +120,20 @@ class TestCutoff(unittest.TestCase):
 
     def test_find_knee(self):
         test_vals = [0, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14]
-        knee, _ = find_knee(test_vals, delta_x=1, convex=True, allow_pad=False)
+        knee, _ = find_knee(test_vals, delta_x=1, convex=True, allow_boundary=False)
         self.assertEqual(knee, 2)
-        elbow, _ = find_knee(test_vals, delta_x=1, convex=False, allow_pad=False)
+        elbow, _ = find_knee(test_vals, delta_x=1, convex=False, allow_boundary=False)
         self.assertEqual(elbow, 8)
+
+    def test_find_bends(self):
+        test_vals = [0.1, 0.2, .5, .7, .8]
+        res = find_bends(test_vals, min_val=0, max_val=1, steps=5, dist=1, allow_boundary=False)
+        self.assertEqual(len(res), 6)
+        self.assertEqual(len(res[0]), 6)
+        self.assertEqual(len(res[1]), 6)
+        self.assertEqual(res[2], 1)
+        self.assertEqual(res[4], 2)
+
 
 
 if __name__ == '__main__':

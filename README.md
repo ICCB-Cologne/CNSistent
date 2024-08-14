@@ -2,7 +2,7 @@
 
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
-## Usage
+# Usage
 
 CNSistent is available both as a [stand-alone](#cli) tool and as a [Python library](#library).
 
@@ -14,7 +14,7 @@ Requires:
 
 > Git Clone the will also download all source datasets, in total around ~1GB.
 
-### Quickstart (from Bash)
+## Quickstart (from Bash)
 
 1. Create the conda environment: `conda env create -f ./cnsistent.yml`
 2. Activate the environment: `conda activate cns`
@@ -63,7 +63,7 @@ BED files do not have a sample identifier, so the `sample_id` column is not pres
 awk 'BEGIN{FS="[ \t]+";OFS="\t"} {print "sample1", $1, $2, $3}' yourfile.txt | sed '1isample_id\tchrom\tstart\tend' > modified_file.tsv
 ```
 
-## CLI
+# CLI
 
 The command line interface uses the following pattern:
 
@@ -98,7 +98,7 @@ The following additional optional arguments are shared:
 
 > For examples of using the CLI, you can refer to  the file `example_CLI.sh`.
 
-### `fill`
+## `fill`
 
 Fills any gaps in *CNS* file with Nan values. The following steps are performed: 
 
@@ -107,7 +107,7 @@ Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 3. Add missing chromosomes, if they are missing compared to the reference.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major must match.
 
-### `impute`
+## `impute`
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
@@ -120,7 +120,7 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 | -- | -- |
 
 
-### `coverage`
+## `coverage`
 
 Calculates the coverage of the *CNS* file. The coverage is calculated as the fraction of the genome that has a CN value assigned.
 
@@ -134,7 +134,7 @@ The following statistics are calculated and stored in a *samples* file:
 * `bases_*`: total number of bases with CNS values assigned. `*` is for `aut`, `sex`, `tot`, referring to autosomes, sex chromosomes, and the sum of both, respectively
 * `frac_*`: fraction of bases with CNS values assigned over the total number of bases
 
-### `ploidy`
+## `ploidy`
 
 Calculates the portions of the genome that are aneuploid, or for absent in case of male sex chromosomes.
 
@@ -146,7 +146,7 @@ The following statistics are calculated and stored in a *samples* file:
 * `ane_+_*`: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), `+` expands into CN columns names
 * `ane_+_frac_*`: the fraction of aneuploid bases over the total number of bases
 
-### `bin`
+## `bin`
 
 Conducts the binning - for selected segments, the aggregate CN value for selected samples are calculated. 
 
@@ -185,7 +185,7 @@ cns bin cns.tsv --bins 200000 --remove gaps --filter
 cns bin cns.tsv --select genes.tsv --aggregate min
 ```
 
-### `cluster`
+## `cluster`
 
 Calculates consistent regions using breakpoints clustering.
 
@@ -195,7 +195,36 @@ Additional arguments:
 
 > NOTE: If first or last breakpoint is less than `--dist` from the end of the chromosome, the segment is extended to the end of the chromosome.
 
-## API (Python library)
+# API (Python library)
+
+## Quickstart
+
+The repository contains a set of utility functions for loading the available data in `cns.data_utils`. 
+
+* `main_load_data`: The entry point function. It loads and filters samples from the datasets (PCAWG, TCGA, TRACERx) together with the imputed CNS data. If bins value is provided, instead of CNS data, binned data is loaded for the perspective bin size.
+* `load_COSMIC`: Loads the gene set from COSMIC with columns `gene, chrom, start, end`.
+* `load_ENSEMBL`: Loads the gene set from Ensembl with columns `gene, chrom, start, end`.
+
+### Data subfunctions:
+
+* `filter_samples`: Filters samples based on the provided criteria.
+* `load_all_samples`: Loads samples only, with possible filtering.
+* `load_merged_samples`: Same as `load_all_samples`, but merges the samples from the datasets into a dataframe.
+* `load_merged_bins`: Only loads bins for provided list of samples.
+* `load_merged_cns`: Only loads CNS for provided list of samples.
+
+### Utility functions
+
+* `get_cns_for_type`: Obtains CNS for samples for a given cancer type.
+
+### File accecss:
+* `out_path`: Returns the default output path where output of processing/binning files are stored.
+* `data_path`: Returns the default data path where the input files (bundled together with the repository) are stored.
+* `load_cns_out`: Loads CNS file from the output folder.
+* `load_samples_out`: Loads samples file from the output folder.
+* `load_bins`: Loads bins from the output folder.
+
+## Library
 
 The library is split into three blocks:
 * `cns.process`: The methods for processing the data, including filling, imputing, and calculating coverage.
@@ -331,10 +360,19 @@ For the figures, the first parameter is always the `CNS_df`, or a list thereof i
 * width: width of the figure in inches, is calculated automatically if not specified.
 * max_cn: The CN tracks values are cropped to avoid outliers collapsing the color scale. If not specified, `10` is used.
 
-
 ### Utils
 
 Utils contain the specification for the hg19, hg38 assemblies, including the gaps and cytobands. In addition, functions for files and data are provided:
+
+#### Filtering (cutoff)
+
+To help with defining cutoff regions for samples, it is possible to use a utility function that finds a knee/elbow point for a dataset. 
+
+The primary function is `find_bends`, which will convert a value (e.g. coverage) into a cumulative distribution between `min_val` and `max_val` with `steps` steps. The function will then find the knee/elbow point in the distribution.
+
+The function will return the point where the slope of the cumulative distribution has the highest convex (knee) or concave (elbow) curvature. To avoid finding local minimum, `dist` can be set to consider the angle between the mean of the nearest `dist` points. If `allow_pad` is set to true, the endpoinst are also considered as potential knees/elbows, with the slope at the beginning and the end being 0.
+
+![CN Tracks](./docs/example_knee.png)
 
 #### Files
 
