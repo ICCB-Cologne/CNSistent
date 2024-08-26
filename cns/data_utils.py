@@ -28,35 +28,6 @@ def load_bins(dataset, bin_type):
     return sum_cns(add_cns_loc(load_cns(pjoin(out_path, f"{dataset}_bin_{bin_type}.tsv"))))
 
 
-class Dataset:
-    def __init__(self, name, color):
-        self.name = name
-        self.cns = rename_cns_columns(load_cns_out(f"{name}_cns_imp.tsv"))
-        self.samples = load_samples_out(f"{name}_samples.tsv")
-        self.color = color
-
-
-def load_pcawg():
-    return Dataset("PCAWG", "#1f77b4")
-
-
-def load_tcga():
-    return Dataset("TCGA_hg19", "#ff7f0e")
-
-
-def load_tracerx():
-    return Dataset("TRACERx", "#2ca02c")
-
-
-def load_data():
-    data = {
-        "PCAWG" : load_pcawg(),
-        "TCGA_hg19": load_tcga(),
-        "TRACERx": load_tracerx()
-    }
-    return data
-
-
 def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):
     if print_info:
         print("Total samples:", len(samples))
@@ -95,7 +66,7 @@ def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=F
 def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
-        "TRACERx": load_samples_out("TRACERx_samples.tsv"),
+        "TRACERx": load_samples_out("TRACERx_prim_samples.tsv"),
         "TCGA_hg19": load_samples_out("TCGA_hg19_samples.tsv")
     }
     
@@ -156,7 +127,7 @@ def rename_cns_columns(cns):
 def load_merged_bins(select_samples, bin_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
-        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{bin_size}.tsv")),
+        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_prim_bin_{bin_size}.tsv")),
         "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
     }
     all_cns = pd.concat(cns.values())
@@ -168,7 +139,7 @@ def load_merged_bins(select_samples, bin_size):
 def load_merged_cns(select_samples=None):
     cns = {
         "PCAWG": load_cns_out("PCAWG_cns_imp.tsv"),
-        "TRACERx": rename_cns_columns(load_cns_out("TRACERx_cns_imp.tsv")),
+        "TRACERx": rename_cns_columns(load_cns_out("TRACERx_prim_cns_imp.tsv")),
         "TCGA_hg19": load_cns_out("TCGA_hg19_cns_imp.tsv")
     }
     all_cns = pd.concat(cns.values())
