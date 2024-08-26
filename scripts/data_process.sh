@@ -10,10 +10,10 @@ data="../data"
 out="../out"
 cd "$(dirname "$0")" # Set path to the script's path
 
-
 mkdir -p $out
+
 # TRACERx_met TRACERx_prim PCAWG TCGA_hg19 TCGA_hg38
-for dataset in TRACERx_met TRACERx_prim;
+for dataset in TRACERx_met TRACERx_prim PCAWG TCGA_hg19 TCGA_hg38;
 do
     echo "Processing $dataset"    
     if [ "$postprocess" = true ]; then        

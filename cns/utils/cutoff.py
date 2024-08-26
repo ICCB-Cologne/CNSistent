@@ -69,6 +69,8 @@ def find_knee(vals, aspect_ratio = 1, convex=True, dist=1, allow_boundary=True):
 #   otherwise the slope is calculated only for points that are not within dist from the beginning or end
 def find_bends(vals, min_val=0, max_val=1, steps=1000, dist=10, allow_boundary=True):    
     cutoffs, counts, delta_x = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
+    if delta_x <= 0:
+        return cutoffs, counts, -1, min_val, -1, min_val
     knee_index, knee_value = find_knee(counts, delta_x, convex=True, dist=dist, allow_boundary=allow_boundary)
     elbow_index, elbow_value = find_knee(counts, delta_x, convex=False, dist=dist, allow_boundary=allow_boundary)
     return cutoffs, counts, knee_index, knee_value, elbow_index, elbow_value

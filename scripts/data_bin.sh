@@ -14,7 +14,7 @@ if [ $cluster = true ]; then
 fi
 
 # TRACERx PCAWG TCGA_hg19 TCGA_hg38
-for dataset in TRACERx PCAWG TCGA_hg19 ; 
+for dataset in TRACERx PCAWG TCGA_hg19 TCGA_hg38; 
 do    
     echo "Processing $dataset"
     bin_shared_args="${out}/${dataset}_cns_imp.tsv --samples ${out}/${dataset}_samples.tsv  --verbose --threads $threads --subsplit $subsplit"
