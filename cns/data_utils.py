@@ -34,13 +34,13 @@ def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=F
     
     cn_neutral = samples.query(f"ane_total_cn_frac_aut < {ane_min_frac}").index
     if print_info:
-        print(len(cn_neutral), f"samples are CN neutral (below {ane_min_frac})")
+        print(len(cn_neutral), f"samples are CN neutral (below {ane_min_frac:.5f})")
     filtered = samples.query("(index not in @cn_neutral)")
 
     # Find samples with low coverage (below 95% in autosomes)
     low_coverage = samples.query(f"cover_frac_aut < {cover_min_frac}").index
     if print_info:
-        print(len(low_coverage), f"samples have low coverage (below {cover_min_frac})")
+        print(len(low_coverage), f"samples have low coverage (below {cover_min_frac:.5f})")
     filtered = filtered.query("(index not in @low_coverage)")
 
     # Filter out CN neutral and low coverage samples 
@@ -77,10 +77,10 @@ def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False)
             if print_info:
                 print(k)
             ane_vals = v["ane_total_cn_frac_aut"]
-            ane_bends = find_bends(ane_vals, max_val=0.01, steps=100)
+            ane_bends = find_bends(ane_vals)
             ane_min_frac = ane_bends[0][ane_bends[2]]
             cover_vals = v["cover_frac_aut"]
-            cover_bends = find_bends(cover_vals, min_val=0.75, steps=250)
+            cover_bends = find_bends(cover_vals)
             cover_min_frac = cover_bends[0][cover_bends[4]]
             whitelist = k=="PCAWG"
             filter_types = k=="TRACERx"

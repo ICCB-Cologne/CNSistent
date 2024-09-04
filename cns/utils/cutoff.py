@@ -52,14 +52,9 @@ def find_knee(x, y, convex=True):
 # vals - values to be counted
 # min_val - minimum value to be considered
 # max_val - maximum value to be considered
-# steps - number of cutoffs between min and max, such that the distribution is counts the vals <= cutoff
-# dist - number of points left and right of a cutoff to be considered when calculating the slope
-# allow_pad - if True, the slope is calculated for all points, 
-#   otherwise the slope is calculated only for points that are not within dist from the beginning or end
-def find_bends(vals, min_val=0, max_val=1, steps=1000, dist=10, allow_boundary=True):    
-    cutoffs, counts, delta_x = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
-    if delta_x <= 0:
-        return cutoffs, counts, -1, min_val, -1, min_val
-    knee_index, knee_value = find_knee(counts, delta_x, convex=True, dist=dist, allow_boundary=allow_boundary)
-    elbow_index, elbow_value = find_knee(counts, delta_x, convex=False, dist=dist, allow_boundary=allow_boundary)
-    return cutoffs, counts, knee_index, knee_value, elbow_index, elbow_value
+# steps - number of steps between min_val and max_val
+def find_bends(vals, min_val=0, max_val=1, steps=10000):    
+    X, Y = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
+    knee_index, knee_value = find_knee(X, Y, convex=True)
+    elbow_index, elbow_value = find_knee(X, Y, convex=False)
+    return X, Y, knee_index, knee_value, elbow_index, elbow_value

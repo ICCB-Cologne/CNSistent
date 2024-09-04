@@ -20,3 +20,4 @@ def add_breaks_per_sample(cns, samples, assembly=hg19):
 
     res["breaks_tot"] = res["breaks_aut"] + res["breaks_sex"]
     return res
+

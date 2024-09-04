@@ -59,23 +59,7 @@ def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any_nan=Tr
 
 
 def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=False):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if len(cn_columns) > 2:
-        raise ValueError("To calculate aneuploidy, only one (sum) or two (major, minor) CN columns are allowed.")
-    elif len(cn_columns) == 2:
-        cn_columns_df = cns_df[cn_columns]
-        major_col = cn_columns_df.values.max(axis=1)  
-        minor_col = cn_columns_df.values.min(axis=1)
-        cns_df = cns_df.drop(columns=cn_columns)
-        cns_df["major_cn"] = major_col
-        cns_df["minor_cn"] = minor_col
-        cns_df["total_cn"] = cns_df["major_cn"] + cns_df["minor_cn"]
-        cn_columns = ["major_cn", "minor_cn", "total_cn"]
-    elif len(cn_columns) == 1:
-        cns_df.rename(columns={cn_columns[0]: "total_cn"}, inplace=True)
-        cn_columns = ["total_cn"]
-    else:
-        raise ValueError("No CN columns found.")
+
 
     samples = add_breaks_per_sample(cns_df, samples, assembly)
     cns_df = add_cns_loc(cns_df, assembly)

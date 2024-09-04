@@ -59,12 +59,6 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(sortable_to_chrom(24), 'chrY')
         self.assertEqual(sortable_to_chrom(25), 'chrM')
 
-    def test_column_to_label(self):
-        self.assertEqual(column_to_label('total_cn'), 'Total CN')
-        self.assertEqual(column_to_label('major_cn'), 'Major CN')
-        self.assertEqual(column_to_label('minor_cn'), 'Minor CN')
-        self.assertEqual(column_to_label('other'), 'other')
-
     def test_segs_to_chrom_dict(self):
         segs = [('chr1', 1, 5), ('chr1', 4, 8), ('chr2', 10, 15)]
         chrom_dict = segs_to_chrom_dict(segs)
@@ -101,14 +95,22 @@ class TestFiles(unittest.TestCase):
         cols = get_cn_columns(self.cns_df)
         self.assertEqual(cols, ["major_cn", "minor_cn"])
 
+    def test_rename_cn_cols(self):
+        cns = pd.DataFrame({
+            'sample_id': ['s1', 's2'],
+            'CN1': [1, 2],
+            'CN2': [0, 1]
+        })
+        cns = rename_cn_cols(cns)
+        self.assertEqual(cns.columns.tolist(), ['sample_id', 'major_cn', 'minor_cn'])
+
 
 class TestCutoff(unittest.TestCase):
     def test_count_below_lim(self):
         vals = np.array([1, 2, 3, 4, 5])
-        cutoffs, counts, delta_x = count_below_lim(vals, min_val=0, max_val=5, steps=5)
-        self.assertTrue(np.array_equal(cutoffs, np.array([0., 1., 2., 3., 4., 5.])))
-        self.assertTrue(np.array_equal(counts, np.array([0., 0.2, 0.4, 0.6, 0.8, 1.])))
-        self.assertEqual(delta_x, 1)
+        x, y = count_below_lim(vals, min_val=0, max_val=5, steps=5)
+        self.assertTrue(np.array_equal(x, np.array([0., 1., 2., 3., 4., 5.])))
+        self.assertTrue(np.array_equal(y, np.array([0., 0.2, 0.4, 0.6, 0.8, 1.])))
 
     def test_calculate_signed_angle(self):
         angle = calculate_signed_angle(0, 1)
@@ -117,21 +119,22 @@ class TestCutoff(unittest.TestCase):
         self.assertEqual(angle, -45)
 
     def test_find_knee(self):
-        test_vals = [0, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14]
-        knee, _ = find_knee(test_vals, aspect_ratio=1, convex=True, allow_boundary=False)
+        test_y = [0, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14]
+        test_x = list(range(len(test_y)))
+        knee, _ = find_knee(test_x, test_y, convex=True)
         self.assertEqual(knee, 2)
-        elbow, _ = find_knee(test_vals, aspect_ratio=1, convex=False, allow_boundary=False)
+        elbow, _ = find_knee(test_x, test_y, convex=False)
         self.assertEqual(elbow, 8)
 
     def test_find_bends(self):
         test_vals = [0.1, 0.2, .5, .7, .8]
-        res = find_bends(test_vals, min_val=0, max_val=1, steps=5, dist=1, allow_boundary=False)
+        res = find_bends(test_vals, steps=5)
         self.assertEqual(len(res), 6)
         self.assertEqual(len(res[0]), 6)
         self.assertEqual(len(res[1]), 6)
-        self.assertEqual(res[2], 1)
-        self.assertEqual(res[4], 2)
-
+        self.assertEqual(res[2], 4)
+        self.assertEqual(res[4], 3)
+    
 
 if __name__ == '__main__':
     unittest.main()

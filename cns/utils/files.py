@@ -202,3 +202,37 @@ def dataframe_array_split(df, n_splits):
     
     return splits
 
+
+def get_major_col(col1, col2):
+    if (col1 >= col2).all():
+        return col1, col2
+    elif (col2 >= col1).all():
+        return col2, col1
+    else:
+        return None, None
+    
+
+def rename_cn_cols(cns_df, cn_columns=None):
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    if len(cn_columns) > 2:
+        raise ValueError("To discover columns, only one (total) or two (major, minor) or (hap1, hap2) CN columns are allowed. Found {cn_columns} instead.")
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    if len(cn_columns) == 2:
+        col1 = cns_df[cn_columns[0]]
+        col2 = cns_df[cn_columns[1]]            
+        cns_df = cns_df.drop(columns=cn_columns)        
+        major_col, minor_col = get_major_col(col1, col2)            
+        if major_col is None:
+            cns_df["hap1_cn"] = col1
+            cns_df["hap2_cn"] = col2
+            cn_columns = ["hap1_cn", "hap2_cn"]
+        else:
+            cns_df["major_cn"] = major_col
+            cns_df["minor_cn"] = minor_col            
+            cn_columns = ["major_cn", "minor_cn"]
+    elif len(cn_columns) == 1:
+        cns_df.rename(columns={cn_columns[0]: "total_cn"}, inplace=True)
+        cn_columns = ["total_cn"]
+    else:
+        raise ValueError("No CN columns found.")
+    return cns_df

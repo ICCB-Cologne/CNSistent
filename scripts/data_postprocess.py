@@ -22,9 +22,9 @@ def merge_samples(print_info=False):
     met_only = met_samples[~met_samples.index.isin(common_samples)].copy()
 
     # dataset label
-    prim_samples["dataset"] = "primary"
-    prim_samples[prim_samples.isin(common_samples)]["dataset"] = "both"	
-    met_only["dataset"] = "metastatic"
+    prim_samples["TRACERx_set"] = "primary"
+    prim_samples[prim_samples.isin(common_samples)]["TRACERx_set"] = "both"	
+    met_only["TRACERx_set"] = "metastatic"
 
     all_df = pd.concat([prim_samples,  met_only], axis=0)
 

@@ -34,17 +34,6 @@ def sortable_to_chrom(sortable, aut_count = 22):
         return "chrM"
 
 
-def column_to_label(cn_column):
-    if cn_column == "total_cn":
-        return "Total CN"
-    elif cn_column == "major_cn":
-        return "Major CN"
-    elif cn_column == "minor_cn":
-        return "Minor CN"
-    else:
-        return cn_column
-
-
 def segs_to_chrom_dict(segments):
     res = { }
     for seg in segments:
