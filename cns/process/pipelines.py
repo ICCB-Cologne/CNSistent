@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_ane_per_sample, norm_aut_aneuploidy, norm_sex_aneuploidy
+from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_aut_aneuploidy, calc_sex_aneuploidy, norm_aut_aneuploidy, norm_sex_aneuploidy
 from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import add_cns_loc, bin_by_segments
@@ -10,7 +10,7 @@ from cns.process.cluster import created_merged_segs
 from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours
 from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
-from cns.utils.files import get_ane_cols_if_none, load_regions, samples_df_from_cns_df, find_cn_cols_if_none
+from cns.utils.files import load_regions, samples_df_from_cns_df, find_cn_cols_if_none, rename_cn_cols
 from cns.utils.assemblies import hg19
 
 
@@ -58,18 +58,20 @@ def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any_nan=Tr
     return coverage
 
 
+def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
+    res = add_breaks_per_sample(cns_df, samples_df, assembly)
+    return res
+
+
 def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=False):
-
-
-    samples = add_breaks_per_sample(cns_df, samples, assembly)
-    cns_df = add_cns_loc(cns_df, assembly)
-    per_chr = calc_ane_per_chrom(cns_df, samples, cn_columns)
-    ane_cols = get_ane_cols_if_none(per_chr)
-    autosomes_sum, sex_chrom_sum = calc_ane_per_sample(per_chr, ane_cols, assembly)
-    autosomes_sum = norm_aut_aneuploidy(autosomes_sum, ane_cols, assembly)
-    sex_chrom_sum = norm_sex_aneuploidy(samples, sex_chrom_sum, ane_cols, assembly)
-    merged_df = autosomes_sum.merge(sex_chrom_sum, left_index=True, right_index=True, suffixes=('_aut', '_sex'))
+    cn_columns = rename_cn_cols(cns_df, cn_columns)
+    autosomes_sum, = calc_aut_aneuploidy(cns_df, samples, assembly)
+    sex_chrom_sum = calc_sex_aneuploidy(cns_df, samples, assembly)
+    autosomes_norm = norm_aut_aneuploidy(autosomes_sum, assembly)
+    sex_chrom_norm = norm_sex_aneuploidy(samples, sex_chrom_sum, assembly)
+    merged_df = autosomes_norm.merge(sex_chrom_norm, left_index=True, right_index=True, suffixes=('_aut', '_sex'))
     res = samples.merge(merged_df, left_index=True, right_index=True)
+    # TODO: Added total CNs
     return res
 
 

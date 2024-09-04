@@ -70,11 +70,11 @@ class TestFiles(unittest.TestCase):
     def setUp(self):
         self.cns_df = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4'],
-            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
-            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0],
             'chrom': ['chr1', 'chrX', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99],
             'end': [100, 200, 300, 400, 500, 50, 99, 100],
+            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
+            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0],
         })        
         self.samples = pd.DataFrame({
             'sex': ['xy', 'NA', 'xx', 'NA']
@@ -96,13 +96,25 @@ class TestFiles(unittest.TestCase):
         self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_rename_cn_cols(self):
-        cns = pd.DataFrame({
-            'sample_id': ['s1', 's2'],
-            'CN1': [1, 2],
-            'CN2': [0, 1]
-        })
+        cns = rename_cn_cols(self.cns_df.copy())
+        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
+        
+        cns = self.cns_df.copy().rename(columns={"major_cn": "cn_a"})
         cns = rename_cn_cols(cns)
-        self.assertEqual(cns.columns.tolist(), ['sample_id', 'major_cn', 'minor_cn'])
+        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
+                
+        cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
+        cns.loc[3, "cn_X"] = 0
+        cns.loc[3, "cn_Y"] = 1
+        cns = rename_cn_cols(cns)
+        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "hapX_cn", "hapY_cn"])
+
+        cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
+        cns = cns.query("chrom != 'chrY'").copy()
+        cns.loc[1, "cn_X"] = 0
+        cns = rename_cn_cols(cns)
+        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "hap1_cn", "hap2_cn"])
+
 
 
 class TestCutoff(unittest.TestCase):

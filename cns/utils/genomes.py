@@ -26,7 +26,9 @@ chr_names = [
 ]
 
 aut_names = chr_names[:-2]
+x_name = chr_names[-2]
 xx_names = chr_names[:-1]
+y_name = chr_names[-1]
 xy_names = chr_names
 
 human_chr_colors = {

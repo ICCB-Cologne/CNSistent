@@ -19,22 +19,22 @@ def cns_random(cns_df, n=5, seed=0):
     return cns_random.copy()
 
 
-def sample_head(cns_df, n=5):
-    samples = np.sort(cns_df["sample_id"].unique())[:n]
-    sample_head = cns_df.query('sample_id in @samples')
+def sample_head(samples_df, n=5):
+    samples = np.sort(samples_df.index.unique())[:n]
+    sample_head = samples_df.query('sample_id in @samples')
     return sample_head.copy()
 
 
-def sample_tail(cns_df, n=5):
-    samples = np.sort(cns_df["sample_id"].unique())[-n:]
-    sample_tail = cns_df.query('sample_id in @samples')
+def sample_tail(samples_df, n=5):
+    samples = np.sort(samples_df.index.unique())[:n]
+    sample_tail = samples.query('sample_id in @samples')
     return sample_tail.copy()
 
 
-def sample_random(cns_df, n=5, seed=0):
+def sample_random(samples_df, n=5, seed=0):
     np.random.seed(seed)
-    samples = np.random.choice(cns_df["sample_id"].unique(), n, replace=False)
-    sample_random = cns_df.query('sample_id in @samples')
+    samples = np.random.choice(samples_df["sample_id"].unique(), n, replace=False)
+    sample_random = samples_df.query('sample_id in @samples')
     return sample_random.copy()
 
 

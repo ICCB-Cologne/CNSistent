@@ -159,12 +159,6 @@ def find_cn_cols_if_none(cns_df, cn_cols):
     return cn_cols
 
 
-def get_ane_cols_if_none(cns_df, ane_cols=None):
-    if ane_cols is None:
-        return [col for col in cns_df.columns if col.startswith("ane_") and not col.endswith("_frac")]
-    return ane_cols
-
-
 def dataframe_array_split(df, n_splits):
     """
     Splits a DataFrame into n_splits parts as equally as possible.
@@ -203,36 +197,66 @@ def dataframe_array_split(df, n_splits):
     return splits
 
 
-def get_major_col(col1, col2):
-    if (col1 >= col2).all():
-        return col1, col2
-    elif (col2 >= col1).all():
-        return col2, col1
+def _get_major_minor_cols(cns_df, cn_columns):
+    col1 = cn_columns[0]
+    col2 = cn_columns[1]
+    if (cns_df[col1] >= cns_df[col2]).all():
+        return {col1: "major_cn", col2: "minor_cn"}
+    elif (cns_df[col2] >= cns_df[col1]).all():
+        return {col1: "major_cn", col2: "minor_cn"}
     else:
-        return None, None
+        return {}  
+
+# Return X hap and Y hap
+def _get_sex_hap_cols(cns_df, cn_columns, assembly=hg19):
+    col1 = cn_columns[0]
+    col2 = cn_columns[1]
+    vals = cns_df.query(f"chrom == '{assembly.chr_y}'")
+    if vals[col1].sum() != 0:
+        if vals[col2].sum() != 0:
+            print(vals)
+            raise ValueError("Haploid chromosome Y found, but both haplotypes are non-zero.")	
+        return {col2: "hapX_cn", col1: "hapY_cn"}
+    return {col1: "hapX_cn", col2: "hapY_cn"}
+
+def _has_Y_chrom(samples_df, assembly=hg19):
+    return assembly.chr_y in samples_df["chrom"].values
     
 
-def rename_cn_cols(cns_df, cn_columns=None):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+def _requires_rename(cn_columns):
     if len(cn_columns) > 2:
-        raise ValueError("To discover columns, only one (total) or two (major, minor) or (hap1, hap2) CN columns are allowed. Found {cn_columns} instead.")
+        raise ValueError("""Discovery of CN columns failed.\n
+                         Only one (total) or two (major, minor) or (hap1, hap2) CN columns are allowed.\n
+                         Found {cn_columns} instead.""")
+    elif len(cn_columns) == 2:
+        for cn_col in cn_columns:
+            if not cn_col in ["major_cn", "minor_cn", "hap1_cn", "hap2_cn", "hapX_cn", "hapY_cn"]:
+                return True
+        
+    elif len(cn_columns) == 1:
+        return cn_columns[0] != "total_cn"
+
+    else:
+        raise ValueError("Discovery of CN columns failed. No CN columns found.")
+    
+    return False
+        
+
+def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if len(cn_columns) == 2:
-        col1 = cns_df[cn_columns[0]]
-        col2 = cns_df[cn_columns[1]]            
-        cns_df = cns_df.drop(columns=cn_columns)        
-        major_col, minor_col = get_major_col(col1, col2)            
-        if major_col is None:
-            cns_df["hap1_cn"] = col1
-            cns_df["hap2_cn"] = col2
-            cn_columns = ["hap1_cn", "hap2_cn"]
-        else:
-            cns_df["major_cn"] = major_col
-            cns_df["minor_cn"] = minor_col            
-            cn_columns = ["major_cn", "minor_cn"]
+    if not _requires_rename(cn_columns):
+        return cns_df
+    
+    if len(cn_columns) == 2:                 
+        rename_map = _get_major_minor_cols(cns_df, cn_columns)            
+        if len(rename_map) == 0: # Try haplotype specific
+            if _has_Y_chrom(cns_df):
+                rename_map = _get_sex_hap_cols(cns_df, cn_columns, assembly)
+            else:
+                rename_map = { cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn" }
+        cns_df.rename(columns=rename_map, inplace=True)     
     elif len(cn_columns) == 1:
         cns_df.rename(columns={cn_columns[0]: "total_cn"}, inplace=True)
         cn_columns = ["total_cn"]
-    else:
-        raise ValueError("No CN columns found.")
+
     return cns_df
