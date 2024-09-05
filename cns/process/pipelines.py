@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 
-from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_aut_aneuploidy, calc_sex_aneuploidy, norm_aut_aneuploidy, norm_sex_aneuploidy
-from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
+from cns.analyze.aneuploidy import calc_aut_aneuploidy, calc_sex_aneuploidy, norm_aut_aneuploidy, norm_gen_aneuploidy, norm_sex_aneuploidy
+from cns.analyze.coverage import get_norm_cover, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
-from cns.process.binning import add_cns_loc, bin_by_segments
+from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
 from cns.process.cluster import created_merged_segs
 from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours
@@ -46,15 +46,16 @@ def main_bin(cns_df, segs, fun_type='mean', print_info=False):
     return bin_by_segments(cns_df, segs, fun_type, print_info)
 
 
-def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any_nan=True, print_info=False):
+# any: if True, based is considered as covered if any CN column has values assigned
+def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any=True, print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     nan_vals = cns_df[cn_columns].isna()
-    nan_filter = ~nan_vals.any(axis=1) if any_nan else ~nan_vals.all(axis=1)
+    nan_filter = ~nan_vals.all(axis=1) if any else ~nan_vals.any(axis=1)
     cns_vals = cns_df.loc[nan_filter].copy()
     coverage = get_missing_chroms(cns_vals, samples_df, assembly)
     coverage = get_covered_bases(cns_vals, coverage)
-    coverage = get_base_frac(coverage, assembly)
+    coverage = get_norm_cover(coverage, assembly)
     return coverage
 
 
@@ -66,12 +67,16 @@ def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
 def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=False):
     cn_columns = rename_cn_cols(cns_df, cn_columns)
     autosomes_sum, = calc_aut_aneuploidy(cns_df, samples, assembly)
-    sex_chrom_sum = calc_sex_aneuploidy(cns_df, samples, assembly)
+    sex_chrom_sum = calc_sex_aneuploidy(cns_df, samples, assembly)  
+    all_chrom_sum = autosomes_sum + sex_chrom_sum
+
     autosomes_norm = norm_aut_aneuploidy(autosomes_sum, assembly)
-    sex_chrom_norm = norm_sex_aneuploidy(samples, sex_chrom_sum, assembly)
+    sex_chrom_norm = norm_sex_aneuploidy(samples, sex_chrom_sum, assembly)  
+    all_chrom_norm = norm_gen_aneuploidy(samples, all_chrom_sum, assembly)  
+
     merged_df = autosomes_norm.merge(sex_chrom_norm, left_index=True, right_index=True, suffixes=('_aut', '_sex'))
-    res = samples.merge(merged_df, left_index=True, right_index=True)
-    # TODO: Added total CNs
+    merged_df = merged_df.merge(all_chrom_norm, left_index=True, right_index=True, suffixes=('', '_tot'))
+    res = samples.merge(merged_df, left_index=True, right_index=True)    
     return res
 
 

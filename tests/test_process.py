@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.pipelines import get_genome_segments, regions_remove, regions_select
 from cns.process.segments import *
 from cns.process.imputation import *
 from cns.process.binning import *
@@ -64,20 +63,6 @@ class TestSegments(unittest.TestCase):
         exp = [(1, 0, 10), (3, 20, 30)]
         self.assertEqual(filter_min_size(segs, min_size), exp)
 
-    def test_get_genome_segments(self):
-        select = [(1, 0, 10), (1, 20, 30), (2, 0, 5)]
-        remove = [(1, 5, 15)]
-        
-        filter_size = 1
-        expected_result = [(1, 15, 20), (1, 20, 30)]        
-        result = get_genome_segments(select, filter_size=filter_size, remove=remove)
-
-        
-        filter_size = 6
-        expected_result = [(1, 20, 30)]        
-        result = get_genome_segments(select, filter_size=filter_size, remove=remove)
-        
-        self.assertEqual(result, expected_result)
 
     def test_split_segment(self):
         # Test case 1
@@ -379,16 +364,6 @@ class TestMCS(unittest.TestCase):
         result = created_merged_segs(dict_start, dist, assembly, True)
         exp = [('chr1', 0, 100), ('chr2', 0, 200), ('chr2', 200, 300), ('chr2', 300, 400)]
         self.assertEqual(result, exp)
-
-    
-class TestPipelines(unittest.TestCase):
-    def test_get_segments(self):
-        bin_size = 10000000
-        filter_size = 1000000
-        select = regions_select("")
-        remove = regions_remove("gaps")
-        segs = get_genome_segments(select, bin_size, remove, filter_size)
-        print(segs)
 
 
 if __name__ == "__main__":

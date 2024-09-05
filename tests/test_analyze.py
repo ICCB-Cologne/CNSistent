@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_aut_aneuploidy, calc_sex_aneuploidy, get_expected_ploidy, norm_aut_aneuploidy, norm_sex_aneuploidy
-from cns.analyze.coverage import get_base_frac, get_covered_bases, get_missing_chroms
+from cns.analyze.coverage import get_norm_cover, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample, calc_breaks_per_chr
 from cns.process.binning import add_cns_loc, sum_cns
 from cns.process.pipelines import main_coverage
@@ -40,7 +40,7 @@ class TestCoverage(unittest.TestCase):
 
     def test_get_base_frac(self):
         samples = get_covered_bases(self.cns, self.samples)
-        result = get_base_frac(samples, assembly=self.assembly)
+        result = get_norm_cover(samples, assembly=self.assembly)
         self.assertEqual(result.loc['s1', 'cover_frac_aut'], 1/3)
         self.assertEqual(result.loc['s2', 'cover_frac_sex'], 1)
         self.assertEqual(result.loc['s4', 'cover_frac_tot'], 1/4)
@@ -138,8 +138,9 @@ class TestAneuploidy(unittest.TestCase):
     def test_calc_ane_per_sample(self):
         cns_df = sum_cns(add_cns_loc(self.cns, self.assembly))
         autosomes_sum = calc_aut_aneuploidy(cns_df, self.samples, assembly=self.assembly)
-        print(autosomes_sum)
         sex_chrom_sum = calc_sex_aneuploidy(cns_df, self.samples, assembly=self.assembly)
+        all_chrom_sum = autosomes_sum + sex_chrom_sum
+        # sum both dataframes
         self.assertEqual(len(autosomes_sum), 4)
         test_row = autosomes_sum.query('sample_id == "s4"')
         self.assertEqual(test_row['ane_major_cn'].values[0], 101)

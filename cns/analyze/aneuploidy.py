@@ -82,14 +82,27 @@ def norm_sex_aneuploidy(samples_sex, samples_df, cn_columns=None, assembly=hg19)
     cn_columns = find_cn_cols_if_none(samples_df, cn_columns)
     sex_info = samples_sex[["sex"]]
     merged_df = samples_df.merge(sex_info, left_index=True, right_index=True, how="left")
+    
     xx_len = assembly.chr_lens["chrX"]
     xy_len = assembly.chr_lens["chrY"] + xx_len
-    # map xy_len to merged_df
     
     for cn_column in cn_columns:        
         merged_df["expected_length"] = merged_df.apply(lambda x: xy_len if x["sex"] == "xy" else xx_len, axis=1)
         merged_df[cn_column + "_frac"] = merged_df[cn_column] / merged_df["expected_length"]
-    # drop the sex column
+
+    merged_df = merged_df.drop(columns=["sex", "expected_length"])
+    return merged_df
+
+def norm_gen_aneuploidy(samples_sex, samples_df, cn_columns=None, assembly=hg19):
+    cn_columns = find_cn_cols_if_none(samples_df, cn_columns)
+    sex_info = samples_sex[["sex"]]
+    merged_df = samples_df.merge(sex_info, left_index=True, right_index=True, how="left")
+    xx_len = assembly.aut_len + assembly.chr_lens["chrX"]
+    xy_len = assembly.gen_len
+    
+    for cn_column in cn_columns:        
+        merged_df["expected_length"] = merged_df.apply(lambda x: xy_len if x["sex"] == "xy" else xx_len, axis=1)
+        merged_df[cn_column + "_frac"] = merged_df[cn_column] / merged_df["expected_length"]
 
     merged_df = merged_df.drop(columns=["sex", "expected_length"])
     return merged_df

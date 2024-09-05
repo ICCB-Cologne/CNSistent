@@ -1,24 +1,22 @@
 import numpy as np
 import pandas as pd
-
 from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
-
-def get_base_frac(samples, assembly=hg19):
+def get_norm_cover(samples, assembly=hg19):
     res = samples.copy()
     x_length = assembly.chr_lens["chrX"]
     y_length = assembly.chr_lens["chrY"]
-    res["cover_frac_aut"] = res["cover_bases_aut"] / assembly.aut_len
-    res["cover_frac_sex"] = np.where(
+    res["cover_aut"] = res["cover_aut"] / assembly.aut_len
+    res["cover_sex"] = np.where(
         res["sex"] == "xy",
-        res["cover_bases_sex"] / (x_length + y_length),
-        res["cover_bases_sex"] / (x_length),
+        res["cover_sex"] / (x_length + y_length),
+        res["cover_sex"] / (x_length),
     )
-    res["cover_frac_tot"] = np.where(
+    res["cover_tot"] = np.where(
         res["sex"] == "xy",
-        res["cover_bases_tot"] / (assembly.aut_len + x_length + y_length),
-        res["cover_bases_tot"] / (assembly.aut_len + x_length),
+        res["cover_tot"] / (assembly.aut_len + x_length + y_length),
+        res["cover_tot"] / (assembly.aut_len + x_length),
     )
     return res
 
@@ -32,11 +30,11 @@ def get_covered_bases(cns_df, samples):
     sex_lens = sex_df["end"] - sex_df["start"]
 
     # Group the differences by sample_id and compute the sum for each group
-    res["cover_bases_aut"] = aut_lens.groupby(aut_df["sample_id"]).sum()
-    res["cover_bases_aut"] = res["cover_bases_aut"].fillna(0).astype(np.int64)
-    res["cover_bases_sex"] = sex_lens.groupby(sex_df["sample_id"]).sum()
-    res["cover_bases_sex"] = res["cover_bases_sex"].fillna(0).astype(np.int64)
-    res["cover_bases_tot"] = res["cover_bases_aut"] + res["cover_bases_sex"]
+    res["cover_aut"] = aut_lens.groupby(aut_df["sample_id"]).sum()
+    res["cover_aut"] = res["cover_aut"].fillna(0).astype(np.int64)
+    res["cover_sex"] = sex_lens.groupby(sex_df["sample_id"]).sum()
+    res["cover_sex"] = res["cover_sex"].fillna(0).astype(np.int64)
+    res["cover_tot"] = res["cover_aut"] + res["cover_sex"]
     return res
 
 
