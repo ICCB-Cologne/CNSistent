@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from cns.analyze.aneuploidy import calc_aut_aneuploidy, calc_sex_aneuploidy, norm_aut_aneuploidy, norm_gen_aneuploidy, norm_sex_aneuploidy
-from cns.analyze.coverage import get_norm_cover, get_covered_bases, get_missing_chroms
+from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
@@ -54,7 +54,7 @@ def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any=True, 
     cns_vals = cns_df.loc[nan_filter].copy()
     coverage = get_missing_chroms(cns_vals, samples_df, assembly)
     coverage = get_covered_bases(cns_vals, coverage)
-    coverage = get_norm_cover(coverage, assembly)
+    coverage = normalize_feature(coverage, assembly)
     return coverage
 
 

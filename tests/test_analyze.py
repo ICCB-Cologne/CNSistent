@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_aut_aneuploidy, calc_sex_aneuploidy, get_expected_ploidy, norm_aut_aneuploidy, norm_sex_aneuploidy
-from cns.analyze.coverage import get_norm_cover, get_covered_bases, get_missing_chroms
+from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample, calc_breaks_per_chr
 from cns.process.binning import add_cns_loc, sum_cns
 from cns.process.pipelines import main_coverage
@@ -40,7 +40,7 @@ class TestCoverage(unittest.TestCase):
 
     def test_get_base_frac(self):
         samples = get_covered_bases(self.cns, self.samples)
-        result = get_norm_cover(samples, assembly=self.assembly)
+        result = normalize_feature(samples, assembly=self.assembly)
         self.assertEqual(result.loc['s1', 'cover_frac_aut'], 1/3)
         self.assertEqual(result.loc['s2', 'cover_frac_sex'], 1)
         self.assertEqual(result.loc['s4', 'cover_frac_tot'], 1/4)

@@ -3,20 +3,20 @@ import pandas as pd
 from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
-def get_norm_cover(samples, assembly=hg19):
+def normalize_feature(samples, feature, assembly=hg19):
     res = samples.copy()
-    x_length = assembly.chr_lens["chrX"]
-    y_length = assembly.chr_lens["chrY"]
-    res["cover_aut"] = res["cover_aut"] / assembly.aut_len
-    res["cover_sex"] = np.where(
+    x_length = assembly.chr_lens[assembly.chr_x]
+    y_length = assembly.chr_lens[assembly.chr_y]
+    res[f"{feature}_aut"] = res[f"{feature}_aut"] / assembly.aut_len
+    res[f"{feature}_sex"] = np.where(
         res["sex"] == "xy",
-        res["cover_sex"] / (x_length + y_length),
-        res["cover_sex"] / (x_length),
+        res[f"{feature}_sex"] / (x_length + y_length),
+        res[f"{feature}_sex"] / (x_length),
     )
-    res["cover_tot"] = np.where(
+    res[f"{feature}_tot"] = np.where(
         res["sex"] == "xy",
-        res["cover_tot"] / (assembly.aut_len + x_length + y_length),
-        res["cover_tot"] / (assembly.aut_len + x_length),
+        res[f"{feature}_tot"] / (assembly.aut_len + x_length + y_length),
+        res[f"{feature}_tot"] / (assembly.aut_len + x_length),
     )
     return res
 

@@ -31,15 +31,13 @@ def get_direction(y):
         raise ValueError('Trying to find a knee in a curve that is non-monotonic')
 
 
-
 # finds a knee/elbow in the curve when using convex/concave curves
 def find_knee(x, y, knee=True):
     y_range = y[-1] - y[0]
     x_range = x[-1] - x[0]
     norm_factor = x_range / y_range
     orientation = get_direction(y)
-    print(f'orientation: {orientation}')
-    orientation *= (1 if knee else -1)
+    orientation *= (-1 if knee else 1)
 
     # calculate the difference between slopes on the left and right side of each point 
     angles = []
