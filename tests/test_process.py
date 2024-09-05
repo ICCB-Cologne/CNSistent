@@ -290,8 +290,8 @@ class TestBinning(unittest.TestCase):
     def test_bin_by_breaks(self):
         segments = [('chr1', 0, 100), ('chr2', 100, 200)]
         breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
-        seg_bin = bin_by_segments(self.cns, segments, print_progress=False)
-        break_bin = bin_by_breaks(self.cns, breaks, print_progress=False)
+        seg_bin = bin_by_segments(self.cns, segments, print_info=False)
+        break_bin = bin_by_breaks(self.cns, breaks, print_info=False)
         self.assertEqual(seg_bin.shape[0], 4)
         pd.testing.assert_frame_equal(seg_bin, break_bin)
     

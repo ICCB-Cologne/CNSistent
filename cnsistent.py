@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from multiprocessing import Pool
-import numpy as np
 import pandas as pd
 import time
 import argparse
@@ -10,6 +9,7 @@ from os.path import join as exists
 from cns.utils.assemblies import get_assembly
 from cns.utils.files import get_cn_columns, load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
 from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select, get_genome_segments
+from cns.utils.logging import log_info
 
 
 def _add_common_args(parser):
@@ -153,8 +153,7 @@ def _process(action, cns_df, samples_df, cn_cols, assembly, args):
         return [main_fun(*list(*zip_blocks))]
     else:
         with Pool(blocks) as pool:
-            if args.verbose:
-                print(f"Multiprocessing with {blocks} threads..")
+            log_info(args.verbose, f"Multiprocessing with {blocks} threads..")
             res_blocs = pool.starmap(main_fun, zip_blocks)        
             pool.close()   
             pool.join()    
@@ -168,26 +167,23 @@ def main():
     cns_file_path = args.data
     samples_path = args.samples
     out_file = args.out
-    print_progress = args.verbose
+    print_info = args.verbose
     cols_no = args.cols
     no_header = args.noheader
     no_sample = args.nosample
     subsplit = args.subsplit
 
     # Read the input
-    if print_progress:
-        print(f"***** cns {action} *****")
-        print(f"CNS path is {cns_file_path}...") 
+    log_info(print_info, print(f"***** cns {action} *****"))
+    log_info(print_info, f"CNS path is {cns_file_path}...") 
 
     # Calculate bin regions without the binning itself
     if action == "bin" and args.onlybins:        
-        if print_progress:
-            print(f"Calculating binning segments...")  
+        log_info(print_info, print(f"Calculating binning segments..."))  
         segs = _get_segments(args, assembly)
         res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
         save_regions(res_df, out_file, change_coords=True, header=not no_header)
-        if print_progress:
-            print("Done.")
+        log_info(print_info, print("Done."))
         return    
 
     if not exists(cns_file_path):
@@ -204,8 +200,7 @@ def main():
     samples_blocks = dataframe_array_split(samples_df, subsplit)
 
     for i in range(subsplit):
-        if print_progress:
-            print(f"Processing block {i+1}/{subsplit}...")
+        log_info(print_info, print(f"Processing block {i+1}/{subsplit}..."))
         
         samples_block = samples_blocks[i]
         
@@ -217,7 +212,7 @@ def main():
         # write out the results
         end = time.time()
 
-        if print_progress:
+        if print_info:
             runtime = end - start
             print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")            
             # Add to file times.tsv
@@ -242,8 +237,7 @@ def main():
                     res_df.reset_index(drop=True)
                 res_df.to_csv(out_file, sep="\t", index=True, header=header,  mode=write_mode)
 
-    if print_progress:
-        print("Done.")
+    log_info(print_info, print("Done."))
 
 
 if __name__ == "__main__":

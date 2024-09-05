@@ -12,12 +12,12 @@ from cns.process.segments import filter_min_size, segment_difference, split_segm
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
 from cns.utils.files import load_regions, samples_df_from_cns_df, find_cn_cols_if_none, rename_cn_cols
 from cns.utils.assemblies import hg19
+from cns.utils.logging import log_info
 
 
 def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     if samples_df is None:
-        if print_info:
-            print("No samples provided, creating samples from CNS data.")
+        log_info(print_info, print("No samples provided, creating samples from CNS data."))
         samples_df = samples_df_from_cns_df(cns_df)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
@@ -32,8 +32,7 @@ def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missi
 def main_impute(cns_df, cn_columns=None, samples_df=None, method='extend', print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if method == 'diploid' and samples_df is None:
-        if print_info:  
-            print("Diploid imputation requires samples, but none provided, creating samples from CNS data.")
+        log_info(print_info, print("Diploid imputation requires samples, but none provided, creating samples from CNS data."))
         samples_df = samples_df_from_cns_df(cns_df)
     imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
@@ -80,16 +79,16 @@ def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=Fals
     return res
 
 
-def main_cluster(cns_df, dist, assembly=hg19, print_progress=False):    
+def main_cluster(cns_df, dist, assembly=hg19, print_info=False):    
     dict_start = get_breaks(cns_df, keep_ends=False, assembly=assembly)
 
-    if print_progress:
+    if print_info:
         orig_count = sum(len(values) for values in dict_start.values())
         print(f"Reducing {orig_count} breakpoints, merge distance {dist} ... ")   
 
     res = created_merged_segs(dict_start, dist, assembly, extend=True)
 
-    if print_progress:
+    if print_info:
         new_count = len(res) - len(dict_start) # number of segments is breakpoints + 1 per chrom
         reduction = np.round(new_count / orig_count, 2)
         print(f"Merged breakpoints: {new_count}, reduced by {1 - reduction:.2%}.")

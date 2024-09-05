@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from cns.utils.files import find_cn_cols_if_none
+from cns.utils.logging import log_info
 
 
 def get_nan_segs(cns_df):
@@ -34,12 +35,10 @@ def add_tails(cns_df, chr_lengths, print_info=True):
             )
 
     if len(missing_ranges) == 0:
-        if print_info:
-            print(f"No missing ends found.")
+        log_info(print_info, print(f"No missing ends found."))
         return cns_df.copy()
     else:
-        if print_info:
-            print(f"Adding {len(missing_ranges)} missing ends")
+        log_info(print_info, print(f"Adding {len(missing_ranges)} missing ends"))
         new_cns_df = pd.DataFrame(missing_ranges, columns=cns_df.columns)
         res_df = pd.concat([cns_df, new_cns_df])
         res_df.sort_values(
@@ -72,13 +71,11 @@ def fill_gaps(cns_df, print_info=True):
                 )
 
     if len(new_rows) == 0:
-        if print_info:
-            print(f"No gaps found.")
+        log_info(print_info, print(f"No gaps found."))
         return cns_df.copy()
     else:
         # Concatenate the cns_dfs
-        if print_info:
-            print(f"Filling {len(new_rows)} gaps.")
+        log_info(print_info, print(f"Filling {len(new_rows)} gaps."))
         new_cns_df = pd.DataFrame(new_rows, columns=cns_df.columns)
         res_df = pd.concat([cns_df, new_cns_df])
         res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
@@ -105,12 +102,10 @@ def add_missing(cns_df, samples_df, chr_lengths, print_info=True):
                 new_entries.append(new_entry)
 
     if len(new_entries) == 0:
-        if print_info:
-            print(f"No missing chromosomes found.")
+        log_info(print_info, print(f"No missing chromosomes found."))
         return cns_df.copy()
     else:
-        if print_info:
-            print(f"Adding {len(new_entries)} missing chromosomes.")
+        log_info(print_info, print(f"Adding {len(new_entries)} missing chromosomes."))
         empty_chrs_df = pd.DataFrame(new_entries)
         res_df.reset_index(inplace=True)
         res_df = pd.concat([res_df, empty_chrs_df])
@@ -142,8 +137,7 @@ def merge_neighbours(cns_df, cn_columns=None, print_info=True):
             row.start = prev.start  # update the comparison copy too
         prev = row
 
-    if print_info:
-        print(f"Merged entries: {len(idx_to_remove)}")
+    log_info(print_info, print(f"Merged entries: {len(idx_to_remove)}"))
 
     # remove from cns_df where idx_to_remove is in the index
     res_df = res_df.drop(res_df.index[idx_to_remove]).sort_values(by=["sample_id", "chrom", "start"], ignore_index=True)
@@ -195,9 +189,7 @@ def _impute_extend(cns_df, cn_columns, print_info=True):
     query = ' or '.join([f"{col}.isnull()" for col in cn_columns])
     idx_to_remove = cns_df.query(query).index
 
-    if print_info:
-        print(f"New entries: {imputation_df.shape[0]}")
-        print(f"Removed entries: {len(idx_to_remove)}")
+    log_info(print_info, f"New entries: {imputation_df.shape[0]}\nRemoved entries: {len(idx_to_remove)}")
     # remove from cns_df where idx_to_remove is in the index
     filtered_df = cns_df.drop(idx_to_remove)
     # concat the new_table to cns_df
@@ -261,8 +253,7 @@ def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=
 def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
     res_df = cns_df.copy()
-    if print_info:
-        print(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")
+    log_info(print_info, print(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero"))
     # Fully missing chromosomes filled with 0
     for col in cn_columns:
         res_df[col] = res_df[col].fillna(0).astype(int)

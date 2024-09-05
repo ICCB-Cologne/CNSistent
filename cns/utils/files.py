@@ -3,6 +3,7 @@ import pandas as pd
 
 from cns.utils.conversions import cns_to_segments
 from cns.utils.assemblies import hg19
+from cns.utils.logging import log_info
 
 
 def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False, header=True):
@@ -109,8 +110,8 @@ def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
     if not any([chrom in assembly.chr_names for chrom in chrom_vals]):
         raise ValueError(f"No chrom found. Chromosome values must be in {assembly.chr_names}, got {chrom_vals}.")
     not_known = [chrom not in assembly.chr_names for chrom in chrom_vals]
-    if len(not_known) > 0 and print_info:
-        print(f"Found chromosomes not in assembly: {chrom_vals}, these will be dropped.")
+    if len(not_known) > 0:
+        log_info(print_info, f"Found chromosomes not in assembly: {chrom_vals}, these will be dropped.")
     cns_df = cns_df[~cns_df["chrom"].isin(chrom_vals[not_known])]
 
     # if the column start does not exist, rename the third column to start
@@ -133,8 +134,7 @@ def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
         cn_columns_map = {col : (col if is_cn_column(col) else f"{col}_cn") for col in cn_columns}
         cns_df.rename(columns=cn_columns_map, inplace=True)
         cn_columns = list(cn_columns_map.values())
-    if print_info:
-        print(f"Using CN columns: {cn_columns}")
+    lon(f"Using CN columns: {cn_columns}")
 
     sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df = cns_df[sel_columns]

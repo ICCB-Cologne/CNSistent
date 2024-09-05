@@ -6,6 +6,7 @@ from cns.process.breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
 from cns.utils.files import find_cn_cols_if_none, get_cn_columns
 from cns.utils import hg19
+from cns.utils.logging import log_info
 
 
 def add_cns_loc(cns_df, assembly=hg19):
@@ -126,7 +127,7 @@ def _get_agg_func(fun_type):
 
 
 # Add column names
-def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
+def bin_by_segments(cns_df, segments, fun_type="mean", print_info=True):
     agg_func = _get_agg_func(fun_type)
     chrom_segments = segs_to_chrom_dict(segments)
     cn_columns = get_cn_columns(cns_df)
@@ -135,10 +136,8 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
     new_rows = []
     indices = cns_df_view.index.unique()
     i = 0
-    for (sample, chrom), group in cns_df_view.groupby(level=[0, 1]):
-        if print_progress:
-            i += 1
-            print(f"Binning chr ({i}/{len(indices)})", end="\r")
+    for i, ((sample, chrom), group) in enumerate(cns_df_view.groupby(level=[0, 1])):
+        log_info(print_info, print(f"Binning chr ({i+1}/{len(indices)})", end="\r"))
         if chrom in chrom_segments:
             for segment in chrom_segments[chrom]:
                 if agg_func != None:
@@ -147,22 +146,20 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_progress=True):
                 else:
                     bin = _cns_in_seg(sample, chrom, group.values, segment)
                     new_rows.extend(bin)
-    if print_progress:
-        print(f"Binning finished. Converting {len(new_rows)} rows...", end="\r")
+    log_info(print_info, print(f"Binning finished. Converting {len(new_rows)} rows...", end="\r"))
     bin_df = pd.DataFrame(new_rows, columns=sel_cols)
     bin_df["start"] = bin_df["start"].astype(np.uint32)
     bin_df["end"] = bin_df["end"].astype(np.uint32)
-    if print_progress:
-        print(f"Binned into {len(new_rows)} CNS." + " " * 40)
+    log_info(print_info, print(f"Binned into {len(new_rows)} CNS." + " " * 40))
     return bin_df
 
 
-def bin_by_breaks(cns_df, breaks, fun_type="mean", print_progress=True):
+def bin_by_breaks(cns_df, breaks, fun_type="mean", print_info=True):
     segments = breaks_to_segments(breaks)
-    return bin_by_segments(cns_df, segments, fun_type, print_progress)
+    return bin_by_segments(cns_df, segments, fun_type, print_info)
 
 
-def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", print_progress=True):
+def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", print_info=True):
     breaks = make_breaks(break_type, assembly)
-    bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_progress)
+    bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_info)
     return bin_df
