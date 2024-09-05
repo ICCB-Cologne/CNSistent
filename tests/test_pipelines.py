@@ -58,8 +58,9 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'cover_sex'], 0.0)
         self.assertEqual(res.loc['s1', 'cover_tot'], 0.25)
     
+    def test_main_ploidy(self):
+        raise NotImplementedError()
+    
     def test_main_signatures(self):
         raise NotImplementedError()
     
-    def test_main_ploidy(self):
-        raise NotImplementedError()
