@@ -53,11 +53,13 @@ class TestPipelines(unittest.TestCase):
     def test_main_fill(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
         print(res)
+        raise NotImplementedError()
 
     def test_main_impute(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
         res = main_impute(res, self.samples)
         print(res)
+        raise NotImplementedError()
 
     def test_main_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)      
@@ -70,6 +72,7 @@ class TestPipelines(unittest.TestCase):
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
         print(res)
+        raise NotImplementedError()
     
     def test_main_signatures(self):
         raise NotImplementedError()

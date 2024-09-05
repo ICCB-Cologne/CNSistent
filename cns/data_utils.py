@@ -17,8 +17,11 @@ data_path = pjoin(get_root_path(), "data")
 docs_path = pjoin(get_root_path(), "docs")
 
 
-def load_cns_out(filename):
-    return sum_cns(add_cns_loc(rename_cns_columns(load_cns(pjoin(out_path, filename)))))
+def load_cns_out(filename, raw=False):
+    cns_df = load_cns(pjoin(out_path, filename))
+    if raw:
+        return cns_df
+    return sum_cns(add_cns_loc(rename_cns_columns(cns_df)))
 
 
 def load_samples_out(filename):

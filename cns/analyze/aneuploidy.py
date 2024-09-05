@@ -4,7 +4,7 @@ from cns.utils.files import find_cn_cols_if_none
 
 
 def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
-    if chrom == "chrX":
+    if chrom == assembly.chr_x:
         if is_xy:
             if column == "minor_cn" or column == "hapY_cn":
                 return 0
@@ -15,7 +15,7 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
                 return 2
             else:
                 return 1
-    elif chrom == "chrY":
+    elif chrom == assembly.chr_y:
         if is_xy:
             if column == "minor_cn" or column == "hapY_cn":
                 return 0
@@ -28,7 +28,7 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
             return 2
         else:
             return 1
-
+        
 
 # per chromosome and and allele find the number of aneuploid bases
 def calc_ane_per_chrom(cns_df, samples_df, cn_column, assembly=hg19):
