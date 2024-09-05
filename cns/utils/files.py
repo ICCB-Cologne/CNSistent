@@ -245,7 +245,7 @@ def _requires_rename(cn_columns):
 def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if not _requires_rename(cn_columns):
-        return cns_df
+        return cns_df, list(cn_columns)
     
     if len(cn_columns) == 2:                 
         rename_map = _get_major_minor_cols(cns_df, cn_columns)            
@@ -253,10 +253,9 @@ def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
             if _has_Y_chrom(cns_df):
                 rename_map = _get_sex_hap_cols(cns_df, cn_columns, assembly)
             else:
-                rename_map = { cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn" }
-        cns_df.rename(columns=rename_map, inplace=True)     
+                rename_map = { cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn" }   
     elif len(cn_columns) == 1:
-        cns_df.rename(columns={cn_columns[0]: "total_cn"}, inplace=True)
-        cn_columns = ["total_cn"]
-
-    return cns_df
+        rename_map = {cn_columns[0]: "total_cn"}
+    
+    cns_df.rename(columns=rename_map, inplace=True)  
+    return cns_df, rename_map.values().tolist()

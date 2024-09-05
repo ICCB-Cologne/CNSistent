@@ -4,7 +4,7 @@ from cns.process.binning import add_cns_loc, sum_cns
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples, get_cn_columns
-from cns.utils.cutoff import find_bends
+from cns.utils.kneepoint import find_bends
 
 
 def get_root_path():

@@ -139,7 +139,6 @@ class TestAneuploidy(unittest.TestCase):
         cns_df = sum_cns(add_cns_loc(self.cns, self.assembly))
         autosomes_sum = calc_aut_aneuploidy(cns_df, self.samples, assembly=self.assembly)
         sex_chrom_sum = calc_sex_aneuploidy(cns_df, self.samples, assembly=self.assembly)
-        all_chrom_sum = autosomes_sum + sex_chrom_sum
         # sum both dataframes
         self.assertEqual(len(autosomes_sum), 4)
         test_row = autosomes_sum.query('sample_id == "s4"')

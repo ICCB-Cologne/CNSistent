@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from cns.utils.conversions import *
 from cns.utils.files import *
-from cns.utils.cutoff import *
+from cns.utils.kneepoint import *
 
 
 class TestConversions(unittest.TestCase):
@@ -96,25 +96,24 @@ class TestFiles(unittest.TestCase):
         self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_rename_cn_cols(self):
-        cns = rename_cn_cols(self.cns_df.copy())
+        cns, cols = rename_cn_cols(self.cns_df.copy())
         self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
         
         cns = self.cns_df.copy().rename(columns={"major_cn": "cn_a"})
-        cns = rename_cn_cols(cns)
-        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
+        cns, cols = rename_cn_cols(cns)
+        self.assertEqual(cols, ["major_cn", "minor_cn"])
                 
         cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
         cns.loc[3, "cn_X"] = 0
         cns.loc[3, "cn_Y"] = 1
-        cns = rename_cn_cols(cns)
-        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "hapX_cn", "hapY_cn"])
+        cns, cols = rename_cn_cols(cns)
+        self.assertEqual(cols, ["hapX_cn", "hapY_cn"])
 
         cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
         cns = cns.query("chrom != 'chrY'").copy()
         cns.loc[1, "cn_X"] = 0
-        cns = rename_cn_cols(cns)
-        self.assertEqual(cns.columns.tolist(), ["sample_id", "chrom", "start", "end", "hap1_cn", "hap2_cn"])
-
+        cns, cols = rename_cn_cols(cns)
+        self.assertEqual(cols, ["hap1_cn", "hap2_cn"])
 
 
 class TestCutoff(unittest.TestCase):
@@ -133,9 +132,9 @@ class TestCutoff(unittest.TestCase):
     def test_find_knee(self):
         test_y = [0, 2, 4, 5, 6, 7, 8, 9, 10, 12, 14]
         test_x = list(range(len(test_y)))
-        knee, _ = find_knee(test_x, test_y, convex=True)
+        knee, _ = find_knee(test_x, test_y, knee=True)
         self.assertEqual(knee, 2)
-        elbow, _ = find_knee(test_x, test_y, convex=False)
+        elbow, _ = find_knee(test_x, test_y, knee=False)
         self.assertEqual(elbow, 8)
 
     def test_find_bends(self):

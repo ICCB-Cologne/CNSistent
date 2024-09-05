@@ -23,22 +23,23 @@ def calculate_signed_angle(s1, s2):
 
 
 def get_direction(y):
-    if y[0] < y[-1]:
+    if  np.all(np.diff(y) >= 0):
         return 1
-    elif y[0] > y[-1]:
+    elif np.all(np.diff(y) < 0):
         return -1
     else:
-        return 0
+        raise ValueError('Trying to find a knee in a curve that is non-monotonic')
+
 
 
 # finds a knee/elbow in the curve when using convex/concave curves
-def find_knee(x, y, convex=True):
+def find_knee(x, y, knee=True):
     y_range = y[-1] - y[0]
     x_range = x[-1] - x[0]
     norm_factor = x_range / y_range
     orientation = get_direction(y)
     print(f'orientation: {orientation}')
-    orientation *= (1 if convex else -1)
+    orientation *= (1 if knee else -1)
 
     # calculate the difference between slopes on the left and right side of each point 
     angles = []
@@ -67,8 +68,8 @@ def find_knee(x, y, convex=True):
 # steps - number of steps between min_val and max_val
 def find_bends(vals, min_val=0, max_val=1, steps=1000):    
     X, Y = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
-    knee_index, knee_value = find_knee(X, Y, convex=True)
-    elbow_index, elbow_value = find_knee(X, Y, convex=False)
+    knee_index, knee_value = find_knee(X, Y, knee=True)
+    elbow_index, elbow_value = find_knee(X, Y, knee=False)
     return X, Y, knee_index, knee_value, elbow_index, elbow_value
 
 
@@ -79,6 +80,6 @@ def find_bends(vals, min_val=0, max_val=1, steps=1000):
 # steps - number of steps between min_val and max_val
 def find_bends(vals, min_val=0, max_val=1, steps=10000):    
     X, Y = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
-    knee_index, knee_value = find_knee(X, Y, convex=True)
-    elbow_index, elbow_value = find_knee(X, Y, convex=False)
+    knee_index, knee_value = find_knee(X, Y, knee=True)
+    elbow_index, elbow_value = find_knee(X, Y, knee=False)
     return X, Y, knee_index, knee_value, elbow_index, elbow_value

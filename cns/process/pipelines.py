@@ -11,11 +11,11 @@ from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps
 from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
 from cns.utils.files import load_regions, samples_df_from_cns_df, find_cn_cols_if_none, rename_cn_cols
-from cns.utils.assemblies import hg19
 from cns.utils.logging import log_info
+from cns.utils.assemblies import hg19
 
 
-def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
+def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     if samples_df is None:
         log_info(print_info, print("No samples provided, creating samples from CNS data."))
         samples_df = samples_df_from_cns_df(cns_df)
@@ -29,7 +29,7 @@ def main_fill(cns_df, cn_columns=None, samples_df=None, assembly=hg19, add_missi
     return res
 
 
-def main_impute(cns_df, cn_columns=None, samples_df=None, method='extend', print_info=False):
+def main_impute(cns_df, samples_df=None, cn_columns=None, method='extend', print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if method == 'diploid' and samples_df is None:
         log_info(print_info, print("Diploid imputation requires samples, but none provided, creating samples from CNS data."))
@@ -63,19 +63,19 @@ def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
     return res
 
 
-def main_ploidy(cns_df, samples, cn_columns=None, assembly=hg19, print_info=False):
-    cn_columns = rename_cn_cols(cns_df, cn_columns)
-    autosomes_sum, = calc_aut_aneuploidy(cns_df, samples, assembly)
-    sex_chrom_sum = calc_sex_aneuploidy(cns_df, samples, assembly)  
+def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
+    cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
+    autosomes_sum = calc_aut_aneuploidy(cns_df, samples_df, cn_columns, assembly)
+    sex_chrom_sum = calc_sex_aneuploidy(cns_df, samples_df, cn_columns, assembly)  
     all_chrom_sum = autosomes_sum + sex_chrom_sum
 
     autosomes_norm = norm_aut_aneuploidy(autosomes_sum, assembly)
-    sex_chrom_norm = norm_sex_aneuploidy(samples, sex_chrom_sum, assembly)  
-    all_chrom_norm = norm_gen_aneuploidy(samples, all_chrom_sum, assembly)  
+    sex_chrom_norm = norm_sex_aneuploidy(samples_df, sex_chrom_sum, assembly)  
+    all_chrom_norm = norm_gen_aneuploidy(samples_df, all_chrom_sum, assembly)  
 
     merged_df = autosomes_norm.merge(sex_chrom_norm, left_index=True, right_index=True, suffixes=('_aut', '_sex'))
     merged_df = merged_df.merge(all_chrom_norm, left_index=True, right_index=True, suffixes=('', '_tot'))
-    res = samples.merge(merged_df, left_index=True, right_index=True)    
+    res = samples_df.merge(merged_df, left_index=True, right_index=True)    
     return res
 
 

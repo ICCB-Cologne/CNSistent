@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.pipelines import get_genome_segments, regions_remove, regions_select, main_coverage
+from cns.process.pipelines import get_genome_segments, regions_remove, regions_select, main_coverage, main_ploidy, main_fill, main_impute
     
 class TestPipelines(unittest.TestCase):
     def setUp(self):
@@ -50,6 +50,15 @@ class TestPipelines(unittest.TestCase):
         
         self.assertEqual(result, expected_result)
 
+    def test_main_fill(self):
+        res = main_fill(self.cns, self.samples, assembly=self.assembly)
+        print(res)
+
+    def test_main_impute(self):
+        res = main_fill(self.cns, self.samples, assembly=self.assembly)
+        res = main_impute(res, self.samples)
+        print(res)
+
     def test_main_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)      
         print(res.loc['s1', 'chrom_missing']) 
@@ -59,7 +68,8 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'cover_tot'], 0.25)
     
     def test_main_ploidy(self):
-        raise NotImplementedError()
+        res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
+        print(res)
     
     def test_main_signatures(self):
         raise NotImplementedError()

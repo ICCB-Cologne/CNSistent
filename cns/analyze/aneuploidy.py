@@ -38,9 +38,10 @@ def calc_ane_per_chrom(cns_df, samples_df, cn_column, assembly=hg19):
     for (sample, chrom), group in cns_indexed.groupby(level=[0, 1]):
         is_xy = samples_df.loc[sample]["sex"] == "xy"
         sample_data = [sample, chrom]
-        values = group[["length", cn_column]].values
+        values = group[["start", "end", cn_column]].values
         expected_ploidy = get_expected_ploidy(cn_column, chrom, is_xy, assembly)
-        anu_len = values[values[:, 1] != expected_ploidy, 0].sum()
+        aneuploid = values[values[:, 2] != expected_ploidy]
+        anu_len = (aneuploid[:,1] - aneuploid[:,0]).sum()
         sample_data.append(anu_len)
         aneuploidy.append(sample_data)
     res = pd.DataFrame(aneuploidy, columns=["sample_id", "chrom"] + [ane_col]).set_index(["sample_id", "chrom"])

@@ -121,10 +121,10 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
     ver_block[-1] = args.verbose
     cols_block = [cols_block]*threads
     if action == "impute":
-        return zip(cns_blocks, cols_block, ver_block)
+        return zip(cns_blocks, samples_blocks, cols_block, ver_block)
     if action == "fill":
         add_missing = [True]*threads
-        return zip(cns_blocks, cols_block, samples_blocks, ass_block, add_missing, ver_block)        
+        return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)        
     elif action == "cluster":
         dist_block = [args.dist]*threads
         return zip(cns_blocks, dist_block, ass_block, ver_block)
