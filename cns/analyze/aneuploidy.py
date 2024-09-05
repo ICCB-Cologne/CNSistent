@@ -1,6 +1,6 @@
-import pandas as pd
+import numpy as np
 from cns.utils.assemblies import hg19
-from cns.utils.files import find_cn_cols_if_none
+from cns.utils.selection import only_aut, only_sex
 
 
 def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
@@ -30,83 +30,32 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
             return 1
         
 
-# per chromosome and and allele find the number of aneuploid bases
-def calc_ane_per_chrom(cns_df, samples_df, cn_column, assembly=hg19):
-    aneuploidy = []
-    ane_col = f"ane_{cn_column}"
-    cns_indexed = cns_df.set_index(["sample_id", "chrom"])
-    for (sample, chrom), group in cns_indexed.groupby(level=[0, 1]):
-        is_xy = samples_df.loc[sample]["sex"] == "xy"
-        sample_data = [sample, chrom]
-        values = group[["start", "end", cn_column]].values
-        expected_ploidy = get_expected_ploidy(cn_column, chrom, is_xy, assembly)
-        aneuploid = values[values[:, 2] != expected_ploidy]
-        anu_len = (aneuploid[:,1] - aneuploid[:,0]).sum()
-        sample_data.append(anu_len)
-        aneuploidy.append(sample_data)
-    res = pd.DataFrame(aneuploidy, columns=["sample_id", "chrom"] + [ane_col]).set_index(["sample_id", "chrom"])
+def get_ane_for_cols(cns_df, samples_df, cn_columns, assembly=hg19):
+    is_ane = [cns_df.apply(lambda x: 
+                           get_expected_ploidy( col, x["chrom"], samples_df.loc[x["sample_id"]]["sex"] == "xy", assembly) != x[col], 
+                           axis=1) for col in cn_columns]
+    return is_ane
+
+
+def get_ane_for_samples(cns_df, samples_df, cn_columns, any=True, assembly=hg19):
+    is_ane = get_ane_for_cols(cns_df, samples_df, cn_columns, assembly)
+    cns_df["ane"] = np.any(is_ane, axis=0) if any else np.all(is_ane, axis=0)
+    res = cns_df[cns_df["ane"]].groupby("sample_id")["length"].sum()
     return res
 
 
-def _calc_ane_per_sample_int(cns_df, samples_df, cn_columns, chroms_list, assembly=hg19):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    sel_df = cns_df.query("chrom in @chroms_list")
-    ane_res = [calc_ane_per_chrom(sel_df, samples_df, cn_column, assembly)  for cn_column in cn_columns]
-    chr_ane_df = pd.concat(ane_res, axis=1)
-    ids = cns_df["sample_id"].unique()
-    sample_sum = (
-        chr_ane_df
-        .groupby("sample_id")
-        .apply(lambda g: g.sum())
-    )
-    # add additional rows to match the ids
-    sample_sum = sample_sum.reindex(ids).fillna(0).astype(int)
-    return sample_sum
-
-
-def calc_aut_aneuploidy(cns_df, samples_df, cn_columns=None, assembly=hg19):
-    return _calc_ane_per_sample_int(cns_df, samples_df, cn_columns, assembly.aut_names, assembly)
-
-
-def calc_sex_aneuploidy(cns_df, samples_df, cn_columns=None, assembly=hg19):
-    return _calc_ane_per_sample_int(cns_df, samples_df, cn_columns, assembly.sex_names, assembly)
-
-
-def norm_aut_aneuploidy(samples_df, cn_columns=None, assembly=hg19):
-    cn_columns = find_cn_cols_if_none(samples_df, cn_columns)
+# Note: missing values are NOT considered to be aneuploid, to consider missing segments, first impute
+def get_ane_bases(cns_df, samples_df, cn_columns, any=True, assembly=hg19):
     res = samples_df.copy()
-    for cn_column in cn_columns:        
-        res[cn_column + "_frac"] = res.apply(lambda x: x[cn_column] / assembly.aut_len, axis=1)
-    return res
+    cns_df["length"] = cns_df["end"] - cns_df["start"]
 
-def norm_sex_aneuploidy(samples_sex, samples_df, cn_columns=None, assembly=hg19):
-    cn_columns = find_cn_cols_if_none(samples_df, cn_columns)
-    sex_info = samples_sex[["sex"]]
-    merged_df = samples_df.merge(sex_info, left_index=True, right_index=True, how="left")
-    
-    xx_len = assembly.chr_lens["chrX"]
-    xy_len = assembly.chr_lens["chrY"] + xx_len
-    
-    for cn_column in cn_columns:        
-        merged_df["expected_length"] = merged_df.apply(lambda x: xy_len if x["sex"] == "xy" else xx_len, axis=1)
-        merged_df[cn_column + "_frac"] = merged_df[cn_column] / merged_df["expected_length"]
+    aut_df = only_aut(cns_df).copy()
+    sex_df = only_sex(cns_df).copy()
 
-    merged_df = merged_df.drop(columns=["sex", "expected_length"])
-    return merged_df
-
-def norm_gen_aneuploidy(samples_sex, samples_df, cn_columns=None, assembly=hg19):
-    cn_columns = find_cn_cols_if_none(samples_df, cn_columns)
-    sex_info = samples_sex[["sex"]]
-    merged_df = samples_df.merge(sex_info, left_index=True, right_index=True, how="left")
-    xx_len = assembly.aut_len + assembly.chr_lens["chrX"]
-    xy_len = assembly.gen_len
-    
-    for cn_column in cn_columns:        
-        merged_df["expected_length"] = merged_df.apply(lambda x: xy_len if x["sex"] == "xy" else xx_len, axis=1)
-        merged_df[cn_column + "_frac"] = merged_df[cn_column] / merged_df["expected_length"]
-
-    merged_df = merged_df.drop(columns=["sex", "expected_length"])
-    return merged_df
-
-def norm_gen_aneuploidy():
-    raise NotImplementedError("Not implemented yet")
+    # Group the differences by sample_id and compute the sum for each group
+    res["ane_aut"] = get_ane_for_samples(aut_df, samples_df, cn_columns, any)
+    res["ane_aut"] = res["ane_aut"].fillna(0).astype(np.int64)
+    res["ane_sex"] = get_ane_for_samples(sex_df, samples_df, cn_columns, any)
+    res["ane_sex"] = res["ane_sex"].fillna(0).astype(np.int64)
+    res["ane_tot"] = res["ane_aut"] + res["ane_sex"]
+    return res.fillna(0)

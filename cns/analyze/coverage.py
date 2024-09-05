@@ -3,6 +3,7 @@ import pandas as pd
 from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
+
 def normalize_feature(samples, feature, assembly=hg19):
     res = samples.copy()
     x_length = assembly.chr_lens[assembly.chr_x]
@@ -21,29 +22,29 @@ def normalize_feature(samples, feature, assembly=hg19):
     return res
 
 
-def get_covered_bases(cns_df, samples, feature):
+def get_covered_bases(cns_df, samples):
     res = samples.copy()
+    cns_df["length"] = cns_df["end"] - cns_df["start"]
 
     aut_df = only_aut(cns_df)
     sex_df = only_sex(cns_df)
-    # Compute the differences between end and start
-    aut_lens = aut_df["end"] - aut_df["start"]
-    sex_lens = sex_df["end"] - sex_df["start"]
 
     # Group the differences by sample_id and compute the sum for each group
-    res["cover_aut"] = aut_lens.groupby(aut_df["sample_id"]).sum().astype(np.int64)
-    res["cover_sex"] = sex_lens.groupby(sex_df["sample_id"]).sum().astype(np.int64)
+    res["cover_aut"] = aut_df["length"].groupby(aut_df["sample_id"]).sum()
+    res["cover_aut"] = res["cover_aut"].fillna(0).astype(np.int64)
+    res["cover_sex"] = sex_df["length"].groupby(sex_df["sample_id"]).sum().astype(np.int64)
+    res["cover_sex"] = res["cover_sex"].fillna(0).astype(np.int64)
     res["cover_tot"] = res["cover_aut"] + res["cover_sex"]
     return res
 
 
-def get_missing_chroms(cns, samples, assembly=hg19):
-    res = samples.copy()
+def get_missing_chroms(cns_df, samples_df, assembly=hg19):
+    res = samples_df.copy()
     # create a serise where the value is sex_xy if exhpected_chrs == 'xy' lese it is sex_xx
     xy_names = assembly.aut_names + ["chrX", "chrY"]
     xx_names = assembly.aut_names + ["chrX"]
     expected_chrs = res["sex"].map({"xy": xy_names, "xx": xx_names, "NA": xx_names})
-    tot_chrs = cns.groupby("sample_id")["chrom"].unique()
+    tot_chrs = cns_df.groupby("sample_id")["chrom"].unique()
 
     merged = pd.DataFrame([expected_chrs, tot_chrs]).T
     diff = merged.apply(lambda x: np.setdiff1d(x.iloc[0], x.iloc[1]), axis=1)

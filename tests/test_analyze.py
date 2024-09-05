@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import calc_ane_per_chrom, calc_aut_aneuploidy, calc_sex_aneuploidy, get_expected_ploidy, norm_aut_aneuploidy, norm_sex_aneuploidy
+from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, get_ane_for_samples, get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample, calc_breaks_per_chr
 from cns.process.binning import add_cns_loc, sum_cns
@@ -92,8 +92,8 @@ class TestAneuploidy(unittest.TestCase):
     def setUp(self):
         self.cns = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4', 's4', 's4', 's4'],
-            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0, 2, 1, 1],
-            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0, 1, 0, 1],
+            'major_cn': [1, 2, 3, 4, np.nan, 2, 1, 0, 2, 1, 1],
+            'minor_cn': [0, 2, np.nan, 4, 3, 1, 0, 0, 1, 0, 1],
             'chrom': ['chr1', 'chr1', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [100, 200, 300, 400, 500, 50, 99, 100, 100, 120, 130],
@@ -107,9 +107,11 @@ class TestAneuploidy(unittest.TestCase):
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'chr_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
             'aut_len': 300,
-            'sex_names': ['chrX', 'chrY']
+            'sex_names': ['chrX', 'chrY'],
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
         })
-        self.ane_cols = ["ane_major_cn", "ane_minor_cn", "ane_total_cn"]
+        self.ane_cols = ["major_cn", "minor_cn"]
 
     def test_get_expected_ploidy(self):
         self.assertEqual(get_expected_ploidy("minor_cn", "chrX", True), 0)
@@ -122,41 +124,27 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("total_cn", "chr1", True), 2)
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
 
-    def test_calc_ane_per_chrom(self):
-        cns_df = sum_cns(add_cns_loc(self.cns, self.assembly))
-        samples = self.samples
-        res = calc_ane_per_chrom(cns_df, samples, "major_cn")
-        self.assertEqual(len(res), 6)
-        self.assertTrue("ane_major_cn" in res.columns)
-        test_row = res.query('sample_id == "s4" and chrom == "chr1"')
-        self.assertEqual(test_row['ane_major_cn'].values[0], 51)
-        
-        res = calc_ane_per_chrom(cns_df, samples, "minor_cn")
-        test_row = res.query('sample_id == "s4" and chrom == "chr1"')
-        self.assertEqual(test_row['ane_minor_cn'].values[0], 50)
+    def test_get_ane_for_cols(self):
+        res = get_ane_for_cols(self.cns, self.samples, self.ane_cols, self.assembly)
+        self.assertEqual(len(res), 2)
+        self.assertEqual(len(res[0]), len(self.cns["major_cn"]))
+        self.assertEqual(res[0][0], False)
+        self.assertEqual(res[1][0], True)
 
     def test_calc_ane_per_sample(self):
-        cns_df = sum_cns(add_cns_loc(self.cns, self.assembly))
-        autosomes_sum = calc_aut_aneuploidy(cns_df, self.samples, assembly=self.assembly)
-        sex_chrom_sum = calc_sex_aneuploidy(cns_df, self.samples, assembly=self.assembly)
-        # sum both dataframes
-        self.assertEqual(len(autosomes_sum), 4)
-        test_row = autosomes_sum.query('sample_id == "s4"')
-        self.assertEqual(test_row['ane_major_cn'].values[0], 101)
-        self.assertEqual(test_row['ane_minor_cn'].values[0], 70)
-        self.assertEqual(test_row['ane_total_cn'].values[0], 170)
-        self.assertEqual(len(sex_chrom_sum), 4)
+        cns_df = add_cns_loc(self.cns.copy())
+        res = get_ane_for_samples(cns_df, self.samples, self.ane_cols, True, self.assembly)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res.values[3], 170)
+        res = get_ane_for_samples(cns_df, self.samples, self.ane_cols, False, self.assembly)
+        self.assertEqual(res.values[3], 1)
 
-    def test_norm_aut_aneuploidy(self):
-        cns_df = sum_cns(add_cns_loc(self.cns, self.assembly))
-        autosomes_sum = calc_aut_aneuploidy(cns_df, self.samples, assembly=self.assembly)
-        result = norm_aut_aneuploidy(autosomes_sum, assembly=self.assembly)
-        # TODO: add more
-        self.assertEqual(len(result.columns), 6)
-
-    def test_norm_sex_aneuploidy(self):
-        cns_df = sum_cns(add_cns_loc(self.cns, self.assembly))
-        sex_chrom_sum = calc_sex_aneuploidy(cns_df, self.samples, assembly=self.assembly)
-        result = norm_sex_aneuploidy(self.samples, sex_chrom_sum, assembly=self.assembly)
-        # TODO: add more
-        self.assertEqual(len(result.columns), 6)
+    def test_get_ane_bases(self):
+        res = get_ane_bases(self.cns, self.samples, self.ane_cols, True, self.assembly)
+        self.assertEqual(res.shape, (4, 4))
+        print(res)
+        self.assertEqual(res.loc['s4', 'ane_aut'], 170)
+        self.assertEqual(res.loc['s2', 'ane_sex'], 100)
+        self.assertEqual(res.loc['s2', 'ane_tot'], 200)
+        norm = normalize_feature(res, "ane", self.assembly)
+        print(norm)

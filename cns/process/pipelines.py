@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from cns.analyze.aneuploidy import calc_aut_aneuploidy, calc_sex_aneuploidy, norm_aut_aneuploidy, norm_gen_aneuploidy, norm_sex_aneuploidy
+from cns.analyze.aneuploidy import get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import bin_by_segments
@@ -45,16 +45,16 @@ def main_bin(cns_df, segs, fun_type='mean', print_info=False):
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
-def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, any=True, print_info=False):
+def main_coverage(cns_df, samples_df, cn_columns=None, any=True, assembly=hg19, print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     nan_vals = cns_df[cn_columns].isna()
     nan_filter = ~nan_vals.all(axis=1) if any else ~nan_vals.any(axis=1)
     cns_vals = cns_df.loc[nan_filter].copy()
-    coverage = get_missing_chroms(cns_vals, samples_df, assembly)
-    coverage = get_covered_bases(cns_vals, coverage)
-    coverage = normalize_feature(coverage, assembly)
-    return coverage
+    samples_df = get_missing_chroms(cns_vals, samples_df, assembly)
+    samples_df = get_covered_bases(cns_vals, samples_df)
+    samples_df = normalize_feature(samples_df, "cover", assembly)
+    return samples_df
 
 
 def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
@@ -62,20 +62,11 @@ def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
     return res
 
 
-def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
+def main_ploidy(cns_df, samples_df, cn_columns=None, any=True, assembly=hg19, print_info=False):
     cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
-    autosomes_sum = calc_aut_aneuploidy(cns_df, samples_df, cn_columns, assembly)
-    sex_chrom_sum = calc_sex_aneuploidy(cns_df, samples_df, cn_columns, assembly)  
-    all_chrom_sum = autosomes_sum + sex_chrom_sum
-
-    autosomes_norm = norm_aut_aneuploidy(autosomes_sum, assembly)
-    sex_chrom_norm = norm_sex_aneuploidy(samples_df, sex_chrom_sum, assembly)  
-    all_chrom_norm = norm_gen_aneuploidy(samples_df, all_chrom_sum, assembly)  
-
-    merged_df = autosomes_norm.merge(sex_chrom_norm, left_index=True, right_index=True, suffixes=('_aut', '_sex'))
-    merged_df = merged_df.merge(all_chrom_norm, left_index=True, right_index=True, suffixes=('', '_tot'))
-    res = samples_df.merge(merged_df, left_index=True, right_index=True)    
-    return res
+    samples_df = get_ane_bases(cns_df, samples_df, cn_columns, any=any)
+    samples_df = normalize_feature(samples_df, "ane", assembly)
+    return samples_df
 
 
 def main_cluster(cns_df, dist, assembly=hg19, print_info=False):    
