@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from cns.analyze.aneuploidy import get_ane_bases
-from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
+from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_non_nan
 from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
@@ -48,11 +48,9 @@ def main_bin(cns_df, segs, fun_type='mean', print_info=False):
 def main_coverage(cns_df, samples_df, cn_columns=None, any=True, assembly=hg19, print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    nan_vals = cns_df[cn_columns].isna()
-    nan_filter = ~nan_vals.all(axis=1) if any else ~nan_vals.any(axis=1)
-    cns_vals = cns_df.loc[nan_filter].copy()
-    samples_df = get_missing_chroms(cns_vals, samples_df, assembly)
-    samples_df = get_covered_bases(cns_vals, samples_df)
+    non_nan_df = get_non_nan(cns_df, cn_columns, any)
+    samples_df = get_missing_chroms(non_nan_df, samples_df, assembly)
+    samples_df = get_covered_bases(non_nan_df, samples_df)
     samples_df = normalize_feature(samples_df, "cover", assembly)
     return samples_df
 

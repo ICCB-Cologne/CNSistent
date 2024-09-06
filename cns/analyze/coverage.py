@@ -4,6 +4,13 @@ from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
 
+def get_non_nan(cns_df, cn_columns, any):    
+    nan_vals = cns_df[cn_columns].isna()
+    nan_filter = ~nan_vals.all(axis=1) if any else ~nan_vals.any(axis=1)
+    non_nan_df = cns_df.loc[nan_filter]
+    return non_nan_df
+
+
 def normalize_feature(samples, feature, assembly=hg19):
     res = samples.copy()
     x_length = assembly.chr_lens[assembly.chr_x]

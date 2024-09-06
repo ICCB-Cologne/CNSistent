@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.pipelines import get_genome_segments, regions_remove, regions_select, main_coverage, main_ploidy, main_fill, main_impute
+from cns.process.pipelines import get_genome_segments, main_signatures, regions_remove, regions_select, main_coverage, main_ploidy, main_fill, main_impute
     
 class TestPipelines(unittest.TestCase):
     def setUp(self):
@@ -23,7 +23,9 @@ class TestPipelines(unittest.TestCase):
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
             'aut_len': 300,
-            'sex_names': ['chrX', 'chrY']
+            'sex_names': ['chrX', 'chrY'],
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
         })
 
     def test_regions_remove(self):
@@ -64,6 +66,7 @@ class TestPipelines(unittest.TestCase):
     def test_main_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)      
         print(res.loc['s1', 'chrom_missing']) 
+        self.assertEqual(res.shape, (4, 6))
         self.assertEqual(res.loc['s1', 'chrom_missing'][-1], "chrX")
         self.assertEqual(res.loc['s1', 'chrom_count'], 1)
         self.assertEqual(res.loc['s1', 'cover_sex'], 0.0)
@@ -71,9 +74,16 @@ class TestPipelines(unittest.TestCase):
     
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
+        self.assertEqual(res.shape, (4, 4))
+        self.assertEqual(res.loc['s1', 'ane_sex'], 0)
+        self.assertEqual(res.loc['s1', 'ane_tot'], 0.25)
+        self.assertEqual(res.loc['s4', 'ane_tot'], 0.34)
         print(res)
-        raise NotImplementedError()
     
     def test_main_signatures(self):
-        raise NotImplementedError()
+        res = main_signatures(self.cns, self.samples, assembly=self.assembly)
+        self.assertEqual(res.shape, (4, 4))
+        self.assertEqual(res.loc['s4', 'breaks_aut'], 4)
+        self.assertEqual(res.loc['s4', 'breaks_sex'], 0)
+        self.assertEqual(res.loc['s4', 'breaks_tot'], 4)
     
