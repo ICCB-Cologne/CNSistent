@@ -3,7 +3,7 @@ import numpy as np
 
 from cns.analyze.aneuploidy import get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
-from cns.analyze.signatures import add_breaks_per_sample
+from cns.analyze.signatures import calc_breaks_per_sample
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
 from cns.process.cluster import created_merged_segs
@@ -64,9 +64,19 @@ def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info
     return samples_df
 
 
-def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
-    res = add_breaks_per_sample(cns_df, samples_df, assembly)
-    return res
+def main_signatures(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    for column in cn_columns:
+        samples_df = calc_breaks_per_sample(cns_df, samples_df, column, assembly)
+
+    if len(cn_columns) == 2:
+        cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
+        samples_df =  calc_breaks_per_sample(cns_df, samples_df, "total_cn", assembly)
+
+    total_col = "total_cn" if len(cn_columns) == 2 else cn_columns[0]
+    for suffix in ["tot", "aut", "sex"]:
+        samples_df.rename(columns={f"breaks_{total_col}_{suffix}": f"breaks_{suffix}", }, inplace=True)
+    return samples_df
 
 
 def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):

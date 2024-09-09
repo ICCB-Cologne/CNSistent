@@ -27,6 +27,7 @@ class TestPipelines(unittest.TestCase):
             'chr_x': 'chrX',
             'chr_y': 'chrY'
         })
+        pd.set_option('display.max_columns', 10)
 
     def test_regions_remove(self):
         bin_size = 10000000
@@ -65,7 +66,6 @@ class TestPipelines(unittest.TestCase):
 
     def test_main_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)      
-        print(res.loc['s1', 'chrom_missing']) 
         self.assertEqual(res.shape, (4, 9))
         self.assertEqual(res.loc['s1', 'chrom_missing'][-1], "chrX")
         self.assertEqual(res.loc['s1', 'chrom_count'], 1)
@@ -75,7 +75,6 @@ class TestPipelines(unittest.TestCase):
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res.shape, (4, 7))
-        print(res.loc["s2"])
         self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
         self.assertEqual(res.loc['s1', 'ane_het_tot'], 0.25)
         self.assertEqual(res.loc['s4', 'ane_het_tot'], 0.34)
@@ -84,7 +83,11 @@ class TestPipelines(unittest.TestCase):
     
     def test_main_signatures(self):
         res = main_signatures(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 4))
+        print(res)
+        self.assertEqual(res.shape, (4, 10))        
+        self.assertEqual(res.loc['s1', 'breaks_minor_cn_aut'], 1)
+        self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
+        self.assertEqual(res.loc['s1', 'breaks_aut'], 1)
         self.assertEqual(res.loc['s4', 'breaks_aut'], 4)
         self.assertEqual(res.loc['s4', 'breaks_sex'], 0)
         self.assertEqual(res.loc['s4', 'breaks_tot'], 4)

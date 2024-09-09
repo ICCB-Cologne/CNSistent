@@ -47,10 +47,8 @@ def get_ane_for_samples(cns_df, samples_df, cn_columns, het, assembly=hg19):
 def get_ane_for_chroms(res, aut_df, sex_df, samples_df, cn_columns, het, assembly=hg19):
     label = "het" if het else "hom"
     # Group the differences by sample_id and compute the sum for each group
-    res[f"ane_{label}_aut"] = get_ane_for_samples(aut_df, samples_df, cn_columns, het, assembly)
-    res[f"ane_{label}_aut"] = res[f"ane_{label}_aut"].fillna(0).astype(np.int64)
-    res[f"ane_{label}_sex"] = get_ane_for_samples(sex_df, samples_df, cn_columns, het, assembly)
-    res[f"ane_{label}_sex"] = res[f"ane_{label}_sex"].fillna(0).astype(np.int64)
+    res[f"ane_{label}_aut"] = get_ane_for_samples(aut_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
+    res[f"ane_{label}_sex"] = get_ane_for_samples(sex_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
     res[f"ane_{label}_tot"] = res[f"ane_{label}_aut"] + res[f"ane_{label}_sex"]
     return res
 

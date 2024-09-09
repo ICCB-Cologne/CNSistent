@@ -4,7 +4,7 @@ import pandas as pd
 
 from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, get_ane_for_samples, get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
-from cns.analyze.signatures import add_breaks_per_sample, calc_breaks_per_chr
+from cns.analyze.signatures import calc_breaks_per_sample, calc_breaks_per_chr
 from cns.process.binning import add_cns_loc, sum_cns
 from cns.process.pipelines import main_coverage
 
@@ -92,9 +92,12 @@ class TestSignatures(unittest.TestCase):
         self.assertEqual(result.query('sample_id == "s4" and chrom == "chr1"')['breaks'].values[0], 2)
 
     def test_add_breaks_per_sample(self):
-        result = add_breaks_per_sample(self.cns, self.samples, self.assembly)
-        self.assertEqual(result.query('sample_id == "s1"')['breaks_aut'].values[0], 1)
-        self.assertEqual(result.query('sample_id == "s4"')['breaks_tot'].values[0], 4)
+        res = calc_breaks_per_sample(self.cns, self.samples, "major_cn", self.assembly)
+        print(res)
+        self.assertEqual(res.query('sample_id == "s1"')['breaks_major_cn_aut'].values[0], 1)
+        self.assertEqual(res.query('sample_id == "s4"')['breaks_major_cn_tot'].values[0], 3)        
+        res = calc_breaks_per_sample(self.cns, self.samples, "major_cn", self.assembly)
+        print(res)
 
 
 class TestAneuploidy(unittest.TestCase):

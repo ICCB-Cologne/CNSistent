@@ -154,8 +154,22 @@ def get_cn_columns(df):
 def find_cn_cols_if_none(cns_df, cn_cols):
     if cn_cols is None:
         cn_cols = get_cn_columns(cns_df)
-    if len(cn_cols) == 0:
-        raise ValueError("No CN columns found.")
+    # check if cn_cols is a string
+    if isinstance(cn_cols, str):
+        if cn_cols in cns_df.columns:
+            return [cn_cols]
+        else:
+            raise ValueError(f"Column {cn_cols} not found in the CNS DataFrame.")
+    # check if cn_cols is a list
+    if isinstance(cn_cols, list):
+        for col in cn_cols:
+            if col not in cns_df.columns:
+                raise ValueError(f"Column {col} not found in the CNS DataFrame.")    
+        if len(cn_cols) > 2:
+            raise ValueError("Only one (total) or two (major, minor) CN columns are allowed.")    
+        if len(cn_cols) == 0:
+            raise ValueError("No CN columns found.")
+        return cn_cols
     return cn_cols
 
 
@@ -242,7 +256,7 @@ def _requires_rename(cn_columns):
     return False
         
 
-# TODO: Merge into canonization
+# TODO: Decide whether to make part of canonization
 def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if not _requires_rename(cn_columns):
@@ -259,4 +273,5 @@ def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
         rename_map = {cn_columns[0]: "total_cn"}
     
     cns_df.rename(columns=rename_map, inplace=True)  
-    return cns_df, rename_map.values().tolist()
+    print(f"Renamed CN columns: {rename_map}")
+    return cns_df, list(rename_map.values())
