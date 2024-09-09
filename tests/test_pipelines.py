@@ -59,29 +59,40 @@ class TestPipelines(unittest.TestCase):
         res["length"] = res["end"] - res["start"]
         # assert that length sum is equal to aut_len for each sample
         self.assertTrue(np.allclose(only_aut(res, self.assembly).groupby("sample_id")["length"].sum(), self.assembly.aut_len))
+        # assert that chrY exists in chrom column where index is s4 and not in s3
+        self.assertTrue("chrY" in res.query("sample_id == 's4'")['chrom'].values)
+        self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
+
 
     def test_main_impute(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
+        res["length"] = res["end"] - res["start"]
         res = main_impute(res, self.samples)
-        print(res)
-        raise NotImplementedError()
+        res["length"] = res["end"] - res["start"]
+        self.assertTrue(np.allclose(only_aut(res, self.assembly).groupby("sample_id")["length"].sum(), self.assembly.aut_len))
+        # assert that chrY exists in chrom column where index is s4 and not in s3
+        self.assertTrue("chrY" in res.query("sample_id == 's4'")['chrom'].values)
+        self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
 
     def test_main_coverage(self):
-        res = main_coverage(self.cns, self.samples, assembly=self.assembly)      
+        res = main_coverage(self.cns, self.samples, assembly=self.assembly)     
         self.assertEqual(res.shape, (4, 9))
         self.assertEqual(res.loc['s1', 'chrom_missing'][-1], "chrX")
         self.assertEqual(res.loc['s1', 'chrom_count'], 1)
-        self.assertEqual(res.loc['s1', 'cover_hom_sex'], 0.0)
-        self.assertEqual(res.loc['s1', 'cover_het_tot'], 0.25)
+        # for all rows, cov_hom_aut is lower than cov_het_aut
+        self.assertTrue(np.all(res['cover_hom_aut'] <= res['cover_het_aut']))        
+        self.assertEqual(res.loc['s1', 'cover_het_sex'], 0)
+        self.assertEqual(res.loc['s2', 'cover_het_sex'], 0.5)
+        self.assertEqual(res.loc['s4', 'cover_het_aut'], 0.3)
+    
     
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res.shape, (4, 7))
+        self.assertTrue(np.all(res['ane_hom_aut'] <= res['ane_het_aut']))       
         self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
-        self.assertEqual(res.loc['s1', 'ane_het_tot'], 0.25)
-        self.assertEqual(res.loc['s4', 'ane_het_tot'], 0.34)
-        self.assertEqual(res.loc['s2', 'ane_hom_tot'], 0.4)
-        print(res)
+        self.assertEqual(res.loc['s2', 'ane_het_sex'], 0.5)
+        self.assertEqual(res.loc['s4', 'ane_het_sex'], 0)
     
     def test_main_signatures(self):
         res = main_signatures(self.cns, self.samples, assembly=self.assembly)

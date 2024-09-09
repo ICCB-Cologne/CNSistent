@@ -4,7 +4,7 @@ from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
 
-def get_not_nan(cns_df, cn_columns, het):    
+def get_not_nan(cns_df, cn_columns, het):
     nan_vals = cns_df[cn_columns].isna()
     nan_filter = ~nan_vals.all(axis=1) if het else ~nan_vals.any(axis=1)
     non_nan_df = cns_df.loc[nan_filter]
@@ -35,10 +35,12 @@ def get_covered_bases(nan_bases_df, samples_df, het):
     aut_df = only_aut(nan_bases_df)
     sex_df = only_sex(nan_bases_df)
     # Group the differences by sample_id and compute the sum for each group
-    res[f"cover_{label}_aut"] = aut_df["length"].groupby(aut_df["sample_id"]).sum()
-    res[f"cover_{label}_aut"] = res[f"cover_{label}_aut"].fillna(0).astype(np.int64)
-    res[f"cover_{label}_sex"] = sex_df["length"].groupby(sex_df["sample_id"]).sum().astype(np.int64)
-    res[f"cover_{label}_sex"] = res[f"cover_{label}_sex"].fillna(0).astype(np.int64)
+    res[f"cover_{label}_aut"] = (
+        aut_df["length"].groupby(aut_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
+    )
+    res[f"cover_{label}_sex"] = (
+        sex_df["length"].groupby(sex_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
+    )
     res[f"cover_{label}_tot"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
     return res
 

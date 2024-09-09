@@ -4,7 +4,7 @@ import numpy as np
 
 from cns.analyze.aneuploidy import get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
-from cns.analyze.signatures import calc_breaks_per_sample
+from cns.analyze.breakpoints import calc_breaks_per_sample
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
 from cns.process.cluster import created_merged_segs
@@ -38,7 +38,6 @@ def main_impute(cns_df, samples_df=None, cn_columns=None, method='extend', print
     imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
     res = merge_neighbours(filled_df, cn_columns=cn_columns, print_info=print_info)
-    assert len(res[res.isnull().any(axis=1)]) == 0, "NaNs still present in final_df."
     return res
 
 

@@ -206,8 +206,9 @@ def _impute_extend(cns_df, cn_columns, print_info=True):
                 second_half = [id, chrom, midpoint, end] + next_vals
                 new_entries.append(first_half)                    
                 new_entries.append(second_half)                
-        
-    imputation_df = pd.DataFrame(new_entries, columns=cns_df.columns)
+    
+    new_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
+    imputation_df = pd.DataFrame(new_entries, columns=new_cols)
     query = ' or '.join([f"{col}.isnull()" for col in cn_columns])
     idx_to_remove = cns_df.query(query).index
 

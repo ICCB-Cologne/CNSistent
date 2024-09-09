@@ -4,7 +4,7 @@ import pandas as pd
 
 from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, get_ane_for_samples, get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
-from cns.analyze.signatures import calc_breaks_per_sample, calc_breaks_per_chr
+from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr
 from cns.process.binning import add_cns_loc, sum_cns
 from cns.process.pipelines import main_coverage
 
