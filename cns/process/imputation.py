@@ -115,6 +115,28 @@ def add_missing(cns_df, samples_df, chr_lengths, print_info=True):
         return res_df
 
 
+def remove_outliers(cns_df, chr_lengths, print_info=True):
+    res_df = cns_df.copy()
+    idx_to_remove = []
+    for i, (index, row) in enumerate(res_df.iterrows()):
+        if row.start < 0:
+            if row.end < 0:
+                idx_to_remove.append(i)
+                log_info(print_info, f"Removed outlier:\n{row}")
+            else:
+                res_df.at[index, "start"] = 0
+        if row.end > chr_lengths[row.chrom]:
+            if row.start > chr_lengths[row.chrom]:
+                idx_to_remove.append(i)
+                log_info(print_info, f"Removed outlier:\n{row}")
+            else:
+                res_df.at[index, "end"] = chr_lengths[row.chrom]
+
+    log_info(print_info, print(f"Removed outliers: {len(idx_to_remove)}"))
+    # remove from cns_df where idx_to_remove is in the index
+    res_df = res_df.drop(res_df.index[idx_to_remove]).sort_values(by=["sample_id", "chrom", "start"], ignore_index=True)
+    return res_df
+
 # Makes sure that the columns are of the correct type
 def _are_mergeable(a, b, cn_columns):
     return (

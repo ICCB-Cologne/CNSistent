@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from cns.process.pipelines import get_genome_segments, main_signatures, regions_remove, regions_select, main_coverage, main_ploidy, main_fill, main_impute
+from cns.utils.selection import only_aut
     
 class TestPipelines(unittest.TestCase):
     def setUp(self):
@@ -22,7 +23,7 @@ class TestPipelines(unittest.TestCase):
             'aut_names': ['chr1', 'chr2', 'chr3'],
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
-            'aut_len': 300,
+            'aut_len': 600,
             'sex_names': ['chrX', 'chrY'],
             'chr_x': 'chrX',
             'chr_y': 'chrY'
@@ -55,8 +56,9 @@ class TestPipelines(unittest.TestCase):
 
     def test_main_fill(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
-        print(res)
-        raise NotImplementedError()
+        res["length"] = res["end"] - res["start"]
+        # assert that length sum is equal to aut_len for each sample
+        self.assertTrue(np.allclose(only_aut(res, self.assembly).groupby("sample_id")["length"].sum(), self.assembly.aut_len))
 
     def test_main_impute(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)

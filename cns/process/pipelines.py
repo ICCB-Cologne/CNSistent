@@ -8,7 +8,7 @@ from cns.analyze.signatures import calc_breaks_per_sample
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
 from cns.process.cluster import created_merged_segs
-from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours
+from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours, remove_outliers
 from cns.process.segments import filter_min_size, segment_difference, split_segments
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
 from cns.utils.files import load_regions, samples_df_from_cns_df, find_cn_cols_if_none, rename_cn_cols
@@ -25,7 +25,8 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
         cns_filled_df = add_missing(cns_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
-    res = merge_neighbours(cns_filled_df, cn_columns, print_info=print_info)
+    cns_cleared_df = remove_outliers(cns_filled_df, assembly.chr_lens, print_info=print_info)
+    res = merge_neighbours(cns_cleared_df, cn_columns, print_info=print_info)
     return res
 
 
