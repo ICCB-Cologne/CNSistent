@@ -140,11 +140,11 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.values[3], 1)
 
     def test_get_ane_bases(self):
-        res = get_ane_bases(self.cns, self.samples, self.ane_cols, True, self.assembly)
-        self.assertEqual(res.shape, (4, 4))
-        print(res)
-        self.assertEqual(res.loc['s4', 'ane_aut'], 170)
-        self.assertEqual(res.loc['s2', 'ane_sex'], 100)
-        self.assertEqual(res.loc['s2', 'ane_tot'], 200)
-        norm = normalize_feature(res, "ane", self.assembly)
+        res = get_ane_bases(self.cns, self.samples, self.ane_cols, self.assembly)
+        self.assertEqual(res.shape, (4, 7))
+        self.assertEqual(res.loc['s4', 'ane_het_aut'], 170)
+        self.assertEqual(res.loc['s2', 'ane_het_sex'], 100)
+        self.assertEqual(res.loc['s2', 'ane_het_tot'], 200)
+        norm = normalize_feature(res, "ane_het", self.assembly)
+        norm = normalize_feature(res, "ane_hom", self.assembly)
         print(norm)

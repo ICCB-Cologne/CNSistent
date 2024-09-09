@@ -74,10 +74,12 @@ class TestPipelines(unittest.TestCase):
     
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 4))
-        self.assertEqual(res.loc['s1', 'ane_sex'], 0)
-        self.assertEqual(res.loc['s1', 'ane_tot'], 0.25)
-        self.assertEqual(res.loc['s4', 'ane_tot'], 0.34)
+        self.assertEqual(res.shape, (4, 7))
+        print(res.loc["s2"])
+        self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
+        self.assertEqual(res.loc['s1', 'ane_het_tot'], 0.25)
+        self.assertEqual(res.loc['s4', 'ane_het_tot'], 0.34)
+        self.assertEqual(res.loc['s2', 'ane_hom_tot'], 0.4)
         print(res)
     
     def test_main_signatures(self):

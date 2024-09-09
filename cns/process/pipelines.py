@@ -60,10 +60,12 @@ def main_signatures(cns_df, samples_df, assembly=hg19, print_info=False):
     return res
 
 
-def main_ploidy(cns_df, samples_df, cn_columns=None, any=True, assembly=hg19, print_info=False):
-    cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
-    samples_df = get_ane_bases(cns_df, samples_df, cn_columns, any=any)
-    samples_df = normalize_feature(samples_df, "ane", assembly)
+def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
+    cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns, assembly)
+    samples_df = get_ane_bases(cns_df, samples_df, cn_columns, assembly)
+    samples_df = normalize_feature(samples_df, "ane_hom", assembly)
+    if len(cn_columns) == 2:
+        samples_df = normalize_feature(samples_df, "ane_het", assembly)
     return samples_df
 
 
