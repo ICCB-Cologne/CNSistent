@@ -4,9 +4,9 @@ from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
 
-def get_non_nan(cns_df, cn_columns, any):    
+def get_not_nan(cns_df, cn_columns, het):    
     nan_vals = cns_df[cn_columns].isna()
-    nan_filter = ~nan_vals.all(axis=1) if any else ~nan_vals.any(axis=1)
+    nan_filter = ~nan_vals.all(axis=1) if het else ~nan_vals.any(axis=1)
     non_nan_df = cns_df.loc[nan_filter]
     return non_nan_df
 
@@ -29,19 +29,17 @@ def normalize_feature(samples, feature, assembly=hg19):
     return res
 
 
-def get_covered_bases(cns_df, samples):
-    res = samples.copy()
-    cns_df["length"] = cns_df["end"] - cns_df["start"]
-
-    aut_df = only_aut(cns_df)
-    sex_df = only_sex(cns_df)
-
+def get_covered_bases(nan_bases_df, samples_df, het):
+    res = samples_df.copy()
+    label = "het" if het else "hom"
+    aut_df = only_aut(nan_bases_df)
+    sex_df = only_sex(nan_bases_df)
     # Group the differences by sample_id and compute the sum for each group
-    res["cover_aut"] = aut_df["length"].groupby(aut_df["sample_id"]).sum()
-    res["cover_aut"] = res["cover_aut"].fillna(0).astype(np.int64)
-    res["cover_sex"] = sex_df["length"].groupby(sex_df["sample_id"]).sum().astype(np.int64)
-    res["cover_sex"] = res["cover_sex"].fillna(0).astype(np.int64)
-    res["cover_tot"] = res["cover_aut"] + res["cover_sex"]
+    res[f"cover_{label}_aut"] = aut_df["length"].groupby(aut_df["sample_id"]).sum()
+    res[f"cover_{label}_aut"] = res[f"cover_{label}_aut"].fillna(0).astype(np.int64)
+    res[f"cover_{label}_sex"] = sex_df["length"].groupby(sex_df["sample_id"]).sum().astype(np.int64)
+    res[f"cover_{label}_sex"] = res[f"cover_{label}_sex"].fillna(0).astype(np.int64)
+    res[f"cover_{label}_tot"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
     return res
 
 

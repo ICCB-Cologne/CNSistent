@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from cns.analyze.aneuploidy import get_ane_bases
-from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_non_nan
+from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
 from cns.analyze.signatures import add_breaks_per_sample
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
@@ -45,13 +45,22 @@ def main_bin(cns_df, segs, fun_type='mean', print_info=False):
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
-def main_coverage(cns_df, samples_df, cn_columns=None, any=True, assembly=hg19, print_info=False):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
+    if "length" not in cns_df.columns:
+        cns_df["length"] = cns_df["end"] - cns_df["start"]
+
+    samples_df = get_missing_chroms(cns_df, samples_df, assembly)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    non_nan_df = get_non_nan(cns_df, cn_columns, any)
-    samples_df = get_missing_chroms(non_nan_df, samples_df, assembly)
-    samples_df = get_covered_bases(non_nan_df, samples_df)
-    samples_df = normalize_feature(samples_df, "cover", assembly)
+    
+    hom_nan_df = get_not_nan(cns_df, cn_columns, False)
+    samples_df = get_covered_bases(hom_nan_df, samples_df, False)
+    samples_df = normalize_feature(samples_df, "cover_hom", assembly)
+
+    if len(cn_columns) == 2:
+        hom_nan_df = get_not_nan(cns_df, cn_columns, True)
+        samples_df = get_covered_bases(hom_nan_df, samples_df, True)
+        samples_df = normalize_feature(samples_df, "cover_het", assembly)
     return samples_df
 
 

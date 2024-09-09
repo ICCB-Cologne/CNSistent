@@ -242,6 +242,7 @@ def _requires_rename(cn_columns):
     return False
         
 
+# TODO: Merge into canonization
 def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if not _requires_rename(cn_columns):

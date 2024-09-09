@@ -14,11 +14,12 @@ class TestCoverage(unittest.TestCase):
         self.cns = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4'],
             'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
-            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0],
+            'minor_cn': [0, 2, np.nan, np.nan, 3, 1, 0, 0],
             'chrom': ['chr1', 'chrX', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99],
             'end': [100, 200, 300, 400, 500, 50, 99, 100],
         })
+        self.cns["length"] = self.cns["end"] - self.cns["start"]
         self.samples = pd.DataFrame({
             'sex': ['xy', 'NA', 'xx', 'NA']
         }, index=['s1', 's2', 's3', 's4'])
@@ -27,31 +28,37 @@ class TestCoverage(unittest.TestCase):
             'aut_names': ['chr1', 'chr2', 'chr3'],
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
-            'aut_len': 300
+            'aut_len': 300,
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
         })
+        pd.set_option('display.max_columns', 10)
+
 
     def test_get_missing_chroms(self):
-        result = get_missing_chroms(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(result.loc['s1', 'chrom_count'], 2)
+        res = get_missing_chroms(self.cns, self.samples, assembly=self.assembly)
+        self.assertEqual(res.loc['s1', 'chrom_count'], 2)
 
     def test_get_covered_bases(self):
-        result = get_covered_bases(self.cns, self.samples)
-        self.assertEqual(result.loc['s1', 'cover_bases_aut'], 100)
+        res = get_covered_bases(self.cns, self.samples, True)
+        self.assertEqual(res.loc['s1', 'cover_het_aut'], 100)
 
     def test_get_base_frac(self):
-        samples = get_covered_bases(self.cns, self.samples)
-        result = normalize_feature(samples, assembly=self.assembly)
-        self.assertEqual(result.loc['s1', 'cover_frac_aut'], 1/3)
-        self.assertEqual(result.loc['s2', 'cover_frac_sex'], 1)
-        self.assertEqual(result.loc['s4', 'cover_frac_tot'], 1/4)
+        samples_df = get_covered_bases(self.cns, self.samples, True)
+        res = normalize_feature(samples_df, "cover_het", assembly=self.assembly)
+        self.assertEqual(res.loc['s1', 'cover_het_aut'], 1/3)
+        self.assertEqual(res.loc['s2', 'cover_het_sex'], 1)
+        self.assertEqual(res.loc['s4', 'cover_het_tot'], 1/4)
 
     def test_calculate_coverage(self):
-        result = main_coverage(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(result['cover_bases_aut']['s1'], 100)
-        self.assertEqual(result['cover_bases_sex']['s1'], 100)
-        self.assertEqual(result['cover_bases_tot']['s1'], 200)
-        self.assertEqual(result['chrom_count']['s2'], 2)
-        self.assertEqual(result['chrom_missing']['s3'].size, 3)
+        res = main_coverage(self.cns, self.samples, assembly=self.assembly)
+        print(res)
+        self.assertEqual(res['cover_het_sex']['s1'], 1/2)
+        self.assertEqual(res['cover_het_tot']['s1'], 2/5)
+        self.assertEqual(res['cover_hom_aut']['s2'], 0)
+        self.assertEqual(res['cover_het_aut']['s2'], 1/3)
+        self.assertEqual(res['chrom_count']['s2'], 2)
+        self.assertEqual(res['chrom_missing']['s3'].size, 3)
 
 
 class TestSignatures(unittest.TestCase):
@@ -73,7 +80,9 @@ class TestSignatures(unittest.TestCase):
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
             'aut_len': 300,
-            'sex_names': ['chrX', 'chrY']
+            'sex_names': ['chrX', 'chrY'],
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
         })
 
     def test_calc_breaks_per_chr(self):
