@@ -161,7 +161,7 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
 4. If `--bins` is provided, the data is binned into segments of the given size. The segments are created by aggregating the CN values of the selected segments. 
     * The aggregation can be done using one of the following `--aggregate` functions: `mean`, `min`, `max`. For `mean`, the aggregation is weighted by the segment length.
 5. The binned data is stored in a TSV file with the following columns: `sample_id, chrom, start, end, major_cn, minor_cn`. The names of the columns can be different, but the order must be the same.
-    * If `--onlybins` is provided, only the segments are created, with the columns `chrom, start, end`.
+    * If `--segfile` is provided, only the segments are created, with the columns `chrom, start, end`.
 
 
 ![Example Binning](./docs/example_bins.png)
@@ -173,7 +173,7 @@ Additional arguments:
 * `--bins int`: Size of the bins. This is an optional argument. If not provided, the default value is `0` for no bins.
 * `--filter int`: Minimum size of the segment. This is an optional argument. If not provided, the default value is `0` for no filtering.
 * `--aggregate [mean, min, max]`: Aggregation function to use. This is an optional argument. If not provided, the default value is `mean`.
-* `--onlybins`: If provided, only the bins are created, without the sample_id column.
+* `--segfile`: If provided, only the bins are created, without the sample_id column.
 
 
 An example of use:

@@ -91,10 +91,29 @@ def load_regions(path, change_coords=True, header=True):
     return segs
     
 
-def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
+def rename_cn_cols(cns_df, cn_columns=None):
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    if not _requires_rename(cn_columns):
+        return cns_df, list(cn_columns)
+    
+    if len(cn_columns) == 2:                 
+        rename_map = _get_major_minor_cols(cns_df, cn_columns)            
+        if len(rename_map) == 0: # Try haplotype specific
+            rename_map = { cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn" }   
+    elif len(cn_columns) == 1:
+        rename_map = {cn_columns[0]: "total_cn"}
+    
+    cns_df.rename(columns=rename_map, inplace=True)  
+    print(f"Renamed CN columns: {rename_map}")
+    return cns_df, list(rename_map.values())
+
+
+def canonize_cns_df(cns_df, cn_columns_no=0, order_columns=False, assembly=hg19, print_info=False):
     if cn_columns_no > 0:
         if cns_df.columns.size < 4 + cn_columns_no:
             raise ValueError(f"Not enough columns in the CNS file, expected at least 4 + {cn_columns_no}, got {cns_df.columns.size}.")
+        if cn_columns_no > 2:
+            raise ValueError("Only one (total) or two (major, minor) CN columns are allowed. Got {cn_columns_no} instead.")
     else:
         if cns_df.columns.size < 5:
             raise ValueError("Not enough columns in the CNS file, expected at least 5, got {cns_df.columns.size}.")
@@ -129,13 +148,21 @@ def canonize_cns_df(cns_df, cn_columns_no=0, assembly=hg19, print_info=False):
         # if cn_columns is empty, take the 5 + columns
         if len(cn_columns) == 0:
             cn_columns = cns_df.columns[5:].tolist()
+        if len(cn_columns) > 2:
+            raise ValueError(f"Only one (total) or two (major, minor) CN columns are allowed during canonization. Detected {len(cn_columns)} columns: {cn_columns}.")
     else:
         cn_columns = cns_df.columns[4:4 + cn_columns_no].tolist()
-        cn_columns_map = {col : (col if is_cn_column(col) else f"{col}_cn") for col in cn_columns}
-        cns_df.rename(columns=cn_columns_map, inplace=True)
-        cn_columns = list(cn_columns_map.values())
-    log_info(print_info, f"Using CN columns: {cn_columns}")
 
+    if len(cn_columns) == 2 and order_columns:
+        major_cn = cns_df[[cn_columns[0], cn_columns[1]]].max(axis=1)
+        minor_cn = cns_df[[cn_columns[0], cn_columns[1]]].min(axis=1)
+        cns_df.drop(columns=cn_columns, inplace=True)
+        cns_df["major_cn"] = major_cn
+        cns_df["minor_cn"] = minor_cn
+        cn_columns = ["major_cn", "minor_cn"]
+    else:
+        cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
+    
     sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df = cns_df[sel_columns]
     return cns_df
@@ -221,17 +248,6 @@ def _get_major_minor_cols(cns_df, cn_columns):
     else:
         return {}  
 
-# Return X hap and Y hap
-def _get_sex_hap_cols(cns_df, cn_columns, assembly=hg19):
-    col1 = cn_columns[0]
-    col2 = cn_columns[1]
-    vals = cns_df.query(f"chrom == '{assembly.chr_y}'")
-    if vals[col1].sum() != 0:
-        if vals[col2].sum() != 0:
-            print(vals)
-            raise ValueError("Haploid chromosome Y found, but both haplotypes are non-zero.")	
-        return {col2: "hapX_cn", col1: "hapY_cn"}
-    return {col1: "hapX_cn", col2: "hapY_cn"}
 
 def _has_Y_chrom(samples_df, assembly=hg19):
     return assembly.chr_y in samples_df["chrom"].values
@@ -244,7 +260,7 @@ def _requires_rename(cn_columns):
                          Found {cn_columns} instead.""")
     elif len(cn_columns) == 2:
         for cn_col in cn_columns:
-            if not cn_col in ["major_cn", "minor_cn", "hap1_cn", "hap2_cn", "hapX_cn", "hapY_cn"]:
+            if not cn_col in ["major_cn", "minor_cn", "hap1_cn", "hap2_cn"]:
                 return True
         
     elif len(cn_columns) == 1:
@@ -255,23 +271,3 @@ def _requires_rename(cn_columns):
     
     return False
         
-
-# TODO: Decide whether to make part of canonization
-def rename_cn_cols(cns_df, cn_columns=None, assembly=hg19):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if not _requires_rename(cn_columns):
-        return cns_df, list(cn_columns)
-    
-    if len(cn_columns) == 2:                 
-        rename_map = _get_major_minor_cols(cns_df, cn_columns)            
-        if len(rename_map) == 0: # Try haplotype specific
-            if _has_Y_chrom(cns_df):
-                rename_map = _get_sex_hap_cols(cns_df, cn_columns, assembly)
-            else:
-                rename_map = { cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn" }   
-    elif len(cn_columns) == 1:
-        rename_map = {cn_columns[0]: "total_cn"}
-    
-    cns_df.rename(columns=rename_map, inplace=True)  
-    print(f"Renamed CN columns: {rename_map}")
-    return cns_df, list(rename_map.values())

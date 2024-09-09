@@ -45,7 +45,7 @@ cns bin --bins 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_cns_
 
 # %% 
 # Create only segments from arms where gaps bigger than 100KB are removed
-cns bin --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --onlybins
+cns bin --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --segfile
 
 # %%
 # Calculate consisten segment bins

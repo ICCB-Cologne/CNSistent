@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 from cns.analyze.aneuploidy import get_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
 from cns.analyze.signatures import calc_breaks_per_sample
@@ -80,7 +81,7 @@ def main_signatures(cns_df, samples_df, cn_columns=None, assembly=hg19, print_in
 
 
 def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
-    cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns, assembly)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     samples_df = get_ane_bases(cns_df, samples_df, cn_columns, assembly)
     samples_df = normalize_feature(samples_df, "ane_hom", assembly)
     if len(cn_columns) == 2:

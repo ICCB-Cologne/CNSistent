@@ -13,7 +13,7 @@ from cns.utils.logging import log_info
 
 
 def _add_common_args(parser):
-    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments")
+    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments") #TODO: make optional
     parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
     parser.add_argument("--cols", type=int, help="number of copy number columns in the CNS file", required=False, default=-1)
     parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
@@ -26,6 +26,7 @@ def _add_common_args(parser):
     parser.add_argument("--subsplit", type=int, help="will split the processing into chunks to lower memory needs", required=False, default=1)
 
 
+# TODO: Canonization should be a callable action
 def _parse_args():
     # Top-level parser
     parser = argparse.ArgumentParser(description="Impute missing values in CNS data")
@@ -49,7 +50,7 @@ def _parse_args():
     sp_dict["bin"].add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
     sp_dict["bin"].add_argument("--filter", type=int, help="If set, regions smaller than the given size are exclued from selection and gaps.", required=False, default=0)
     sp_dict["bin"].add_argument("--aggregate", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
-    sp_dict["bin"].add_argument("--onlybins", help="If set, creates a BED file with regions corresponding to the individual bins, without the actual binning. (A dummy CNS file still has to be provided)", action="store_true")
+    sp_dict["bin"].add_argument("--segfile", help="If set, creates a BED file with regions corresponding to the individual bins, without the actual binning. (A dummy CNS file still has to be provided)", action="store_true")
     
     sp_dict["cluster"].add_argument("--dist", type=int, help="Maximum distance between breakpoint clusters for merging", required=False, default=0)
 
@@ -178,7 +179,7 @@ def main():
     log_info(print_info, f"CNS path is {cns_file_path}...") 
 
     # Calculate bin regions without the binning itself
-    if action == "bin" and args.onlybins:        
+    if action == "bin" and args.segfile:        
         log_info(print_info, print(f"Calculating binning segments..."))  
         segs = _get_segments(args, assembly)
         res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
@@ -227,7 +228,7 @@ def main():
             write_mode = "w" if i == 0 and j == 0 else "a"
             header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
-            if action == "bin" and args.onlybins or action == "cluster":
+            if action == "bin" and args.segfile or action == "cluster":
                 save_regions(res_df, out_file, change_coords=True, header=header, write_mode=write_mode)
             elif action in ["fill", "impute", "bin"]:
                 save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, 

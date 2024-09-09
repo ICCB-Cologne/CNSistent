@@ -42,7 +42,7 @@ commands=(
   "cns bin --select bands ./temp/test_cns_fill.tsv --out ./temp/test_cns_bands.tsv --subsplit 2"
   "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB.tsv"
   "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB_gaps.tsv --remove gaps --filter 500000"
-  "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --onlybins"
+  "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --segfile"
   "cns bin ./temp/test_cns_fill.tsv --select ./temp/mcs_regions.tsv --out ./temp/test_cns_mcs.tsv"
 )
 

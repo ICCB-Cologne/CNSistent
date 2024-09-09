@@ -107,7 +107,7 @@ class TestFiles(unittest.TestCase):
         cns.loc[3, "cn_X"] = 0
         cns.loc[3, "cn_Y"] = 1
         cns, cols = rename_cn_cols(cns)
-        self.assertEqual(cols, ["hapX_cn", "hapY_cn"])
+        self.assertEqual(cols, ["hap1_cn", "hap2_cn"])
 
         cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
         cns = cns.query("chrom != 'chrY'").copy()

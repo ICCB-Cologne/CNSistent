@@ -6,7 +6,7 @@ from cns.utils.selection import only_aut, only_sex
 def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
     if chrom == assembly.chr_x:
         if is_xy:
-            if column == "minor_cn" or column == "hapY_cn":
+            if column == "minor_cn" or column == "hap2":
                 return 0
             else:
                 return 1
@@ -17,10 +17,10 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
                 return 1
     elif chrom == assembly.chr_y:
         if is_xy:
-            if column == "minor_cn" or column == "hapY_cn":
-                return 0
-            else:
+            if column == "major_cn" or column == "hap1":
                 return 1
+            else:
+                return 0
         else:
             return 0
     else:
