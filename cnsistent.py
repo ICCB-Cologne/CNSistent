@@ -175,16 +175,16 @@ def main():
     subsplit = args.subsplit
 
     # Read the input
-    log_info(print_info, print(f"***** cns {action} *****"))
+    log_info(print_info, f"***** cns {action} *****")
     log_info(print_info, f"CNS path is {cns_file_path}...") 
 
     # Calculate bin regions without the binning itself
     if action == "bin" and args.segfile:        
-        log_info(print_info, print(f"Calculating binning segments..."))  
+        log_info(print_info, f"Calculating binning segments...") 
         segs = _get_segments(args, assembly)
         res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
         save_regions(res_df, out_file, change_coords=True, header=not no_header)
-        log_info(print_info, print("Done."))
+        log_info(print_info, "Done.")
         return    
 
     if not exists(cns_file_path):
@@ -201,7 +201,7 @@ def main():
     samples_blocks = dataframe_array_split(samples_df, subsplit)
 
     for i in range(subsplit):
-        log_info(print_info, print(f"Processing block {i+1}/{subsplit}..."))
+        log_info(print_info, f"Processing block {i+1}/{subsplit}...")
         
         samples_block = samples_blocks[i]
         
@@ -238,7 +238,7 @@ def main():
                     res_df.reset_index(drop=True)
                 res_df.to_csv(out_file, sep="\t", index=True, header=header,  mode=write_mode)
 
-    log_info(print_info, print("Done."))
+    log_info(print_info, "Done.")
 
 
 if __name__ == "__main__":

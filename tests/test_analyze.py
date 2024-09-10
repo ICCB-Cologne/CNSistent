@@ -3,11 +3,11 @@ import numpy as np
 import pandas as pd
 
 from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, get_ane_for_samples, get_ane_bases
+from cns.analyze.cnstep import calc_step_per_chr, get_step_per_sample
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr
-from cns.process.binning import add_cns_loc, sum_cns
+from cns.process.binning import add_cns_loc
 from cns.process.pipelines import main_coverage
-
 
 class TestCoverage(unittest.TestCase):
     def setUp(self):
@@ -77,13 +77,18 @@ class TestSignatures(unittest.TestCase):
         }).set_index('sample_id')
         self.assembly = type('Assembly', (object,), {
             'aut_names': ['chr1', 'chr2', 'chr3'],
+            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY'],
+            'sex_names': ['chrX', 'chrY'],
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
-            'aut_len': 300,
-            'sex_names': ['chrX', 'chrY'],
+            'aut_len': 600,
             'chr_x': 'chrX',
-            'chr_y': 'chrY'
+            'chr_y': 'chrY',
+            'chr_count': 5,
+            'aut_count': 3,
+            'sex_count': 2
         })
+        pd.set_option('display.max_columns', 10)
 
     def test_calc_breaks_per_chr(self):
         result = calc_breaks_per_chr(self.cns)
@@ -98,6 +103,17 @@ class TestSignatures(unittest.TestCase):
         self.assertEqual(res.query('sample_id == "s4"')['breaks_major_cn_tot'].values[0], 3)        
         res = calc_breaks_per_sample(self.cns, self.samples, "major_cn", self.assembly)
         print(res)
+
+
+    def test_calc_step_per_chr(self):
+        res = calc_step_per_chr(self.cns, "major_cn")
+        self.assertEqual(res.query('sample_id == "s1" and chrom == "chr1"')['step'].values[0], 1)
+
+    def test_cn_step(self):
+        res = get_step_per_sample(self.cns, self.samples, "major_cn", self.assembly)
+        self.assertEqual(res.loc['s1', 'step_major_cn_aut'], 1)     
+        res = get_step_per_sample(self.cns, self.samples, "minor_cn", self.assembly)
+        self.assertEqual(res.loc['s1', 'step_minor_cn_aut'], 2)     
 
 
 class TestAneuploidy(unittest.TestCase):

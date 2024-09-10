@@ -15,7 +15,7 @@ def calc_breaks_per_chr(cns):
 def calc_breaks_per_sample(cns_df, samples, cn_col, assembly=hg19):
     res = samples.copy()
     cns_subset_df = cns_df[["sample_id", "chrom", "start", "end", cn_col]]
-    merged_cns_df = merge_neighbours(cns_subset_df, cn_col)
+    merged_cns_df = merge_neighbours(cns_subset_df, cn_col, False)
     breaks_per_chr = calc_breaks_per_chr(merged_cns_df)
     chrom_types = {"aut": assembly.aut_names, "sex": assembly.sex_names}
 

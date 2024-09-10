@@ -18,7 +18,7 @@ from cns.utils.assemblies import hg19
 
 def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     if samples_df is None:
-        log_info(print_info, print("No samples provided, creating samples from CNS data."))
+        log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     cns_tailed_df = add_tails(cns_df, assembly.chr_lens, print_info=print_info)
@@ -33,7 +33,7 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
 def main_impute(cns_df, samples_df=None, cn_columns=None, method='extend', print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if method == 'diploid' and samples_df is None:
-        log_info(print_info, print("Diploid imputation requires samples, but none provided, creating samples from CNS data."))
+        log_info(print_info, "Diploid imputation requires samples, but none provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)

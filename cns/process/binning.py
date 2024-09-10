@@ -137,7 +137,7 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_info=True):
     indices = cns_df_view.index.unique()
     i = 0
     for i, ((sample, chrom), group) in enumerate(cns_df_view.groupby(level=[0, 1])):
-        log_info(print_info, print(f"Binning chr ({i+1}/{len(indices)})", end="\r"))
+        log_info(print_info, f"Binning chr ({i+1}/{len(indices)})", end="\r")
         if chrom in chrom_segments:
             for segment in chrom_segments[chrom]:
                 if agg_func != None:
@@ -146,11 +146,11 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_info=True):
                 else:
                     bin = _cns_in_seg(sample, chrom, group.values, segment)
                     new_rows.extend(bin)
-    log_info(print_info, print(f"Binning finished. Converting {len(new_rows)} rows...", end="\r"))
+    log_info(print_info, f"Binning finished. Converting {len(new_rows)} rows...", end="\r")
     bin_df = pd.DataFrame(new_rows, columns=sel_cols)
     bin_df["start"] = bin_df["start"].astype(np.uint32)
     bin_df["end"] = bin_df["end"].astype(np.uint32)
-    log_info(print_info, print(f"Binned into {len(new_rows)} CNS." + " " * 40))
+    log_info(print_info, f"Binned into {len(new_rows)} CNS." + " " * 40)
     return bin_df
 
 
