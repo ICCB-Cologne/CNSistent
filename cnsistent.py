@@ -143,7 +143,6 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         raise ValueError(f"Unknown action {action}")
 
 
-
 def _process(action, cns_df, samples_df, cn_cols, assembly, args):   
     main_fun = _action_to_fun(action)
     blocks = abs(args.threads)

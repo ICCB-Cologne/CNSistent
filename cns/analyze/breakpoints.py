@@ -4,6 +4,12 @@ import numpy as np
 import pandas as pd
 
 
+def prepare_segments(cns_df, cn_col):
+    cns_subset_df = cns_df[["sample_id", "chrom", "start", "end", cn_col]]
+    merged_cns_df = merge_neighbours(cns_subset_df, cn_col, False)
+    return merged_cns_df
+
+
 # count segments per chromosome and subtract 1
 def calc_breaks_per_chr(cns):
     breaks = cns.reset_index().groupby(["sample_id", "chrom"]).size()
@@ -12,11 +18,9 @@ def calc_breaks_per_chr(cns):
     return breaks
 
 
-def calc_breaks_per_sample(cns_df, samples, cn_col, assembly=hg19):
-    res = samples.copy()
-    cns_subset_df = cns_df[["sample_id", "chrom", "start", "end", cn_col]]
-    merged_cns_df = merge_neighbours(cns_subset_df, cn_col, False)
-    breaks_per_chr = calc_breaks_per_chr(merged_cns_df)
+def calc_breaks_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
+    res = samples_df.copy()
+    breaks_per_chr = calc_breaks_per_chr(cns_df)
     chrom_types = {"aut": assembly.aut_names, "sex": assembly.sex_names}
 
     for suffix, names in chrom_types.items():
@@ -31,3 +35,27 @@ def calc_breaks_per_sample(cns_df, samples, cn_col, assembly=hg19):
 
     res[f"breaks_{cn_col}_tot"] = res[f"breaks_{cn_col}_aut"] + res[f"breaks_{cn_col}_sex"]
     return res
+
+
+def calc_step_per_chr(cns_df, cn_col):
+    groups = cns_df.groupby(["sample_id", "chrom"])
+    res = []
+    for group in groups:
+        vals = group[1][cn_col].values
+        val = 0 if len(vals) < 2 else np.abs(np.diff(vals)).sum()
+        res.append((group[0][0], group[0][1], val, len(vals) - 1))
+    return pd.DataFrame(res, columns=["sample_id", "chrom", "step", "count"])
+
+
+def calc_step_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
+    res = samples_df.copy()
+    chrom_types = {"aut": assembly.aut_names, "sex": assembly.sex_names, "tot": assembly.chr_names}
+    step_per_chr = calc_step_per_chr(cns_df, cn_col)
+
+    for suffix, names in chrom_types.items():
+        res[f"step_{cn_col}_{suffix}"] = (
+            step_per_chr.query("chrom in @names").groupby("sample_id")
+            .apply(lambda x: x["step"].sum() / x["count"].sum() if x["count"].sum() != 0 else 0)
+            .reset_index(name="cnstep").set_index("sample_id")
+        )
+    return res.fillna(0)

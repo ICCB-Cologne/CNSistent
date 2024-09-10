@@ -21,6 +21,7 @@ class TestPipelines(unittest.TestCase):
         }).set_index('sample_id')
         self.assembly = type('Assembly', (object,), {
             'aut_names': ['chr1', 'chr2', 'chr3'],
+            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY'],
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
             'aut_len': 600,
@@ -96,11 +97,11 @@ class TestPipelines(unittest.TestCase):
     
     def test_main_signatures(self):
         res = main_signatures(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 10))        
+        self.assertEqual(res.shape, (4, 19))        
         self.assertEqual(res.loc['s1', 'breaks_minor_cn_aut'], 1)
         self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
-        self.assertEqual(res.loc['s1', 'breaks_aut'], 1)
-        self.assertEqual(res.loc['s4', 'breaks_aut'], 4)
-        self.assertEqual(res.loc['s4', 'breaks_sex'], 0)
-        self.assertEqual(res.loc['s4', 'breaks_tot'], 4)
+        self.assertEqual(res.loc['s1', 'breaks_total_cn_aut'], 1)
+        self.assertEqual(res.loc['s4', 'breaks_total_cn_aut'], 4)
+        self.assertEqual(res.loc['s4', 'breaks_total_cn_sex'], 0)
+        self.assertEqual(res.loc['s4', 'breaks_total_cn_tot'], 4)
     
