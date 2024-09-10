@@ -107,7 +107,7 @@ class TestSignatures(unittest.TestCase):
         res = calc_step_per_chr(segs_df, "major_cn")
         self.assertEqual(res.query('sample_id == "s1" and chrom == "chr1"')['step'].values[0], 1)
 
-    def test_cn_step(self):
+    def test_calc_step_per_sample(self):
         segs_df = prepare_segments(self.cns, "major_cn")
         res = calc_step_per_sample(segs_df, self.samples, "major_cn", self.assembly)
         self.assertEqual(res.loc['s1', 'step_major_cn_aut'], 1)    
@@ -115,6 +115,8 @@ class TestSignatures(unittest.TestCase):
         res = calc_step_per_sample(segs_df, self.samples, "minor_cn", self.assembly)
         self.assertEqual(res.loc['s1', 'step_minor_cn_aut'], 2)     
 
+    def test_calc_seg_size_per_sample(self):
+        pass
 
 class TestAneuploidy(unittest.TestCase):
     def setUp(self):

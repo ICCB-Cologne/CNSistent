@@ -30,10 +30,12 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
             return 1
         
 
+def get_ane_for_col(col, row, samples_df, assembly=hg19):
+    return get_expected_ploidy(col, row["chrom"], samples_df.loc[row["sample_id"]]["sex"] == "xy", assembly) != row[col]
+
+
 def get_ane_for_cols(cns_df, samples_df, cn_columns, assembly=hg19):
-    is_ane = [cns_df.apply(lambda x: 
-                           get_expected_ploidy( col, x["chrom"], samples_df.loc[x["sample_id"]]["sex"] == "xy", assembly) != x[col], 
-                           axis=1) for col in cn_columns]
+    is_ane = [cns_df.apply(lambda x: get_ane_for_col(col, x, samples_df, assembly), axis=1) for col in cn_columns]
     return is_ane
 
 

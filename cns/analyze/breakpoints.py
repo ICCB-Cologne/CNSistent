@@ -1,3 +1,4 @@
+from cns.analyze.aneuploidy import get_ane_for_col
 from cns.process.imputation import merge_neighbours
 from cns.utils.assemblies import hg19
 import numpy as np
@@ -59,3 +60,10 @@ def calc_step_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
             .reset_index(name="cnstep").set_index("sample_id")
         )
     return res.fillna(0)
+
+
+def calc_seg_size_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
+    res = samples_df.copy()    
+    chrom_types = {"aut": assembly.aut_names, "sex": assembly.sex_names, "tot": assembly.chr_names}
+    is_seg_ane = cns_df.apply(lambda x: get_ane_for_col(cn_col, x, samples_df, assembly), axis=1)
+    print (is_seg_ane)
