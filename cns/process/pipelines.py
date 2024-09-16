@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 
 
-from cns.analyze.aneuploidy import get_ane_bases
+from cns.analyze.aneuploidy import calc_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
-from cns.analyze.breakpoints import calc_breaks_per_sample, calc_step_per_sample, prepare_segments
+from cns.analyze.breakpoints import calc_breaks_per_sample, calc_seg_size_per_sample, calc_step_per_sample, prepare_segments
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
 from cns.process.cluster import created_merged_segs
@@ -78,13 +78,14 @@ def main_signatures(cns_df, samples_df, cn_columns=None, assembly=hg19, print_in
         segs_df = prepare_segments(cns_df, cn_col)
         res = calc_breaks_per_sample(segs_df, res, cn_col, assembly)
         res = calc_step_per_sample(segs_df, res, cn_col, assembly)
+        res = calc_seg_size_per_sample(segs_df, res, cn_col, assembly)
     
     return res
 
 
 def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    samples_df = get_ane_bases(cns_df, samples_df, cn_columns, assembly)
+    samples_df = calc_ane_bases(cns_df, samples_df, cn_columns, assembly)
     samples_df = normalize_feature(samples_df, "ane_hom", assembly)
     if len(cn_columns) == 2:
         samples_df = normalize_feature(samples_df, "ane_het", assembly)

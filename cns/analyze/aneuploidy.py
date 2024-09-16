@@ -39,23 +39,23 @@ def get_ane_for_cols(cns_df, samples_df, cn_columns, assembly=hg19):
     return is_ane
 
 
-def get_ane_for_samples(cns_df, samples_df, cn_columns, het, assembly=hg19):
+def calc_bases_for_subset(cns_df, samples_df, cn_columns, het, assembly=hg19):
     is_ane = get_ane_for_cols(cns_df, samples_df, cn_columns, assembly)
     cns_df["ane"] = np.any(is_ane, axis=0) if het else np.all(is_ane, axis=0)
     res = cns_df[cns_df["ane"]].groupby("sample_id")["length"].sum()
     return res
 
 
-def get_ane_for_chroms(res, aut_df, sex_df, samples_df, cn_columns, het, assembly=hg19):
+def _calc_bases_per_column(res, aut_df, sex_df, samples_df, cn_columns, het, assembly=hg19):
     label = "het" if het else "hom"
     # Group the differences by sample_id and compute the sum for each group
-    res[f"ane_{label}_aut"] = get_ane_for_samples(aut_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
-    res[f"ane_{label}_sex"] = get_ane_for_samples(sex_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
+    res[f"ane_{label}_aut"] = calc_bases_for_subset(aut_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
+    res[f"ane_{label}_sex"] = calc_bases_for_subset(sex_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
     res[f"ane_{label}_tot"] = res[f"ane_{label}_aut"] + res[f"ane_{label}_sex"]
     return res
 
 # Note: missing values are NOT considered to be aneuploid, to consider missing segments, first impute
-def get_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
+def calc_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
     res = samples_df.copy()
     cns_df["length"] = cns_df["end"] - cns_df["start"]
 
@@ -63,6 +63,6 @@ def get_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
     sex_df = only_sex(cns_df).copy()
 
     if len(cn_columns) == 2:
-        res = get_ane_for_chroms(res, aut_df, sex_df, samples_df, cn_columns, True, assembly)
-    res = get_ane_for_chroms(res, aut_df, sex_df, samples_df, cn_columns, False, assembly)    
+        res = _calc_bases_per_column(res, aut_df, sex_df, samples_df, cn_columns, True, assembly)
+    res = _calc_bases_per_column(res, aut_df, sex_df, samples_df, cn_columns, False, assembly)    
     return res

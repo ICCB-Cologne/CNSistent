@@ -2,9 +2,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, get_ane_for_samples, get_ane_bases
+from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, calc_bases_for_subset, calc_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
-from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments
+from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
 from cns.process.binning import add_cns_loc
 from cns.process.pipelines import main_coverage
 
@@ -116,7 +116,15 @@ class TestSignatures(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'step_minor_cn_aut'], 2)     
 
     def test_calc_seg_size_per_sample(self):
-        pass
+        self.cns.loc[0, "major_cn"] = 2
+        segs_df = prepare_segments(self.cns, "major_cn")
+        res = calc_seg_size_per_sample(segs_df, self.samples, "major_cn", self.assembly)
+        print(res)
+        self.assertEqual(res.loc['s1', 'segsize_major_cn_aut'], 200)
+        self.assertEqual(res.loc['s2', 'segsize_major_cn_aut'], 100)
+        self.assertEqual(res.loc['s1', 'segsize_major_cn_sex'], 0)
+        self.assertEqual(res.loc['s2', 'segsize_major_cn_sex'], 100)
+
 
 class TestAneuploidy(unittest.TestCase):
     def setUp(self):
@@ -163,14 +171,14 @@ class TestAneuploidy(unittest.TestCase):
 
     def test_calc_ane_per_sample(self):
         cns_df = add_cns_loc(self.cns.copy())
-        res = get_ane_for_samples(cns_df, self.samples, self.ane_cols, True, self.assembly)
+        res = calc_bases_for_subset(cns_df, self.samples, self.ane_cols, True, self.assembly)
         self.assertEqual(len(res), 4)
         self.assertEqual(res.values[3], 170)
-        res = get_ane_for_samples(cns_df, self.samples, self.ane_cols, False, self.assembly)
+        res = calc_bases_for_subset(cns_df, self.samples, self.ane_cols, False, self.assembly)
         self.assertEqual(res.values[3], 1)
 
     def test_get_ane_bases(self):
-        res = get_ane_bases(self.cns, self.samples, self.ane_cols, self.assembly)
+        res = calc_ane_bases(self.cns, self.samples, self.ane_cols, self.assembly)
         self.assertEqual(res.shape, (4, 7))
         self.assertEqual(res.loc['s4', 'ane_het_aut'], 170)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 100)
