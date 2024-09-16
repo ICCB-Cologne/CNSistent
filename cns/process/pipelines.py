@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-from cns.analyze.aneuploidy import calc_ane_bases
+from cns.analyze.aneuploidy import calc_ane_bases, calc_loh_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_seg_size_per_sample, calc_step_per_sample, prepare_segments
 from cns.process.binning import bin_by_segments
@@ -82,13 +82,17 @@ def main_signatures(cns_df, samples_df, cn_columns=None, assembly=hg19, print_in
     
     return res
 
-
+# NaNs are not considered for ploidy calculation
 def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    
     samples_df = calc_ane_bases(cns_df, samples_df, cn_columns, assembly)
     samples_df = normalize_feature(samples_df, "ane_hom", assembly)
+    samples_df = calc_loh_bases(cns_df, samples_df, cn_columns, assembly)
+    samples_df = normalize_feature(samples_df, "loh_hom", assembly)
     if len(cn_columns) == 2:
         samples_df = normalize_feature(samples_df, "ane_het", assembly)
+        samples_df = normalize_feature(samples_df, "loh_het", assembly)
     return samples_df
 
 

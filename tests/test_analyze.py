@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_col, is_seg_ane, calc_ane_bases
+from cns.analyze.aneuploidy import calc_loh_bases, get_expected_ploidy, is_seg_ane, calc_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
 from cns.process.binning import add_cns_loc
@@ -177,3 +177,12 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
         res = normalize_feature(res, "ane_hom", self.assembly)
         self.assertEqual(res.loc['s1', 'ane_hom_aut'], 1/6)
+
+    def test_get_loh_bases(self):
+        res = calc_loh_bases(self.cns, self.samples, self.ane_cols, self.assembly)
+        self.assertEqual(res.shape, (4, 7))
+        self.assertEqual(res.loc['s1', 'loh_het_aut'], 100)
+        self.assertEqual(res.loc['s4', 'loh_het_aut'], 70)
+        self.assertEqual(res.loc['s4', 'loh_hom_tot'], 1)
+        print(res)
+        
