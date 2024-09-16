@@ -86,10 +86,9 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s2', 'cover_het_sex'], 0.5)
         self.assertEqual(res.loc['s4', 'cover_het_aut'], 0.3)
     
-    
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 13))
+        self.assertEqual(res.shape, (4, 16))
         self.assertTrue(np.all(res['ane_hom_aut'] <= res['ane_het_aut']))       
         self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)

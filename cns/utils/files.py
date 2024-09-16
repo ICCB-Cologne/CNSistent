@@ -91,6 +91,25 @@ def load_regions(path, change_coords=True, header=True):
     return segs
     
 
+def _requires_rename(cn_columns):
+    if len(cn_columns) > 2:
+        raise ValueError("""Discovery of CN columns failed.\n
+                         Only one (total) or two (major, minor) or (hap1, hap2) CN columns are allowed.\n
+                         Found {cn_columns} instead.""")
+    elif len(cn_columns) == 2:
+        for cn_col in cn_columns:
+            if not cn_col in ["major_cn", "minor_cn", "hap1_cn", "hap2_cn"]:
+                return True
+        
+    elif len(cn_columns) == 1:
+        return cn_columns[0] != "total_cn"
+
+    else:
+        raise ValueError("Discovery of CN columns failed. No CN columns found.")
+    
+    return False
+
+
 def rename_cn_cols(cns_df, cn_columns=None):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if not _requires_rename(cn_columns):
@@ -247,27 +266,8 @@ def _get_major_minor_cols(cns_df, cn_columns):
         return {col1: "major_cn", col2: "minor_cn"}
     else:
         return {}  
-
-
-def _has_Y_chrom(samples_df, assembly=hg19):
-    return assembly.chr_y in samples_df["chrom"].values
     
 
-def _requires_rename(cn_columns):
-    if len(cn_columns) > 2:
-        raise ValueError("""Discovery of CN columns failed.\n
-                         Only one (total) or two (major, minor) or (hap1, hap2) CN columns are allowed.\n
-                         Found {cn_columns} instead.""")
-    elif len(cn_columns) == 2:
-        for cn_col in cn_columns:
-            if not cn_col in ["major_cn", "minor_cn", "hap1_cn", "hap2_cn"]:
-                return True
-        
-    elif len(cn_columns) == 1:
-        return cn_columns[0] != "total_cn"
-
-    else:
-        raise ValueError("Discovery of CN columns failed. No CN columns found.")
-    
-    return False
+def is_hap_spec(cn_columns):
+    return len(cn_columns) == 2 and all([cn_col in ["hap1_cn", "hap2_cn"] for cn_col in cn_columns])
         

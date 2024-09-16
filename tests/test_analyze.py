@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import calc_loh_bases, get_expected_ploidy, is_seg_ane, calc_ane_bases
+from cns.analyze.aneuploidy import calc_imb_bases, calc_loh_bases, get_expected_ploidy, is_seg_ane, calc_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
 from cns.process.binning import add_cns_loc
@@ -32,7 +32,7 @@ class TestCoverage(unittest.TestCase):
             'chr_y': 'chrY'
         })
         pd.set_option('display.max_columns', 10)
-
+        self.cns["length"] = self.cns["end"] - self.cns["start"]
 
     def test_get_missing_chroms(self):
         res = get_missing_chroms(self.cns, self.samples, assembly=self.assembly)
@@ -51,7 +51,6 @@ class TestCoverage(unittest.TestCase):
 
     def test_calculate_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)
-        print(res)
         self.assertEqual(res['cover_het_sex']['s1'], 1/2)
         self.assertEqual(res['cover_het_tot']['s1'], 2/5)
         self.assertEqual(res['cover_hom_aut']['s2'], 0)
@@ -88,6 +87,7 @@ class TestSignatures(unittest.TestCase):
             'sex_count': 2
         })
         pd.set_option('display.max_columns', 10)
+        self.cns["length"] = self.cns["end"] - self.cns["start"]
 
     def test_calc_breaks_per_chr(self):
         segs_df = prepare_segments(self.cns, "major_cn")
@@ -119,7 +119,6 @@ class TestSignatures(unittest.TestCase):
         self.cns.loc[0, "major_cn"] = 2
         segs_df = prepare_segments(self.cns, "major_cn")
         res = calc_seg_size_per_sample(segs_df, self.samples, "major_cn", self.assembly)
-        print(res)
         self.assertEqual(res.loc['s1', 'segsize_major_cn_aut'], 200)
         self.assertEqual(res.loc['s2', 'segsize_major_cn_aut'], 100)
         self.assertEqual(res.loc['s1', 'segsize_major_cn_sex'], 0)
@@ -151,6 +150,7 @@ class TestAneuploidy(unittest.TestCase):
             'chr_y': 'chrY'
         })
         self.ane_cols = ["major_cn", "minor_cn"]
+        self.cns["length"] = self.cns["end"] - self.cns["start"]
 
     def test_get_expected_ploidy(self):
         self.assertEqual(get_expected_ploidy("minor_cn", "chrX", True), 0)
@@ -184,5 +184,10 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'loh_het_aut'], 100)
         self.assertEqual(res.loc['s4', 'loh_het_aut'], 70)
         self.assertEqual(res.loc['s4', 'loh_hom_tot'], 1)
-        print(res)
         
+    def test_imb_score(self):
+        res = calc_imb_bases(self.cns, self.samples, self.ane_cols, 0, self.assembly)
+        self.assertEqual(res.shape, (4, 4))
+        self.assertEqual(res.loc['s1', 'imb_major_cn_aut'], 100)
+        self.assertEqual(res.loc['s2', 'imb_major_cn_sex'], 0)
+        self.assertEqual(res.loc['s4', 'imb_major_cn_tot'], 169)
