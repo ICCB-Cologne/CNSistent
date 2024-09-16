@@ -111,23 +111,24 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
             log_info(print_info, f"Renamed column {chrom_col} to chrom.")
 
     chrom_vals = cns_df["chrom"].unique()
-    # if not all lower case, convert to the whole column to lower case
-    if not all([chrom.islower() for chrom in chrom_vals]):
-        cns_df["chrom"] = cns_df["chrom"].str.lower()
-        chrom_vals = cns_df["chrom"].unique()
-        log_info(print_info, "Chromosome values converted to lower case.")
     # if the chromosomes values are all either digits or single characters, convert to chrX format
     if all([chrom.isdigit() or len(chrom) == 1 for chrom in chrom_vals]):
         cns_df["chrom"] = "chr" + cns_df["chrom"]
         chrom_vals = cns_df["chrom"].unique()
         log_info(print_info, "Chromosome values converted to chr[1-Y] format.")
+    # if the first 3 letters of the chromosome values are not lower case, convert these 3 letters to lower case
+    if not all([chrom[:3].islower() for chrom in chrom_vals]):
+        cns_df["chrom"] = cns_df["chrom"].apply(lambda x: x[:3].lower() + x[3:])
+        chrom_vals = cns_df["chrom"].unique()
+        log_info(print_info, "Chromosome values converted to lower case.")
     
     if not any([chrom in assembly.chr_names for chrom in chrom_vals]):
         raise ValueError(f"No chrom found. Chromosome values must be in {assembly.chr_names}, got {chrom_vals}.")
-    not_known = [chrom not in assembly.chr_names for chrom in chrom_vals]
+    not_known = [chrom for chrom in chrom_vals if chrom not in assembly.chr_names]
     if len(not_known) > 0:
-        log_info(print_info, f"Found chromosomes not in assembly: {chrom_vals}, these will be dropped.")
-    cns_df = cns_df[~cns_df["chrom"].isin(chrom_vals[not_known])]
+        log_info(print_info, f"Found chromosomes not in assembly: {not_known}, these will be dropped.")
+        rows_to_drop = cns_df[cns_df["chrom"].isin(chrom_vals[not_known])].index
+        cns_df.drop(rows_to_drop, inplace=True) 
 
     # if the column start does not exist, rename the third column to start
     if "start" not in cns_df.columns:

@@ -105,8 +105,19 @@ class TestCanonization(unittest.TestCase):
         self.samples.index.name = "sample_id"
 
     def test_canonize_cns_df(self):                      
-        cns_df = canonize_cns_df(self.cns_df)
+        cns_df = canonize_cns_df(self.cns_df, print_info=False)
         self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
+        pd.testing.assert_frame_equal(cns_df, self.cns_df)
+
+        cns_df = self.cns_df.rename(columns={"major_cn": "cn_a", "minor_cn": "cn_b", "chrom": "Chr", "start": "Start", "end": "End", "sample_id": ""})
+        cns_df = canonize_cns_df(cns_df, order_columns=True, print_info=False)
+        pd.testing.assert_frame_equal(cns_df, self.cns_df)
+
+        cns_df = self.cns_df.rename(columns={"major_cn": "cn_a", "minor_cn": "cn_b", "chrom": "Chr", "start": "Start", "end": "End", "sample_id": ""})
+        cns_df["sumCn"] = cns_df["cn_a"] + cns_df["cn_b"]
+        cns_df = canonize_cns_df(cns_df, cn_columns=["sumCn"], print_info=False)
+        self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "total_cn"])
+        self.assertEqual(cns_df.shape, (8, 5))
 
     def test_find_cn_cols_if_none(self):
         cols = find_cn_cols_if_none(self.cns_df, None)
