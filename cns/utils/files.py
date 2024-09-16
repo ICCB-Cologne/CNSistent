@@ -1,16 +1,18 @@
 from os.path import join as exists
 import pandas as pd
 
+from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
 from cns.utils.conversions import cns_to_segments
-from cns.utils.assemblies import hg19
-from cns.utils.logging import log_info
 
 
-def load_cns(path, cn_col_no=0, sort=False, change_coords=True, no_sample=False, header=True):
+def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, no_sample=False, header=True):
     cns_df = pd.read_csv(path, sep="\t", header=0 if header else None)
     if no_sample:
-        cns_df["sample"] = "dummy"
-    cns_df = canonize_cns_df(cns_df, cn_col_no)
+        cns_df["sample_id"] = "sample_id"
+    if canonize or not header:
+        cns_df = canonize_cns_df(cns_df, cn_columns)
+    elif not is_canonical_cns_df(cns_df):
+        raise ValueError("CNS file is not canonical, call load_cns(..., canonize=True, ...) instead.")
     if change_coords:
         cns_df.loc[:, "start"] -= 1
     if sort:
@@ -91,134 +93,6 @@ def load_regions(path, change_coords=True, header=True):
     return segs
     
 
-def _requires_rename(cn_columns):
-    if len(cn_columns) > 2:
-        raise ValueError("""Discovery of CN columns failed.\n
-                         Only one (total) or two (major, minor) or (hap1, hap2) CN columns are allowed.\n
-                         Found {cn_columns} instead.""")
-    elif len(cn_columns) == 2:
-        for cn_col in cn_columns:
-            if not cn_col in ["major_cn", "minor_cn", "hap1_cn", "hap2_cn"]:
-                return True
-        
-    elif len(cn_columns) == 1:
-        return cn_columns[0] != "total_cn"
-
-    else:
-        raise ValueError("Discovery of CN columns failed. No CN columns found.")
-    
-    return False
-
-
-def rename_cn_cols(cns_df, cn_columns=None):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if not _requires_rename(cn_columns):
-        return cns_df, list(cn_columns)
-    
-    if len(cn_columns) == 2:                 
-        rename_map = _get_major_minor_cols(cns_df, cn_columns)            
-        if len(rename_map) == 0: # Try haplotype specific
-            rename_map = { cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn" }   
-    elif len(cn_columns) == 1:
-        rename_map = {cn_columns[0]: "total_cn"}
-    
-    cns_df.rename(columns=rename_map, inplace=True)  
-    print(f"Renamed CN columns: {rename_map}")
-    return cns_df, list(rename_map.values())
-
-
-def canonize_cns_df(cns_df, cn_columns_no=0, order_columns=False, assembly=hg19, print_info=False):
-    if cn_columns_no > 0:
-        if cns_df.columns.size < 4 + cn_columns_no:
-            raise ValueError(f"Not enough columns in the CNS file, expected at least 4 + {cn_columns_no}, got {cns_df.columns.size}.")
-        if cn_columns_no > 2:
-            raise ValueError("Only one (total) or two (major, minor) CN columns are allowed. Got {cn_columns_no} instead.")
-    else:
-        if cns_df.columns.size < 5:
-            raise ValueError("Not enough columns in the CNS file, expected at least 5, got {cns_df.columns.size}.")
-
-    # if the column sample_id does not exist, rename the first column to sample_id
-    if "sample_id" not in cns_df.columns:
-        cns_df.columns = ["sample_id"] + cns_df.columns[1:].tolist()
-
-    # if the column chrom does not exist, rename the second column to chrom
-    if "chrom" not in cns_df.columns:
-        cns_df.columns = cns_df.columns[:1].tolist() + ["chrom"] + cns_df.columns[2:].tolist()
-    chrom_vals = cns_df["chrom"].unique()
-    if not any([chrom in assembly.chr_names for chrom in chrom_vals]):
-        raise ValueError(f"No chrom found. Chromosome values must be in {assembly.chr_names}, got {chrom_vals}.")
-    not_known = [chrom not in assembly.chr_names for chrom in chrom_vals]
-    if len(not_known) > 0:
-        log_info(print_info, f"Found chromosomes not in assembly: {chrom_vals}, these will be dropped.")
-    cns_df = cns_df[~cns_df["chrom"].isin(chrom_vals[not_known])]
-
-    # if the column start does not exist, rename the third column to start
-    if "start" not in cns_df.columns:
-        cns_df.columns = cns_df.columns[:2].tolist() + ["start"] + cns_df.columns[3:].tolist()    
-    cns_df["start"] = cns_df["start"].astype(int)
-
-    # if the column end does not exist, rename the fourth column to end
-    if "end" not in cns_df.columns:
-        cns_df.columns = cns_df.columns[:3].tolist() + ["end"] + cns_df.columns[4:].tolist()
-    cns_df["end"] = cns_df["end"].astype(int)
-    
-    if cn_columns_no <= 0:
-        cn_columns = get_cn_columns(cns_df)
-        # if cn_columns is empty, take the 5 + columns
-        if len(cn_columns) == 0:
-            cn_columns = cns_df.columns[5:].tolist()
-        if len(cn_columns) > 2:
-            raise ValueError(f"Only one (total) or two (major, minor) CN columns are allowed during canonization. Detected {len(cn_columns)} columns: {cn_columns}.")
-    else:
-        cn_columns = cns_df.columns[4:4 + cn_columns_no].tolist()
-
-    if len(cn_columns) == 2 and order_columns:
-        major_cn = cns_df[[cn_columns[0], cn_columns[1]]].max(axis=1)
-        minor_cn = cns_df[[cn_columns[0], cn_columns[1]]].min(axis=1)
-        cns_df.drop(columns=cn_columns, inplace=True)
-        cns_df["major_cn"] = major_cn
-        cns_df["minor_cn"] = minor_cn
-        cn_columns = ["major_cn", "minor_cn"]
-    else:
-        cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
-    
-    sel_columns = ["sample_id", "chrom", "start", "end"] + cn_columns
-    cns_df = cns_df[sel_columns]
-    return cns_df
-
-
-def is_cn_column(column):
-    if not isinstance(column, str):
-        return False
-    return column.endswith("cn") or column.endswith("CN") or column.startswith("cn") or column.startswith("CN")
-
-
-def get_cn_columns(df):
-    return [col for col in df.columns if is_cn_column(col)]
-
-
-def find_cn_cols_if_none(cns_df, cn_cols):
-    if cn_cols is None:
-        cn_cols = get_cn_columns(cns_df)
-    # check if cn_cols is a string
-    if isinstance(cn_cols, str):
-        if cn_cols in cns_df.columns:
-            return [cn_cols]
-        else:
-            raise ValueError(f"Column {cn_cols} not found in the CNS DataFrame.")
-    # check if cn_cols is a list
-    if isinstance(cn_cols, list):
-        for col in cn_cols:
-            if col not in cns_df.columns:
-                raise ValueError(f"Column {col} not found in the CNS DataFrame.")    
-        if len(cn_cols) > 2:
-            raise ValueError("Only one (total) or two (major, minor) CN columns are allowed.")    
-        if len(cn_cols) == 0:
-            raise ValueError("No CN columns found.")
-        return cn_cols
-    return cn_cols
-
-
 def dataframe_array_split(df, n_splits):
     """
     Splits a DataFrame into n_splits parts as equally as possible.
@@ -255,19 +129,3 @@ def dataframe_array_split(df, n_splits):
         current_row += rows_in_split
     
     return splits
-
-
-def _get_major_minor_cols(cns_df, cn_columns):
-    col1 = cn_columns[0]
-    col2 = cn_columns[1]
-    if (cns_df[col1] >= cns_df[col2]).all():
-        return {col1: "major_cn", col2: "minor_cn"}
-    elif (cns_df[col2] >= cns_df[col1]).all():
-        return {col1: "major_cn", col2: "minor_cn"}
-    else:
-        return {}  
-    
-
-def is_hap_spec(cn_columns):
-    return len(cn_columns) == 2 and all([cn_col in ["hap1_cn", "hap2_cn"] for cn_col in cn_columns])
-        

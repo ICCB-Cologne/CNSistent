@@ -4,7 +4,7 @@ from numba import njit
 
 from cns.process.breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
-from cns.utils.files import find_cn_cols_if_none, get_cn_columns
+from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils import hg19
 from cns.utils.logging import log_info
 
@@ -127,10 +127,10 @@ def _get_agg_func(fun_type):
 
 
 # Add column names
-def bin_by_segments(cns_df, segments, fun_type="mean", print_info=True):
+def bin_by_segments(cns_df, segments, fun_type="mean", cn_columns=None, print_info=True):
     agg_func = _get_agg_func(fun_type)
     chrom_segments = segs_to_chrom_dict(segments)
-    cn_columns = get_cn_columns(cns_df)
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df_view = cns_df[sel_cols].set_index(["sample_id", "chrom"])
     new_rows = []
@@ -156,12 +156,12 @@ def bin_by_segments(cns_df, segments, fun_type="mean", print_info=True):
     return bin_df
 
 
-def bin_by_breaks(cns_df, breaks, fun_type="mean", print_info=True):
+def bin_by_breaks(cns_df, breaks, fun_type="mean", cn_columns=None, print_info=True):
     segments = breaks_to_segments(breaks)
-    return bin_by_segments(cns_df, segments, fun_type, print_info)
+    return bin_by_segments(cns_df, segments, fun_type, cn_columns, print_info)
 
 
-def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", print_info=True):
+def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", cn_columns=None, print_info=True):
     breaks = make_breaks(break_type, assembly)
-    bin_df = bin_by_breaks(cns_df, breaks, fun_type, print_info)
+    bin_df = bin_by_breaks(cns_df, breaks, fun_type, cn_columns, print_info)
     return bin_df

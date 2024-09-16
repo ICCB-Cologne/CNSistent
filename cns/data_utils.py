@@ -1,9 +1,10 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 from cns.process.binning import add_cns_loc, sum_cns
+from cns.utils.canonization import get_cn_columns_from_df
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
-from cns.utils.files import load_cns, load_samples, get_cn_columns
+from cns.utils.files import load_cns, load_samples
 from cns.utils.kneepoint import find_bends
 
 
@@ -115,7 +116,7 @@ def load_merged_samples(print_info=False):
 
 
 def rename_cns_columns(cns):
-    cn_columns = get_cn_columns(cns)
+    cn_columns = get_cn_columns_from_df(cns)
     return cns.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
 
 

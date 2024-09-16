@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from cns.utils.files import find_cn_cols_if_none
+from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 
 

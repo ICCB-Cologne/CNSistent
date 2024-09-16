@@ -1,6 +1,7 @@
 import unittest
 import pandas as pd
 import numpy as np
+from cns.utils.canonization import canonize_cns_df, find_cn_cols_if_none, rename_cn_cols
 from cns.utils.conversions import *
 from cns.utils.files import *
 from cns.utils.kneepoint import *
@@ -87,12 +88,28 @@ class TestFiles(unittest.TestCase):
         self.assertEqual(result.loc['s2', 'sex'], 'xy')
         self.assertEqual(result.loc['s4', 'sex'], 'xx')
 
+
+class TestCanonization(unittest.TestCase):
+    def setUp(self):
+        self.cns_df = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4'],
+            'chrom': ['chr1', 'chrX', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1'],
+            'start': [0, 100, 200, 300, 400, 0, 50, 99],
+            'end': [100, 200, 300, 400, 500, 50, 99, 100],
+            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
+            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0],
+        })        
+        self.samples = pd.DataFrame({
+            'sex': ['xy', 'NA', 'xx', 'NA']
+        }, index=['s1', 's2', 's3', 's4'])
+        self.samples.index.name = "sample_id"
+
     def test_canonize_cns_df(self):                      
         cns_df = canonize_cns_df(self.cns_df)
         self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "major_cn", "minor_cn"])
 
-    def test_get_cn_columns(self):
-        cols = get_cn_columns(self.cns_df)
+    def test_find_cn_cols_if_none(self):
+        cols = find_cn_cols_if_none(self.cns_df, None)
         self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_rename_cn_cols(self):
@@ -107,7 +124,7 @@ class TestFiles(unittest.TestCase):
         cns.loc[3, "cn_X"] = 0
         cns.loc[3, "cn_Y"] = 1
         cns, cols = rename_cn_cols(cns)
-        self.assertEqual(cols, ["hap1_cn", "hap2_cn"])
+        self.assertEqual(cols, ["hap2_cn", "hap1_cn"])
 
         cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
         cns = cns.query("chrom != 'chrY'").copy()

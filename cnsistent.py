@@ -7,15 +7,15 @@ import argparse
 from os.path import join as exists
 
 from cns.utils.assemblies import get_assembly
-from cns.utils.files import get_cn_columns, load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
-from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select, get_genome_segments
+from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils.files import load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
+from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, main_canonize, regions_remove, regions_select, get_genome_segments
 from cns.utils.logging import log_info
 
 
 def _add_common_args(parser):
     parser.add_argument("data", type=str, help="path to the TSV file with copy number segments") #TODO: make optional
     parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
-    parser.add_argument("--cols", type=int, help="number of copy number columns in the CNS file", required=False, default=-1)
     parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
     parser.add_argument("--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19")
     parser.add_argument("--threads", type=int, help="number of threads to use", required=False, default=1)
@@ -24,6 +24,7 @@ def _add_common_args(parser):
     parser.add_argument("--noheader", help="if set, the input/output file does not have a header", action="store_true")
     parser.add_argument("--nosample", help="if set, the input/output file does not have an sample column. Not compatible with the --samples option.", action="store_true")
     parser.add_argument("--subsplit", type=int, help="will split the processing into chunks to lower memory needs", required=False, default=1)
+    parser.add_argument("--cncols", type=str, help="The name of either a single CN column or two comma separated columns.", required=False, default=None)
 
 
 # TODO: Canonization should be a callable action
@@ -160,25 +161,36 @@ def _process(action, cns_df, samples_df, cn_cols, assembly, args):
         return res_blocs
     
 
+def parse_cncols(cncols):
+    if cncols != None:
+        cncols = cncols.split(",")
+        if len(cncols) == 1:
+            cols_no = [cncols[0]]
+        elif len(cncols) > 2:
+            raise ValueError("Only one or two columns can be specified.")
+    return cncols
+
+
 def main():
     args = _parse_args()
     action = args.action
     assembly = get_assembly(args.assembly)
     cns_file_path = args.data
     samples_path = args.samples
+    segfile = args.segfile
     out_file = args.out
     print_info = args.verbose
-    cols_no = args.cols
     no_header = args.noheader
     no_sample = args.nosample
     subsplit = args.subsplit
+    cncols = parse_cncols(args.cncols)
 
     # Read the input
     log_info(print_info, f"***** cns {action} *****")
     log_info(print_info, f"CNS path is {cns_file_path}...") 
 
     # Calculate bin regions without the binning itself
-    if action == "bin" and args.segfile:        
+    if action == "bin" and segfile:        
         log_info(print_info, f"Calculating binning segments...") 
         segs = _get_segments(args, assembly)
         res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
@@ -187,9 +199,10 @@ def main():
         return    
 
     if not exists(cns_file_path):
-        raise ValueError(f"File {cns_file_path} not found.")
-    cns_df = load_cns(cns_file_path, cn_col_no=cols_no, header=not no_header, no_sample=no_sample)
-    cn_cols = get_cn_columns(cns_df)
+        raise ValueError(f"Copy number file {cns_file_path} not found.")
+        
+    cns_df = load_cns(cns_file_path, canonize=True, change_coords=True, cn_columns=cncols, header=not no_header, no_sample=no_sample)
+    cn_columns = find_cn_cols_if_none(cns_df, cncols)
 
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
@@ -204,30 +217,23 @@ def main():
         
         samples_block = samples_blocks[i]
         
-        start = time.time()
-
         # Perform the action
-        res_dfs = _process(action, cns_df, samples_block, cn_cols, assembly, args)
-
-        # write out the results
-        end = time.time()
+        start = time.time()
+        res_dfs = _process(action, cns_df, samples_block, cn_columns, assembly, args)
+        runtime = time.time() - start
 
         if print_info:
-            runtime = end - start
-            print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")            
-            # Add to file times.tsv
-            if args.time:
-                # check if the file exists
-                write = "a" if exists("./out/times.tsv") else "w"
-                with open("./times.tsv", write) as f:
-                    f.write(f"{action}\t{args.threads}\t{out_file}\t{runtime}\n")
-
+            print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")        
+            if args.time:  
+                timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start))  
+                with open("./out/times.tsv", "a") as f:
+                    f.write(f"{timestamp}\t{action}\t{args.threads}\t{out_file}\t{runtime}\n")
 
         for j in range(len(res_dfs)): 
             write_mode = "w" if i == 0 and j == 0 else "a"
             header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
-            if action == "bin" and args.segfile or action == "cluster":
+            if action == "bin" and segfile and action == "cluster":
                 save_regions(res_df, out_file, change_coords=True, header=header, write_mode=write_mode)
             elif action in ["fill", "impute", "bin"]:
                 save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, 

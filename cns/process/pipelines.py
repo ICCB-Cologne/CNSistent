@@ -10,8 +10,9 @@ from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_b
 from cns.process.cluster import created_merged_segs
 from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours, remove_outliers
 from cns.process.segments import filter_min_size, segment_difference, split_segments
+from cns.utils.canonization import find_cn_cols_if_none, is_hap_spec, rename_cn_cols
 from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
-from cns.utils.files import is_hap_spec, load_regions, samples_df_from_cns_df, find_cn_cols_if_none, rename_cn_cols
+from cns.utils.files import load_regions, samples_df_from_cns_df
 from cns.utils.logging import log_info
 from cns.utils.assemblies import hg19
 

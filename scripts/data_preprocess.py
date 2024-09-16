@@ -4,7 +4,7 @@ import argparse
 import os
 import pandas as pd
 import numpy as np
-from cns.utils.files import canonize_cns_df
+from cns.utils.canonization import canonize_cns_df
 from cns.utils.assemblies import get_assembly
 from cns.data_utils import out_path, data_path
 
@@ -104,7 +104,7 @@ def tracerx(primary, print_debug=False):
 
     cns_subset = cns_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
     cns_subset["chr"] = "chr" + cns_subset["chr"].astype(str)
-    cns_raw_df = canonize_cns_df(cns_subset, 2)
+    cns_raw_df = canonize_cns_df(cns_subset)
     if print_debug:
         print(cns_raw_df.head())
 
