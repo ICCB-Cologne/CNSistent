@@ -34,28 +34,42 @@ def get_ane_for_col(col, row, samples_df, assembly=hg19):
     return get_expected_ploidy(col, row["chrom"], samples_df.loc[row["sample_id"]]["sex"] == "xy", assembly) != row[col]
 
 
-def get_ane_for_cols(cns_df, samples_df, cn_columns, assembly=hg19):
+def is_seg_ane(cns_df, samples_df, cn_columns, het, assembly=hg19):
     is_ane = [cns_df.apply(lambda x: get_ane_for_col(col, x, samples_df, assembly), axis=1) for col in cn_columns]
-    return is_ane
+    return np.any(is_ane, axis=0) if het else np.all(is_ane, axis=0)
 
 
-def calc_bases_for_subset(cns_df, samples_df, cn_columns, het, assembly=hg19):
-    is_ane = get_ane_for_cols(cns_df, samples_df, cn_columns, assembly)
-    cns_df["ane"] = np.any(is_ane, axis=0) if het else np.all(is_ane, axis=0)
-    res = cns_df[cns_df["ane"]].groupby("sample_id")["length"].sum()
+def _calc_bases_per_column(res, cns_df, samples_df, cn_columns, het, feature, assembly=hg19):
+    label = feature + "_" + ("het" if het else "hom")
+    mask = is_seg_ane(cns_df, samples_df, cn_columns, het, assembly)
+
+    chrom_types = {"aut": assembly.aut_names, "sex": assembly.sex_names }
+    for suffix, names in chrom_types.items():
+        subset = cns_df[mask].query("chrom in @names")
+        subset["length"] = subset["end"] - subset["start"]
+        res[f"{label}_{suffix}"] = subset.groupby("sample_id")["length"].sum()
+        res[f"{label}_{suffix}"] = res[f"{label}_{suffix}"].fillna(0).astype(np.int64)    
+    res[f"{label}_tot"] = res[f"{label}_aut"] + res[f"{label}_sex"]
     return res
 
-
-def _calc_bases_per_column(res, aut_df, sex_df, samples_df, cn_columns, het, assembly=hg19):
-    label = "het" if het else "hom"
-    # Group the differences by sample_id and compute the sum for each group
-    res[f"ane_{label}_aut"] = calc_bases_for_subset(aut_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
-    res[f"ane_{label}_sex"] = calc_bases_for_subset(sex_df, samples_df, cn_columns, het, assembly).reindex(res.index).fillna(0).astype(np.int64)
-    res[f"ane_{label}_tot"] = res[f"ane_{label}_aut"] + res[f"ane_{label}_sex"]
-    return res
 
 # Note: missing values are NOT considered to be aneuploid, to consider missing segments, first impute
 def calc_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
+    res = samples_df.copy()
+    cns_df["length"] = cns_df["end"] - cns_df["start"]
+
+    if len(cn_columns) == 2:
+        res = _calc_bases_per_column(res, cns_df, samples_df, cn_columns, True, "ane", assembly)
+    res = _calc_bases_per_column(res, cns_df, samples_df, cn_columns, False, "ane", assembly)    
+    return res
+
+
+def get_loh_for_col(col, row, samples_df, assembly=hg19):
+    return get_expected_ploidy(col, row["chrom"], samples_df.loc[row["sample_id"]]["sex"] == "xy", assembly) > row[col]
+
+
+# Note: missing values are NOT considered to be aneuploid, to consider missing segments, first impute
+def calc_loh_bases(cns_df, samples_df, cn_columns, assembly=hg19):
     res = samples_df.copy()
     cns_df["length"] = cns_df["end"] - cns_df["start"]
 
@@ -66,3 +80,4 @@ def calc_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
         res = _calc_bases_per_column(res, aut_df, sex_df, samples_df, cn_columns, True, assembly)
     res = _calc_bases_per_column(res, aut_df, sex_df, samples_df, cn_columns, False, assembly)    
     return res
+

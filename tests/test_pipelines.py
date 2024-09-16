@@ -97,7 +97,7 @@ class TestPipelines(unittest.TestCase):
     
     def test_main_signatures(self):
         res = main_signatures(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 19))        
+        self.assertEqual(res.shape, (4, 28))        
         self.assertEqual(res.loc['s1', 'breaks_minor_cn_aut'], 1)
         self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
         self.assertEqual(res.loc['s1', 'breaks_total_cn_aut'], 1)

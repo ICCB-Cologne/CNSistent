@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_cols, calc_bases_for_subset, calc_ane_bases
+from cns.analyze.aneuploidy import get_expected_ploidy, get_ane_for_col, is_seg_ane, calc_ane_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
 from cns.process.binning import add_cns_loc
@@ -142,10 +142,11 @@ class TestAneuploidy(unittest.TestCase):
         }).set_index('sample_id')
         self.assembly = type('Assembly', (object,), {
             'aut_names': ['chr1', 'chr2', 'chr3'],
+            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY'],
+            'sex_names': ['chrX', 'chrY'],
             'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'chr_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
-            'aut_len': 300,
-            'sex_names': ['chrX', 'chrY'],
+            'aut_len': 600,
             'chr_x': 'chrX',
             'chr_y': 'chrY'
         })
@@ -162,20 +163,9 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("total_cn", "chr1", True), 2)
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
 
-    def test_get_ane_for_cols(self):
-        res = get_ane_for_cols(self.cns, self.samples, self.ane_cols, self.assembly)
-        self.assertEqual(len(res), 2)
-        self.assertEqual(len(res[0]), len(self.cns["major_cn"]))
-        self.assertEqual(res[0][0], False)
-        self.assertEqual(res[1][0], True)
-
     def test_calc_ane_per_sample(self):
-        cns_df = add_cns_loc(self.cns.copy())
-        res = calc_bases_for_subset(cns_df, self.samples, self.ane_cols, True, self.assembly)
-        self.assertEqual(len(res), 4)
-        self.assertEqual(res.values[3], 170)
-        res = calc_bases_for_subset(cns_df, self.samples, self.ane_cols, False, self.assembly)
-        self.assertEqual(res.values[3], 1)
+        res = is_seg_ane(self.cns, self.samples, self.ane_cols, True, self.assembly)
+        self.assertEqual(len(res), len(self.cns))
 
     def test_get_ane_bases(self):
         res = calc_ane_bases(self.cns, self.samples, self.ane_cols, self.assembly)
@@ -183,6 +173,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.loc['s4', 'ane_het_aut'], 170)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 100)
         self.assertEqual(res.loc['s2', 'ane_het_tot'], 200)
-        norm = normalize_feature(res, "ane_het", self.assembly)
-        norm = normalize_feature(res, "ane_hom", self.assembly)
-        print(norm)
+        res = normalize_feature(res, "ane_het", self.assembly)
+        self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
+        res = normalize_feature(res, "ane_hom", self.assembly)
+        self.assertEqual(res.loc['s1', 'ane_hom_aut'], 1/6)
