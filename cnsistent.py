@@ -42,6 +42,7 @@ def _parse_args():
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Calculates aneuploidy for CNS data (NaNs are ignored).")
     sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")
     sp_dict["segment"] = subparsers.add_parser("cluster", help=f"Calculates segmentation regions for CNS data.")
+    sp_dict["segbin"] = subparsers.add_parser("segbin", help=f"Segments and bins the CNS data. (combines segment and bin commands)")
 
     for sp in sp_dict.values():
         _add_common_args(sp)
@@ -101,6 +102,8 @@ def _action_to_fun(action):
         return main_ploidy   
     elif action == "bin":
         return main_bin
+    elif action == "segment":
+        return main_segment    
     elif action == "segment":
         return main_segment
     else:

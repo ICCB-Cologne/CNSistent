@@ -112,19 +112,19 @@ def filter_min_size(segs, min_size):
     return [seg for seg in segs if seg[2] - seg[1] >= min_size]
 
 
-def split_segment(segment, step_size, equidisant=True):
+def split_segment(segment, step_size, strategy="scale"):
     chrom_no, seg_start, seg_end = segment
     length = seg_end - seg_start
-    breaks = create_step_breaks(length, step_size, equidisant)
+    breaks = create_step_breaks(length, step_size, strategy)
     breaks = (np.array(breaks) + seg_start).tolist()
     res = [(chrom_no, breaks[i], breaks[i + 1]) for i in range(len(breaks) - 1)]
     return res
 
 
-def split_segments(segments, step_size, equidisant=True):
+def split_segments(segments, step_size, strategy="scale"):
     res = []
     for segment in segments:
-        res += split_segment(segment, step_size, equidisant)
+        res += split_segment(segment, step_size, strategy)
     return res
 
 

@@ -4,23 +4,22 @@ from cns.utils.assemblies import hg19
 from cns.utils.conversions import breaks_to_segments, cytobands_to_df
 
 
-# TODO: add option to pad only on the right
-def create_step_breaks(reg_len, step_size, equidistant=True):
+def create_step_breaks(reg_len, step_size, strategy="after"):
     if (step_size < 1) or (reg_len < step_size):
         return [0, reg_len]
     padding = reg_len % step_size
-    if equidistant:
+    if strategy=="scale":
         step_count = reg_len // step_size
         if step_count < 1:
             return [0, reg_len]
-        if padding > (step_size / 2):
+        if padding >= (step_size / 2):
             step_size -= (step_size - padding) / (step_count + 1)
         else:
             step_size += padding / step_count
         fracs = np.arange(0, reg_len + 1, step_size) ## 
         return [np.int32(np.floor(frac + .5)) for frac in fracs]
-    else:
-        if padding > (step_size / 2):
+    elif strategy=="pad":
+        if padding >= (step_size / 2):
             padding = (step_size - padding) / 2
             start = step_size - padding
             end = reg_len - start
@@ -33,11 +32,17 @@ def create_step_breaks(reg_len, step_size, equidistant=True):
             end = reg_len - start
             fracs = np.arange(start, end + 1, step_size)
             return [0] + [np.int32(np.floor(frac + .5)) for frac in fracs] + [reg_len]
-       
+    else:       
+        if padding >= (step_size / 2):
+            fracs = np.arange(0, reg_len - padding + step_size, step_size)
+        else:
+            fracs = np.arange(0, reg_len - padding, step_size)
+        return [np.int32(np.floor(frac + .5)) for frac in fracs] + [reg_len]
+        
 
 # Calculate breakpoints at the given resolution. The boundaries either use half
-def calc_bin_breaks(step_size, equidistant=True, assembly=hg19):
-    return { chrom: create_step_breaks(length, step_size, equidistant) for chrom, length in assembly.chr_lens.items() }
+def calc_bin_breaks(step_size, strategy="scale", assembly=hg19):
+    return { chrom: create_step_breaks(length, step_size, strategy) for chrom, length in assembly.chr_lens.items() }
 
 
 def calc_arm_breaks(assembly=hg19):
@@ -66,7 +71,7 @@ def make_breaks(break_type, assembly=hg19):
             bin_size = int(break_type)
         except:
             raise ValueError("break_type must be 'arms', 'cytobands' or an integer, got " + break_type)
-        return calc_bin_breaks(bin_size, equidistant=True, assembly=assembly)
+        return calc_bin_breaks(bin_size, strategy="scale", assembly=assembly)
     
 
 # Obtain breakpoints from a cns dataframe
@@ -97,7 +102,7 @@ def get_breaks_in_segments(segments, breaks, min_dist = 0):
     return res
 
 
-def insert_breaks_in_segments(segments, breaks, min_dist=0):
+def insert_breaks_in_segments(segments, breaks, min_dist=1):
     breaks = get_breaks_in_segments(segments, breaks, min_dist)
     # add breaks from segments
     for chrom, start, end in segments:

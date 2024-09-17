@@ -68,17 +68,15 @@ class TestSegments(unittest.TestCase):
         # Test case 1
         segment = (1, 1, 11)
         step_size = 2
-        equidisant = True
         expected_output = [(1, 1, 3), (1, 3, 5), (1, 5, 7), (1, 7, 9), (1, 9, 11)]
-        actual_output = split_segment(segment, step_size, equidisant)
+        actual_output = split_segment(segment, step_size, "scale")
         self.assertEqual(actual_output, expected_output)
 
         # Test case 2
         segment = (1, 1, 11)
         step_size = 3
-        equidisant = False
         expected_output = [(1, 1, 5), (1, 5, 8), (1, 8, 11)]
-        actual_output = split_segment(segment, step_size, equidisant)
+        actual_output = split_segment(segment, step_size, "pad")
         self.assertEqual(actual_output, expected_output)
 
     
@@ -199,61 +197,87 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(sum_of_breaks, sum_of_bands)
 
     def test_bin_breaks(self):
-        result = calc_bin_breaks(1000000, True)
+        result = calc_bin_breaks(1000000, "scale")
         self.assertEqual(list(result.keys())[0], 'chr1')
         self.assertEqual(list(result.values())[0][0], 0)
         self.assertEqual(list(result.values())[0][-1], 249250621)
 
-    def test_dist_breaks_equidistant(self):
-        act = create_step_breaks(10, 1)
+    def test_dist_breaks_scaled(self):
+        act = create_step_breaks(10, 1, "scale")
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2, True)
+        act = create_step_breaks(10, 2, "scale")
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2.5, True)
+        act = create_step_breaks(10, 2.5, "scale")
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 3)
+        act = create_step_breaks(10, 3, "scale")
         exp = [0, 3, 7, 10]
         self.assertEqual(act, exp)        
-        act = create_step_breaks(13, 10)
+        act = create_step_breaks(13, 10, "scale")
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = create_step_breaks(17, 10)
+        act = create_step_breaks(17, 10, "scale")
         exp = [0, 9, 17]
         self.assertEqual(act, exp)
-        act = create_step_breaks(33, 10, True)
+        act = create_step_breaks(33, 10, "scale")
         exp = [0, 11, 22, 33]
         self.assertEqual(act, exp)
-        act = create_step_breaks(37, 10, True)
+        act = create_step_breaks(37, 10, "scale")
         exp = [0, 9, 19, 28, 37]
         self.assertEqual(act, exp)
         
-    def test_dist_breaks_unequidistant(self):
-        act = create_step_breaks(10, 1, False)
+    def test_dist_breaks_padded(self):
+        act = create_step_breaks(10, 1, "pad")
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2, False)
+        act = create_step_breaks(10, 2, "pad")
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2.5, False)
+        act = create_step_breaks(10, 2.5, "pad")
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 3, False)
+        act = create_step_breaks(10, 3, "pad")
         exp = [0, 4, 7, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(13, 10, False)
+        act = create_step_breaks(13, 10, "pad")
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = create_step_breaks(17, 10, False)
+        act = create_step_breaks(17, 10, "pad")
         exp = [0, 9, 17]
         self.assertEqual(act, exp)
-        act = create_step_breaks(33, 10, False)
+        act = create_step_breaks(33, 10, "pad")
         exp = [0, 12, 22, 33]
         self.assertEqual(act, exp)
-        act = create_step_breaks(37, 10, False)
+        act = create_step_breaks(37, 10, "pad")
         exp = [0, 9, 19, 29, 37]
+        self.assertEqual(act, exp)
+
+    def test_dist_breaks_after(self):
+        act = create_step_breaks(10, 1, "after")
+        exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(10, 2, "after")
+        exp = [0, 2, 4, 6, 8, 10]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(10, 2.5, "after")
+        exp = [0, 3, 5, 8, 10]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(10, 3, "after")
+        exp = [0, 3, 6, 10]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(13, 10, "after")
+        exp = [0, 13]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(17, 10, "after")
+        exp = [0, 10, 17]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(33, 10, "after")
+        exp = [0, 10, 20, 33]
+        self.assertEqual(act, exp)
+        act = create_step_breaks(37, 10, "after")
+        exp = [0, 10, 20, 30, 37]
         self.assertEqual(act, exp)
 
     def test_diffs(self):
@@ -394,6 +418,7 @@ class TestMerging(unittest.TestCase):
         segments = [('chr1', 0, 300), ('chr2', 100, 200)]
         dist = 100
         res = cluster_within_segments(breaks, segments, dist)
+        print(res)
         self.assertEqual(len(res), 4)
         self.assertEqual(res[0], ('chr1', 0, 100))
         self.assertEqual(res[2], ('chr1', 250, 300))
