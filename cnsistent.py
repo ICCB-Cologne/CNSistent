@@ -9,8 +9,8 @@ from os.path import exists
 from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
-from cns.utils.files import load_cns, load_regions, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
-from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_segment
+from cns.utils.files import load_cns, load_regions, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
+from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info
 
 
@@ -39,11 +39,11 @@ def _parse_args():
     sp_dict["fill"] = subparsers.add_parser("fill", help=f"Adds Nan regions to the CNS data to match the assembly.")
     sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNS data.")
     sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data.")
-    sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Calculates aneuploidy for CNS data (NaNs are ignored).")
+    sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
+    sp_dict["signatures"] = subparsers.add_parser("signatures", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
+    sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
     sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")
-    sp_dict["segment"] = subparsers.add_parser("cluster", help=f"Calculates segmentation regions for CNS data.")
-    sp_dict["segbin"] = subparsers.add_parser("segbin", help=f"Segments and bins the CNS data. (combines segment and bin commands)")
-
+    
     for sp in sp_dict.values():
         _add_common_args(sp)
 
@@ -100,12 +100,12 @@ def _action_to_fun(action):
         return main_coverage
     elif action == "ploidy":
         return main_ploidy   
-    elif action == "bin":
-        return main_bin
+    elif action == "signatures":
+        return main_signatures  
     elif action == "segment":
         return main_segment    
-    elif action == "segment":
-        return main_segment
+    elif action == "bin":
+        return main_bin
     else:
         raise ValueError(f"Action {action} not recognized.")
 
@@ -131,9 +131,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         merge_block = [args.merge]*threads
         filter_block = [args.filter]*threads
         return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
-    elif action == "coverage":        
-        return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
-    elif action == "ploidy":
+    elif action in ["coverage", "ploidy", "signatures"]:       
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "bin":
         segs = load_regions(args.segments)
@@ -164,9 +162,7 @@ def _process(action, cns_df, samples_df, cn_cols, assembly, args):
 def parse_cncols(cncols):
     if cncols != None:
         cncols = cncols.split(",")
-        if len(cncols) == 1:
-            cols_no = [cncols[0]]
-        elif len(cncols) > 2:
+        if len(cncols) > 2:
             raise ValueError("Only one or two columns can be specified.")
     return cncols
 
@@ -226,15 +222,15 @@ def main():
             mode = "w" if i == 0 and j == 0 else "a"
             header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
-            if action == "segment":
-                save_regions(res_df, out_file, change_coords=True, header=header, write_mode=mode)
+            if action in ["segment"]:
+                save_regions(res_df, out_file, change_coords=True, header=header)
             elif action in ["fill", "impute", "bin"]:
                 save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, write_mode=mode)
+            elif action in ["coverage", "ploidy", "signatures"]:
+                save_samples(res_df, out_file, no_sample=no_sample, header=header)
             else:
-                if no_sample:
-                    res_df.reset_index(drop=True)
-                res_df.to_csv(out_file, sep="\t", index=True, header=header, mode=mode)
-
+                raise ValueError(f"Unknown action {action}")
+    
     log_info(print_info, "Done.")
 
 

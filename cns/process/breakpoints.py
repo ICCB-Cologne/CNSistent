@@ -102,7 +102,7 @@ def get_breaks_in_segments(segments, breaks, min_dist = 0):
     return res
 
 
-def insert_breaks_in_segments(segments, breaks, min_dist=1):
+def insert_breaks_in_segments(segments, breaks, min_dist=0):
     breaks = get_breaks_in_segments(segments, breaks, min_dist)
     # add breaks from segments
     for chrom, start, end in segments:

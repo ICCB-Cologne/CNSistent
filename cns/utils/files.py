@@ -43,8 +43,10 @@ def load_samples(path):
     return samples_df   
 
 
-def save_samples(samples_df, path, write_mode="w"):
-    samples_df.to_csv(path, sep="\t", index=True, header=True, mode=write_mode)
+def save_samples(samples_df, path, no_sample=False, header=True):
+    if no_sample:
+        samples_df = samples_df.reset_index(drop=True)
+    samples_df.to_csv(path, sep="\t", index=True, header=header)
 
 
 def fill_sex_if_missing(cns, samples):
@@ -67,12 +69,12 @@ def samples_df_from_cns_df(cns_df, fill_sex=True):
     return samples_df
 
 
-def save_regions(seg_df, path, change_coords=True, header=True, write_mode="w"):
+def save_regions(seg_df, path, change_coords=True, header=True):
     if change_coords:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
     sel = seg_df[["chrom", "start", "end"]]
-    sel.to_csv(path, sep="\t", index=False, header=header, mode=write_mode)
+    sel.to_csv(path, sep="\t", index=False, header=header)
 
 
 def load_regions(path, change_coords=True, header=True):

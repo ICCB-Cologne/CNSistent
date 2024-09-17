@@ -1,16 +1,13 @@
 import pandas as pd
-import numpy as np
-
-
 from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_bases
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_seg_size_per_sample, calc_step_per_sample, prepare_segments
 from cns.process.binning import bin_by_segments
 from cns.process.breakpoints import get_breaks
-from cns.process.cluster import calc_clusters, cluster_within_segments
+from cns.process.cluster import cluster_within_segments
 from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours, remove_outliers
-from cns.process.segments import get_genome_segments, regions_remove, regions_select, split_segments
-from cns.utils.canonization import find_cn_cols_if_none, is_hap_spec, rename_cn_cols
+from cns.process.segments import get_genome_segments, split_segments
+from cns.utils.canonization import find_cn_cols_if_none, is_hap_spec
 from cns.utils.files import samples_df_from_cns_df
 from cns.utils.logging import log_info
 from cns.utils.assemblies import hg19
@@ -47,27 +44,27 @@ def main_bin(cns_df, segs, fun_type='mean', cn_columns=None, print_info=False):
 
 # any: if True, based is considered as covered if any CN column has values assigned
 def main_coverage(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
-    res = samples_df.copy()
+    res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
     if "length" not in cns_df.columns:
         cns_df["length"] = cns_df["end"] - cns_df["start"]
 
-    res = get_missing_chroms(cns_df, res, assembly)
+    res_df = get_missing_chroms(cns_df, res_df, assembly)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     
     hom_nan_df = get_not_nan(cns_df, cn_columns, False)
-    res = get_covered_bases(hom_nan_df, res, False)
-    res = normalize_feature(res, "cover_hom", assembly)
+    res_df = get_covered_bases(hom_nan_df, res_df, False)
+    res_df = normalize_feature(res_df, "cover_hom", assembly)
 
     if len(cn_columns) == 2:
         hom_nan_df = get_not_nan(cns_df, cn_columns, True)
-        res = get_covered_bases(hom_nan_df, res, True)
-        res = normalize_feature(res, "cover_het", assembly)
-    return res
+        res_df = get_covered_bases(hom_nan_df, res_df, True)
+        res_df = normalize_feature(res_df, "cover_het", assembly)
+    return res_df
 
 
 def main_signatures(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
-    res = samples_df.copy()
+    res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
     if "length" not in cns_df.columns:
         cns_df["length"] = cns_df["end"] - cns_df["start"]
@@ -78,11 +75,11 @@ def main_signatures(cns_df, samples_df, cn_columns=None, assembly=hg19, print_in
     
     for cn_col in cn_columns:
         segs_df = prepare_segments(cns_df, cn_col)
-        res = calc_breaks_per_sample(segs_df, res, cn_col, assembly)
-        res = calc_step_per_sample(segs_df, res, cn_col, assembly)
-        res = calc_seg_size_per_sample(segs_df, res, cn_col, assembly)
+        res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
+        res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
+        res_df = calc_seg_size_per_sample(segs_df, res_df, cn_col, assembly)
     
-    return res
+    return res_df
 
 # NaNs are not considered for ploidy calculation
 def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=False):
@@ -112,4 +109,5 @@ def main_segment(cns_df, select_segs, remove_segs, split_size=0, merge_dist=0, f
         segs = cluster_within_segments(breaks, segs, merge_dist, print_info)
     if split_size > 0:
         segs = split_segments(segs, split_size)
-    return segs
+    segs_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
+    return segs_df
