@@ -4,9 +4,8 @@ from multiprocessing import Pool
 import pandas as pd
 import time
 import argparse
-from os.path import join, exists, abspath
+from os.path import exists
 
-from cns.process.segments import get_genome_segments, regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.files import load_cns, load_regions, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing

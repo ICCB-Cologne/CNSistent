@@ -108,7 +108,7 @@ def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=F
 def main_segment(cns_df, select, remove, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False):
     select = regions_select(select, assembly)
     remove = regions_remove(remove, assembly)
-    segs = get_genome_segments(select, split_size, remove, filter_size)
+    segs = get_genome_segments(select, remove, filter_size)
     if merge_dist > 0:
         breaks = get_breaks(cns_df, keep_ends=False, assembly=assembly)
         return cluster_within_segments(breaks, segs, merge_dist, assembly, print_info)

@@ -81,6 +81,30 @@ class TestSegments(unittest.TestCase):
         actual_output = split_segment(segment, step_size, equidisant)
         self.assertEqual(actual_output, expected_output)
 
+    
+    def test_regions_remove(self):
+        filter_size = 0
+        select = regions_select("")
+        remove = regions_remove("gaps")
+        self.assertGreater(len(remove), 0)
+        segs = get_genome_segments(select, remove, filter_size)
+        self.assertGreater(len(segs), 0)
+        self.assertEqual(remove[0][2], segs[0][1]) # check if the first segment is a gap
+        
+    def test_get_genome_segments(self):
+        select = [(1, 0, 10), (1, 20, 30), (2, 0, 5)]
+        remove = [(1, 5, 15)]
+        
+        filter_size = 1
+        expected_result = [(1, 15, 20), (1, 20, 30)]        
+        result = get_genome_segments(select, remove, filter_size)
+        
+        filter_size = 6
+        expected_result = [(1, 20, 30)]        
+        result = get_genome_segments(select, remove, filter_size)
+        
+        self.assertEqual(result, expected_result)
+
 
 # TODO: Add sex chromosome checks
 class TestImputation(unittest.TestCase):
@@ -374,12 +398,12 @@ class TestMCS(unittest.TestCase):
         dict_start = {'chr1': [50, 99], 'chr2': [200, 300]}
         dist = 100
         assembly = type('Assembly', (object,), {'chr_lens': {'chr1': 100, 'chr2': 400, 'chr3': 300, 'chrX': 100, 'chrY': 100}})
-        result = calc_clusters(dict_start, dist, assembly, False)
-        exp = [('chr1', 0, 74), ('chr1', 74, 100), ('chr2', 0, 200), ('chr2', 200, 300), ('chr2', 300, 400)]
+        result = calc_clusters(dict_start, dist)
+        exp = {'chr1': [74], 'chr2': [200, 300]}
         self.assertEqual(result, exp)
-        result = calc_clusters(dict_start, dist, assembly, True)
-        exp = [('chr1', 0, 100), ('chr2', 0, 200), ('chr2', 200, 300), ('chr2', 300, 400)]
-        self.assertEqual(result, exp)
+
+    def test_cluster_within_segments(self):
+        raise NotImplementedError("Test not implemented")
 
 
 if __name__ == "__main__":

@@ -32,30 +32,6 @@ class TestPipelines(unittest.TestCase):
         })
         pd.set_option('display.max_columns', 10)
 
-    def test_regions_remove(self):
-        bin_size = 10000000
-        filter_size = 0
-        select = regions_select("")
-        remove = regions_remove("gaps")
-        self.assertGreater(len(remove), 0)
-        segs = get_genome_segments(select, bin_size, remove, filter_size)
-        self.assertGreater(len(segs), 0)
-        self.assertEqual(remove[0][2], segs[0][1]) # check if the first segment is a gap
-        
-    def test_get_genome_segments(self):
-        select = [(1, 0, 10), (1, 20, 30), (2, 0, 5)]
-        remove = [(1, 5, 15)]
-        
-        filter_size = 1
-        expected_result = [(1, 15, 20), (1, 20, 30)]        
-        result = get_genome_segments(select, filter_size=filter_size, remove=remove)
-        
-        filter_size = 6
-        expected_result = [(1, 20, 30)]        
-        result = get_genome_segments(select, filter_size=filter_size, remove=remove)
-        
-        self.assertEqual(result, expected_result)
-
     def test_main_fill(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
         res["length"] = res["end"] - res["start"]
@@ -64,7 +40,6 @@ class TestPipelines(unittest.TestCase):
         # assert that chrY exists in chrom column where index is s4 and not in s3
         self.assertTrue("chrY" in res.query("sample_id == 's4'")['chrom'].values)
         self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
-
 
     def test_main_impute(self):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
@@ -106,4 +81,9 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s4', 'breaks_total_cn_aut'], 4)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_sex'], 0)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_tot'], 4)
+
+    def test_main_segment(self):
+        raise NotImplementedError("Test not implemented yet")
+    
+    
     
