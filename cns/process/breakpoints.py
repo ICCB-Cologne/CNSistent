@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from cns.utils.assemblies import hg19
-from cns.utils.conversions import cytobands_to_df
+from cns.utils.conversions import breaks_to_segments, cytobands_to_df
 
 
 def create_step_breaks(reg_len, step_size, equidistant=True):
@@ -83,3 +83,30 @@ def get_breaks(cns_df, keep_ends=True, assembly=hg19):
         if chrom not in dict_start:
             dict_start[chrom] = []
     return dict_start
+
+
+def get_breaks_in_segments(segments, breaks):
+    res = { chrom: [] for chrom in breaks }
+    for chrom, start, end in segments:
+        if chrom not in breaks:
+            continue
+        for br in breaks[chrom]:
+            if start <= br < end:
+                res[chrom].append(br)
+    return res
+
+
+def insert_breaks_in_segments(segments, breaks):
+    breaks = get_breaks_in_segments(segments, breaks)
+    # add breaks from segments
+    for chrom, start, end in segments:
+        if chrom not in breaks:
+            breaks[chrom] = []
+        breaks[chrom].append(start)
+        breaks[chrom].append(end)
+    # unique and sort
+    for chrom in breaks:
+        breaks[chrom] = sorted(set(breaks[chrom]))
+    # breaks to segments
+    res = breaks_to_segments(breaks)
+    return res

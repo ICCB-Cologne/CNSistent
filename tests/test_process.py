@@ -263,6 +263,22 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(breaks['chr1'], [])
         self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
 
+    def test_get_breaks_in_segments(self):
+        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
+        res = get_breaks_in_segments(segments, breaks)
+        self.assertEqual(res['chr1'], [0, 1, 99])
+        self.assertEqual(res['chr3'], [])
+
+    def test_insert_breaks_in_segments(self):
+        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
+        res = insert_breaks_in_segments(segments, breaks)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res[0], ('chr1', 0, 1))
+        self.assertEqual(res[1], ('chr1', 1, 99))
+        self.assertEqual(res[2], ('chr1', 99, 100))
+        self.assertEqual(res[3], ('chr2', 100, 200))
 
 
 class TestBinning(unittest.TestCase):

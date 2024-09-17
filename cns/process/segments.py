@@ -123,3 +123,5 @@ def split_segments(segments, step_size, equidisant=True):
     for segment in segments:
         res += split_segment(segment, step_size, equidisant)
     return res
+
+

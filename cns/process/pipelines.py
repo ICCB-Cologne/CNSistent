@@ -124,6 +124,12 @@ def main_cluster(cns_df, dist, assembly=hg19, print_info=False):
     return df
 
 
+def main_segment(cns_df, regions, strategy, assembly=hg19, print_info=False):
+    if strategy == "regions":
+        res = regions_select(regions, assembly)
+    return res
+
+
 def regions_select(select, assembly=hg19):    
     if select == "arms":
         breaks = calc_arm_breaks(assembly)
@@ -160,4 +166,5 @@ def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):
     if bin_size > 0:
         res = split_segments(res, bin_size)
     return res
+
 

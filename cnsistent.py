@@ -40,7 +40,7 @@ def _parse_args():
     sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data.")
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Calculates aneuploidy for CNS data (NaNs are ignored).")
     sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")
-    sp_dict["cluster"] = subparsers.add_parser("cluster", help=f"Calculates a clustering of breakpoints between samples.")
+    sp_dict["segment"] = subparsers.add_parser("cluster", help=f"Calculates a clustering of breakpoints between samples.")
 
     for sp in sp_dict.values():
         _add_common_args(sp)
