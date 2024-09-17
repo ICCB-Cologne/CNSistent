@@ -270,7 +270,8 @@ def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=
     if method == 'zero':
         return fill_nans_with_zeros(cns_df, cn_columns, print_info)
     else:
-        raise ValueError(f"Unknown imputation method: {method}")
+        msg = f"Unknown imputation method: {method}"
+        raise Exception(msg)
 
 
 def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    

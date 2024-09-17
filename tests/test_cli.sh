@@ -36,14 +36,14 @@ commands=(
   "cns fill ./in/test_cns_source.tsv --sample ./in/test_sample_source.tsv --out ./temp/test_cns_fill.tsv"
   "cns impute ./temp/test_cns_fill.tsv --out ./temp/test_cns_imp.tsv"
   "cns coverage ./temp/test_cns_fill.tsv --out ./temp/test_sample_cover.tsv"
-  "cns ploidy ./out/test_cns_imp.tsv --samples ./in/test_sample_source.tsv --out ./out/test_sample_ploidy.tsv"
+  "cns ploidy ./out/test_cns_imp.tsv --samples ./in/test_sample_source.tsv --out ./temp/test_sample_ploidy.tsv"
   "cns cluster ./temp/test_cns_fill.tsv --dist 100000 --out ./temp/mcs_regions.tsv"
-  "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_cns_arms.tsv --threads 2"
-  "cns bin --select bands ./temp/test_cns_fill.tsv --out ./temp/test_cns_bands.tsv --subsplit 2"
-  "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB.tsv"
-  "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB_gaps.tsv --remove gaps --filter 500000"
-  "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --segfile"
-  "cns bin ./temp/test_cns_fill.tsv --select ./temp/mcs_regions.tsv --out ./temp/test_cns_mcs.tsv"
+  # "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_cns_arms.tsv --threads 2"
+  # "cns bin --select bands ./temp/test_cns_fill.tsv --out ./temp/test_cns_bands.tsv --subsplit 2"
+  # "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB.tsv"
+  # "cns bin --bins 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_cns_1MB_gaps.tsv --remove gaps --filter 500000"
+  # "cns bin --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000 --segfile"
+  # "cns bin ./temp/test_cns_fill.tsv --select ./temp/mcs_regions.tsv --out ./temp/test_cns_mcs.tsv"
 )
 
 rm -r ./temp

@@ -31,7 +31,7 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
     return res
 
 
-def main_impute(cns_df, samples_df=None, cn_columns=None, method='extend', print_info=False):
+def main_impute(cns_df, samples_df=None, method='extend', cn_columns=None,  print_info=False):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if method == 'diploid' and samples_df is None:
         log_info(print_info, "Diploid imputation requires samples, but none provided, creating samples from CNS data.")

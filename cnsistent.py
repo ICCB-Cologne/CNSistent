@@ -9,7 +9,7 @@ from os.path import join as exists
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.files import load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
-from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, main_canonize, regions_remove, regions_select, get_genome_segments
+from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select, get_genome_segments
 from cns.utils.logging import log_info
 
 
@@ -27,7 +27,6 @@ def _add_common_args(parser):
     parser.add_argument("--cncols", type=str, help="The name of either a single CN column or two comma separated columns.", required=False, default=None)
 
 
-# TODO: Canonization should be a callable action
 def _parse_args():
     # Top-level parser
     parser = argparse.ArgumentParser(description="Impute missing values in CNS data")
@@ -123,7 +122,8 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
     ver_block[-1] = args.verbose
     cols_block = [cols_block]*threads
     if action == "impute":
-        return zip(cns_blocks, samples_blocks, cols_block, ver_block)
+        ext_block = ['extend']*threads
+        return zip(cns_blocks, samples_blocks, ext_block, cols_block, ver_block)
     if action == "fill":
         add_missing = [True]*threads
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)        
@@ -131,8 +131,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         dist_block = [args.dist]*threads
         return zip(cns_blocks, dist_block, ass_block, ver_block)
     elif action == "coverage":        
-        any_nan_block = [True]*threads
-        return zip(cns_blocks, samples_blocks, cols_block, ass_block, any_nan_block, ver_block)
+        return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "ploidy":
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "bin":
@@ -177,7 +176,6 @@ def main():
     assembly = get_assembly(args.assembly)
     cns_file_path = args.data
     samples_path = args.samples
-    segfile = args.segfile
     out_file = args.out
     print_info = args.verbose
     no_header = args.noheader
@@ -190,7 +188,7 @@ def main():
     log_info(print_info, f"CNS path is {cns_file_path}...") 
 
     # Calculate bin regions without the binning itself
-    if action == "bin" and segfile:        
+    if action == "bin" and args.segfile:        
         log_info(print_info, f"Calculating binning segments...") 
         segs = _get_segments(args, assembly)
         res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
@@ -233,7 +231,7 @@ def main():
             write_mode = "w" if i == 0 and j == 0 else "a"
             header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
-            if action == "bin" and segfile and action == "cluster":
+            if (action == "bin" and args.segfile) or action == "cluster":
                 save_regions(res_df, out_file, change_coords=True, header=header, write_mode=write_mode)
             elif action in ["fill", "impute", "bin"]:
                 save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, 
