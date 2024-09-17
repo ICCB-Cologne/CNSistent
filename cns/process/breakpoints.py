@@ -4,6 +4,7 @@ from cns.utils.assemblies import hg19
 from cns.utils.conversions import breaks_to_segments, cytobands_to_df
 
 
+# TODO: add option to pad only on the right
 def create_step_breaks(reg_len, step_size, equidistant=True):
     if (step_size < 1) or (reg_len < step_size):
         return [0, reg_len]

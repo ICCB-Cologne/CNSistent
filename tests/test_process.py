@@ -359,20 +359,7 @@ class TestBinning(unittest.TestCase):
                 self.assertTrue(result.at[i, "end"] <= 200)
 
 
-class TestMCS(unittest.TestCase):
-    def setUp(self):
-        self.cns = pd.DataFrame({
-            'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4', 's4', 's4', 's4'],
-            'chrom': ['chr1', 'chr1', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
-            'start': [0, 50, 200, 300, 400, 0, 50, 99, 50, 100, 120],
-            'end': [50, 100, 300, 400, 500, 50, 99, 100, 100, 120, 130],
-            'major_cn': [1, 2, 3, 4, 5, 2, 1, 0, 2, 1, 1],
-            'minor_cn': [0, 2, 0, 4, 3, 1, 0, 0, 1, 0, 1],
-        })        
-        self.assembly = type('Assembly', (object,), {
-            'chr_lens': {'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100}
-        })
-
+class TestMerging(unittest.TestCase):
     def test_prep_clusters(self):
         chrom_breaks = [50, 99]
         clusters = breaks_to_clusters(chrom_breaks)
@@ -397,13 +384,20 @@ class TestMCS(unittest.TestCase):
     def test_created_merged_segs(self):
         dict_start = {'chr1': [50, 99], 'chr2': [200, 300]}
         dist = 100
-        assembly = type('Assembly', (object,), {'chr_lens': {'chr1': 100, 'chr2': 400, 'chr3': 300, 'chrX': 100, 'chrY': 100}})
         result = calc_clusters(dict_start, dist)
         exp = {'chr1': [74], 'chr2': [200, 300]}
         self.assertEqual(result, exp)
 
     def test_cluster_within_segments(self):
-        raise NotImplementedError("Test not implemented")
+        print()
+        breaks = {'chr1': [50, 149, 200, 299], 'chr2': [200, 300]}
+        segments = [('chr1', 0, 300), ('chr2', 100, 200)]
+        dist = 100
+        res = cluster_within_segments(breaks, segments, dist)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res[0], ('chr1', 0, 100))
+        self.assertEqual(res[2], ('chr1', 250, 300))
+        self.assertEqual(res[3], ('chr2', 100, 200))
 
 
 if __name__ == "__main__":

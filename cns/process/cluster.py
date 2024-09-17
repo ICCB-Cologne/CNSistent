@@ -69,7 +69,7 @@ def calc_clusters(dict_start, dist):
 
 
 def _break_count(breaks):
-    sum(len(values) for values in breaks.values())
+    return sum(len(values) for values in breaks.values())
 
 
 def cluster_within_segments(existing_breaks, segments, clust_dist, print_info=False):    
