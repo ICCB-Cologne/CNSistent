@@ -105,13 +105,11 @@ def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=F
     return samples_df
 
 
-def main_segment(cns_df, select, remove, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False):
-    select = regions_select(select, assembly)
-    remove = regions_remove(remove, assembly)
-    segs = get_genome_segments(select, remove, filter_size)
+def main_segment(cns_df, select_segs, remove_segs, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False):
+    segs = get_genome_segments(select_segs, remove_segs, filter_size)
     if merge_dist > 0:
         breaks = get_breaks(cns_df, keep_ends=False, assembly=assembly)
-        return cluster_within_segments(breaks, segs, merge_dist, assembly, print_info)
+        segs = cluster_within_segments(breaks, segs, merge_dist, print_info)
     if split_size > 0:
         segs = split_segments(segs, split_size)
-    segs
+    return segs

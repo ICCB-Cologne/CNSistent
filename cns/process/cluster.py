@@ -86,6 +86,6 @@ def cluster_within_segments(existing_breaks, segments, clust_dist, print_info=Fa
     new_count = _break_count(existing_breaks)
     log_info(print_info, f"Removed to {break_count - new_count} breakpoints by distance merge.")
 
-    res = insert_breaks_in_segments(segments, res)
+    res = insert_breaks_in_segments(segments, res, clust_dist // 2)
 
     return res

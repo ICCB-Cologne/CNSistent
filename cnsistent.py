@@ -6,6 +6,7 @@ import time
 import argparse
 from os.path import exists
 
+from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.files import load_cns, load_regions, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
@@ -119,8 +120,10 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         add_missing = [True]*threads
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)        
     elif action == "segment":
-        select_block = [args.select]*threads
-        remove_block = [args.remove]*threads
+        select = regions_select(args.select, assembly)
+        remove = regions_remove(args.remove, assembly)
+        select_block = [select]*threads
+        remove_block = [remove]*threads
         split_block = [args.split]*threads
         merge_block = [args.merge]*threads
         filter_block = [args.filter]*threads

@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.pipelines import main_signatures, main_coverage, main_ploidy, main_fill, main_impute
+from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
 from cns.process.segments import get_genome_segments, regions_remove, regions_select
 from cns.utils.selection import only_aut
     
@@ -83,7 +83,17 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s4', 'breaks_total_cn_tot'], 4)
 
     def test_main_segment(self):
-        raise NotImplementedError("Test not implemented yet")
-    
-    
+        select = [("chr1", 0, 100), ("chr2", 50, 150), ("chr3", 100, 200), ("chr3", 250, 300)]
+        remove = [("chr2", 0, 75), ("chr3", 150, 175), ("chrX", 0, 100)]
+        res = main_segment(self.cns, select, remove, assembly=self.assembly)
+        self.assertEqual(len(res), 5)
+        res = main_segment(self.cns, select, remove, filter_size=50, assembly=self.assembly)
+        self.assertEqual(len(res), 4)
+        res = main_segment(self.cns, select, remove, merge_dist=25, filter_size=50, assembly=self.assembly)
+        self.assertEqual(res[0], ("chr1", 0, 50))
+        self.assertEqual(res[2], ("chr2", 75, 117))        
+        res = main_segment(self.cns, select, remove, 25, 25, 50, self.assembly)
+        print(res)    
+        self.assertEqual(res[0], ("chr1", 0, 25))
+        self.assertEqual(res[4], ("chr2", 75, 96))    
     
