@@ -4,12 +4,13 @@ from multiprocessing import Pool
 import pandas as pd
 import time
 import argparse
-from os.path import join as exists
+from os.path import join, exists, abspath
 
+from cns.process.segments import get_genome_segments, regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
-from cns.utils.files import load_cns, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
-from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_cluster, regions_remove, regions_select, get_genome_segments
+from cns.utils.files import load_cns, load_regions, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing
+from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_segment
 from cns.utils.logging import log_info
 
 
@@ -40,19 +41,19 @@ def _parse_args():
     sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data.")
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Calculates aneuploidy for CNS data (NaNs are ignored).")
     sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")
-    sp_dict["segment"] = subparsers.add_parser("cluster", help=f"Calculates a clustering of breakpoints between samples.")
+    sp_dict["segment"] = subparsers.add_parser("cluster", help=f"Calculates segmentation regions for CNS data.")
 
     for sp in sp_dict.values():
         _add_common_args(sp)
 
-    sp_dict["bin"].add_argument("--bins", type=int, help="Size of the bins, can be a positive integer or 0 for no bins (whole regions).", required=False, default=0)
-    sp_dict["bin"].add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
-    sp_dict["bin"].add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
-    sp_dict["bin"].add_argument("--filter", type=int, help="If set, regions smaller than the given size are exclued from selection and gaps.", required=False, default=0)
+    sp_dict["segment"].add_argument("--split", type=int, help="Distance in which regions should be, can be a positive integer or 0 for no splitting (whole regions).", required=False, default=0)
+    sp_dict["segment"].add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
+    sp_dict["segment"].add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
+    sp_dict["segment"].add_argument("--filter", type=int, help="If set, regions smaller than the given size are exclued from selection and gaps.", required=False, default=0)
+    sp_dict["segment"].add_argument("--merge", type=int, help="Maximum distance between breakpoint clusters for breakpoint merging", required=False, default=0)
+
+    sp_dict["bin"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=True)
     sp_dict["bin"].add_argument("--aggregate", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
-    sp_dict["bin"].add_argument("--segfile", help="If set, creates a BED file with regions corresponding to the individual bins, without the actual binning. (A dummy CNS file still has to be provided)", action="store_true")
-    
-    sp_dict["cluster"].add_argument("--dist", type=int, help="Maximum distance between breakpoint clusters for merging", required=False, default=0)
 
     args = parser.parse_args()
     if args.action is None:
@@ -61,20 +62,20 @@ def _parse_args():
     if args.action not in sp_dict:
         raise ValueError(f"Action {args.action} not recognized.")
     
-    if args.action == "bin":
-        if args.bins < 0:
-            args.bins = 0
+    if args.action == "segment":
+        if args.split < 0:
+            args.split = 0
         if args.select not in ["", "arms", "bands"] and not exists(args.select):
             raise ValueError(f"Selection {args.select} is not a build-in or a path to a file.")
         if args.remove not in ["", "gaps"] and not exists(args.remove):
             raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
 
-    if args.action == "cluster":
+    if args.action == "segment":
         if args.threads > 1:
-            print("cluster is not data parallelizable, --threads option will be ignored.")
+            print("segmentation is not data parallelizable, --threads option will be ignored.")
             args.threads = 1
         if args.subsplit > 1:
-            print("cluster is not data parallelizable, --subsplit option will be ignored.")
+            print("segmentation is not data parallelizable, --subsplit option will be ignored.")
             args.subsplit = 1        
 
     if args.nosample and args["samples"] != "":
@@ -100,19 +101,10 @@ def _action_to_fun(action):
         return main_ploidy   
     elif action == "bin":
         return main_bin
-    elif action == "cluster":
-        return main_cluster
+    elif action == "segment":
+        return main_segment
     else:
         raise ValueError(f"Action {action} not recognized.")
-
-
-def _get_segments(args, assembly):    
-    bin_size = args.bins
-    filter_size = args.filter
-    select = regions_select(args.select, assembly)
-    remove = regions_remove(args.remove, assembly)
-    segs = get_genome_segments(select, bin_size, remove, filter_size)
-    return segs
 
 
 def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, threads, args):
@@ -127,18 +119,22 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
     if action == "fill":
         add_missing = [True]*threads
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)        
-    elif action == "cluster":
-        dist_block = [args.dist]*threads
-        return zip(cns_blocks, dist_block, ass_block, ver_block)
+    elif action == "segment":
+        select_block = [args.select]*threads
+        remove_block = [args.remove]*threads
+        split_block = [args.split]*threads
+        merge_block = [args.merge]*threads
+        filter_block = [args.filter]*threads
+        return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
     elif action == "coverage":        
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "ploidy":
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
     elif action == "bin":
-        segs = _get_segments(args, assembly)
+        segs = load_regions(args.segments)
         segs_block = [segs]*threads
         fun_block = [args.aggregate]*threads
-        return zip(cns_blocks, segs_block, fun_block, ver_block)
+        return zip(cns_blocks, segs_block, fun_block, cols_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
 
@@ -185,21 +181,15 @@ def main():
 
     # Read the input
     log_info(print_info, f"***** cns {action} *****")
-    log_info(print_info, f"CNS path is {cns_file_path}...") 
 
-    # Calculate bin regions without the binning itself
-    if action == "bin" and args.segfile:        
-        log_info(print_info, f"Calculating binning segments...") 
-        segs = _get_segments(args, assembly)
-        res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
-        save_regions(res_df, out_file, change_coords=True, header=not no_header)
-        log_info(print_info, "Done.")
-        return    
-
-    if not exists(cns_file_path):
-        raise ValueError(f"Copy number file {cns_file_path} not found.")
+    # Check the CNS file, may be omitted for segmentation without merging
+    if action != "segment" or args.merge > 0:
+        if not exists(cns_file_path):    
+            raise ValueError(f"Copy number file {cns_file_path} not found.")
+        else:
+            log_info(print_info, f"CNS file at {cns_file_path}...")     
         
-    cns_df = load_cns(cns_file_path, canonize=True, change_coords=True, cn_columns=cncols, header=not no_header, no_sample=no_sample)
+    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, header=not no_header, no_sample=no_sample)
     cn_columns = find_cn_cols_if_none(cns_df, cncols)
 
     if samples_path == "":
@@ -228,18 +218,17 @@ def main():
                     f.write(f"{timestamp}\t{action}\t{args.threads}\t{out_file}\t{runtime}\n")
 
         for j in range(len(res_dfs)): 
-            write_mode = "w" if i == 0 and j == 0 else "a"
+            mode = "w" if i == 0 and j == 0 else "a"
             header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
-            if (action == "bin" and args.segfile) or action == "cluster":
-                save_regions(res_df, out_file, change_coords=True, header=header, write_mode=write_mode)
+            if action == "segment":
+                save_regions(res_df, out_file, change_coords=True, header=header, write_mode=mode)
             elif action in ["fill", "impute", "bin"]:
-                save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, 
-                        header=header, write_mode=write_mode)
+                save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, write_mode=mode)
             else:
                 if no_sample:
                     res_df.reset_index(drop=True)
-                res_df.to_csv(out_file, sep="\t", index=True, header=header,  mode=write_mode)
+                res_df.to_csv(out_file, sep="\t", index=True, header=header, mode=mode)
 
     log_info(print_info, "Done.")
 

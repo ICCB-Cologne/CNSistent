@@ -1,5 +1,8 @@
 import numpy as np
-from cns.process.breakpoints import create_step_breaks
+from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, create_step_breaks
+from cns.utils.assemblies import hg19
+from cns.utils.conversions import breaks_to_segments, genome_to_segments, tuples_to_segments
+from cns.utils.files import load_regions
 
 
 def do_segments_overlap(segs, sorted=False):
@@ -122,6 +125,42 @@ def split_segments(segments, step_size, equidisant=True):
     res = []
     for segment in segments:
         res += split_segment(segment, step_size, equidisant)
+    return res
+
+
+def regions_select(select, assembly=hg19):
+    if select == "arms":
+        breaks = calc_arm_breaks(assembly)
+        return breaks_to_segments(breaks)
+    elif select == "bands":
+        breaks = calc_cytoband_breaks(assembly)
+        return breaks_to_segments(breaks)
+    elif select =="":
+        return genome_to_segments(assembly)
+    else:
+        return load_regions(select)
+
+
+def regions_remove(remove, assembly=hg19):
+    if remove == "gaps":
+        breaks = assembly.gaps
+        return tuples_to_segments(breaks)
+    elif remove == "":
+        return None
+    else:
+        return load_regions(remove)
+
+
+def get_genome_segments(select, remove=None, filter_size=0):
+    res = select
+    if filter_size > 0:
+        res = filter_min_size(res, filter_size)
+    if remove != None:
+        if filter_size > 0:
+            remove = filter_min_size(remove, filter_size)
+        res = segment_difference(res, remove)
+        if filter_size > 0:
+            res = filter_min_size(res, filter_size)
     return res
 
 

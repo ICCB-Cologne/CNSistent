@@ -6,13 +6,12 @@ from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_base
 from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms, get_not_nan
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_seg_size_per_sample, calc_step_per_sample, prepare_segments
 from cns.process.binning import bin_by_segments
-from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, get_breaks
-from cns.process.cluster import created_merged_segs
+from cns.process.breakpoints import get_breaks
+from cns.process.cluster import calc_clusters, cluster_within_segments
 from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours, remove_outliers
-from cns.process.segments import filter_min_size, segment_difference, split_segments
+from cns.process.segments import get_genome_segments, regions_remove, regions_select, split_segments
 from cns.utils.canonization import find_cn_cols_if_none, is_hap_spec, rename_cn_cols
-from cns.utils.conversions import genome_to_segments, breaks_to_segments, tuples_to_segments
-from cns.utils.files import load_regions, samples_df_from_cns_df
+from cns.utils.files import samples_df_from_cns_df
 from cns.utils.logging import log_info
 from cns.utils.assemblies import hg19
 
@@ -42,8 +41,8 @@ def main_impute(cns_df, samples_df=None, method='extend', cn_columns=None,  prin
     return res
 
 
-def main_bin(cns_df, segs, fun_type='mean', print_info=False):
-    return bin_by_segments(cns_df, segs, fun_type, print_info)
+def main_bin(cns_df, segs, fun_type='mean', cn_columns=None, print_info=False):
+    return bin_by_segments(cns_df, segs, fun_type, cn_columns, print_info)
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
@@ -106,65 +105,13 @@ def main_ploidy(cns_df, samples_df, cn_columns=None, assembly=hg19, print_info=F
     return samples_df
 
 
-def main_cluster(cns_df, dist, assembly=hg19, print_info=False):    
-    dict_start = get_breaks(cns_df, keep_ends=False, assembly=assembly)
-
-    if print_info:
-        orig_count = sum(len(values) for values in dict_start.values())
-        print(f"Reducing {orig_count} breakpoints, merge distance {dist} ... ")   
-
-    res = created_merged_segs(dict_start, dist, assembly, extend=True)
-
-    if print_info:
-        new_count = len(res) - len(dict_start) # number of segments is breakpoints + 1 per chrom
-        reduction = np.round(new_count / orig_count, 2)
-        print(f"Merged breakpoints: {new_count}, reduced by {1 - reduction:.2%}.")
-
-    df = pd.DataFrame(res, columns=["chrom", "start", "end"])
-    return df
-
-
-def main_segment(cns_df, regions, strategy, assembly=hg19, print_info=False):
-    if strategy == "regions":
-        res = regions_select(regions, assembly)
-    return res
-
-
-def regions_select(select, assembly=hg19):    
-    if select == "arms":
-        breaks = calc_arm_breaks(assembly)
-        return breaks_to_segments(breaks)
-    elif select == "bands":
-        breaks = calc_cytoband_breaks(assembly)
-        return breaks_to_segments(breaks)
-    elif select =="":
-        return genome_to_segments(assembly)
-    else:
-        return load_regions(select)
-    
-
-def regions_remove(remove, assembly=hg19):
-    if remove == "gaps":
-        breaks = assembly.gaps
-        return tuples_to_segments(breaks)
-    elif remove == "":
-        return None
-    else:
-        return load_regions(remove)
-
-
-def get_genome_segments(select, bin_size=0, remove=None, filter_size=0):
-    res = select
-    if filter_size > 0:
-        res = filter_min_size(res, filter_size)
-    if remove != None:
-        if filter_size > 0:
-            remove = filter_min_size(remove, filter_size)
-        res = segment_difference(res, remove)
-        if filter_size > 0:
-            res = filter_min_size(res, filter_size)
-    if bin_size > 0:
-        res = split_segments(res, bin_size)
-    return res
-
-
+def main_segment(cns_df, select, remove, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False):
+    select = regions_select(select, assembly)
+    remove = regions_remove(remove, assembly)
+    segs = get_genome_segments(select, split_size, remove, filter_size)
+    if merge_dist > 0:
+        breaks = get_breaks(cns_df, keep_ends=False, assembly=assembly)
+        return cluster_within_segments(breaks, segs, merge_dist, assembly, print_info)
+    if split_size > 0:
+        segs = split_segments(segs, split_size)
+    segs

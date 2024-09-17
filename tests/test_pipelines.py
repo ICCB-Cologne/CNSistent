@@ -2,7 +2,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.pipelines import get_genome_segments, main_signatures, regions_remove, regions_select, main_coverage, main_ploidy, main_fill, main_impute
+from cns.process.pipelines import main_signatures, main_coverage, main_ploidy, main_fill, main_impute
+from cns.process.segments import get_genome_segments, regions_remove, regions_select
 from cns.utils.selection import only_aut
     
 class TestPipelines(unittest.TestCase):

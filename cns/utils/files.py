@@ -1,4 +1,4 @@
-from os.path import join as exists
+from os.path import abspath, exists, join
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
@@ -78,6 +78,7 @@ def save_regions(seg_df, path, change_coords=True, header=True, write_mode="w"):
 def load_regions(path, change_coords=True, header=True):
     if path == "" or path is None:
         return None
+    path = abspath(path)
     if not exists(path):
         raise ValueError(f"File {path} not found.")
     regs = pd.read_csv(path, sep="\t", header=0 if header else None)
