@@ -30,7 +30,6 @@ run_and_compare() {
   fi
 }
 
-
 # Commands to run and test
 commands=(
   "cns fill ./in/test_cns_source.tsv --sample ./in/test_sample_source.tsv --out ./temp/test_cns_fill.tsv"
@@ -44,8 +43,10 @@ commands=(
   "cns segment --split 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_segs_1MB.tsv"
   "cns segment --split 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_segs_1MB_gaps.tsv --remove gaps --filter 500000"
   "cns segment --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000"
-  # "cns segment ./temp/test_cns_fill.tsv --select ./temp/mcs_regions.tsv --out ./temp/test_cns_mcs.tsv"
+  "cns bin ./temp/test_cns_fill.tsv --segments ./temp/test_segs_1MB.tsv --out ./temp/test_cns_1MB.tsv"
 )
+
+# TODO: Test signle-columns BED file
 
 rm -r ./temp
 mkdir ./temp

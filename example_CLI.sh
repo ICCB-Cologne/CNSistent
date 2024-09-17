@@ -49,4 +49,4 @@ cns segment --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_s
 
 # %%
 # Calculate consisten segment bins
-# cns bin ./tests/out/test_cns_fill.tsv --select ./tests/out/mcs_regions.tsv --out ./tests/out/test_cns_mcs.tsv --verbose
+cns bin ./tests/out/test_cns_fill.tsv --segments ./tests/out/test_segs_1MB.tsv --out ./tests/out/test_cns_1MB.tsv --verbose
