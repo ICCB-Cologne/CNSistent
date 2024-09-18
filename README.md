@@ -253,10 +253,10 @@ This is the main data type used in the library.
 
 #### Breakpoints
 
-Breakpoints are stored in a dictionary mapping a set of breakpoints to a chromosome. Boundaries are normally included, e.g.
+Breakpoints are stored in a dictionary mapping a set of breakpoints to a chromosome. Boundaries are normally excluded, e.g.
 ```
 {
-    'chr1' : [0, 125000000, 249250621],
+    'chr1' : [125000000],
     ...
 }
 ```
@@ -264,7 +264,15 @@ would be the arm breakpoints for hg19 chromosome 1.
 
 #### Segments
 
-Segments are a list of triples: `[(chrom, start, end), ...]`, used to map into chromosomes. The range is start-inclusive, end-exclusive.
+Segments are analogous to breakpoints, instead of position defining a range. The range is start-inclusive, end-exclusive. E.g.
+
+```
+{
+    'chr1' : [(0, 125000000), (125000000, 249250621)],
+    ...
+}
+```
+would be the arm breakpoints for hg19 chromosome 1.
 
 #### Assemblies
 
@@ -286,7 +294,7 @@ The file also contains high-level functions for region manipulation, in particul
 
 #### Segment
 
-Functions for working with segments. Segments are tuples `(chrom, start, end)`, where the start is inclusive, and the end is exclusive.
+Functions for working with segments. Segments are dictionaries of tuples `{chr: [(start, end), ...], ...}`, where the start is inclusive, and the end is exclusive.
 
 Note that you can pass longer tuples, but the result will discard the 4th and further elements.
 
