@@ -32,9 +32,9 @@ def merge_samples(print_info=False):
 
 def merge_cns(print_info=False, filled=False):
     suffix = "fill" if filled else "imp"
-    prim_cns = load_cns_out(f"TRACERx_prim_cns_{suffix}.tsv")
+    prim_cns = load_cns_out(f"TRACERx_prim_cns_{suffix}.tsv", raw=True)
     prim_cns.set_index(["sample_id"], inplace=True)
-    met_cns = load_cns_out(f"TRACERx_met_cns_{suffix}.tsv")
+    met_cns = load_cns_out(f"TRACERx_met_cns_{suffix}.tsv", raw=True)
     met_cns.set_index(["sample_id"], inplace=True)
 
     common_samples = list(set(prim_cns.index).intersection(set(met_cns.index)))
