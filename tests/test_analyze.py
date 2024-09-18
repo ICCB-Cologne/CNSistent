@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 
 from cns.analyze.aneuploidy import calc_imb_bases, calc_loh_bases, get_expected_ploidy, is_seg_ane, calc_ane_bases
-from cns.analyze.coverage import normalize_feature, get_covered_bases, get_missing_chroms
+from cns.analyze.coverage import get_covered_bases, get_missing_chroms
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
-from cns.process.binning import add_cns_loc
+from cns.process.normalize import get_norm_sizes, normalize_feature
 from cns.process.pipelines import main_coverage
 
 class TestCoverage(unittest.TestCase):
@@ -44,7 +44,10 @@ class TestCoverage(unittest.TestCase):
 
     def test_get_base_frac(self):
         samples_df = get_covered_bases(self.cns, self.samples, True)
-        res = normalize_feature(samples_df, "cover_het", assembly=self.assembly)
+        norm_sizes = get_norm_sizes(None, self.assembly)
+        print(samples_df)
+        res = normalize_feature(samples_df, "cover_het", norm_sizes)
+        print(norm_sizes)
         self.assertEqual(res.loc['s1', 'cover_het_aut'], 1/3)
         self.assertEqual(res.loc['s2', 'cover_het_sex'], 1)
         self.assertEqual(res.loc['s4', 'cover_het_all'], 1/4)
@@ -96,7 +99,7 @@ class TestSignatures(unittest.TestCase):
         self.assertEqual(result.query('sample_id == "s2" and chrom == "chr2"')['breaks'].values[0], 0)
         self.assertEqual(result.query('sample_id == "s4" and chrom == "chr1"')['breaks'].values[0], 2)
 
-    def test_add_breaks_per_sample(self):
+    def test_calc_breaks_per_sample(self):
         segs_df = prepare_segments(self.cns, "major_cn")
         res = calc_breaks_per_sample(segs_df, self.samples, "major_cn", self.assembly)
         self.assertEqual(res.query('sample_id == "s1"')['breaks_major_cn_aut'].values[0], 1)
@@ -106,6 +109,7 @@ class TestSignatures(unittest.TestCase):
         segs_df = prepare_segments(self.cns, "major_cn")
         res = calc_step_per_chr(segs_df, "major_cn")
         self.assertEqual(res.query('sample_id == "s1" and chrom == "chr1"')['step'].values[0], 1)
+        self.assertEqual(res.query('sample_id == "s1" and chrom == "chr1"')['count'].values[0], 1)
 
     def test_calc_step_per_sample(self):
         segs_df = prepare_segments(self.cns, "major_cn")
@@ -169,17 +173,19 @@ class TestAneuploidy(unittest.TestCase):
 
     def test_get_ane_bases(self):
         res = calc_ane_bases(self.cns, self.samples, self.ane_cols, self.assembly)
+        norm_sizes = get_norm_sizes(None, self.assembly)
         self.assertEqual(res.shape, (4, 7))
         self.assertEqual(res.loc['s4', 'ane_het_aut'], 170)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 100)
         self.assertEqual(res.loc['s2', 'ane_het_all'], 200)
-        res = normalize_feature(res, "ane_het", self.assembly)
+        res = normalize_feature(res, "ane_het", norm_sizes)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
-        res = normalize_feature(res, "ane_hom", self.assembly)
+        res = normalize_feature(res, "ane_hom", norm_sizes)
         self.assertEqual(res.loc['s1', 'ane_hom_aut'], 1/6)
 
     def test_get_loh_bases(self):
         res = calc_loh_bases(self.cns, self.samples, self.ane_cols, self.assembly)
+        print(res)
         self.assertEqual(res.shape, (4, 7))
         self.assertEqual(res.loc['s1', 'loh_het_aut'], 100)
         self.assertEqual(res.loc['s4', 'loh_het_aut'], 70)
@@ -187,6 +193,7 @@ class TestAneuploidy(unittest.TestCase):
         
     def test_imb_score(self):
         res = calc_imb_bases(self.cns, self.samples, self.ane_cols, 0, self.assembly)
+        print(res)
         self.assertEqual(res.shape, (4, 4))
         self.assertEqual(res.loc['s1', 'imb_major_cn_aut'], 100)
         self.assertEqual(res.loc['s2', 'imb_major_cn_sex'], 0)

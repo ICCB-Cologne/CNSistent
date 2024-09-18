@@ -78,6 +78,7 @@ def save_segments(segs, path, change_coords=True, header=True):
     sel.to_csv(path, sep="\t", index=False, header=header)
 
 
+# TODO: Potentially check if the segments are within the assembly bounds
 def load_segments(path, change_coords=True, header=True):
     if path == "" or path is None:
         return None

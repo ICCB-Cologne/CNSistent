@@ -91,8 +91,8 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     def test_calc_group_sizes(self):
-        segs = {"chr1": [(0, 10), (20, 30)], "chrX": [(0, 5)]}
-        expected_result = {'all': 25, 'aut': 20, 'sex': 5}
+        segs = {"chr1": [(0, 10), (20, 30)], "chrY": [(0, 5)]}
+        expected_result = {'aut': 20, 'sexXX': 0, 'sexXY': 5}
         result = calc_group_sizes(segs)
         self.assertEqual(result, expected_result)
 

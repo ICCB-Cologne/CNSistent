@@ -122,6 +122,8 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 
 ## `coverage`
 
+> For all sample statistics, the values are calculated for autosomes, sex chromosomes, and the total genome, with the values being suffixed with `_aut`, `_sex`, `_tot`, respectively. If sex chromosomes are missing from data altogether, only `_aut` values are calculated.
+
 Calculates the coverage of the *CNS* file. The coverage is calculated as the fraction of the genome that has a CN value assigned.
 
 > coverage should ber run on a filled, but **not** imputed dataset.
@@ -146,7 +148,11 @@ The following statistics are calculated and stored in a *samples* file:
 * `ane_+_*`: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), `+` expands into CN columns names
 * `ane_+_frac_*`: the fraction of aneuploid bases over the total number of bases
 
-## `bin`
+## `signatures`
+
+TODO
+
+## `segment`
 
 Conducts the binning - for selected segments, the aggregate CN value for selected samples are calculated. 
 
@@ -170,30 +176,29 @@ Additional arguments:
 
 * `--select string`: Path to the selection file or one of [`arms`, `bands`]. The file should be a TSV with the following columns: `chrom, start, end`. This is an optional argument. Default is whole chromosomes.
 * `--remove string`: Path to the removal file or `gaps`. The file should be a TSV with the following columns: `chrom, start, end`. This is an optional argument. Default is no removal.
-* `--bins int`: Size of the bins. This is an optional argument. If not provided, the default value is `0` for no bins.
+* `--split int`: Size of the bins. This is an optional argument. If not provided, the default value is `0` for no bins.
+* `--merge`: Maximum distance between breakpoints to be considered a part of the same segment. If not provided, the default value is `0`, which will create the exact segments of the dataset.
 * `--filter int`: Minimum size of the segment. This is an optional argument. If not provided, the default value is `0` for no filtering.
 * `--aggregate [mean, min, max]`: Aggregation function to use. This is an optional argument. If not provided, the default value is `mean`.
-* `--segfile`: If provided, only the bins are created, without the sample_id column.
 
 
 An example of use:
 
 ```bash	
 ## Create bins of 1Mb size, exclude gaps, and filter out small segments
-cns bin cns.tsv --bins 200000 --remove gaps --filter 
+cns segment cns.tsv --split 200000 --remove gaps --filter 
 ## Sample copy numbers of genes, take the minimum CN value across the gene to exclude fractional segments
-cns bin cns.tsv --select genes.tsv --aggregate min
+cns segment cns.tsv --select genes.tsv --aggregate min
 ```
 
-## `cluster`
+## `bin`
 
-Calculates consistent regions using breakpoints clustering.
+TODO
 
-Additional arguments:
+```bash	
+cns bin cns.tsv --segments segments.tsv
+```
 
-* `--dist`: Maximum distance between breakpoints to be considered a part of the same segment. If not provided, the default value is `0`, which will create the exact segments of the dataset.
-
-> NOTE: If first or last breakpoint is less than `--dist` from the end of the chromosome, the segment is extended to the end of the chromosome.
 
 # API (Python library)
 

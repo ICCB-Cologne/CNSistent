@@ -178,5 +178,5 @@ def calc_chr_sizes(chr_segs_df):
 
 def calc_group_sizes(segs_df, assembly=hg19):
     chr_sizes = calc_chr_sizes(segs_df)
-    groups = { "sex" : assembly.sex_names, "aut" : assembly.aut_names, "all" : assembly.chr_names }
+    groups = { "sexXX" : [ assembly.chr_x], "aut" : assembly.aut_names, "sexXY" : [ assembly.chr_y, assembly.chr_x] }
     return { key : sum([chr_sizes[chrom] if chrom in chr_sizes else 0 for chrom in group]) for key, group in groups.items() } 

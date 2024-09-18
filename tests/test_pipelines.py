@@ -2,8 +2,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
+from cns.process.binning import bin_by_segments
+from cns.process.normalize import get_chr_sets, get_norm_sizes
 from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
-from cns.process.segments import get_genome_segments, regions_remove, regions_select
 from cns.utils.selection import only_aut
     
 class TestPipelines(unittest.TestCase):
@@ -30,6 +31,8 @@ class TestPipelines(unittest.TestCase):
             'chr_x': 'chrX',
             'chr_y': 'chrY'
         })
+        self.segs = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chrY': [(0, 100)], 'chr3': [(100, 200), (250, 300)]}
+        self.aut_segs ={'chr1': [(0, 100)]}
         pd.set_option('display.max_columns', 10)
 
     def test_main_fill(self):
@@ -52,7 +55,8 @@ class TestPipelines(unittest.TestCase):
         self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
 
     def test_main_coverage(self):
-        res = main_coverage(self.cns, self.samples, assembly=self.assembly)     
+        res = main_coverage(self.cns, self.samples, assembly=self.assembly)    
+        print(res) 
         self.assertEqual(res.shape, (4, 9))
         self.assertEqual(res.loc['s1', 'chrom_missing'][-1], "chrX")
         self.assertEqual(res.loc['s1', 'chrom_count'], 1)
@@ -61,18 +65,33 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'cover_het_sex'], 0)
         self.assertEqual(res.loc['s2', 'cover_het_sex'], 0.5)
         self.assertEqual(res.loc['s4', 'cover_het_aut'], 0.3)
+
+    def test_main_coverage_segs(self):
+        res = main_coverage(self.cns, self.samples, segs=self.segs, assembly=self.assembly)         
+        self.assertEqual(res.loc['s2', 'cover_hom_aut'], 0)    
+        self.assertEqual(res.loc['s2', 'cover_het_aut'], 50/350)
     
     def test_main_ploidy(self):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res.shape, (4, 16))
-        self.assertTrue(np.all(res['ane_hom_aut'] <= res['ane_het_aut']))       
+        self.assertTrue(np.all(res['ane_hom_aut'] <= res['ane_het_aut']))   
+        print(res)    
         self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
         self.assertEqual(res.loc['s4', 'ane_het_sex'], 0)
         self.assertEqual(res.loc['s2', 'loh_het_all'], 1/8)
-        self.assertEqual(res.loc['s4', 'loh_hom_aut'], 1/self.assembly.aut_len)
+        self.assertEqual(res.loc['s2', 'imb_major_cn_aut'], 1/6)        
+        self.assertEqual(res.loc['s4', 'imb_major_cn_sex'], 0)
+
+    def test_main_ploidy_segs(self):
+        res = main_ploidy(self.cns, self.samples, segs=self.segs, assembly=self.assembly)
+        self.assertEqual(res.loc['s2', 'ane_het_aut'], 0)
+        self.assertEqual(res.loc['s4', 'loh_hom_aut'], 1/350)
     
     def test_main_signatures(self):
+        with self.assertRaises(Exception):
+            main_signatures(self.cns, self.samples, assembly=self.assembly)
+        self.cns.loc[2, "minor_cn"] = 0
         res = main_signatures(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res.shape, (4, 28))        
         self.assertEqual(res.loc['s1', 'breaks_minor_cn_aut'], 1)
@@ -81,6 +100,14 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s4', 'breaks_total_cn_aut'], 4)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_sex'], 0)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_all'], 4)
+        self.assertEqual(res.loc['s1', 'segsize_total_cn_tot'], 50)
+        self.assertEqual(res.loc['s3', 'segsize_total_cn_aut'], 100)
+
+    def test_main_signatures_segs(self):
+        res = main_signatures(self.cns, self.samples, segs=self.aut_segs, assembly=self.assembly)
+        self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
+        self.assertEqual(res.loc['s1', 'segsize_total_cn_tot'], 50)
+        self.assertEqual(res.loc['s3', 'segsize_total_cn_aut'], 0)
 
     def test_main_segment(self):
         select = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chr3': [(100, 200), (250, 300)]}
@@ -95,3 +122,28 @@ class TestPipelines(unittest.TestCase):
         res = main_segment(self.cns, select, remove, 25, 25, 50, self.assembly)
         self.assertEqual(res.iloc[0].tolist(), ["chr1", 0, 25])
         self.assertEqual(res.iloc[4].tolist(), ["chr2", 75, 96])    
+
+    def test_get_norm_sizes(self):
+        res = get_norm_sizes(self.segs)
+        self.assertEqual(res['aut'], 350)
+        self.assertEqual(res['sexXX'], 0)
+        self.assertEqual(res['sexXY'], 100)
+        self.assertEqual(res['allXX'], 350)
+        self.assertEqual(res['allXY'], 450)
+        res = get_norm_sizes(None, assembly=self.assembly)
+        self.assertEqual(res['aut'], 600)
+        self.assertEqual(res['sexXX'], 100)
+        self.assertEqual(res['sexXY'], 200)
+        self.assertEqual(res['allXX'], 700)
+        self.assertEqual(res['allXY'], 800)
+
+    def test_get_chr_sets(self):
+        res = get_chr_sets(self.cns, assembly=self.assembly)
+        self.assertEqual(res['aut'], ['chr1', 'chr2', 'chr3'])
+        self.assertEqual(res['sex'], ['chrY'])
+        self.assertEqual(res['all'], ['chr1', 'chr2', 'chr3', 'chrY'])
+        cns_df = bin_by_segments(self.cns, self.aut_segs, 'none')
+        res = get_chr_sets(cns_df, assembly=self.assembly)
+        self.assertTrue('aut' in res)   
+        self.assertTrue('sex' not in res)   
+        self.assertTrue('all' not in res)   
