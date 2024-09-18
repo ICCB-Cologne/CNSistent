@@ -20,15 +20,6 @@ class TestConversions(unittest.TestCase):
         exp = [('chr1', 0, 50), ('chr1', 50, 100), ('chr2', 0, 125), ('chr2', 125, 150), ('chr2', 150, 176)]
         self.assertEqual(breaks_to_segments(breakpoints), exp)
 
-    def test_regions_to_segments(self):
-        regions = pd.DataFrame({
-            'chrom': ['chr1', 'chr2'],
-            'start': [0, 50],
-            'end': [100, 150]
-        })
-        exp = [('chr1', 0, 100), ('chr2', 50, 150)]
-        self.assertEqual(cns_to_segments(regions), exp)
-
     def test_tuples_to_segments(self):
         gaps = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]
         exp = [('chr1', 1, 5), ('chr2', 10, 15)]

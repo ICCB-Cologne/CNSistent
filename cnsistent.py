@@ -9,7 +9,7 @@ from os.path import exists
 from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
-from cns.utils.files import load_cns, load_regions, save_cns, save_regions, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
+from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
 from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info
 
@@ -46,6 +46,10 @@ def _parse_args():
     
     for sp in sp_dict.values():
         _add_common_args(sp)
+
+    sp_dict["coverage"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default="")
+    sp_dict["ploidy"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default="")
+    sp_dict["signatures"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default="")
 
     sp_dict["segment"].add_argument("--split", type=int, help="Distance in which regions should be, can be a positive integer or 0 for no splitting (whole regions).", required=False, default=0)
     sp_dict["segment"].add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
@@ -131,11 +135,13 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
         merge_block = [args.merge]*threads
         filter_block = [args.filter]*threads
         return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
-    elif action in ["coverage", "ploidy", "signatures"]:       
-        return zip(cns_blocks, samples_blocks, cols_block, ass_block, ver_block)
+    elif action in ["coverage", "ploidy", "signatures"]:        
+        segs_df = load_segments(args.segments) if args.segments != "" else None
+        segs_block = [segs_df] * threads
+        return zip(cns_blocks, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "bin":
-        segs = load_regions(args.segments)
-        segs_block = [segs]*threads
+        segs_df = load_segments(args.segments)
+        segs_block = [segs_df]*threads
         fun_block = [args.aggregate]*threads
         return zip(cns_blocks, segs_block, fun_block, cols_block, ver_block)
     else:
@@ -223,7 +229,7 @@ def main():
             header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
             if action in ["segment"]:
-                save_regions(res_df, out_file, change_coords=True, header=header)
+                save_segments(res_df, out_file, change_coords=True, header=header)
             elif action in ["fill", "impute", "bin"]:
                 save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, write_mode=mode)
             elif action in ["coverage", "ploidy", "signatures"]:

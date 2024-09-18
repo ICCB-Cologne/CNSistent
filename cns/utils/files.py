@@ -2,7 +2,6 @@ from os.path import abspath, exists, join
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
-from cns.utils.conversions import cns_to_segments
 
 
 def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, no_sample=False, header=True):
@@ -69,7 +68,8 @@ def samples_df_from_cns_df(cns_df, fill_sex=True):
     return samples_df
 
 
-def save_regions(seg_df, path, change_coords=True, header=True):
+def save_segments(segs, path, change_coords=True, header=True):
+    seg_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
     if change_coords:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
@@ -77,23 +77,27 @@ def save_regions(seg_df, path, change_coords=True, header=True):
     sel.to_csv(path, sep="\t", index=False, header=header)
 
 
-def load_regions(path, change_coords=True, header=True):
+def load_segments(path, change_coords=True, header=True):
     if path == "" or path is None:
         return None
     path = abspath(path)
     if not exists(path):
         raise ValueError(f"File {path} not found.")
-    regs = pd.read_csv(path, sep="\t", header=0 if header else None)
+    segs_df = pd.read_csv(path, sep="\t", header=0 if header else None)
     # check that columns "chrom", "start" and "end" exist, more colums may be present
     if header:
-        if not all([col in regs.columns for col in ["chrom", "start", "end"]]):
+        if not all([col in segs_df.columns for col in ["chrom", "start", "end"]]):
             raise ValueError(f"File {path} must have columns 'chrom', 'start' and 'end'.")
     else:
-        if len(regs.columns) < 3:
+        if len(segs_df.columns) < 3:
             raise ValueError(f"File {path} must have at least 3 columns.")
-        regs.columns = ["chrom", "start", "end"]    
-    segs = cns_to_segments(regs, change_coords)
-    return segs
+        elif len(segs_df.columns) > 3:
+            print(f"Warning: File {path} has more than 3 columns. Only the first 3 columns are used.")
+            segs_df = segs_df.iloc[:, :3]
+        segs_df.columns = ["chrom", "start", "end"]    
+    if change_coords:
+        segs_df.loc[:, "start"] -= 1
+    return segs_df.values.tolist()
     
 
 def dataframe_array_split(df, n_splits):

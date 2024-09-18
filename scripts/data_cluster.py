@@ -1,7 +1,7 @@
 import os
 from cns.data_utils import *
 from cns.process.pipelines import main_cluster
-from cns.utils.files import save_regions
+from cns.utils.files import save_segments
 import argparse
 
 if __name__ == "__main__":
@@ -19,6 +19,6 @@ if __name__ == "__main__":
 	clustered = main_cluster(cns, dist)
 	file = os.path.join(out_path, f'joint_clust_{dist}.tsv')
 	print("Saving to file:", file)
-	save_regions(clustered, file)
+	save_segments(clustered, file)
 
 

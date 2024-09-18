@@ -63,11 +63,10 @@ def max_func(cns_array):
 def min_func(cns_array):
     return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
-def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
+def _regs_to_bin(sample_id, chrom, sample_rows, seg_start, seg_end, agg_func):
     row_id = 0
     seg_cns = []
     cns_cols = sample_rows.shape[1] - 2
-    seg_start, seg_end = segment
     while sample_rows[row_id][1] <= seg_start:
         row_id += 1
         if row_id >= len(sample_rows):
@@ -92,10 +91,9 @@ def _regs_to_bin(sample_id, chrom, sample_rows, segment, agg_func):
     return [sample_id, chrom, seg_start, seg_end] + cns
 
 
-def _cns_in_seg(sample_id, chrom, sample_rows, segment):
+def _cns_in_seg(sample_id, chrom, sample_rows, seg_start, seg_end):
     row_id = 0
     seg_cns = []
-    seg_start, seg_end = segment
     while sample_rows[row_id][1] <= seg_start:
         row_id += 1
         if row_id >= len(sample_rows):
@@ -127,10 +125,14 @@ def _get_agg_func(fun_type):
 
 
 # Add column names
-def bin_by_segments(cns_df, segments, fun_type="mean", cn_columns=None, print_info=True):
+def bin_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=True):
     agg_func = _get_agg_func(fun_type)
-    chrom_segments = segs_to_chrom_dict(segments)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    segs_dict = {}
+    for key, val1, val2 in segs:
+        if key not in segs_dict:
+            segs_dict[key] = []
+        segs_dict[key].append((val1, val2))
     sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df_view = cns_df[sel_cols].set_index(["sample_id", "chrom"])
     new_rows = []
@@ -139,14 +141,15 @@ def bin_by_segments(cns_df, segments, fun_type="mean", cn_columns=None, print_in
     for i, ((sample, chrom), group) in enumerate(cns_df_view.groupby(level=[0, 1])):
         if print_info:
             print(f"Binning chr ({i+1}/{len(indices)})", end="\r")
-        if chrom in chrom_segments:
-            for segment in chrom_segments[chrom]:
-                if agg_func != None:
-                    bin = _regs_to_bin(sample, chrom, group.values, segment, agg_func)
-                    new_rows.append(bin)
-                else:
-                    bin = _cns_in_seg(sample, chrom, group.values, segment)
-                    new_rows.extend(bin)
+        if chrom not in segs_dict:
+            continue
+        for seg_start, seg_end in segs_dict[chrom]:
+            if agg_func != None:
+                bin = _regs_to_bin(sample, chrom, group.values, seg_start, seg_end, agg_func)
+                new_rows.append(bin)
+            else:
+                bin = _cns_in_seg(sample, chrom, group.values, seg_start, seg_end)
+                new_rows.extend(bin)
     if print_info:
         print(f"Binning finished. Converting {len(new_rows)} rows...", end="\r")
     bin_df = pd.DataFrame(new_rows, columns=sel_cols)
