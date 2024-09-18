@@ -56,7 +56,6 @@ class TestPipelines(unittest.TestCase):
 
     def test_main_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)    
-        print(res) 
         self.assertEqual(res.shape, (4, 9))
         self.assertEqual(res.loc['s1', 'chrom_missing'][-1], "chrX")
         self.assertEqual(res.loc['s1', 'chrom_count'], 1)
@@ -75,7 +74,6 @@ class TestPipelines(unittest.TestCase):
         res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res.shape, (4, 16))
         self.assertTrue(np.all(res['ane_hom_aut'] <= res['ane_het_aut']))   
-        print(res)    
         self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
         self.assertEqual(res.loc['s4', 'ane_het_sex'], 0)

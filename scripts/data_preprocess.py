@@ -85,7 +85,7 @@ def tcga(hg_ver, print_debug=False):
     if print_debug:
         print(specimen_df.head())
 
-    samples_df = specimen_df[["patient", "sex", "cancer_type"]].rename(columns={"patient": "sample_id", "cancer_type": "type"})
+    samples_df = specimen_df[["name", "sex", "cancer_type"]].rename(columns={"name": "sample_id", "cancer_type": "type"})
     samples_df["sex"] = samples_df["sex"].replace({"XY": "xy", "XX": "xx"})
     samples_df.set_index("sample_id", inplace=True)
     if print_debug:

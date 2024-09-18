@@ -30,7 +30,7 @@ def get_covered_bases(nan_bases_df, samples_df, het):
 
 def get_missing_chroms(cns_df, samples_df, assembly=hg19):
     res = samples_df.copy()
-    # create a serise where the value is sex_xy if exhpected_chrs == 'xy' lese it is sex_xx
+    # create a serise where the value is sex_xy if expected_chrs == 'xy' lese it is sex_xx
     xy_names = assembly.aut_names + ["chrX", "chrY"]
     xx_names = assembly.aut_names + ["chrX"]
     expected_chrs = res["sex"].map({"xy": xy_names, "xx": xx_names, "NA": xx_names})

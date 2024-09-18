@@ -55,10 +55,9 @@ def main_coverage(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19,
     if "length" not in cns_df.columns:
         cns_df["length"] = cns_df["end"] - cns_df["start"]
 
-    res_df = get_missing_chroms(cns_df, res_df, assembly)
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-
     hom_nan_df = get_not_nan(cns_df, cn_columns, False)
+    res_df = get_missing_chroms(hom_nan_df, res_df, assembly)
     res_df = get_covered_bases(hom_nan_df, res_df, False)
     res_df = normalize_feature(res_df, "cover_hom", norm_sizes)
 
