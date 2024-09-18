@@ -128,11 +128,6 @@ def _get_agg_func(fun_type):
 def bin_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=True):
     agg_func = _get_agg_func(fun_type)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    segs_dict = {}
-    for key, val1, val2 in segs:
-        if key not in segs_dict:
-            segs_dict[key] = []
-        segs_dict[key].append((val1, val2))
     sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df_view = cns_df[sel_cols].set_index(["sample_id", "chrom"])
     new_rows = []
@@ -141,9 +136,9 @@ def bin_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=T
     for i, ((sample, chrom), group) in enumerate(cns_df_view.groupby(level=[0, 1])):
         if print_info:
             print(f"Binning chr ({i+1}/{len(indices)})", end="\r")
-        if chrom not in segs_dict:
+        if chrom not in segs:
             continue
-        for seg_start, seg_end in segs_dict[chrom]:
+        for seg_start, seg_end in segs[chrom]:
             if agg_func != None:
                 bin = _regs_to_bin(sample, chrom, group.values, seg_start, seg_end, agg_func)
                 new_rows.append(bin)
@@ -166,5 +161,4 @@ def bin_by_breaks(cns_df, breaks, fun_type="mean", cn_columns=None, print_info=T
 
 def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", cn_columns=None, print_info=True):
     breaks = make_breaks(break_type, assembly)
-    bin_df = bin_by_breaks(cns_df, breaks, fun_type, cn_columns, print_info)
-    return bin_df
+    return bin_by_breaks(cns_df, breaks, fun_type, cn_columns, print_info)

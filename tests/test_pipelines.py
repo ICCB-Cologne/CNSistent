@@ -83,8 +83,8 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s4', 'breaks_total_cn_tot'], 4)
 
     def test_main_segment(self):
-        select = [("chr1", 0, 100), ("chr2", 50, 150), ("chr3", 100, 200), ("chr3", 250, 300)]
-        remove = [("chr2", 0, 75), ("chr3", 150, 175), ("chrX", 0, 100)]
+        select = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chr3': [(100, 200), (250, 300)]}
+        remove = {'chr2': [(0, 75)], 'chr3': [(150, 175)], 'chrX': [(0, 100)]}
         res = main_segment(self.cns, select, remove, assembly=self.assembly)
         self.assertEqual(len(res), 5)
         res = main_segment(self.cns, select, remove, filter_size=50, assembly=self.assembly)
@@ -95,4 +95,3 @@ class TestPipelines(unittest.TestCase):
         res = main_segment(self.cns, select, remove, 25, 25, 50, self.assembly)
         self.assertEqual(res.iloc[0].tolist(), ["chr1", 0, 25])
         self.assertEqual(res.iloc[4].tolist(), ["chr2", 75, 96])    
-    

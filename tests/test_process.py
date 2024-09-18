@@ -12,8 +12,8 @@ from cns.utils.conversions import tuples_to_segments
 
 class TestSegments(unittest.TestCase):        
     def test_do_segments_overlap(self):
-        segs_a = [(1, 0, 5), (1, 4, 8), (2, 10, 15)]
-        segs_b = [(1, 5, 10), (2, 14, 20), (3, 25, 30)]
+        segs_a = {1: [(0, 5), (4, 8)], 2: [(10, 15)]}
+        segs_b = {1: [(5, 10)], 2: [(14, 20)], 3: [(25, 30)]}
         gaps_hg19_segs = tuples_to_segments(hg19.gaps)
         gaps_hg38_segs = tuples_to_segments(hg38.gaps)
         self.assertTrue(do_segments_overlap(segs_a))
@@ -22,85 +22,72 @@ class TestSegments(unittest.TestCase):
         self.assertFalse(do_segments_overlap(gaps_hg38_segs))
 
     def test_merge_segments(self):
-        segs = [(1, 5, 10), (1, 10, 15), (2, 20, 25), (2, 25, 30), (3, 35, 40)]
-        exp = [(1, 5, 15), (2, 20, 30), (3, 35, 40)]
+        segs = {1: [(5, 10), (10, 15)], 2: [(20, 25), (25, 30)], 3: [(35, 40)]}
+        exp = {1: [(5, 15)], 2: [(20, 30)], 3: [(35, 40)]}
         self.assertEqual(merge_segments(segs), exp)
 
     def test_segment_union(self):
-        segs_a = [(1, 0, 10), (2, 10, 15)]
-        segs_b = [(1, 5, 10), (2, 15, 20), (3, 25, 30)]
-        exp = [(1, 0, 10), (2, 10, 20), (3, 25, 30)]
+        segs_a = {1: [(0, 10)], 2: [(10, 15)]}
+        segs_b = {1: [(5, 10)], 2: [(15, 20)], 3: [(25, 30)]}
+        exp = {1: [(0, 10)], 2: [(10, 20)], 3: [(25, 30)]}
         self.assertEqual(segment_union(segs_a, segs_b), exp)
 
     def test_find_overlaps(self):
-        segs = [(1, 1, 3), (1, 7, 9), (2, 10, 15), (3, 20, 25), (1, 3, 4), (1, 8, 10), (2, 12, 20), (3, 22, 30)]
-        exp = [(1, 8, 9), (2, 12, 15), (3, 22, 25)]
+        segs = {1: [(1, 3), (7, 9), (3, 4), (8, 10)], 2: [(10, 15), (12, 20)], 3: [(20, 25), (22, 30)]}
+        exp = {1: [(8, 9)], 2: [(12, 15)], 3: [(22, 25)]}
         self.assertEqual(find_overlaps(segs), exp)
 
     def test_segment_difference(self):
-        segs_a = [(1, 0, 10), (2, 15, 25), (3, 20, 30)]
-        segs_b = [(1, 3, 5), (1, 7, 8), (2, 20, 23), (3, 22, 25), (3, 26, 29)]
-        exp = [
-            (1, 0, 3),
-            (1, 5, 7),
-            (1, 8, 10),
-            (2, 15, 20),
-            (2, 23, 25),
-            (3, 20, 22),
-            (3, 25, 26),
-            (3, 29, 30),
-        ]
+        segs_a = {1: [(0, 10)], 2: [(15, 25)], 3: [(20, 30)]}
+        segs_b = {1: [(3, 5), (7, 8)], 2: [(20, 23)], 3: [(22, 25), (26, 29)]}
+        exp = {
+            1: [(0, 3), (5, 7), (8, 10)],
+            2: [(15, 20), (23, 25)],
+            3: [(20, 22), (25, 26), (29, 30)],
+        }
         self.assertEqual(segment_difference(segs_a, segs_b), exp)
 
-        segs_a = [(1, 0, 10)]
-        segs_b = [(1, 9, 10)]
+        segs_a = {1: [(0, 10)]}
+        segs_b = {1: [(9, 10)]}
         res = segment_difference(segs_a, segs_b)
-        self.assertEqual(res, [(1, 0, 9)])
+        self.assertEqual(res, {1: [(0, 9)]})
 
     def test_filter_min_size(self):
-        segs = [(1, 0, 10), (2, 15, 20), (3, 20, 30)]
+        segs = {1: [(0, 10)], 2: [(15, 20)], 3: [(20, 30)]}
         min_size = 6
-        exp = [(1, 0, 10), (3, 20, 30)]
+        exp = {1: [(0, 10)], 2: [], 3: [(20, 30)]}
         self.assertEqual(filter_min_size(segs, min_size), exp)
 
-
     def test_split_segment(self):
-        # Test case 1
-        segment = (1, 1, 11)
-        step_size = 2
-        expected_output = [(1, 1, 3), (1, 3, 5), (1, 5, 7), (1, 7, 9), (1, 9, 11)]
-        actual_output = split_segment(segment, step_size, "scale")
+        actual_output = split_segment(1, 11, 2, "scale")
+        expected_output = [(1, 3), (3, 5), (5, 7), (7, 9), (9, 11)]
         self.assertEqual(actual_output, expected_output)
 
-        # Test case 2
-        segment = (1, 1, 11)
-        step_size = 3
-        expected_output = [(1, 1, 5), (1, 5, 8), (1, 8, 11)]
-        actual_output = split_segment(segment, step_size, "pad")
+        expected_output = [(1, 5), (5, 8), (8, 11)]
+        actual_output = split_segment(1, 11, 3, "pad")
         self.assertEqual(actual_output, expected_output)
 
-    
     def test_regions_remove(self):
         filter_size = 0
         select = regions_select("")
         remove = regions_remove("gaps")
         self.assertGreater(len(remove), 0)
         segs = get_genome_segments(select, remove, filter_size)
-        self.assertGreater(len(segs), 0)
-        self.assertEqual(remove[0][2], segs[0][1]) # check if the first segment is a gap
-        
+        self.assertGreater(len(segs["chr1"]), 0)
+        self.assertEqual(remove["chr1"][0][1], segs["chr1"][0][0])  # check if the first segment is a gap
+
     def test_get_genome_segments(self):
-        select = [(1, 0, 10), (1, 20, 30), (2, 0, 5)]
-        remove = [(1, 5, 15)]
-        
+        select = {1: [(0, 10), (20, 30)], 2: [(0, 5)]}
+        remove = {1: [(5, 15)]}
+
         filter_size = 1
-        expected_result = [(1, 15, 20), (1, 20, 30)]        
+        expected_result = {1: [(15, 20), (20, 30)]}
         result = get_genome_segments(select, remove, filter_size)
-        
+
         filter_size = 6
-        expected_result = [(1, 20, 30)]        
+        expected_result = {1: [(20, 30)], 2: []}
         result = get_genome_segments(select, remove, filter_size)
-        
+
         self.assertEqual(result, expected_result)
 
 
@@ -312,21 +299,22 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
 
     def test_get_breaks_in_segments(self):
-        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        segments = { 'chr1': [(0, 100)], 'chr2': [(100, 200)] }
         breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
         res = get_breaks_in_segments(segments, breaks)
         self.assertEqual(res['chr1'], [0, 1, 99])
         self.assertEqual(res['chr3'], [])
 
     def test_insert_breaks_in_segments(self):
-        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        segments = { 'chr1': [(0, 100)], 'chr2': [(100, 200)] }
         breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
         res = insert_breaks_in_segments(segments, breaks)
-        self.assertEqual(len(res), 4)
-        self.assertEqual(res[0], ('chr1', 0, 1))
-        self.assertEqual(res[1], ('chr1', 1, 99))
-        self.assertEqual(res[2], ('chr1', 99, 100))
-        self.assertEqual(res[3], ('chr2', 100, 200))
+        print(res)
+        self.assertEqual(len(res), 3)
+        self.assertEqual(res['chr1'][0], (0, 1))
+        self.assertEqual(res['chr1'][1], (1, 99))
+        self.assertEqual(res['chr1'][2], (99, 100))
+        self.assertEqual(res['chr2'][0], (100, 200))
 
 
 class TestBinning(unittest.TestCase):
@@ -352,7 +340,7 @@ class TestBinning(unittest.TestCase):
         })
 
     def test_bin_by_breaks(self):
-        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
         breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
         seg_bin = bin_by_segments(self.cns, segments, print_info=False)
         break_bin = bin_by_breaks(self.cns, breaks, print_info=False)
@@ -360,7 +348,7 @@ class TestBinning(unittest.TestCase):
         pd.testing.assert_frame_equal(seg_bin, break_bin)
     
     def test_bin_by_segments(self):
-        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
         result = bin_by_segments(self.cns, segments)
         self.assertEqual(result.shape[0], 4)
         self.assertEqual(result.at[0, "start"], 0)
@@ -371,7 +359,7 @@ class TestBinning(unittest.TestCase):
         self.assertTrue(np.isnan(result.at[1, "major_cn"]))
     
     def test_bin_none(self):        
-        segments = [('chr1', 0, 100), ('chr2', 100, 200)]
+        segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
         result = bin_by_segments(self.cns, segments, fun_type="none")
         self.assertEqual(result.shape[0], 8)
         for i in range(result.shape[0]):
@@ -415,14 +403,13 @@ class TestMerging(unittest.TestCase):
     def test_cluster_within_segments(self):
         print()
         breaks = {'chr1': [50, 149, 200, 299], 'chr2': [200, 300]}
-        segments = [('chr1', 0, 300), ('chr2', 100, 200)]
+        segments = {'chr1': [(0, 300)], 'chr2': [(100, 200)]}
         dist = 100
         res = cluster_within_segments(breaks, segments, dist)
-        print(res)
-        self.assertEqual(len(res), 4)
-        self.assertEqual(res[0], ('chr1', 0, 100))
-        self.assertEqual(res[2], ('chr1', 250, 300))
-        self.assertEqual(res[3], ('chr2', 100, 200))
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res['chr1'][0], (0, 100))
+        self.assertEqual(res['chr1'][2], (250, 300))
+        self.assertEqual(res['chr2'][0], (100, 200))
 
 
 if __name__ == "__main__":

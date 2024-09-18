@@ -25,7 +25,8 @@ run_and_compare() {
   # Compare the output with the expected output
   if ! diff "${output_file}" "${expected_file}" > /dev/null; then
     echo -e "\033[0;31m Test failed: Output of $1 does not match expected output ${expected_file}"
-	diff "${output_file}" "${expected_file}" 
+	diff "${output_file}" "${expected_file}"
+  echo -e "Failed on command $1"
     exit 1
   fi
 }

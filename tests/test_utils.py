@@ -8,22 +8,38 @@ from cns.utils.kneepoint import *
 
 
 class TestConversions(unittest.TestCase):
+    def test_tuples_to_segments(self):
+        gaps = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]
+        exp =  {'chr1': [(1, 5)], 'chr2': [(10, 15)]}
+        self.assertEqual(tuples_to_segments(gaps), exp)
+
+    def test_segs_to_df(self):
+        segments = {'chr1': [(1, 5)], 'chr2': [(10, 15)]}
+        df = segs_to_df(segments)
+        self.assertTrue(isinstance(df, pd.DataFrame))
+        self.assertEqual(df.columns.tolist(), ["chrom", "start", "end"])
+        self.assertEqual(df.iloc[0].tolist(), ['chr1', 1, 5])
+
+    def test_df_to_segs(self):
+        df = pd.DataFrame({
+            'chrom': ['chr1', 'chr1', 'chr2'],
+            'start': [0, 10, 20],
+            'end': [5, 15, 25]
+        })
+        exp = {'chr1': [(0, 5), (10, 15)], 'chr2': [(20, 25)]}
+        self.assertEqual(df_to_segs(df), exp)
+
     def test_genome_to_segments(self):
         assembly = type('Assembly', (object,), {
             'chr_lens':{'chr1': 100, 'chr2': 200 }
         })
-        exp = [('chr1', 0, 100), ('chr2', 0, 200)]
+        exp = {'chr1': [(0, 100)], 'chr2': [(0, 200)]}
         self.assertEqual(genome_to_segments(assembly), exp)
 
     def test_breaks_to_segments(self):
         breakpoints = {'chr1': [0, 50, 100], 'chr2': [0, 125, 150, 176]}
-        exp = [('chr1', 0, 50), ('chr1', 50, 100), ('chr2', 0, 125), ('chr2', 125, 150), ('chr2', 150, 176)]
+        exp = {'chr1': [(0, 50), (50, 100)], 'chr2': [(0, 125), (125, 150), (150, 176)]}
         self.assertEqual(breaks_to_segments(breakpoints), exp)
-
-    def test_tuples_to_segments(self):
-        gaps = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]
-        exp = [('chr1', 1, 5), ('chr2', 10, 15)]
-        self.assertEqual(tuples_to_segments(gaps), exp)
 
     def test_cytobands_to_df(self):
         cytobands = [['chr1', 0, 2300000, 'p36.33', 'gneg']]

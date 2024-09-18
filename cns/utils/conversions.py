@@ -11,6 +11,21 @@ def gaps_to_df(gaps):
     return pd.DataFrame( gaps, columns=["chrom", "start", "end", "type", "bridge"])
 
 
+def segs_to_df(segments):
+    seg_list = []
+    for chrom in sorted(segments.keys()):  # Sort the keys lexicographically
+        for seg in segments[chrom]:
+            seg_list.append((chrom, seg[0], seg[1]))
+    return pd.DataFrame(seg_list, columns=["chrom", "start", "end"])
+
+
+def df_to_segs(segs_df):
+    res = {}
+    for chrom, group in segs_df.groupby("chrom"):
+        res[chrom] = list(zip(group["start"], group["end"]))
+    return res
+
+
 def chrom_to_sortable(chrom, aut_count = 22):
     if chrom == "chrX":
         return aut_count + 1  # Make 'chrX' sort last
@@ -44,24 +59,26 @@ def segs_to_chrom_dict(segments):
 
 
 def tuples_to_segments(tuples):
-    segs = []
+    segs = {}
     if len(tuples) > 0 and len(tuples[0]) >= 3:
         for tuple in tuples:
-            segs.append((tuple[0], tuple[1], tuple[2]))
+            if tuple[0] not in segs:
+                segs[tuple[0]] = []
+            segs[tuple[0]].append((tuple[1], tuple[2]))
     return segs
 
 
 def breaks_to_segments(breakpoints):
-    segs = []
+    segs = {}
     for chrom, breaks in breakpoints.items():
-        last_break = len(breaks) - 1
-        for i in range(last_break):
-            segs.append((chrom, breaks[i], breaks[i + 1]))
+        segs[chrom] = []
+        for i in range(len(breaks) - 1):
+            segs[chrom].append((breaks[i], breaks[i + 1]))
     return segs
 
 
 def genome_to_segments(assembly=hg19):
-    segs = []
+    segs = {}
     for chrom, len in assembly.chr_lens.items():
-        segs.append((chrom, 0, len))
+        segs[chrom] = [(0, len)]
     return segs

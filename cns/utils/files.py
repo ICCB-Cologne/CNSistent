@@ -2,6 +2,7 @@ from os.path import abspath, exists, join
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
+from cns.utils.conversions import df_to_segs
 
 
 def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, no_sample=False, header=True):
@@ -97,7 +98,7 @@ def load_segments(path, change_coords=True, header=True):
         segs_df.columns = ["chrom", "start", "end"]    
     if change_coords:
         segs_df.loc[:, "start"] -= 1
-    return segs_df.values.tolist()
+    return df_to_segs(segs_df)
     
 
 def dataframe_array_split(df, n_splits):

@@ -91,25 +91,27 @@ def get_breaks(cns_df, keep_ends=True, assembly=hg19):
     return dict_start
 
 
-def get_breaks_in_segments(segments, breaks, min_dist = 0):
+def get_breaks_in_segments(segs, breaks, min_dist = 0):
     res = { chrom: [] for chrom in breaks }
-    for chrom, start, end in segments:
+    for chrom, chrom_segs in segs.items():
         if chrom not in breaks:
             continue
-        for br in breaks[chrom]:
-            if start + min_dist <= br < end - min_dist:
-                res[chrom].append(br)
+        for start, end in chrom_segs:
+            for br in breaks[chrom]:
+                if start + min_dist <= br < end - min_dist:
+                    res[chrom].append(br)
     return res
 
 
-def insert_breaks_in_segments(segments, breaks, min_dist=0):
-    breaks = get_breaks_in_segments(segments, breaks, min_dist)
+def insert_breaks_in_segments(segs, breaks, min_dist=0):
+    breaks = get_breaks_in_segments(segs, breaks, min_dist)
     # add breaks from segments
-    for chrom, start, end in segments:
+    for chrom, chrom_segs in segs.items():
         if chrom not in breaks:
             breaks[chrom] = []
-        breaks[chrom].append(start)
-        breaks[chrom].append(end)
+        for start, end in chrom_segs:
+            breaks[chrom].append(start)
+            breaks[chrom].append(end)
     # unique and sort
     for chrom in breaks:
         breaks[chrom] = sorted(set(breaks[chrom]))

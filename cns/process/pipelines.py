@@ -8,6 +8,7 @@ from cns.process.cluster import cluster_within_segments
 from cns.process.imputation import add_missing, add_tails, cns_impute, fill_gaps, fill_nans_with_zeros, merge_neighbours, remove_outliers
 from cns.process.segments import get_genome_segments, split_segments
 from cns.utils.canonization import find_cn_cols_if_none, is_hap_spec
+from cns.utils.conversions import segs_to_df
 from cns.utils.files import samples_df_from_cns_df
 from cns.utils.logging import log_info
 from cns.utils.assemblies import hg19
@@ -111,5 +112,5 @@ def main_segment(cns_df, select_segs, remove_segs, split_size=0, merge_dist=0, f
         segs = cluster_within_segments(breaks, segs, merge_dist, print_info)
     if split_size > 0:
         segs = split_segments(segs, split_size)
-    res_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
+    res_df = segs_to_df(segs)
     return res_df
