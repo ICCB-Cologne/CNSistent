@@ -1,7 +1,8 @@
 import os
 from cns.data_utils import *
-from cns.process.pipelines import main_cluster
+from cns.process.pipelines import main_segment
 from cns.utils.files import save_segments
+from cns.process.segments import regions_select, regions_remove
 import argparse
 
 if __name__ == "__main__":
@@ -16,8 +17,10 @@ if __name__ == "__main__":
 	samples = load_merged_samples(False)
 	cns = load_merged_cns(samples)
 
-	clustered = main_cluster(cns, dist)
-	file = os.path.join(out_path, f'joint_clust_{dist}.tsv')
+	select = regions_select("")
+	remove = regions_remove("gaps")
+	clustered = main_segment(cns, select, remove, merge_dist=dist, filter_size=dist//4)
+	file = os.path.join(out_path, f'segs_merge_{dist}.tsv')
 	print("Saving to file:", file)
 	save_segments(clustered, file)
 

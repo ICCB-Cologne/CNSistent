@@ -121,8 +121,10 @@ def main_ploidy(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19, p
 
 
 def main_segment(
-    cns_df, select_segs, remove_segs, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False
+    cns_df, select_segs=None, remove_segs=None, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False
 ):
+    if select_segs == None:
+        select_segs = genome_to_segments(assembly)
     segs = get_genome_segments(select_segs, remove_segs, filter_size)
     if merge_dist > 0:
         breaks = get_breaks(cns_df, keep_ends=False, assembly=assembly)

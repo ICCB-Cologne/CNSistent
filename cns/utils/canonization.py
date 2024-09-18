@@ -22,7 +22,7 @@ def _requires_rename(cn_columns):
     return False
 
 
-def find_cn_cols_if_none(cns_df, cn_cols):
+def find_cn_cols_if_none(cns_df, cn_cols=None):
     if cn_cols is None:
         cn_cols = [col for col in cns_df.columns if is_cn_column(col)]
     # check if cn_cols is a string

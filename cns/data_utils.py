@@ -34,30 +34,30 @@ def load_bins(dataset, bin_type):
 
 
 def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):
-    log_info(print_info, "Total samples:", len(samples))
+    log_info(print_info, f"Total samples: {len(samples)}")
     
-    cn_neutral = samples.query(f"ane_total_cn_frac_aut < {ane_min_frac}").index
-    log_info(print_info, len(cn_neutral), f"samples are CN neutral (below {ane_min_frac:.5f})")
+    cn_neutral = samples.query(f"ane_het_aut < {ane_min_frac}").index
+    log_info(print_info, f"{len(cn_neutral)} samples are CN neutral (below {ane_min_frac:.5f})")
     filtered = samples.query("(index not in @cn_neutral)")
 
     # Find samples with low coverage (below 95% in autosomes)
-    low_coverage = samples.query(f"cover_frac_aut < {cover_min_frac}").index
-    log_info(print_info, len(low_coverage), f"samples have low coverage (below {cover_min_frac:.5f})")
+    low_coverage = samples.query(f"cover_het_aut < {cover_min_frac}").index
+    log_info(print_info, f"{len(low_coverage)} samples have low coverage (below {cover_min_frac:.5f})")
     filtered = filtered.query("(index not in @low_coverage)")
 
     # Filter out CN neutral and low coverage samples 
     if whitelist:
         blacklisted = samples.query("whitelist == False").index
-        log_info(print_info, len(blacklisted), "samples are blacklisted")
+        log_info(print_info, f"{len(blacklisted)} samples are blacklisted")
         filtered = filtered.query("(index not in @blacklisted)")
 
     if filter_types:
         samples["type"] = samples["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
         untyped = samples[samples["type"].fillna('').apply(lambda x: any(not c.isupper() for c in x))].index
-        log_info(print_info, len(untyped), "samples do not have exact type")
+        log_info(print_info, f"{len(untyped)} samples do not have exact type")
         filtered = filtered.query("(index not in @untyped)")
 
-    log_info(print_info, "Filtered samples:", len(filtered))
+    log_info(print_info, f"Filtered samples: {len(filtered)}")
 
     return filtered.copy()
 
@@ -74,10 +74,10 @@ def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False)
     if filter:
         for k, v in samples.items():
             log_info(print_info, k)
-            ane_vals = v["ane_total_cn_frac_aut"]
+            ane_vals = v["ane_het_aut"]
             ane_bends = find_bends(ane_vals)
             ane_min_frac = ane_bends[0][ane_bends[2]]
-            cover_vals = v["cover_frac_aut"]
+            cover_vals = v["cover_het_aut"]
             cover_bends = find_bends(cover_vals)
             cover_min_frac = cover_bends[0][cover_bends[4]]
             whitelist = k=="PCAWG"
@@ -111,7 +111,7 @@ def load_merged_samples(print_info=False):
     for k, v in samples.items():
         v["source"] = k
     all_samples = pd.concat(samples.values())        
-    log_info(print_info, "Total samples:", len(all_samples))
+    log_info(print_info, f"Total samples: {len(all_samples)}")
     return all_samples
 
 

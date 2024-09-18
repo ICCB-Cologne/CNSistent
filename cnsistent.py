@@ -189,23 +189,28 @@ def main():
     # Read the input
     log_info(print_info, f"***** cns {action} *****")
 
-    # Check the CNS file, may be omitted for segmentation without merging
-    if action != "segment" or args.merge > 0:
-        if not exists(cns_file_path):    
-            raise ValueError(f"Copy number file {cns_file_path} not found.")
-        else:
-            log_info(print_info, f"CNS file at {cns_file_path}...")     
-        
-    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, header=not no_header, no_sample=no_sample)
-    cn_columns = find_cn_cols_if_none(cns_df, cncols)
+    # For segmentation without cns file we don't use cns files and multiprocessing
+    if action == "segment" and args.merge == 0:
+        select = regions_select(args.select, assembly)
+        remove = regions_remove(args.remove, assembly)
+        res_df = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)
+        save_segments(res_df, out_file, change_coords=True, header=not no_header)
+        log_info(print_info, "Done.")
+        return
 
+    if not exists(cns_file_path):    
+        raise ValueError(f"Copy number file {cns_file_path} not found.")
+    else:
+        log_info(print_info, f"CNS file at {cns_file_path}...")     
+    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, header=not no_header, no_sample=no_sample)
+    cn_columns = find_cn_cols_if_none(cns_df, cncols)     
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
     else:
         samples_df = load_samples(samples_path)
         samples_df = fill_sex_if_missing(cns_df, samples_df)
-
     samples_blocks = dataframe_array_split(samples_df, subsplit) 
+
 
     for i in range(subsplit):
         log_info(print_info, f"Processing block {i+1}/{subsplit}...")
