@@ -113,35 +113,36 @@ def _action_to_fun(action):
         raise ValueError(f"Action {action} not recognized.")
 
 
-def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, threads, args):
+def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
+    block_count = len(cns_blocks)
     # Apply process_block to each pair of blocks
-    ass_block = [assembly]*threads
-    ver_block = [False]*threads
+    ass_block = [assembly]*block_count
+    ver_block = [False]*block_count
     ver_block[-1] = args.verbose
-    cols_block = [cols_block]*threads
+    cols_block = [cols_block]*block_count
     if action == "impute":
-        ext_block = ['extend']*threads
+        ext_block = ['extend']*block_count
         return zip(cns_blocks, samples_blocks, ext_block, cols_block, ver_block)
     if action == "fill":
-        add_missing = [True]*threads
+        add_missing = [True]*block_count
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)        
     elif action == "segment":
         select = regions_select(args.select, assembly)
         remove = regions_remove(args.remove, assembly)
-        select_block = [select]*threads
-        remove_block = [remove]*threads
-        split_block = [args.split]*threads
-        merge_block = [args.merge]*threads
-        filter_block = [args.filter]*threads
+        select_block = [select]*block_count
+        remove_block = [remove]*block_count
+        split_block = [args.split]*block_count
+        merge_block = [args.merge]*block_count
+        filter_block = [args.filter]*block_count
         return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
     elif action in ["coverage", "ploidy", "signatures"]:        
         segs_df = load_segments(args.segments) if args.segments != "" else None
-        segs_block = [segs_df] * threads
+        segs_block = [segs_df] * block_count
         return zip(cns_blocks, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "bin":
         segs_df = load_segments(args.segments)
-        segs_block = [segs_df]*threads
-        fun_block = [args.aggregate]*threads
+        segs_block = [segs_df]*block_count
+        fun_block = [args.aggregate]*block_count
         return zip(cns_blocks, segs_block, fun_block, cols_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
@@ -149,15 +150,15 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, thread
 
 def _process(action, cns_df, samples_df, cn_cols, assembly, args):   
     main_fun = _action_to_fun(action)
-    blocks = abs(args.threads)
-    samples_blocks = dataframe_array_split(samples_df, blocks)
+    threads = abs(args.threads)
+    samples_blocks = dataframe_array_split(samples_df, threads)
     cns_blocks = [cns_df.query("sample_id in @block.index").reset_index(drop=True) for block in samples_blocks]
-    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, assembly, blocks, args)
-    if blocks == 1:
+    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, assembly, args)
+    if threads == 1:
         return [main_fun(*list(*zip_blocks))]
     else:
-        with Pool(blocks) as pool:
-            log_info(args.verbose, f"Multiprocessing with {blocks} threads..")
+        with Pool(threads) as pool:
+            log_info(args.verbose, f"Multiprocessing with {threads} threads..")
             res_blocs = pool.starmap(main_fun, zip_blocks)        
             pool.close()   
             pool.join()    
@@ -204,7 +205,7 @@ def main():
         samples_df = load_samples(samples_path)
         samples_df = fill_sex_if_missing(cns_df, samples_df)
 
-    samples_blocks = dataframe_array_split(samples_df, subsplit)
+    samples_blocks = dataframe_array_split(samples_df, subsplit) 
 
     for i in range(subsplit):
         log_info(print_info, f"Processing block {i+1}/{subsplit}...")
@@ -230,9 +231,9 @@ def main():
             if action in ["segment"]:
                 save_segments(res_df, out_file, change_coords=True, header=header)
             elif action in ["fill", "impute", "bin"]:
-                save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, write_mode=mode)
+                save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, mode=mode)
             elif action in ["coverage", "ploidy", "signatures"]:
-                save_samples(res_df, out_file, no_sample=no_sample, header=header)
+                save_samples(res_df, out_file, no_sample=no_sample, header=header, mode=mode)
             else:
                 raise ValueError(f"Unknown action {action}")
     

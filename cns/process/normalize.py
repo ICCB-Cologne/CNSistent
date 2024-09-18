@@ -41,6 +41,7 @@ def get_chr_sets(cns_df, assembly=hg19):
     chroms = cns_df["chrom"].unique().tolist()
     aut_selection = [chrom for chrom in chroms if chrom in assembly.aut_names]
     if len(aut_selection) == 0:
+        print(cns_df)
         raise ValueError("No autosomes found in the input segments.")    
     res_dict = { "aut": aut_selection}
     sex_selection = [chrom for chrom in chroms if chrom in assembly.sex_names]

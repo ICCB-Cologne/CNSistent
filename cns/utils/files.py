@@ -1,4 +1,4 @@
-from os.path import abspath, exists, join
+from os.path import abspath, exists
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
@@ -20,14 +20,14 @@ def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=Tr
     return cns_df
 
 
-def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, header=True, write_mode="w"):
+def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, header=True, mode="w"):
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:
         cns_df.loc[:, "start"] += 1
 
     to_save = cns_df.drop(columns="sample_id") if no_sample else cns_df
-    to_save.to_csv(path, sep="\t", index=False, header=header, mode=write_mode)
+    to_save.to_csv(path, sep="\t", index=False, header=header, mode=mode)
 
     if change_coords:
         cns_df.loc[:, "start"] -= 1
@@ -43,10 +43,10 @@ def load_samples(path):
     return samples_df   
 
 
-def save_samples(samples_df, path, no_sample=False, header=True):
+def save_samples(samples_df, path, no_sample=False, header=True, mode='w'):
     if no_sample:
         samples_df = samples_df.reset_index(drop=True)
-    samples_df.to_csv(path, sep="\t", index=True, header=header)
+    samples_df.to_csv(path, sep="\t", index=True, header=header, mode=mode)
 
 
 def fill_sex_if_missing(cns, samples):
@@ -132,9 +132,9 @@ def dataframe_array_split(df, n_splits):
         
         # Slice the DataFrame for this split and append to the list
         split_df = df.iloc[current_row:current_row + rows_in_split]
-        splits.append(split_df)
-        
-        # Update the current row index
-        current_row += rows_in_split
+        if rows_in_split > 0:
+            splits.append(split_df)            
+            # Update the current row index
+            current_row += rows_in_split
     
     return splits

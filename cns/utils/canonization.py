@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 from cns.utils.assemblies import hg19
 from cns.utils.logging import log_info
 
@@ -175,7 +176,8 @@ def is_hap_spec(cn_columns):
 def is_cn_column(column):
     if not isinstance(column, str):
         return False
-    return column.endswith("cn") or column.endswith("CN") or column.startswith("cn") or column.startswith("CN")
+    pattern = re.compile(r'^(cn|CN).*|.*(cn|CN)$|.*(major|minor|hap).*', re.IGNORECASE)
+    return bool(re.search(pattern, column))
 
 
 def is_canonical_cns_df(cns_df):

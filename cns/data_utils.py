@@ -1,7 +1,7 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 from cns.process.binning import add_cns_loc, sum_cns
-from cns.utils.canonization import get_cn_columns_from_df
+from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples
@@ -115,9 +115,9 @@ def load_merged_samples(print_info=False):
     return all_samples
 
 
-def rename_cns_columns(cns):
-    cn_columns = get_cn_columns_from_df(cns)
-    return cns.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
+def rename_cns_columns(cns_df, cn_columns=None):
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    return cns_df.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
 
 
 def load_merged_bins(select_samples, bin_size):
