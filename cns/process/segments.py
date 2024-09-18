@@ -171,5 +171,12 @@ def get_genome_segments(select, remove=None, filter_size=0):
     return res
 
 
-def calc_sizes(chr_segs_df):
-    pass
+
+def calc_chr_sizes(chr_segs_df):
+    return { chr : sum([seg[1] - seg[0] for seg in chr_segs]) for chr, chr_segs in chr_segs_df.items() }
+
+
+def calc_group_sizes(segs_df, assembly=hg19):
+    chr_sizes = calc_chr_sizes(segs_df)
+    groups = { "sex" : assembly.sex_names, "aut" : assembly.aut_names, "all" : assembly.chr_names }
+    return { key : sum([chr_sizes[chrom] if chrom in chr_sizes else 0 for chrom in group]) for key, group in groups.items() } 

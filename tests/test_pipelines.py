@@ -69,7 +69,7 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
         self.assertEqual(res.loc['s4', 'ane_het_sex'], 0)
-        self.assertEqual(res.loc['s2', 'loh_het_tot'], 1/8)
+        self.assertEqual(res.loc['s2', 'loh_het_all'], 1/8)
         self.assertEqual(res.loc['s4', 'loh_hom_aut'], 1/self.assembly.aut_len)
     
     def test_main_signatures(self):
@@ -80,7 +80,7 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'breaks_total_cn_aut'], 1)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_aut'], 4)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_sex'], 0)
-        self.assertEqual(res.loc['s4', 'breaks_total_cn_tot'], 4)
+        self.assertEqual(res.loc['s4', 'breaks_total_cn_all'], 4)
 
     def test_main_segment(self):
         select = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chr3': [(100, 200), (250, 300)]}

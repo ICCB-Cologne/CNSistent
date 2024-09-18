@@ -65,7 +65,7 @@ def _calc_bases_per_chr_group(res, masked_cns_df, label, assembly=hg19):
         subset = masked_cns_df.query("chrom in @names")
         res[f"{label}_{suffix}"] = subset.groupby("sample_id")["length"].sum()
         res[f"{label}_{suffix}"] = res[f"{label}_{suffix}"].fillna(0).astype(np.int64)
-    res[f"{label}_tot"] = res[f"{label}_aut"] + res[f"{label}_sex"]
+    res[f"{label}_all"] = res[f"{label}_aut"] + res[f"{label}_sex"]
     return res
 
 

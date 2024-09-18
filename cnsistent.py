@@ -14,8 +14,8 @@ from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverag
 from cns.utils.logging import log_info
 
 
-def _add_common_args(parser):
-    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments") #TODO: make optional
+def _add_sp_args(action, parser):
+    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments")    
     parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
     parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
     parser.add_argument("--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19")
@@ -27,6 +27,19 @@ def _add_common_args(parser):
     parser.add_argument("--subsplit", type=int, help="will split the processing into chunks to lower memory needs", required=False, default=1)
     parser.add_argument("--cncols", type=str, help="The name of either a single CN column or two comma separated columns.", required=False, default=None)
 
+    if action in ["coverage", "ploidy", "signatures"]:
+        parser.add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default=None)
+
+    if action == "bin":
+        parser.add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=True)
+        parser.add_argument("--aggregate", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
+
+    if action == "segment":
+        parser.add_argument("--split", type=int, help="Distance in which regions should be, can be a positive integer or 0 for no splitting (whole regions).", required=False, default=0)
+        parser.add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
+        parser.add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
+        parser.add_argument("--filter", type=int, help="If set, regions smaller than the given size are excluded from selection and gaps.", required=False, default=0)
+        parser.add_argument("--merge", type=int, help="Maximum distance between breakpoint clusters for breakpoint merging", required=False, default=0)
 
 def _parse_args():
     # Top-level parser
@@ -42,23 +55,9 @@ def _parse_args():
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
     sp_dict["signatures"] = subparsers.add_parser("signatures", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
     sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
-    sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")
-    
-    for sp in sp_dict.values():
-        _add_common_args(sp)
-
-    sp_dict["coverage"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default="")
-    sp_dict["ploidy"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default="")
-    sp_dict["signatures"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default="")
-
-    sp_dict["segment"].add_argument("--split", type=int, help="Distance in which regions should be, can be a positive integer or 0 for no splitting (whole regions).", required=False, default=0)
-    sp_dict["segment"].add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
-    sp_dict["segment"].add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
-    sp_dict["segment"].add_argument("--filter", type=int, help="If set, regions smaller than the given size are exclued from selection and gaps.", required=False, default=0)
-    sp_dict["segment"].add_argument("--merge", type=int, help="Maximum distance between breakpoint clusters for breakpoint merging", required=False, default=0)
-
-    sp_dict["bin"].add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=True)
-    sp_dict["bin"].add_argument("--aggregate", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
+    sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")    
+    for action, sp in sp_dict.items():
+        _add_sp_args(action=action, parser=sp)
 
     args = parser.parse_args()
     if args.action is None:
@@ -68,20 +67,20 @@ def _parse_args():
         raise ValueError(f"Action {args.action} not recognized.")
     
     if args.action == "segment":
+        if args.merge > 0 and not args.data:
+            raise ValueError("Merging breakpoints requires the --data option to provide CNS data.")
         if args.split < 0:
             args.split = 0
         if args.select not in ["", "arms", "bands"] and not exists(args.select):
             raise ValueError(f"Selection {args.select} is not a build-in or a path to a file.")
         if args.remove not in ["", "gaps"] and not exists(args.remove):
             raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
-
-    if args.action == "segment":
         if args.threads > 1:
             print("segmentation is not data parallelizable, --threads option will be ignored.")
             args.threads = 1
         if args.subsplit > 1:
             print("segmentation is not data parallelizable, --subsplit option will be ignored.")
-            args.subsplit = 1        
+            args.subsplit = 1            
 
     if args.nosample and args["samples"] != "":
         raise ValueError("The --nosample and --samples options are incompatible.")

@@ -35,7 +35,7 @@ def calc_breaks_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
             .astype(np.int64)
         )
 
-    res[f"breaks_{cn_col}_tot"] = res[f"breaks_{cn_col}_aut"] + res[f"breaks_{cn_col}_sex"]
+    res[f"breaks_{cn_col}_all"] = res[f"breaks_{cn_col}_aut"] + res[f"breaks_{cn_col}_sex"]
     return res
 
 

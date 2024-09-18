@@ -23,6 +23,9 @@ cns coverage ./tests/out/test_cns_fill.tsv --out ./tests/out/test_sample_cover.t
 # Calculate the aneuploidy of the filled-in CNS data
 cns ploidy ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_sample_source.tsv --out ./tests/out/test_sample_ploidy.tsv --verbose
 
+# Calculate the aneuploidy of the filled-in CNS data
+cns signatures ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_sample_source.tsv --out ./tests/out/test_sample_signatures.tsv --verbose
+
 # %%
 # Obtain regions by clustering neighboring breakpoints
 cns segment ./tests/out/test_cns_fill.tsv --merge 100000 --out ./tests/out/mcs_regions.tsv --verbose 

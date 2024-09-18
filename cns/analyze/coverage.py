@@ -21,10 +21,10 @@ def normalize_feature(samples, feature, assembly=hg19):
         res[f"{feature}_sex"] / (x_length + y_length),
         res[f"{feature}_sex"] / (x_length),
     )
-    res[f"{feature}_tot"] = np.where(
+    res[f"{feature}_all"] = np.where(
         res["sex"] == "xy",
-        res[f"{feature}_tot"] / (assembly.aut_len + x_length + y_length),
-        res[f"{feature}_tot"] / (assembly.aut_len + x_length),
+        res[f"{feature}_all"] / (assembly.aut_len + x_length + y_length),
+        res[f"{feature}_all"] / (assembly.aut_len + x_length),
     )
     return res
 
@@ -41,7 +41,7 @@ def get_covered_bases(nan_bases_df, samples_df, het):
     res[f"cover_{label}_sex"] = (
         sex_df["length"].groupby(sex_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
     )
-    res[f"cover_{label}_tot"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
+    res[f"cover_{label}_all"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
     return res
 
 

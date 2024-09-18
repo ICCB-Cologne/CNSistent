@@ -47,12 +47,12 @@ class TestCoverage(unittest.TestCase):
         res = normalize_feature(samples_df, "cover_het", assembly=self.assembly)
         self.assertEqual(res.loc['s1', 'cover_het_aut'], 1/3)
         self.assertEqual(res.loc['s2', 'cover_het_sex'], 1)
-        self.assertEqual(res.loc['s4', 'cover_het_tot'], 1/4)
+        self.assertEqual(res.loc['s4', 'cover_het_all'], 1/4)
 
     def test_calculate_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res['cover_het_sex']['s1'], 1/2)
-        self.assertEqual(res['cover_het_tot']['s1'], 2/5)
+        self.assertEqual(res['cover_het_all']['s1'], 2/5)
         self.assertEqual(res['cover_hom_aut']['s2'], 0)
         self.assertEqual(res['cover_het_aut']['s2'], 1/3)
         self.assertEqual(res['chrom_count']['s2'], 2)
@@ -100,7 +100,7 @@ class TestSignatures(unittest.TestCase):
         segs_df = prepare_segments(self.cns, "major_cn")
         res = calc_breaks_per_sample(segs_df, self.samples, "major_cn", self.assembly)
         self.assertEqual(res.query('sample_id == "s1"')['breaks_major_cn_aut'].values[0], 1)
-        self.assertEqual(res.query('sample_id == "s4"')['breaks_major_cn_tot'].values[0], 3)      
+        self.assertEqual(res.query('sample_id == "s4"')['breaks_major_cn_all'].values[0], 3)      
 
     def test_calc_step_per_chr(self):
         segs_df = prepare_segments(self.cns, "major_cn")
@@ -172,7 +172,7 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.shape, (4, 7))
         self.assertEqual(res.loc['s4', 'ane_het_aut'], 170)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 100)
-        self.assertEqual(res.loc['s2', 'ane_het_tot'], 200)
+        self.assertEqual(res.loc['s2', 'ane_het_all'], 200)
         res = normalize_feature(res, "ane_het", self.assembly)
         self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
         res = normalize_feature(res, "ane_hom", self.assembly)
@@ -183,11 +183,11 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.shape, (4, 7))
         self.assertEqual(res.loc['s1', 'loh_het_aut'], 100)
         self.assertEqual(res.loc['s4', 'loh_het_aut'], 70)
-        self.assertEqual(res.loc['s4', 'loh_hom_tot'], 1)
+        self.assertEqual(res.loc['s4', 'loh_hom_all'], 1)
         
     def test_imb_score(self):
         res = calc_imb_bases(self.cns, self.samples, self.ane_cols, 0, self.assembly)
         self.assertEqual(res.shape, (4, 4))
         self.assertEqual(res.loc['s1', 'imb_major_cn_aut'], 100)
         self.assertEqual(res.loc['s2', 'imb_major_cn_sex'], 0)
-        self.assertEqual(res.loc['s4', 'imb_major_cn_tot'], 169)
+        self.assertEqual(res.loc['s4', 'imb_major_cn_all'], 169)
