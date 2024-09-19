@@ -106,8 +106,8 @@ def get_cns_for_type(cns, samples, type):
     return select_cns
 
 
-def load_merged_samples(print_info=False):
-    samples = load_all_samples(True, True, True, print_info)
+def load_merged_samples(filter=True, retype=True, print_info=False):
+    samples = load_all_samples(filter, retype, drop_tcga=True, print_info=print_info)
     for k, v in samples.items():
         v["source"] = k
     all_samples = pd.concat(samples.values())        

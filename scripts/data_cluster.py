@@ -14,7 +14,7 @@ if __name__ == "__main__":
 	if dist <= 0:
 		raise ValueError("Distance must be greater than 0")
 
-	samples = load_merged_samples(False)
+	samples = load_merged_samples(print_info=False)
 	cns = load_merged_cns(samples)
 
 	select = regions_select("")

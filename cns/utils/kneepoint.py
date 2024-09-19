@@ -10,6 +10,12 @@ def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
     counts = np.searchsorted(np.sort(vals), cutoffs, side='right') / len(vals)	
     return cutoffs, counts
 
+# Counts the number of samples below each present values
+def count_cum_val(vals):
+    unique_vals, counts = np.unique(vals, return_counts=True)
+    cumulative_count = np.cumsum(counts) / len(vals)
+    return unique_vals, cumulative_count
+
 
 # concave angles (rising curve) are positive, convex angles (falling curve) are negative
 def calculate_signed_angle(s1, s2):

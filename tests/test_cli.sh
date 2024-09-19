@@ -47,7 +47,8 @@ commands=(
   "cns bin ./temp/test_cns_fill.tsv --segments ./temp/test_segs_1MB.tsv --out ./temp/test_cns_1MB.tsv"
 )
 
-# TODO: Test signle-columns BED file
+# TODO: Test single-columns BED file
+# TODO: hg38 test
 
 rm -r ./temp
 mkdir ./temp
