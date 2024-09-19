@@ -7,10 +7,10 @@ from cns.data_utils import load_samples_out, load_cns_out, out_path
 from cns.utils.files import save_cns, save_samples
 
 
-def merge_samples(print_info=False):
+def merge_samples(print_info=False, suffix=""):
     # Load the sample data
-    prim_samples = load_samples_out("TRACERx_prim_samples.tsv")
-    met_samples = load_samples_out("TRACERx_met_samples.tsv")
+    prim_samples = load_samples_out(f"TRACERx_prim_samples{suffix}.tsv")
+    met_samples = load_samples_out(f"TRACERx_met_samples{suffix}.tsv")
 
     # Merge the DataFrames on the common key 'sample_id'
     merged_df = pd.merge(prim_samples, met_samples, on='sample_id', suffixes=('_prim', '_met'))
@@ -27,7 +27,7 @@ def merge_samples(print_info=False):
     all_df = pd.concat([prim_samples,  met_only], axis=0)
 
     # Save the merged DataFrame
-    save_samples(all_df, f"{out_path}/TRACERx_samples.tsv")
+    save_samples(all_df, f"{out_path}/TRACERx_samples{suffix}.tsv")
 
 
 def merge_cns(print_info=False, filled=False):
@@ -53,6 +53,7 @@ if __name__ == "__main__":
     if print_debug:
         print("Merging samples for TRACERx...")
     merge_samples(print_debug)
+    merge_samples(print_debug, "_gaps")
     if print_debug:
         print("Merging filled CNS for TRACERx...")
     merge_cns(print_debug, True)    

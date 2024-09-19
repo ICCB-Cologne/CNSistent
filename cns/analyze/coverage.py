@@ -20,11 +20,10 @@ def get_covered_bases(nan_bases_df, samples_df, het):
     res[f"cover_{label}_aut"] = (
         aut_df["length"].groupby(aut_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
     )
-    if len(sex_df) != 0:
-        res[f"cover_{label}_sex"] = (
-            sex_df["length"].groupby(sex_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
-        )
-        res[f"cover_{label}_all"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
+    res[f"cover_{label}_sex"] = (
+        sex_df["length"].groupby(sex_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
+    )
+    res[f"cover_{label}_all"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
     return res
 
 
