@@ -411,7 +411,7 @@ class TestMerging(unittest.TestCase):
         breaks = {'chr1': [50, 149, 200, 299], 'chr2': [200, 300]}
         segments = {'chr1': [(0, 300)], 'chr2': [(100, 200)]}
         dist = 100
-        res = cluster_within_segments(breaks, segments, dist)
+        res = cluster_within_segments(breaks, segments, dist, True)
         self.assertEqual(len(res), 2)
         self.assertEqual(res['chr1'][0], (0, 100))
         self.assertEqual(res['chr1'][2], (250, 300))
