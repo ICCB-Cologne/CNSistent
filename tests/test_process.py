@@ -101,14 +101,14 @@ class TestSegments(unittest.TestCase):
 class TestImputation(unittest.TestCase):
     def setUp(self):
         self.cns_df = pd.DataFrame({
-            'sample_id': ['s1', 's1', 's2', 's2', 's2', 's2'],
-            'chrom': ['chr1', 'chr2', 'chr2', 'chr2', 'chr2', 'chr2'],
-            'start': [0, 0, 50, 125, 150, 175],
-            'end': [100, 150, 100, 150, 175, 200],
-            'major_cn': [1, 2, 3, np.nan, 1, 1],
-            'minor_cn': [1, 2, 1, 0, 0, 0]
+            'sample_id': ['s1', 's1', 's2', 's2', 's2', 's2', 's2'],
+            'chrom': ['chr1', 'chr2', 'chr2', 'chr2', 'chr2', 'chr2', 'chr3'],
+            'start': [0, 0, 50, 125, 150, 175, 0],
+            'end': [100, 150, 100, 150, 175, 200, 350],
+            'major_cn': [1, 2, 3, np.nan, 1, 1, 2],
+            'minor_cn': [1, 2, 1, 0, 0, 0, 1]
         }) 
-        self.chr_lengths = {'chr1': 100, 'chr2': 200}
+        self.chr_lengths = {'chr1': 100, 'chr2': 200, 'chr3': 300}
         self.total_len = sum(self.chr_lengths.values())
         self.samples_df = pd.DataFrame({
             'sex': ['xx', 'xy']
@@ -120,25 +120,25 @@ class TestImputation(unittest.TestCase):
 
     def test_add_tails(self):
         result = add_tails(self.cns_df, self.chr_lengths)
-        self.assertEqual(result.shape[0], 8)
+        self.assertEqual(result.shape[0], 9)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 50)
 
     def test_fill_gaps(self):
         result = fill_gaps(self.cns_df, print_info=True)
-        self.assertEqual(result.shape[0], 7)
+        self.assertEqual(result.shape[0], 8)
         self.assertEqual(result.at[3, "start"], 100)
         self.assertEqual(result.at[3, "end"], 125)
 
     def test_add_missing(self):
         result = add_missing(self.cns_df, self.samples_df, self.chr_lengths, print_info=False)
-        self.assertEqual(result.shape[0], 7)
-        self.assertEqual(result.at[2, "start"], 0)
-        self.assertEqual(result.at[2, "end"], 100)
+        self.assertEqual(result.shape[0], 9)
+        self.assertEqual(result.at[3, "start"], 0)
+        self.assertEqual(result.at[3, "end"], 100)
 
     def test_merge_neighbours(self):
         result = merge_neighbours(self.cns_df, print_info=False)
-        self.assertEqual(result.shape[0], 5)
+        self.assertEqual(result.shape[0], 6)        
         self.assertEqual(result.at[4, "start"], 150)
         self.assertEqual(result.at[4, "end"], 200)
 
@@ -153,23 +153,23 @@ class TestImputation(unittest.TestCase):
         result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
         result = cns_impute(result, self.samples_df, print_info=False)
         result = merge_neighbours(result, print_info=False)
-        result = fill_nans_with_zeros(result, print_info=False)    
-        self.assertEqual(result.shape[0], 7)        
-        self.assertEqual(result.at[5, "end"], 137)
-        self.assertEqual(result.at[6, "start"], 137)
-        self.assertEqual(result.at[6, "end"], 200)
+        result = fill_nans_with_zeros(result, print_info=False)  
+        self.assertEqual(result.shape[0], 9)        
+        self.assertEqual(result.at[6, "end"], 137)
+        self.assertEqual(result.at[7, "start"], 137)
+        self.assertEqual(result.at[7, "end"], 200)
         self.assertEqual(result.major_cn.isnull().sum(), 0)
 
     def test_impute_diploid(self):
-        print(self.cns_df)
         result = add_tails(self.cns_df, self.chr_lengths)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
         result = cns_impute(result, self.samples_df, method='diploid', print_info=False)
-        result = merge_neighbours(result, print_info=False)    
-        print(result)
+        result = merge_neighbours(result, print_info=False)
+        result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.major_cn.isnull().sum(), 0)
-        self.assertEqual(result.shape[0], 8)
+        self.assertEqual(result.shape[0], 10)
+        self.assertEqual(result.at[3, "minor_cn"], 1)
 
 
 

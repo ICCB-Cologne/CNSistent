@@ -6,6 +6,7 @@ from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples
 from cns.utils.kneepoint import find_bends
+import matplotlib.pyplot as plt
 
 
 def get_root_path():
@@ -166,3 +167,10 @@ def load_ENSEMBL(change_coords=True):
     if change_coords:
         res.loc[:, "start"] -= 1
     return res
+
+
+def save_cns_fig(fig_name, fig = None):
+    if fig == None:
+        fig = plt.gcf()
+    fig.savefig(f"{img_path}/{fig_name}.png", bbox_inches="tight", dpi=300)
+    fig.savefig(f"{img_path}/{fig_name}.pdf", bbox_inches="tight")
