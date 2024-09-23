@@ -78,16 +78,16 @@ def _calc_bases_per_column(res, cns_df, cn_columns, het, feature, assembly=hg19)
 def calc_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
     res = samples_df.copy()
     if len(cn_columns) == 2:
-        res = _calc_bases_per_column(res, cns_df, cn_columns, True, "ane", assembly)
-    res = _calc_bases_per_column(res, cns_df, cn_columns, False, "ane", assembly)
+        res = _calc_bases_per_column(res, cns_df, cn_columns, False, "ane", assembly)
+    res = _calc_bases_per_column(res, cns_df, cn_columns, True, "ane", assembly)
     return res
 
 
 def calc_loh_bases(cns_df, samples_df, cn_columns, assembly=hg19):
     res = samples_df.copy()
     if len(cn_columns) == 2:
-        res = _calc_bases_per_column(res, cns_df, cn_columns, True, "loh", assembly)
-    res = _calc_bases_per_column(res, cns_df, cn_columns, False, "loh", assembly)
+        res = _calc_bases_per_column(res, cns_df, cn_columns, False, "loh", assembly)
+    res = _calc_bases_per_column(res, cns_df, cn_columns, True, "loh", assembly)
     return res
 
 

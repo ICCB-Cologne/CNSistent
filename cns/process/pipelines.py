@@ -56,18 +56,18 @@ def main_coverage(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19,
         cns_df["length"] = cns_df["end"] - cns_df["start"]
 
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    hom_nan_df = get_not_nan(cns_df, cn_columns, False)    
+    het_nan_df = get_not_nan(cns_df, cn_columns, True)
     if len(cn_columns) == 2:        
-        het_nan_df = get_not_nan(cns_df, cn_columns, True)
+        hom_nan_df = get_not_nan(cns_df, cn_columns, False)    
     
-    res_df = get_missing_chroms(hom_nan_df if len(cn_columns) == 1 else het_nan_df, res_df, assembly)
+    res_df = get_missing_chroms(het_nan_df, res_df, assembly)
     
-    res_df = get_covered_bases(hom_nan_df, res_df, False)
-    res_df = normalize_feature(res_df, "cover_hom", norm_sizes)
+    res_df = get_covered_bases(het_nan_df, res_df, True)
+    res_df = normalize_feature(res_df, "cover_het", norm_sizes)
 
     if len(cn_columns) == 2:
-        res_df = get_covered_bases(het_nan_df, res_df, True)
-        res_df = normalize_feature(res_df, "cover_het", norm_sizes)
+        res_df = get_covered_bases(hom_nan_df, res_df, False)
+        res_df = normalize_feature(res_df, "cover_hom", norm_sizes)
     return res_df
 
 

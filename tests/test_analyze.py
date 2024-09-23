@@ -45,9 +45,7 @@ class TestCoverage(unittest.TestCase):
     def test_get_base_frac(self):
         samples_df = get_covered_bases(self.cns, self.samples, True)
         norm_sizes = get_norm_sizes(None, self.assembly)
-        print(samples_df)
         res = normalize_feature(samples_df, "cover_het", norm_sizes)
-        print(norm_sizes)
         self.assertEqual(res.loc['s1', 'cover_het_aut'], 1/3)
         self.assertEqual(res.loc['s2', 'cover_het_sex'], 1)
         self.assertEqual(res.loc['s4', 'cover_het_all'], 1/4)
@@ -185,7 +183,6 @@ class TestAneuploidy(unittest.TestCase):
 
     def test_get_loh_bases(self):
         res = calc_loh_bases(self.cns, self.samples, self.ane_cols, self.assembly)
-        print(res)
         self.assertEqual(res.shape, (4, 7))
         self.assertEqual(res.loc['s1', 'loh_het_aut'], 100)
         self.assertEqual(res.loc['s4', 'loh_het_aut'], 70)
@@ -193,7 +190,6 @@ class TestAneuploidy(unittest.TestCase):
         
     def test_imb_score(self):
         res = calc_imb_bases(self.cns, self.samples, self.ane_cols, 0, self.assembly)
-        print(res)
         self.assertEqual(res.shape, (4, 4))
         self.assertEqual(res.loc['s1', 'imb_major_cn_aut'], 100)
         self.assertEqual(res.loc['s2', 'imb_major_cn_sex'], 0)
