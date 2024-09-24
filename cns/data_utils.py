@@ -172,5 +172,12 @@ def load_ENSEMBL(change_coords=True):
 def save_cns_fig(fig_name, fig = None):
     if fig == None:
         fig = plt.gcf()
-    fig.savefig(f"{img_path}/{fig_name}.png", bbox_inches="tight", dpi=300)
-    fig.savefig(f"{img_path}/{fig_name}.pdf", bbox_inches="tight")
+    fig.savefig(f"{img_path}/{fig_name}.png", bbox_inches="tight", transparent=True, dpi=300)
+    fig.savefig(f"{img_path}/{fig_name}.pdf", bbox_inches="tight", transparent=True)
+
+
+def save_doc_fig(fig_name, fig = None):
+    if fig == None:
+        fig = plt.gcf()
+    fig.savefig(f"{docs_path}/{fig_name}.png", bbox_inches="tight", transparent=True, dpi=300)
+    fig.savefig(f"{img_path}/{fig_name}.pdf", bbox_inches="tight", transparent=True)
