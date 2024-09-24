@@ -1,3 +1,4 @@
+import io
 import unittest
 import numpy as np
 import pandas as pd
@@ -6,6 +7,7 @@ from cns.process.binning import bin_by_segments
 from cns.process.normalize import get_chr_sets, get_norm_sizes
 from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
 from cns.utils.selection import only_aut
+from cns.utils.assemblies import hg19   
     
 class TestPipelines(unittest.TestCase):
     def setUp(self):
@@ -145,3 +147,22 @@ class TestPipelines(unittest.TestCase):
         self.assertTrue('aut' in res)   
         self.assertTrue('sex' not in res)   
         self.assertTrue('all' not in res)   
+
+    def test_sequence(self):
+        cns = """
+        sample_id, chrom, start, end, major_cn, minor_cn
+        s1, chr19, 1000000, 3000000, 1,
+        s1, chr19, 3000000, 11000000, 1, 1
+        s1, chr19, 14000000, 21000000, 3, 1
+        s1, chr19, 21000000, 25000000, 3, 
+        s1, chr19, 28000000, 58500000, 3,
+        s2, chr19, 1000000, 24000000, 2,
+        s2, chr19, 29000000, 58000000, 0,
+        """
+        cns_df = pd.read_csv(io.StringIO(cns.strip()), sep=',\s*', engine='python')
+
+        cns_fill_df = main_fill(cns_df, add_missing_chromosomes=False)
+        lens = cns_fill_df["end"] - cns_fill_df["start"]
+        self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length
+        cns_imp_df = main_impute(cns_fill_df)
+        print(cns_imp_df)

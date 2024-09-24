@@ -154,11 +154,13 @@ class TestImputation(unittest.TestCase):
         result = cns_impute(result, self.samples_df, print_info=False)
         result = merge_neighbours(result, print_info=False)
         result = fill_nans_with_zeros(result, print_info=False)  
-        self.assertEqual(result.shape[0], 9)        
+        self.assertEqual(result.shape[0], 9)
         self.assertEqual(result.at[6, "end"], 137)
         self.assertEqual(result.at[7, "start"], 137)
         self.assertEqual(result.at[7, "end"], 200)
         self.assertEqual(result.major_cn.isnull().sum(), 0)
+        self.assertEqual(result.query("sample_id == 's1'")["chrom"].unique().shape[0], 3)
+        self.assertEqual(result.query("sample_id == 's2'")["chrom"].unique().shape[0], 3)
 
     def test_impute_diploid(self):
         result = add_tails(self.cns_df, self.chr_lengths)
@@ -170,8 +172,6 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.shape[0], 10)
         self.assertEqual(result.at[3, "minor_cn"], 1)
-
-
 
 class TestBreakpoints(unittest.TestCase):
     def setUp(self):

@@ -173,31 +173,31 @@ def _is_same_chrom(df, i, j):
 def _impute_extend(cns_df, cn_columns, print_info=True):
     new_entries = []
     for i in range(len(cns_df)):
-        if np.isnan(cns_df.at[i, cn_columns[0]]) or np.isnan(cns_df.at[i, cn_columns[1]]):
-            prev_vals = [cns_df.at[i, cn_columns[k]] for k in range(len(cn_columns))]
+        if any(np.isnan(cns_df.at[i, col]) for col in cn_columns):
+            prev_vals = [np.nan for _ in cn_columns]
             next_vals = list(prev_vals)
             for k in range(len(cn_columns)):
-                if np.isnan(prev_vals[k]):
-                    j = i - 1
-                    while j >= 0 and np.isnan(prev_vals[k]) and _is_same_chrom(cns_df, i, j):
-                        prev_vals[k] = cns_df.at[j, cn_columns[k]]
-                        j -= 1
-                if np.isnan(next_vals[k]):
-                    j = i + 1
-                    while j < len(cns_df) and np.isnan(next_vals[k]) and _is_same_chrom(cns_df, i, j):
-                        next_vals[k] = cns_df.at[j, cn_columns[k]]
-                        j += 1
+                j = i
+                while j >= 0 and np.isnan(prev_vals[k]) and _is_same_chrom(cns_df, i, j):
+                    prev_vals[k] = cns_df.at[j, cn_columns[k]]
+                    j -= 1
+                j = i
+                while j < len(cns_df) and np.isnan(next_vals[k]) and _is_same_chrom(cns_df, i, j):
+                    next_vals[k] = cns_df.at[j, cn_columns[k]]
+                    j += 1
+                if np.isnan(prev_vals[k]) and np.isnan(next_vals[k]):
+                    prev_vals[k] = 0
+                    next_vals[k] = 0
+                elif np.isnan(prev_vals[k]):
+                    prev_vals[k] = next_vals[k]
+                elif np.isnan(next_vals[k]):
+                    next_vals[k] = prev_vals[k]
+            
             id = cns_df.at[i, "sample_id"]
             chrom = cns_df.at[i, "chrom"]            
             start = cns_df.at[i, "start"]
             end = cns_df.at[i, "end"]
-            if i == 0 or not _is_same_chrom(cns_df, i, i-1):
-                new_start = [id, chrom, start, end] + next_vals
-                new_entries.append(new_start)
-            elif i == len(cns_df) - 1 or not _is_same_chrom(cns_df, i, i+1):
-                new_end = [id, chrom, start, end] + prev_vals
-                new_entries.append(new_end)
-            elif all([prev_vals[k] == next_vals[k] for k in range(len(cn_columns))]):
+            if all([prev_vals[k] == next_vals[k] for k in range(len(cn_columns))]):
                 new_simple = [id, chrom, start, end] + prev_vals
                 new_entries.append(new_simple)
             else:
