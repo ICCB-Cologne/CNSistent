@@ -1,6 +1,7 @@
 import os
 from cns.data_utils import *
 from cns.process.pipelines import main_segment
+from cns.utils.conversions import segs_to_df
 from cns.utils.files import save_segments
 from cns.process.segments import regions_select, regions_remove
 import argparse
@@ -20,8 +21,9 @@ if __name__ == "__main__":
 	select = regions_select("")
 	remove = regions_remove("gaps")
 	clustered = main_segment(cns, select, remove, merge_dist=dist, filter_size=dist//10)
+	res_df = segs_to_df(clustered)
 	file = os.path.join(out_path, f'segs_merge_{dist}.tsv')
 	print("Saving to file:", file)
-	save_segments(clustered, file)
+	save_segments(res_df, file)
 
 

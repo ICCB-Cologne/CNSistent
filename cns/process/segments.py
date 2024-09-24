@@ -114,7 +114,9 @@ def segment_difference(segs_a, segs_b, sorted=False):
     return diffs
 
 
-def filter_min_size(chr_segs, min_size):
+def filter_min_size(chr_segs, min_size, merge_first=True):
+    if merge_first:
+        chr_segs = merge_segments(chr_segs)
     return { chr : [seg for seg in chr_segs if seg[1] - seg[0] >= min_size] for chr, chr_segs in chr_segs.items() }
 
 

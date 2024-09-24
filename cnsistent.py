@@ -9,6 +9,7 @@ from os.path import exists
 from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils.conversions import segs_to_df
 from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
 from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info
@@ -106,7 +107,7 @@ def _action_to_fun(action):
     elif action == "signatures":
         return main_signatures  
     elif action == "segment":
-        return main_segment    
+        raise ValueError("Segmentation should be handled separately.")   
     elif action == "bin":
         return main_bin
     else:
@@ -193,7 +194,8 @@ def main():
     if action == "segment" and args.merge == 0:
         select = regions_select(args.select, assembly)
         remove = regions_remove(args.remove, assembly)
-        res_df = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)
+        segs = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)        
+        res_df = segs_to_df(segs)
         save_segments(res_df, out_file, change_coords=True, header=not no_header)
         log_info(print_info, "Done.")
         return

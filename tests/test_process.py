@@ -289,18 +289,18 @@ class TestBreakpoints(unittest.TestCase):
             'major_cn': [1, 2, 3, np.nan, 1, 1],
             'minor_cn': [1, 2, 1, 0, 0, 0]
         }) 
-        breaks = get_breaks(cns, keep_ends=True)
+        breaks = get_breaks_from_cns(cns, keep_ends=True)
         self.assertEqual(breaks['chr1'], [0, 100])
         self.assertEqual(breaks['chr2'], [0, 50, 100, 125, 150, 175, 200])
         self.assertEqual(breaks['chr3'], [])
-        breaks = get_breaks(cns, keep_ends=False)
+        breaks = get_breaks_from_cns(cns, keep_ends=False)
         self.assertEqual(breaks['chr1'], [100])
         # self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175, 200])
         assembly = type('Assembly', (object,), {
             'chr_lens': {'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY']
         })
-        breaks = get_breaks(cns, assembly=assembly, keep_ends=False)
+        breaks = get_breaks_from_cns(cns, assembly=assembly, keep_ends=False)
         self.assertEqual(breaks['chr1'], [])
         self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
 

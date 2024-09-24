@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-from cns.process.breakpoints import get_breaks, get_breaks_in_segments, insert_breaks_in_segments
+from cns.process.breakpoints import get_breaks_from_cns, get_breaks_in_segments, insert_breaks_in_segments
 from cns.utils import hg19
 from cns.utils.logging import log_info
 

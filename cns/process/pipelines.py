@@ -128,11 +128,10 @@ def main_segment(
 ):
     if select_segs == None:
         select_segs = genome_to_segments(assembly)
-    segs = get_genome_segments(select_segs, remove_segs, filter_size)
+    res = get_genome_segments(select_segs, remove_segs, filter_size)
     if merge_dist > 0:
-        breaks = get_breaks(cns_df, keep_ends=False, assembly=assembly)
-        segs = cluster_within_segments(breaks, segs, merge_dist, print_info)
+        breaks = get_breaks_from_cns(cns_df, keep_ends=False, assembly=assembly)
+        res = cluster_within_segments(breaks, res, merge_dist, print_info)
     if split_size > 0:
-        segs = split_segments(segs, split_size)
-    res_df = segs_to_df(segs)
-    return res_df
+        res = split_segments(res, split_size)
+    return res

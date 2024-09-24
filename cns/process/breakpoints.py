@@ -75,7 +75,7 @@ def make_breaks(break_type, assembly=hg19):
     
 
 # Obtain breakpoints from a cns dataframe
-def get_breaks(cns_df, keep_ends=True, assembly=hg19):
+def get_breaks_from_cns(cns_df, keep_ends=True, assembly=hg19):
     breaks_start = cns_df[["chrom", "start"]].copy().drop_duplicates().rename(columns={"start": "break"})
     breaks_end = cns_df[["chrom", "end"]].copy().drop_duplicates().rename(columns={"end": "break"})
     breaks = pd.concat([breaks_start, breaks_end]).drop_duplicates()
@@ -85,10 +85,22 @@ def get_breaks(cns_df, keep_ends=True, assembly=hg19):
     breaks.sort_values(by=['chrom', 'break'], inplace=True)
     dict_start = breaks.groupby('chrom')['break'].agg(list).to_dict()
     # insert empty for chromosomes without breakpoints
-    for chrom in assembly.chr_names:
+    for chrom in cns_df["chrom"].unique():
         if chrom not in dict_start:
             dict_start[chrom] = []
     return dict_start
+
+
+def get_breaks_from_segments(segments, keep_ends=True):
+    breaks = { chrom: [] for chrom in segments }
+    for chrom, segs in segments.items():
+        for start, end in segs:
+            breaks[chrom].append(start)
+            if keep_ends:
+                breaks[chrom].append(end)
+    for chrom in breaks:
+        breaks[chrom] = sorted(set(breaks[chrom]))
+    return breaks
 
 
 def get_breaks_in_segments(segs, breaks, min_dist = 0):
