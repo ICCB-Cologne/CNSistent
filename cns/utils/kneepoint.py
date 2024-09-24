@@ -41,7 +41,8 @@ def get_direction(y):
 def find_knee(x, y, knee=True):
     y_range = y[-1] - y[0]
     x_range = x[-1] - x[0]
-    norm_factor = x_range / y_range
+    y = (y - y[0]) / y_range
+    x = (x - x[0]) / x_range
     orientation = get_direction(y)
     orientation *= (-1 if knee else 1)
 
@@ -49,8 +50,8 @@ def find_knee(x, y, knee=True):
     angles = []
     slopes = []    
     for i in range(1, len(x) - 1):
-        left = (y[i] - y[0]) / (x[i] - x[0]) * norm_factor
-        right = (y[-1] - y[i]) / (x[-1] - x[i]) * norm_factor
+        left = (y[i]) / (x[i])
+        right = (1 - y[i]) / (1 - x[i])
         angle = calculate_signed_angle(left, right)
         val = max(angle * orientation, 0)
         slopes.append((left, right, val))
