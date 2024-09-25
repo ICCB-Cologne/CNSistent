@@ -11,8 +11,10 @@ def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
     return cutoffs, counts
 
 # Counts the number of samples below each present values
-def count_cum_val(vals):
-    unique_vals, counts = np.unique(vals, return_counts=True)
+def count_cum_val(vals, min_val=0, max_val=1):
+    vals = np.array(vals)
+    vals = vals[(vals >= min_val) & (vals <= max_val)]
+    unique_vals, counts = np.unique(vals.astype(np.float32), return_counts=True)
     cumulative_count = np.cumsum(counts) / len(vals)
     return unique_vals, cumulative_count
 
@@ -39,9 +41,13 @@ def get_direction(y):
 
 # finds a knee/elbow in the curve when using convex/concave curves
 def find_knee(x, y, knee=True):
+    if len(x) < 2:
+        return -1, np.nan
     y_range = y[-1] - y[0]
     x_range = x[-1] - x[0]
-    y = (np.array(y) - y[0]) / y_range
+    if y_range == 0:
+        return -1, np.nan
+    y = (np.array(y) - y[0]) / y_range 
     x = (np.array(x) - x[0]) / x_range
     orientation = get_direction(y)
     orientation *= (-1 if knee else 1)
