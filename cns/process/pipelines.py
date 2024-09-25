@@ -45,7 +45,10 @@ def main_bin(cns_df, segs, fun_type="mean", cn_columns=None, print_info=False):
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
-def main_coverage(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+    if samples_df is None:
+        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        samples_df = samples_df_from_cns_df(cns_df)
     res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
@@ -60,7 +63,7 @@ def main_coverage(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19,
     if len(cn_columns) == 2:        
         hom_nan_df = get_not_nan(cns_df, cn_columns, False)    
     
-    res_df = get_missing_chroms(het_nan_df, res_df, assembly)
+    res_df = get_missing_chroms(het_nan_df, res_df, segs, assembly)
     
     res_df = get_covered_bases(het_nan_df, res_df, True)
     res_df = normalize_feature(res_df, "cover_het", norm_sizes)
@@ -71,11 +74,12 @@ def main_coverage(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19,
     return res_df
 
 
-def main_signatures(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+    if samples_df is None:
+        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        samples_df = samples_df_from_cns_df(cns_df)
     res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if "length" not in cns_df.columns:
-        cns_df["length"] = cns_df["end"] - cns_df["start"]
     if segs is not None:
         cns_df = bin_by_segments(cns_df, segs, "none", cn_columns, print_info)
 
@@ -96,7 +100,10 @@ def main_signatures(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg1
 
 
 # NaNs are no
-def main_ploidy(cns_df, samples_df, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+    if samples_df is None:
+        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        samples_df = samples_df_from_cns_df(cns_df)
     res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if segs is not None:
