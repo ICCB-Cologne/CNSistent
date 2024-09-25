@@ -41,7 +41,7 @@ def create_step_breaks(reg_len, step_size, strategy="after"):
         
 
 # Calculate breakpoints at the given resolution. The boundaries either use half
-def calc_bin_breaks(step_size, strategy="scale", assembly=hg19):
+def calc_seg_breaks(step_size, strategy="scale", assembly=hg19):
     return { chrom: create_step_breaks(length, step_size, strategy) for chrom, length in assembly.chr_lens.items() }
 
 
@@ -68,10 +68,10 @@ def make_breaks(break_type, assembly=hg19):
         return calc_cytoband_breaks(assembly)
     else:
         try:
-            bin_size = int(break_type)
+            step_size = int(break_type)
         except:
             raise ValueError("break_type must be 'arms', 'cytobands' or an integer, got " + break_type)
-        return calc_bin_breaks(bin_size, strategy="scale", assembly=assembly)
+        return calc_seg_breaks(step_size, strategy="scale", assembly=assembly)
     
 
 # Obtain breakpoints from a cns dataframe

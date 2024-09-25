@@ -4,7 +4,7 @@ import pandas as pd
 
 from cns.process.segments import *
 from cns.process.imputation import *
-from cns.process.binning import *
+from cns.process.segmentation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
 from cns.utils.assemblies import hg19, hg38
@@ -190,7 +190,7 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(sum_of_breaks, sum_of_bands)
 
     def test_bin_breaks(self):
-        result = calc_bin_breaks(1000000, "scale")
+        result = calc_seg_breaks(1000000, "scale")
         self.assertEqual(list(result.keys())[0], 'chr1')
         self.assertEqual(list(result.values())[0][0], 0)
         self.assertEqual(list(result.values())[0][-1], 249250621)
@@ -274,8 +274,8 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(act, exp)
 
     def test_diffs(self):
-        bin_breaks = calc_bin_breaks(10_000_000)
-        for chrom, chrom_breaks in bin_breaks.items():
+        seg_breaks = calc_seg_breaks(10_000_000)
+        for chrom, chrom_breaks in seg_breaks.items():
             diffs = np.diff(np.diff(chrom_breaks))
             self.assertTrue(np.abs(np.sum(diffs)) <= 1)
             self.assertTrue(np.max(np.abs(diffs) <= 1))
@@ -292,7 +292,7 @@ class TestBreakpoints(unittest.TestCase):
         breaks = get_breaks_from_cns(cns, keep_ends=True)
         self.assertEqual(breaks['chr1'], [0, 100])
         self.assertEqual(breaks['chr2'], [0, 50, 100, 125, 150, 175, 200])
-        self.assertEqual(breaks['chr3'], [])
+        self.assertTrue('chr3' not in breaks)
         breaks = get_breaks_from_cns(cns, keep_ends=False)
         self.assertEqual(breaks['chr1'], [100])
         # self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175, 200])
@@ -348,14 +348,14 @@ class TestBinning(unittest.TestCase):
     def test_bin_by_breaks(self):
         segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
         breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
-        seg_bin = bin_by_segments(self.cns, segments, print_info=False)
-        break_bin = bin_by_breaks(self.cns, breaks, print_info=False)
+        seg_bin = aggregate_by_segments(self.cns, segments, print_info=False)
+        break_bin = aggregate_by_breaks(self.cns, breaks, print_info=False)
         self.assertEqual(seg_bin.shape[0], 4)
         pd.testing.assert_frame_equal(seg_bin, break_bin)
     
     def test_bin_by_segments(self):
         segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
-        result = bin_by_segments(self.cns, segments)
+        result = aggregate_by_segments(self.cns, segments)
         self.assertEqual(result.shape[0], 4)
         self.assertEqual(result.at[0, "start"], 0)
         self.assertEqual(result.at[0, "end"], 100)
@@ -366,7 +366,7 @@ class TestBinning(unittest.TestCase):
     
     def test_bin_none(self):        
         segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
-        result = bin_by_segments(self.cns, segments, fun_type="none")
+        result = aggregate_by_segments(self.cns, segments, fun_type="none")
         self.assertEqual(result.shape[0], 8)
         for i in range(result.shape[0]):
             if result.at[i, "chrom"] == "chr1":

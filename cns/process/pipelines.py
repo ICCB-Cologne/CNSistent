@@ -2,7 +2,7 @@ import pandas as pd
 from cns.analyze.aneuploidy import *
 from cns.analyze.coverage import *
 from cns.analyze.breakpoints import *
-from cns.process.binning import *
+from cns.process.segmentation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
 from cns.process.imputation import *
@@ -40,8 +40,8 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
     return res_df
 
 
-def main_bin(cns_df, segs, fun_type="mean", cn_columns=None, print_info=False):
-    return bin_by_segments(cns_df, segs, fun_type, cn_columns, print_info)
+def main_aggregate(cns_df, segs, fun_type="mean", cn_columns=None, print_info=False):
+    return aggregate_by_segments(cns_df, segs, fun_type, cn_columns, print_info)
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
@@ -53,7 +53,7 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
     if segs is not None:
-        cns_df = bin_by_segments(cns_df, segs, "none", cn_columns, print_info)
+        cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
     norm_sizes = get_norm_sizes(segs, assembly)
     if "length" not in cns_df.columns:
         cns_df["length"] = cns_df["end"] - cns_df["start"]
@@ -81,7 +81,7 @@ def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembl
     res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if segs is not None:
-        cns_df = bin_by_segments(cns_df, segs, "none", cn_columns, print_info)
+        cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
 
     # check if non of the cn_columns are NaN
     if cns_df[cn_columns].isna().any().any():
@@ -107,7 +107,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     res_df = samples_df.copy()
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if segs is not None:
-        cns_df = bin_by_segments(cns_df, segs, "none", cn_columns, print_info)    
+        cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)    
     if "length" not in cns_df.columns:
         cns_df["length"] = cns_df["end"] - cns_df["start"]
     norm_sizes = get_norm_sizes(segs, assembly)

@@ -41,8 +41,8 @@ def merge_cns(print_info=False, filled=False):
     filtered_met_cns = met_cns[~met_cns.index.isin(common_samples)].reset_index()
     prim_cns.reset_index(inplace=True)
 
-    binned_df = pd.concat([prim_cns, filtered_met_cns]).sort_values(["sample_id", "chrom", "start"])
-    save_cns(binned_df, f"{out_path}/TRACERx_cns_{suffix}.tsv")
+    res_df = pd.concat([prim_cns, filtered_met_cns]).sort_values(["sample_id", "chrom", "start"])
+    save_cns(res_df, f"{out_path}/TRACERx_cns_{suffix}.tsv")
 
 
 if __name__ == "__main__":

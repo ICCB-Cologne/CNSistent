@@ -3,7 +3,7 @@
 # %%
 from matplotlib import pyplot as plt
 import numpy as np
-from cns.process.binning import add_cns_loc
+from cns.process.segmentation import add_cns_loc
 from cns.utils.files import load_cns, load_samples
 from cns.utils.assemblies import hg19
 

@@ -42,6 +42,10 @@ def find_overlaps(segs, sorted=False):
 def merge_segments(segs, sort=False):
     merged = {}
     for chr, chr_segs in segs.items():
+        if len(chr_segs) == 0:
+            merged[chr] = []
+            continue
+        
         if not sorted:
             chr_segs.sort(key=lambda x: (x[0]))   
 

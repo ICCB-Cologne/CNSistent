@@ -1,33 +1,33 @@
 # %%
 from matplotlib import pyplot as plt
 from cns.display.plot import fig_lines, fig_CN_heatmap
-from cns.process.binning import group_bins
-from cns.process.binning import add_cns_loc, sum_cns
+from cns.process.segmentation import group_samples
+from cns.process.segmentation import add_cns_loc, sum_cns
 from cns.utils.selection import cns_head
 from cns.utils.files import load_cns, load_samples
 from cns.utils.assemblies import get_assembly
 
 hg19 = get_assembly("hg19")
 
-# Load bins
+# Load CNS
 # %%  
-bins = load_cns("./out/PCAWG_bin_3MB.tsv")
-print(bins.head())
+cns_df = load_cns("./out/PCAWG_bin_3MB.tsv")
+print(cns_df.head())
 
 # Add derived columns (length, cumulative mid, total_cn, ...)
 # %%
-derived = sum_cns(add_cns_loc(bins))
+derived = sum_cns(add_cns_loc(cns_df))
 print(derived.head())
 
-# Plot heatmap for the first 50 bins
+# Plot heatmap for the first 50 segments
 # %%
 head_50 = cns_head(derived, 50)
 fig_CN_heatmap(head_50, print_info=True, dpi=100)
 plt.show()
 
-# Plot mean total_cn per bin along the genome
+# Plot mean total_cn per segment along the genome
 # %%
-groups = group_bins(derived)
+groups = group_samples(derived)
 fig_lines(groups, width=12, column="total_cn", dpi = 200)
 plt.show()
 
@@ -55,12 +55,12 @@ len(filtered.index.unique())
 # %%
 print(filtered["type"].value_counts())
 
-# Plot mean total_cn per bin along the genome for liver and pancreas
+# Plot mean total_cn per segment along the genome for liver and pancreas
 # %% 
 liver = filtered.query("type == 'Liver-HCC'").index
-liver_group = group_bins(derived.query("sample_id in @liver"))
+liver_group = group_samples(derived.query("sample_id in @liver"))
 pancreas = filtered.query("type == 'Panc-AdenoCA'").index
-pancreas_group = group_bins(derived.query("sample_id in @pancreas"))
+pancreas_group = group_samples(derived.query("sample_id in @pancreas"))
 fig_lines([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], column="total_cn", dpi=200)
 plt.show()
 # %%

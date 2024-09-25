@@ -41,8 +41,8 @@ def get_direction(y):
 def find_knee(x, y, knee=True):
     y_range = y[-1] - y[0]
     x_range = x[-1] - x[0]
-    y = (y - y[0]) / y_range
-    x = (x - x[0]) / x_range
+    y = (np.array(y) - y[0]) / y_range
+    x = (np.array(x) - x[0]) / x_range
     orientation = get_direction(y)
     orientation *= (-1 if knee else 1)
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-preprocess=true
+preprocess=false
 process=true
 postprocess=true
 
@@ -32,12 +32,14 @@ do
     fi
     if [ "$process" = true ]; then        
         common_args="--threads $threads --verbose --assembly $assembly"
-        cns fill "${out}/${dataset}_cns_preprocess.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
+        # cns fill "${out}/${dataset}_cns_preprocess.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
+        # cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
         cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
-        cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
         cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
-        cns signatures "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args
+        cns signatures "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args 
         cns coverage "${out}/${dataset}_cns_fill_gaps.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_samples_gaps.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.tsv"
+        cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples_gaps.tsv" --out "${out}/${dataset}_samples_gaps.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.tsv"
+        cns signatures "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples_gaps.tsv" --out "${out}/${dataset}_samples_gaps.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.tsv"
     fi
 done
 

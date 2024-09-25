@@ -141,7 +141,7 @@ def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=Non
             ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
         else:
             ax.legend(loc='upper right')
-    ax.set_ylabel("mean CN per bin")
+    ax.set_ylabel("mean CN per segment")
     ax.set_xlabel(f"position on {chrom if chrom != None else 'linear genome'}")
     return fig, ax
 

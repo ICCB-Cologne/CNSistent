@@ -11,7 +11,7 @@ from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.conversions import segs_to_df
 from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
-from cns.process.pipelines import main_fill, main_impute, main_bin, main_coverage, main_ploidy, main_segment, main_signatures
+from cns.process.pipelines import main_fill, main_impute, main_aggregate, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info
 
 
@@ -29,16 +29,16 @@ def _add_sp_args(action, parser):
     parser.add_argument("--cncols", type=str, help="The name of either a single CN column or two comma separated columns.", required=False, default=None)
 
     if action in ["coverage", "ploidy", "signatures"]:
-        parser.add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=False, default=None)
+        parser.add_argument("--segments", type=str, help="A path to a segmentation file defining the segments to compute on.", required=False, default=None)
 
-    if action == "bin":
-        parser.add_argument("--segments", type=str, help="A path to a segmentation file defining the regions to bin into.", required=True)
-        parser.add_argument("--aggregate", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
+    if action == "aggregate":
+        parser.add_argument("--segments", type=str, help="A path to a segmentation file defining the segments to compute on.", required=True)
+        parser.add_argument("--how", type=str, help="The aggregation function, one of ['min', 'max', 'mean']", required=False, default="mean")
 
     if action == "segment":
         parser.add_argument("--split", type=int, help="Distance in which regions should be, can be a positive integer or 0 for no splitting (whole regions).", required=False, default=0)
-        parser.add_argument("--select", type=str, help="Selects the regions to bin on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
-        parser.add_argument("--remove", type=str, help="Removed the regions after selection, before binning, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
+        parser.add_argument("--select", type=str, help="Selects the regions to create segments based  on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.", required=False, default="")
+        parser.add_argument("--remove", type=str, help="Removed the regions after selection, before segmentation, can be either 'gaps', path to a BED file, or empty.", required=False, default="")
         parser.add_argument("--filter", type=int, help="If set, regions smaller than the given size are excluded from selection and gaps.", required=False, default=0)
         parser.add_argument("--merge", type=int, help="Maximum distance between breakpoint clusters for breakpoint merging", required=False, default=0)
 
@@ -56,7 +56,7 @@ def _parse_args():
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
     sp_dict["signatures"] = subparsers.add_parser("signatures", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
     sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
-    sp_dict["bin"] = subparsers.add_parser("bin", help=f"Creates bins for CNS data.")    
+    sp_dict["aggregate"] = subparsers.add_parser("aggregate", help=f"Aggregate copy numbers across segments to fill provided segments.")    
     for action, sp in sp_dict.items():
         _add_sp_args(action=action, parser=sp)
 
@@ -108,8 +108,8 @@ def _action_to_fun(action):
         return main_signatures  
     elif action == "segment":
         raise ValueError("Segmentation should be handled separately.")   
-    elif action == "bin":
-        return main_bin
+    elif action == "aggregate":
+        return main_aggregate
     else:
         raise ValueError(f"Action {action} not recognized.")
 
@@ -140,7 +140,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
         segs_df = load_segments(args.segments) if args.segments != "" else None
         segs_block = [segs_df] * block_count
         return zip(cns_blocks, samples_blocks, cols_block, segs_block, ass_block, ver_block)
-    elif action == "bin":
+    elif action == "aggregate":
         segs_df = load_segments(args.segments)
         segs_block = [segs_df]*block_count
         fun_block = [args.aggregate]*block_count
@@ -237,7 +237,7 @@ def main():
             res_df = res_dfs[j]
             if action in ["segment"]:
                 save_segments(res_df, out_file, change_coords=True, header=header)
-            elif action in ["fill", "impute", "bin"]:
+            elif action in ["fill", "impute", "aggregate"]:
                 save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, mode=mode)
             elif action in ["coverage", "ploidy", "signatures"]:
                 save_samples(res_df, out_file, no_sample=no_sample, header=header, mode=mode)

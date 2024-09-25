@@ -3,7 +3,7 @@ import pandas as pd
 from numba import njit
 
 from cns.process.breakpoints import make_breaks
-from cns.utils.conversions import breaks_to_segments, segs_to_chrom_dict
+from cns.utils.conversions import breaks_to_segments
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils import hg19
 from cns.utils.logging import log_info
@@ -27,12 +27,12 @@ def sum_cns(cns_df, cn_columns=None):
 
 
 # TODO: Add empty check
-def group_bins(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid', assembly=hg19):    
+def group_samples(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid', assembly=hg19):    
     if fun_type not in ["mean", "max", "min"]:
-        raise ValueError("to group bins, fun_type must be one of ['mean', 'max', 'min']")
+        raise ValueError("to group samples, fun_type must be one of ['mean', 'max', 'min']")
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if group_col not in cns_df.columns:
-        raise ValueError(f"cns_df must have a column '{group_col}' to group the bins on")
+        raise ValueError(f"cns_df must have a column '{group_col}' to group the samples on")
     grouped = cns_df.drop("sample_id", axis=1).groupby([group_col])
 
     # calculate mean on grouped except for chrom, where take the first value
@@ -63,7 +63,7 @@ def max_func(cns_array):
 def min_func(cns_array):
     return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
-def _regs_to_bin(sample_id, chrom, sample_rows, seg_start, seg_end, agg_func):
+def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, agg_func):
     row_id = 0
     seg_cns = []
     cns_cols = sample_rows.shape[1] - 2
@@ -91,7 +91,7 @@ def _regs_to_bin(sample_id, chrom, sample_rows, seg_start, seg_end, agg_func):
     return [sample_id, chrom, seg_start, seg_end] + cns
 
 
-def _cns_in_seg(sample_id, chrom, sample_rows, seg_start, seg_end):
+def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end):
     row_id = 0
     seg_cns = []
     while sample_rows[row_id][1] <= seg_start:
@@ -125,7 +125,7 @@ def _get_agg_func(fun_type):
 
 
 # Add column names
-def bin_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=True):
+def aggregate_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=True):
     agg_func = _get_agg_func(fun_type)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
@@ -135,30 +135,30 @@ def bin_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=T
     i = 0
     for i, ((sample, chrom), group) in enumerate(cns_df_view.groupby(level=[0, 1])):
         if print_info:
-            print(f"Binning chr ({i+1}/{len(indices)})", end="\r")
+            print(f"Aggregating chr ({i+1}/{len(indices)})", end="\r")
         if chrom not in segs:
             continue
         for seg_start, seg_end in segs[chrom]:
             if agg_func != None:
-                bin = _regs_to_bin(sample, chrom, group.values, seg_start, seg_end, agg_func)
-                new_rows.append(bin)
+                cn_segs = _aggregate_regs(sample, chrom, group.values, seg_start, seg_end, agg_func)
+                new_rows.append(cn_segs)
             else:
-                bin = _cns_in_seg(sample, chrom, group.values, seg_start, seg_end)
-                new_rows.extend(bin)
+                cn_segs = _mask_by_regs(sample, chrom, group.values, seg_start, seg_end)
+                new_rows.extend(cn_segs)
     if print_info:
-        print(f"Binning finished. Converting {len(new_rows)} rows...", end="\r")
-    bin_df = pd.DataFrame(new_rows, columns=sel_cols)
-    bin_df["start"] = bin_df["start"].astype(np.uint32)
-    bin_df["end"] = bin_df["end"].astype(np.uint32)
-    log_info(print_info, f"Binned into {len(new_rows)} CNS." + " " * 40)
-    return bin_df
+        print(f"Aggregation finished. Converting {len(new_rows)} rows...", end="\r")
+    res_df = pd.DataFrame(new_rows, columns=sel_cols)
+    res_df["start"] = res_df["start"].astype(np.uint32)
+    res_df["end"] = res_df["end"].astype(np.uint32)
+    log_info(print_info, f"Aggregated into {len(new_rows)} CNS." + " " * 40)
+    return res_df
 
 
-def bin_by_breaks(cns_df, breaks, fun_type="mean", cn_columns=None, print_info=True):
+def aggregate_by_breaks(cns_df, breaks, fun_type="mean", cn_columns=None, print_info=True):
     segments = breaks_to_segments(breaks)
-    return bin_by_segments(cns_df, segments, fun_type, cn_columns, print_info)
+    return aggregate_by_segments(cns_df, segments, fun_type, cn_columns, print_info)
 
 
-def bin_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", cn_columns=None, print_info=True):
+def aggregate_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", cn_columns=None, print_info=True):
     breaks = make_breaks(break_type, assembly)
-    return bin_by_breaks(cns_df, breaks, fun_type, cn_columns, print_info)
+    return aggregate_by_breaks(cns_df, breaks, fun_type, cn_columns, print_info)

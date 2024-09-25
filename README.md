@@ -20,13 +20,13 @@ Requires:
 2. Activate the environment: `conda activate cns`
 3. Install the package from location: `pip install -e .`
 4. Process data: `bash ./scripts/data_process.sh`
-5. Bin processed data: `bash ./scripts/data_bin.sh`
+5. Aggregate processed data: `bash ./scripts/data_aggregate.sh`
 6. Run example analysis: `python ./example_API.py`
 
 
 NOTES:
 
-* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_bin.sh` scripts.
+* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_aggregate.sh` scripts.
 * The `example_API.py` is split into cells that can be run individually in an IDE.
 * You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
 
@@ -191,12 +191,12 @@ cns segment cns.tsv --split 200000 --remove gaps --filter
 cns segment cns.tsv --select genes.tsv --aggregate min
 ```
 
-## `bin`
+## `aggregate`
 
 TODO
 
 ```bash	
-cns bin cns.tsv --segments segments.tsv
+cns aggregate cns.tsv --segments segments.tsv
 ```
 
 
@@ -323,15 +323,15 @@ If guessing values in imputation is not desired, the `fill_nans_with_zeros` func
 
 Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create de-novo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
 
-#### Binning
+#### Aggregation
 
-Binning will produce segments of a certain size, aggregating the copy number values of the segments within the bin. 
+Aggregation will produce segments of a certain size, aggregating the copy number values of the segment chunks into a single segment.
 
 There are the following aggregate functions: `mean`, `min`, `max`, and `none`. The `none` function will just split exiting bins, without additional aggregation. This is useful if you want to introduce additional breakpoints into the data.
 
-Binning can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. `arms`, `1000000`).
+Aggregation can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. `arms`, `1000000`).
 
-Three utility functions are included with binning:
+Three utility functions are included with aggregation:
 
 * `add_cns_loc`: For a CNS df, will add the center (`mid`) of a segment within the chromosome, within the linear genome (`cum_mid`) and the length of the segment (`length`).
 * `group_bins`: Will group all samples in a a CNS df, by default using the `mean` function. Segments are grouped on `cum_mid`.

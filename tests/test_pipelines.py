@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.binning import bin_by_segments
+from cns.process.segmentation import aggregate_by_segments
 from cns.process.normalize import get_chr_sets, get_norm_sizes
 from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
 from cns.utils.selection import only_aut
@@ -113,15 +113,15 @@ class TestPipelines(unittest.TestCase):
         select = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chr3': [(100, 200), (250, 300)]}
         remove = {'chr2': [(0, 75)], 'chr3': [(150, 175)], 'chrX': [(0, 100)]}
         res = main_segment(self.cns, select, remove, assembly=self.assembly)
-        self.assertEqual(len(res), 5)
+        self.assertEqual(len(res), 3)
         res = main_segment(self.cns, select, remove, filter_size=50, assembly=self.assembly)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(len(res), 3)
         res = main_segment(self.cns, select, remove, merge_dist=25, filter_size=50, assembly=self.assembly)
-        self.assertEqual(res.iloc[0].tolist(), ["chr1", 0, 50])
-        self.assertEqual(res.iloc[2].tolist(), ["chr2", 75, 117])        
+        self.assertEqual(res["chr1"][0], (0, 50))
+        self.assertEqual(res["chr2"][0], (75, 117)) 
         res = main_segment(self.cns, select, remove, 25, 25, 50, self.assembly)
-        self.assertEqual(res.iloc[0].tolist(), ["chr1", 0, 25])
-        self.assertEqual(res.iloc[4].tolist(), ["chr2", 75, 96])    
+        self.assertEqual(res["chr1"][1], (25, 50))
+        self.assertEqual(res["chr2"][0], (75, 96))   
 
     def test_get_norm_sizes(self):
         res = get_norm_sizes(self.segs)
@@ -142,7 +142,7 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res['aut'], ['chr1', 'chr2', 'chr3'])
         self.assertEqual(res['sex'], ['chrY'])
         self.assertEqual(res['all'], ['chr1', 'chr2', 'chr3', 'chrY'])
-        cns_df = bin_by_segments(self.cns, self.aut_segs, 'none')
+        cns_df = aggregate_by_segments(self.cns, self.aut_segs, 'none')
         res = get_chr_sets(cns_df, assembly=self.assembly)
         self.assertTrue('aut' in res)   
         self.assertTrue('sex' not in res)   

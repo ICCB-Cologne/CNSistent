@@ -1,6 +1,6 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-from cns.process.binning import add_cns_loc, sum_cns
+from cns.process.segmentation import add_cns_loc, sum_cns
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
@@ -30,8 +30,8 @@ def load_samples_out(filename):
     return load_samples(pjoin(out_path, filename))
 
 
-def load_bins(dataset, bin_type):
-    return sum_cns(add_cns_loc(load_cns(pjoin(out_path, f"{dataset}_bin_{bin_type}.tsv"))))
+def load_bins(dataset, segment_type):
+    return sum_cns(add_cns_loc(load_cns(pjoin(out_path, f"{dataset}_bin_{segment_type}.tsv"))))
 
 
 def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):
@@ -121,11 +121,11 @@ def rename_cns_columns(cns_df, cn_columns=None):
     return cns_df.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
 
 
-def load_merged_bins(select_samples, bin_size):
+def load_merged_bins(select_samples, segment_size):
     cns = {
-        "PCAWG": load_cns_out(f"PCAWG_bin_{bin_size}.tsv"),
-        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{bin_size}.tsv")),
-        "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{bin_size}.tsv")
+        "PCAWG": load_cns_out(f"PCAWG_bin_{segment_size}.tsv"),
+        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{segment_size}.tsv")),
+        "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{segment_size}.tsv")
     }
     all_cns = pd.concat(cns.values())
     if select_samples is not None:
@@ -146,12 +146,12 @@ def load_merged_cns(select_samples=None):
     return all_cns
 
 
-def main_load_data(bins = None):
+def main_load_data(segment_type = None):
     samples = load_merged_samples()
-    if bins == None:
+    if segment_type == None:
         cns = load_merged_cns(samples)
     else:
-        cns = load_merged_bins(samples, bins)
+        cns = load_merged_bins(samples, segment_type)
     return samples, cns
 
 

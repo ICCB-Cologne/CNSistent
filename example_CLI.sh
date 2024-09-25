@@ -31,19 +31,19 @@ cns signatures ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_sample_sou
 cns segment ./tests/out/test_cns_fill.tsv --merge 100000 --out ./tests/out/mcs_regions.tsv --verbose 
 
 # %%
-# Calculate arm-level bins
+# Calculate arm-level segments
 cns segment --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms.tsv --verbose
 
 # %%
-# Calculate band-level bins
+# Calculate band-level segments
 cns segment --select bands ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_bands.tsv --verbose
 
 # %% 
-# Calculate 1MB bins
+# Calculate 1MB segments
 cns segment --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_1MB.tsv --verbose
 
 # %% 
-# Calculate 1MB bins with gaps
+# Calculate 1MB segments with gaps
 cns segment --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_1MB_gaps.tsv --remove gaps --filter 500000 --verbose
 
 # %% 
@@ -51,5 +51,5 @@ cns segment --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test
 cns segment --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms_gaps.tsv --remove gaps --filter 100000
 
 # %%
-# Calculate consisten segment bins
-cns bin ./tests/out/test_cns_fill.tsv --segments ./tests/out/test_segs_1MB.tsv --out ./tests/out/test_cns_1MB.tsv --verbose
+# Calculate consisten segment segments
+cns aggregate ./tests/out/test_cns_fill.tsv --segments ./tests/out/test_segs_1MB.tsv --out ./tests/out/test_cns_1MB.tsv --verbose

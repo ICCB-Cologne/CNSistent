@@ -44,7 +44,7 @@ commands=(
   "cns segment --split 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_segs_1MB.tsv"
   "cns segment --split 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_segs_1MB_gaps.tsv --remove gaps --filter 500000"
   "cns segment --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000"
-  "cns bin ./temp/test_cns_fill.tsv --segments ./temp/test_segs_1MB.tsv --out ./temp/test_cns_1MB.tsv"
+  "cns aggregate ./temp/test_cns_fill.tsv --segments ./temp/test_segs_1MB.tsv --out ./temp/test_cns_1MB.tsv"
 )
 
 # TODO: Test single-columns BED file
