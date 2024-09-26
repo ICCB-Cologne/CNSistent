@@ -155,11 +155,11 @@ def main_load_data(segment_type = None):
     return samples, cns
 
 
-def load_COSMIC(change_coords=True):
+def load_COSMIC():
     return load_segments("COSMIC_consensus_genes.bed")
 
 
-def load_ENSEMBL(change_coords=True):
+def load_ENSEMBL():
     return load_segments("ENSEMBL_coding_genes.bed")
 
 

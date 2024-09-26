@@ -2,7 +2,7 @@ import numpy as np
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, create_step_breaks
 from cns.utils.assemblies import hg19
 from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to_segments, tuples_to_segments
-from cns.utils.files import load_segments, is_bed_file
+from cns.utils.files import load_segments
 
 
 def do_segments_overlap(segs, is_sorted=False):
@@ -163,8 +163,7 @@ def regions_select(select, assembly=hg19):
     elif select =="":
         return genome_to_segments(assembly)
     else:        
-        is_not_bed = not is_bed_file(select)
-        return load_segments(select, change_coords=is_not_bed, header=is_not_bed)
+        return load_segments(select)
 
 
 def regions_remove(remove, assembly=hg19):
@@ -174,8 +173,7 @@ def regions_remove(remove, assembly=hg19):
     elif remove == "":
         return None
     else:
-        is_not_bed = not is_bed_file(remove)
-        return load_segments(remove, change_coords=is_not_bed, header=is_not_bed)
+        return load_segments(remove)
 
 
 def get_genome_segments(select, remove=None, filter_size=0):

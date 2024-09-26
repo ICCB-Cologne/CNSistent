@@ -29,7 +29,7 @@ def segs_to_df(segments):
 def df_to_segs(segs_df):
     res = {}
     for chrom, group in segs_df.groupby("chrom"):
-        res[chrom] = list(zip(group["start"], group["end"]))
+        res[chrom] = list(zip(group["start"], group["end"], group["name"]))
     return res
 
 

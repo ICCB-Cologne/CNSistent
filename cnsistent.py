@@ -10,7 +10,7 @@ from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.conversions import segs_to_df
-from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples, is_bed_file
+from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
 from cns.process.pipelines import main_fill, main_impute, main_aggregate, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info, log_warn
 
@@ -23,8 +23,6 @@ def _add_sp_args(action, parser):
     parser.add_argument("--threads", type=int, help="number of threads to use", required=False, default=1)
     parser.add_argument("--verbose", help="print progress to console", action="store_true")
     parser.add_argument("--time", help="save runtime info", action="store_true")
-    parser.add_argument("--noheader", help="if set, the input/output file does not have a header", action="store_true")
-    parser.add_argument("--nosample", help="if set, the input/output file does not have an sample column. Not compatible with the --samples option.", action="store_true")
     parser.add_argument("--subsplit", type=int, help="will split the processing into chunks to lower memory needs", required=False, default=1)
     parser.add_argument("--cncols", type=str, help="The name of either a single CN column or two comma separated columns.", required=False, default=None)
 
@@ -82,9 +80,6 @@ def _parse_args():
         if args.subsplit > 1:
             print("segmentation is not data parallelizable, --subsplit option will be ignored.")
             args.subsplit = 1            
-
-    if args.nosample and args["samples"] != "":
-        raise ValueError("The --nosample and --samples options are incompatible.")
     
     if args.threads <= 0:
         raise ValueError("The --threads option must be greater than 0.")
@@ -107,11 +102,17 @@ def _action_to_fun(action):
     elif action == "signatures":
         return main_signatures  
     elif action == "segment":
-        raise ValueError("Segmentation should be handled separately.")   
+        return main_segment
     elif action == "aggregate":
         return main_aggregate
     else:
         raise ValueError(f"Action {action} not recognized.")
+
+
+def _get_segs_df(segs_arg):
+    if segs_arg != "" and segs_arg != None:
+        return load_segments(segs_arg)
+    return None
 
 
 def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
@@ -137,15 +138,11 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
         filter_block = [args.filter]*block_count
         return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
     elif action in ["coverage", "ploidy", "signatures"]:
-        is_not_bed = not is_bed_file(args.segments)
-        segs_df = load_segments(args.segments, change_coords=is_not_bed, header=is_not_bed) if args.segments != "" else None
-        segs_block = [segs_df] * block_count
+        segs_block = [_get_segs_df(args.segments)] * block_count
         return zip(cns_blocks, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "aggregate":
-        is_not_bed = not is_bed_file(args.segments)
-        segs_df = load_segments(args.segments, change_coords=is_not_bed, header=is_not_bed)
-        segs_block = [segs_df]*block_count
-        fun_block = [args.aggregate]*block_count
+        segs_block = [_get_segs_df(args.segments)] * block_count
+        fun_block = [args.how]*block_count
         return zip(cns_blocks, segs_block, fun_block, cols_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
@@ -184,8 +181,6 @@ def main():
     samples_path = args.samples
     out_file = args.out
     print_info = args.verbose
-    no_header = args.noheader
-    no_sample = args.nosample
     subsplit = args.subsplit
     cncols = parse_cncols(args.cncols)
 
@@ -198,10 +193,7 @@ def main():
         remove = regions_remove(args.remove, assembly)
         segs = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)        
         res_df = segs_to_df(segs)
-        is_bed = out_file.tolower().endswith(".bed")
-        if not is_bed:
-            log_warn("Output file does not end with .bed, the coordinates will be 1-based.")
-        save_segments(res_df, out_file, change_coords=not is_bed, header=not no_header)
+        save_segments(res_df, out_file)
         log_info(print_info, "Done.")
         return
 
@@ -209,7 +201,7 @@ def main():
         raise ValueError(f"Copy number file {cns_file_path} not found.")
     else:
         log_info(print_info, f"CNS file at {cns_file_path}...")     
-    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, header=not no_header, no_sample=no_sample)
+    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols)
     cn_columns = find_cn_cols_if_none(cns_df, cncols)     
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
@@ -238,12 +230,13 @@ def main():
 
         for j in range(len(res_dfs)): 
             mode = "w" if i == 0 and j == 0 else "a"
-            header = not no_header and i == 0 and j == 0
             res_df = res_dfs[j]
+            if action == "segment":
+                save_segments(res_df, out_file)
             elif action in ["fill", "impute", "aggregate"]:
-                save_cns(res_df, out_file, change_coords=True, no_sample=no_sample, header=header, mode=mode)
+                save_cns(res_df, out_file, change_coords=True, mode=mode)
             elif action in ["coverage", "ploidy", "signatures"]:
-                save_samples(res_df, out_file, no_sample=no_sample, header=header, mode=mode)
+                save_samples(res_df, out_file, mode=mode)
             else:
                 raise ValueError(f"Unknown action {action}")
     

@@ -24,9 +24,10 @@ class TestConversions(unittest.TestCase):
         df = pd.DataFrame({
             'chrom': ['chr1', 'chr1', 'chr2'],
             'start': [0, 10, 20],
-            'end': [5, 15, 25]
+            'end': [5, 15, 25],
+            'name': ['seg1', 'seg2', 'seg3']
         })
-        exp = {'chr1': [(0, 5), (10, 15)], 'chr2': [(20, 25)]}
+        exp = {'chr1': [(0, 5, 'seg1'), (10, 15, 'seg2')], 'chr2': [(20, 25, 'seg3')]}
         self.assertEqual(df_to_segs(df), exp)
 
     def test_genome_to_segments(self):

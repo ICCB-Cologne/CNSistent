@@ -89,11 +89,13 @@ def find_column(cns_df, patterns):
 
 
 def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
+    # convert columns to strings
+    cns_df.columns = cns_df.columns.astype(str)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
 
     # if the column sample_id does not exist, rename the first column to sample_id
     if "sample_id" not in cns_df.columns:
-        sample_col = find_column(cns_df, ['sample', 'Id', 'sampleId', 'sample_id'])
+        sample_col = find_column(cns_df, ['sample', 'Id', 'sampleId', 'sample_id', 'name'])
         if sample_col is None:
             cns_df.columns = ["sample_id"] + cns_df.columns[1:].tolist()
             log_info(print_info, f"Column sample_id not found, renamed first column to sample_id.")
@@ -133,7 +135,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column start does not exist, rename the third column to start
     if "start" not in cns_df.columns:
-        start_col = find_column(cns_df, ['start', 'begin'])
+        start_col = find_column(cns_df, ['start', 'begin', 'chromStart'])
         if start_col is None:
             cns_df.columns = cns_df.columns[:2].tolist() + ["start"] + cns_df.columns[3:].tolist()
             log_info(print_info, f"Column start not found, renamed third column to start.")
@@ -144,7 +146,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column end does not exist, rename the fourth column to end
     if "end" not in cns_df.columns:
-        end_col = find_column(cns_df, ['end', 'stop'])
+        end_col = find_column(cns_df, ['end', 'stop', 'chromEnd'])
         if end_col is None:
             cns_df.columns = cns_df.columns[:3].tolist() + ["end"] + cns_df.columns[4:].tolist()
             log_info(print_info, f"Column end not found, renamed fourth column to end.")

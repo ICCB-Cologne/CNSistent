@@ -4,13 +4,12 @@ import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
 from cns.utils.conversions import df_to_segs
+from cns.utils.logging import log_warn
 
 
-def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, no_sample=False, header=True):
-    cns_df = pd.read_csv(path, sep="\t", header=0 if header else None)
-    if no_sample:
-        cns_df["sample_id"] = "sample_id"
-    if canonize or not header:
+def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True):
+    cns_df = pd.read_csv(path, sep="\t")
+    if canonize:
         cns_df = canonize_cns_df(cns_df, cn_columns)
     elif not is_canonical_cns_df(cns_df):
         raise ValueError("CNS file is not canonical, call load_cns(..., canonize=True, ...) instead.")
@@ -21,15 +20,12 @@ def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=Tr
     return cns_df
 
 
-def save_cns(cns_df, path, sort=False, change_coords=True, no_sample=False, header=True, mode="w"):
+def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:
         cns_df.loc[:, "start"] += 1
-
-    to_save = cns_df.drop(columns="sample_id") if no_sample else cns_df
-    to_save.to_csv(path, sep="\t", index=False, header=header, mode=mode)
-
+    cns_df.to_csv(path, sep="\t", index=False, mode=mode)
     if change_coords:
         cns_df.loc[:, "start"] -= 1
 
@@ -44,10 +40,8 @@ def load_samples(path):
     return samples_df   
 
 
-def save_samples(samples_df, path, no_sample=False, header=True, mode='w'):
-    if no_sample:
-        samples_df = samples_df.reset_index(drop=True)
-    samples_df.to_csv(path, sep="\t", index=True, header=header, mode=mode)
+def save_samples(samples_df, path, mode='w'):
+    samples_df.to_csv(path, sep="\t", index=True, mode=mode)
 
 
 def fill_sex_if_missing(cns, samples):
@@ -70,30 +64,30 @@ def samples_df_from_cns_df(cns_df, fill_sex=True):
     return samples_df
 
 
-def save_segments(segs, path, change_coords=False, header=False):
+def save_segments(segs, path):    
+    is_bed = path.lower().endswith(".bed")
+    if not is_bed:
+        log_warn(f"Segments file {path} is not bed file, the coordinates will be 1-based.")
     seg_df = pd.DataFrame(segs, columns=["chrom", "start", "end", "name"])
-    if change_coords:
+    if not is_bed:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
-    sel = seg_df[["chrom", "chromStart", "chromStart", "name"]]
-    sel.to_csv(path, sep="\t", index=False, header=header)
+    sel = seg_df[["chrom", "start", "end", "name"]]
+    sel.to_csv(path, sep="\t", index=False, header=not is_bed)
 
 
-def is_bed_file(path):
-    if path.lower().endswith(".bed"):
-        return False
-    return True
-
-
-def load_segments(path, change_coords=True, header=True):
+def load_segments(path):
+    is_bed = path.lower().endswith(".bed")
+    if not is_bed:
+        log_warn(f"Segments file {path} is not bed file, the coordinates will be 1-based.")
     if path == "" or path is None:
         return None
     path = abspath(path)
     if not exists(path):
         raise ValueError(f"File {path} not found.")
-    segs_df = pd.read_csv(path, sep="\t", header=0 if header else None)
+    segs_df = pd.read_csv(path, sep="\t", header=(None if is_bed else 0))
     # check that columns "chrom", "start" and "end" exist, more colums may be present
-    if header:
+    if not is_bed:
         if not all([col in segs_df.columns for col in ["chrom", "start", "end"]]):
             raise ValueError(f"File {path} must have columns 'chrom', 'start' and 'end'.")
         if "name" not in segs_df.columns:
@@ -107,10 +101,11 @@ def load_segments(path, change_coords=True, header=True):
             print(f"Warning: File {path} has more than 4 columns. Only the first 4 columns are used.")
             segs_df = segs_df.iloc[:, :4]                
         segs_df.columns = ["chrom", "start", "end", "name"]  
-    if change_coords:
+    if not is_bed:
         segs_df.loc[:, "start"] -= 1
     if len(segs_df.columns) == 3:
         segs_df["name"] = np.arange(len(segs_df))
+
     return df_to_segs(segs_df)
     
 
