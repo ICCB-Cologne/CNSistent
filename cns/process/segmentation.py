@@ -63,7 +63,7 @@ def max_func(cns_array):
 def min_func(cns_array):
     return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
-def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, agg_func):
+def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name, agg_func):
     row_id = 0
     seg_cns = []
     cns_cols = sample_rows.shape[1] - 2
@@ -88,10 +88,10 @@ def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, agg_func)
         return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols
     sel_array = np.array(seg_cns, dtype=np.uint32)
     cns = agg_func(sel_array)
-    return [sample_id, chrom, seg_start, seg_end] + cns
+    return [sample_id, chrom, seg_start, seg_end] + cns + [seg_name]
 
 
-def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end):
+def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name):
     row_id = 0
     seg_cns = []
     while sample_rows[row_id][1] <= seg_start:
@@ -102,13 +102,12 @@ def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end):
         row = sample_rows[row_id]
         start = max(row[0], seg_start)
         end = min(row[1], seg_end)
-        seg_cns.append([sample_id, chrom, start, end] + list(row[2:]))
+        seg_cns.append([sample_id, chrom, start, end] + list(row[2:]) + [seg_name])
         if row[1] >= seg_end:  # last row ends behind the segment
             break
         row_id += 1
         if row_id >= len(sample_rows):
             break
-
     return seg_cns
 
 
@@ -138,16 +137,16 @@ def aggregate_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_
             print(f"Aggregating chr ({i+1}/{len(indices)})", end="\r")
         if chrom not in segs:
             continue
-        for seg_start, seg_end in segs[chrom]:
+        for seg_start, seg_end, seg_name in segs[chrom]:
             if agg_func != None:
-                cn_segs = _aggregate_regs(sample, chrom, group.values, seg_start, seg_end, agg_func)
+                cn_segs = _aggregate_regs(sample, chrom, group.values, seg_start, seg_end, seg_name, agg_func)
                 new_rows.append(cn_segs)
             else:
-                cn_segs = _mask_by_regs(sample, chrom, group.values, seg_start, seg_end)
+                cn_segs = _mask_by_regs(sample, chrom, group.values, seg_start, seg_end, seg_name)
                 new_rows.extend(cn_segs)
     if print_info:
         print(f"Aggregation finished. Converting {len(new_rows)} rows...", end="\r")
-    res_df = pd.DataFrame(new_rows, columns=sel_cols)
+    res_df = pd.DataFrame(new_rows, columns=sel_cols + ["name"]) 
     res_df["start"] = res_df["start"].astype(np.uint32)
     res_df["end"] = res_df["end"].astype(np.uint32)
     log_info(print_info, f"Aggregated into {len(new_rows)} CNS." + " " * 40)

@@ -4,7 +4,7 @@ from cns.process.segmentation import add_cns_loc, sum_cns
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
-from cns.utils.files import load_cns, load_samples
+from cns.utils.files import load_cns, load_samples, load_segments
 from cns.utils.kneepoint import find_bends
 import matplotlib.pyplot as plt
 
@@ -156,17 +156,11 @@ def main_load_data(segment_type = None):
 
 
 def load_COSMIC(change_coords=True):
-    res = pd.read_csv(pjoin(data_path, "COSMIC_consensus_genes.tsv"), sep="\t")
-    if change_coords:
-        res.loc[:, "start"] -= 1
-    return res
+    return load_segments("COSMIC_consensus_genes.bed")
 
 
 def load_ENSEMBL(change_coords=True):
-    res = pd.read_csv(pjoin(data_path, "ENSEMBL_coding_genes.tsv"), sep="\t")
-    if change_coords:
-        res.loc[:, "start"] -= 1
-    return res
+    return load_segments("ENSEMBL_coding_genes.bed")
 
 
 def save_cns_fig(fig_name, fig = None):

@@ -28,27 +28,31 @@ cns signatures ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_sample_sou
 
 # %%
 # Obtain regions by clustering neighboring breakpoints
-cns segment ./tests/out/test_cns_fill.tsv --merge 100000 --out ./tests/out/mcs_regions.tsv --verbose 
+cns segment ./tests/out/test_cns_fill.tsv --merge 100000 --out ./tests/out/mcs_regions.bed --verbose 
 
 # %%
 # Calculate arm-level segments
-cns segment --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms.tsv --verbose
+cns segment dummy --select arms --out ./tests/out/test_segs_arms.bed --verbose
 
 # %%
 # Calculate band-level segments
-cns segment --select bands ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_bands.tsv --verbose
+cns segment dummy --select bands ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_bands.bed --verbose
 
 # %% 
 # Calculate 1MB segments
-cns segment --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_1MB.tsv --verbose
+cns segment dummy --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_1MB.bed --verbose
 
 # %% 
 # Calculate 1MB segments with gaps
-cns segment --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_1MB_gaps.tsv --remove gaps --filter 500000 --verbose
+cns segment dummy --split 1000000 ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_1MB_gaps.bed --remove gaps --filter 500000 --verbose
 
 # %% 
 # Create only segments from arms where gaps bigger than 100KB are removed
-cns segment --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms_gaps.tsv --remove gaps --filter 100000
+cns segment dummy --select arms ./tests/out/test_cns_fill.tsv --out ./tests/out/test_segs_arms_gaps.bed --remove gaps --filter 100000
+
+# %% 
+# Create segments for COSMIC
+cns segment dummy --select ./data/COSMIC_consensus_genes.bed --out ./tests/out/test_COSMIC_gaps.bed --remove gaps --filter 100000
 
 # %%
 # Calculate consisten segment segments

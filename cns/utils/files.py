@@ -1,4 +1,5 @@
 from os.path import abspath, exists
+import numpy as np
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
@@ -69,16 +70,21 @@ def samples_df_from_cns_df(cns_df, fill_sex=True):
     return samples_df
 
 
-def save_segments(segs, path, change_coords=True, header=True):
-    seg_df = pd.DataFrame(segs, columns=["chrom", "start", "end"])
+def save_segments(segs, path, change_coords=False, header=False):
+    seg_df = pd.DataFrame(segs, columns=["chrom", "start", "end", "name"])
     if change_coords:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
-    sel = seg_df[["chrom", "start", "end"]]
+    sel = seg_df[["chrom", "chromStart", "chromStart", "name"]]
     sel.to_csv(path, sep="\t", index=False, header=header)
 
 
-# TODO: Potentially check if the segments are within the assembly bounds
+def is_bed_file(path):
+    if path.lower().endswith(".bed"):
+        return False
+    return True
+
+
 def load_segments(path, change_coords=True, header=True):
     if path == "" or path is None:
         return None
@@ -90,15 +96,21 @@ def load_segments(path, change_coords=True, header=True):
     if header:
         if not all([col in segs_df.columns for col in ["chrom", "start", "end"]]):
             raise ValueError(f"File {path} must have columns 'chrom', 'start' and 'end'.")
+        if "name" not in segs_df.columns:
+            segs_df["name"] = np.arange(len(segs_df))
     else:
         if len(segs_df.columns) < 3:
             raise ValueError(f"File {path} must have at least 3 columns.")
-        elif len(segs_df.columns) > 3:
-            print(f"Warning: File {path} has more than 3 columns. Only the first 3 columns are used.")
-            segs_df = segs_df.iloc[:, :3]
-        segs_df.columns = ["chrom", "start", "end"]    
+        elif len(segs_df.columns) == 3:            
+            segs_df["name"] = np.arange(len(segs_df))
+        elif len(segs_df.columns) > 4:
+            print(f"Warning: File {path} has more than 4 columns. Only the first 4 columns are used.")
+            segs_df = segs_df.iloc[:, :4]                
+        segs_df.columns = ["chrom", "start", "end", "name"]  
     if change_coords:
         segs_df.loc[:, "start"] -= 1
+    if len(segs_df.columns) == 3:
+        segs_df["name"] = np.arange(len(segs_df))
     return df_to_segs(segs_df)
     
 

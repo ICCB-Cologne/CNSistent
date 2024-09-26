@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-from cns.process.breakpoints import get_breaks_from_cns, get_breaks_in_segments, insert_breaks_in_segments
+from cns.process.breakpoints import get_breaks_inside_segments, insert_breaks_into_segments
 from cns.utils import hg19
 from cns.utils.logging import log_info
 
@@ -76,7 +76,7 @@ def cluster_within_segments(existing_breaks, segments, clust_dist, print_info=Fa
     break_count = _break_count(existing_breaks)
     log_info(print_info, f"Reducing {break_count} breakpoints with merge distance {clust_dist} ... ")
 
-    existing_breaks = get_breaks_in_segments(segments, existing_breaks)
+    existing_breaks = get_breaks_inside_segments(segments, existing_breaks)
     new_count = _break_count(existing_breaks)
     if new_count != break_count:
         log_info(print_info, f"Removed {break_count - new_count} outside of segments.")
@@ -87,6 +87,6 @@ def cluster_within_segments(existing_breaks, segments, clust_dist, print_info=Fa
     log_info(print_info, f"Removed to {break_count - new_count} breakpoints by distance merge.")
     log_info(print_info, f"Resulting breakpoints: {new_count}")
 
-    res = insert_breaks_in_segments(segments, res, clust_dist // 2 - 1)
+    res = insert_breaks_into_segments(segments, res, clust_dist // 2 - 1)
 
     return res

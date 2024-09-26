@@ -103,30 +103,40 @@ def get_breaks_from_segments(segments, keep_ends=True):
     return breaks
 
 
-def get_breaks_in_segments(segs, breaks, min_dist = 0):
+def get_breaks_inside_segments(segs, breaks, min_dist = 0):
     res = { chrom: [] for chrom in breaks }
     for chrom, chrom_segs in segs.items():
         if chrom not in breaks:
             continue
-        for start, end in chrom_segs:
+        for seg in chrom_segs:
             for br in breaks[chrom]:
-                if start + min_dist <= br < end - min_dist:
+                if seg[0] + min_dist <= br < seg[1] - min_dist:
                     res[chrom].append(br)
     return res
 
 
-def insert_breaks_in_segments(segs, breaks, min_dist=0):
-    breaks = get_breaks_in_segments(segs, breaks, min_dist)
-    # add breaks from segments
+def insert_breaks_into_segments(segs, breaks, min_dist=0):
+    res = {}
     for chrom, chrom_segs in segs.items():
         if chrom not in breaks:
-            breaks[chrom] = []
-        for start, end in chrom_segs:
-            breaks[chrom].append(start)
-            breaks[chrom].append(end)
-    # unique and sort
-    for chrom in breaks:
-        breaks[chrom] = sorted(set(breaks[chrom]))
-    # breaks to segments
-    res = breaks_to_segments(breaks)
+            res[chrom] = chrom_segs
+            continue
+        res[chrom] = []
+        for seg in chrom_segs:
+            seg_breaks = []
+            start = seg[0]
+            end = seg[1]
+            name = seg[2] if len(seg) > 2 else None
+            for br in breaks[chrom]:
+                if start + min_dist <= br < end - min_dist:
+                    seg_breaks.append(br)
+            if len(seg_breaks) == 0:
+                new_seg = (start, end, name) if name != None else (start, end)
+                res[chrom].append(new_seg)
+            else:
+                seg_breaks = [start] + sorted(set(seg_breaks)) + [end]
+                for i in range(len(seg_breaks) - 1):
+                    if seg_breaks[i + 1] - seg_breaks[i] > 0:
+                        new_seg = (seg_breaks[i], seg_breaks[i + 1], name) if name != None else (seg_breaks[i], seg_breaks[i + 1])
+                        res[chrom].append(new_seg)
     return res

@@ -33,8 +33,8 @@ class TestPipelines(unittest.TestCase):
             'chr_x': 'chrX',
             'chr_y': 'chrY'
         })
-        self.segs = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chrY': [(0, 100)], 'chr3': [(100, 200), (250, 300)]}
-        self.aut_segs ={'chr1': [(0, 100)]}
+        self.segs = {'chr1': [(0, 100, 0)], 'chr2': [(50, 150, 1)], 'chrY': [(0, 100, 2)], 'chr3': [(100, 200, 3), (250, 300, 4)]}
+        self.aut_segs ={'chr1': [(0, 100, "0")]}
         pd.set_option('display.max_columns', 10)
 
     def test_main_fill(self):
@@ -110,18 +110,18 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s3', 'segsize_total_cn_aut'], 0)
 
     def test_main_segment(self):
-        select = {'chr1': [(0, 100)], 'chr2': [(50, 150)], 'chr3': [(100, 200), (250, 300)]}
-        remove = {'chr2': [(0, 75)], 'chr3': [(150, 175)], 'chrX': [(0, 100)]}
+        select = {'chr1': [(0, 100, "0")], 'chr2': [(50, 150, "1")], 'chr3': [(100, 200, "2"), (250, 300, "3")]}
+        remove = {'chr2': [(0, 75, "0")], 'chr3': [(150, 175, "1")], 'chrX': [(0, 100, "3")]}
         res = main_segment(self.cns, select, remove, assembly=self.assembly)
         self.assertEqual(len(res), 3)
         res = main_segment(self.cns, select, remove, filter_size=50, assembly=self.assembly)
         self.assertEqual(len(res), 3)
         res = main_segment(self.cns, select, remove, merge_dist=25, filter_size=50, assembly=self.assembly)
-        self.assertEqual(res["chr1"][0], (0, 50))
-        self.assertEqual(res["chr2"][0], (75, 117)) 
+        self.assertEqual(res["chr1"][0], (0, 50, "0"))
+        self.assertEqual(res["chr2"][0], (75, 117, "1")) 
         res = main_segment(self.cns, select, remove, 25, 25, 50, self.assembly)
-        self.assertEqual(res["chr1"][1], (25, 50))
-        self.assertEqual(res["chr2"][0], (75, 96))   
+        self.assertEqual(res["chr1"][1], (25, 50, "0_1"))
+        self.assertEqual(res["chr2"][0], (75, 96, "1_0"))   
 
     def test_get_norm_sizes(self):
         res = get_norm_sizes(self.segs)

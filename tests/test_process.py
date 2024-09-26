@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import pandas as pd
+import io
 
 from cns.process.segments import *
 from cns.process.imputation import *
@@ -59,13 +60,30 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(filter_min_size(segs, min_size), exp)
 
     def test_split_segment(self):
-        actual_output = split_segment(1, 11, 2, "scale")
+        actual_output = split_segment(1, 11, None, 2, "scale")
         expected_output = [(1, 3), (3, 5), (5, 7), (7, 9), (9, 11)]
         self.assertEqual(actual_output, expected_output)
 
         expected_output = [(1, 5), (5, 8), (8, 11)]
-        actual_output = split_segment(1, 11, 3, "pad")
+        actual_output = split_segment(1, 11, None, 3, "pad")
         self.assertEqual(actual_output, expected_output)
+
+    def test_regions_select(self):        
+        res = regions_select("")
+        self.assertEqual(len(res), 24)
+        self.assertEqual(len(res["chr1"]), 1)
+        self.assertEqual(res["chr1"][0][0], 0)
+        self.assertEqual(res["chr1"][0][2], "chr1")
+
+        res = regions_select("arms")
+        self.assertEqual(len(res), 24)
+        self.assertEqual(len(res["chr1"]), 2)
+        self.assertEqual(res["chr1"][0][2], "chr1p")
+
+        res = regions_select("bands")
+        self.assertEqual(len(res), 24)
+        print(res["chr1"][0][2], "p36.33")
+
 
     def test_regions_remove(self):
         filter_size = 0
@@ -95,6 +113,36 @@ class TestSegments(unittest.TestCase):
         expected_result = {'aut': 20, 'sexXX': 0, 'sexXY': 5}
         result = calc_group_sizes(segs)
         self.assertEqual(result, expected_result)
+
+    def test_gene_segs(self):
+        dummy_file = """gene	chrom	start	end
+SKI	chr1	2160134	2241558
+TNFRSF14	chr1	2487078	2496821
+BIRC6	chr2	32582096	32843966
+STRN	chr2	37070783	37193615
+EML4	chr2	42396490	42559688
+SRGAP3	chr3	9022275	9404737
+BCORL1	chrX	129115083	129192058"""
+        gene_df = pd.read_csv(io.StringIO(dummy_file), sep="\t")
+        gene_segs = {}
+        for i, row in gene_df.iterrows():
+            if row["chrom"] not in gene_segs:
+                gene_segs[row["chrom"]] = []
+            gene_segs[row["chrom"]].append((row["start"], row["end"], row["gene"]))
+        other_segs = {"chr1": [(0, 100000), (2000000, 2200000)], "chrY": [(0, 5)]}
+        res = merge_segments(gene_segs)
+        self.assertEqual(gene_segs, res)
+        res = segment_union(gene_segs, other_segs)
+        self.assertEqual(gene_segs["chrX"], res["chrX"])
+        self.assertEqual(other_segs["chrY"], res["chrY"])
+        res = segment_difference(gene_segs, other_segs)
+        self.assertEqual(res["chr1"][0][0], 2200000) # cut by the other segment
+        res = split_segments(gene_segs, 100000)
+        self.assertGreater(len(res["chr2"]), len(gene_segs["chr2"]))
+
+
+
+
 
 
 # TODO: Add sex chromosome checks
@@ -305,22 +353,22 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
 
     def test_get_breaks_in_segments(self):
-        segments = { 'chr1': [(0, 100)], 'chr2': [(100, 200)] }
+        segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
         breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
-        res = get_breaks_in_segments(segments, breaks)
+        res = get_breaks_inside_segments(segments, breaks)
         self.assertEqual(res['chr1'], [0, 1, 99])
         self.assertEqual(res['chr3'], [])
 
     def test_insert_breaks_in_segments(self):
-        segments = { 'chr1': [(0, 100)], 'chr2': [(100, 200)] }
+        segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
         breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
-        res = insert_breaks_in_segments(segments, breaks)
+        res = insert_breaks_into_segments(segments, breaks)
         print(res)
-        self.assertEqual(len(res), 3)
-        self.assertEqual(res['chr1'][0], (0, 1))
-        self.assertEqual(res['chr1'][1], (1, 99))
-        self.assertEqual(res['chr1'][2], (99, 100))
-        self.assertEqual(res['chr2'][0], (100, 200))
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res['chr1'][0], (0, 1, 0))
+        self.assertEqual(res['chr1'][1], (1, 99, 0))
+        self.assertEqual(res['chr1'][2], (99, 100, 0))
+        self.assertEqual(res['chr2'][0], (100, 200, 1))
 
 
 class TestBinning(unittest.TestCase):
@@ -346,7 +394,7 @@ class TestBinning(unittest.TestCase):
         })
 
     def test_bin_by_breaks(self):
-        segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
+        segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
         breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
         seg_bin = aggregate_by_segments(self.cns, segments, print_info=False)
         break_bin = aggregate_by_breaks(self.cns, breaks, print_info=False)
@@ -354,7 +402,7 @@ class TestBinning(unittest.TestCase):
         pd.testing.assert_frame_equal(seg_bin, break_bin)
     
     def test_bin_by_segments(self):
-        segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
+        segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}
         result = aggregate_by_segments(self.cns, segments)
         self.assertEqual(result.shape[0], 4)
         self.assertEqual(result.at[0, "start"], 0)
@@ -365,16 +413,17 @@ class TestBinning(unittest.TestCase):
         self.assertTrue(np.isnan(result.at[1, "major_cn"]))
     
     def test_bin_none(self):        
-        segments = {'chr1': [(0, 100)], 'chr2': [(100, 200)]}
-        result = aggregate_by_segments(self.cns, segments, fun_type="none")
-        self.assertEqual(result.shape[0], 8)
-        for i in range(result.shape[0]):
-            if result.at[i, "chrom"] == "chr1":
-                self.assertTrue(result.at[i, "start"] >= 0)
-                self.assertTrue(result.at[i, "end"] <= 100)
-            elif result.at[i, "chrom"] == "chr2":
-                self.assertTrue(result.at[i, "start"] >= 100)
-                self.assertTrue(result.at[i, "end"] <= 200)
+        segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}
+        res = aggregate_by_segments(self.cns, segments, fun_type="none")
+        self.assertEqual(res.shape[0], 8)
+        for i in range(res.shape[0]):
+            if res.at[i, "chrom"] == "chr1":
+                self.assertTrue(res.at[i, "start"] >= 0)
+                self.assertTrue(res.at[i, "end"] <= 100)
+            elif res.at[i, "chrom"] == "chr2":
+                self.assertTrue(res.at[i, "start"] >= 100)
+                self.assertTrue(res.at[i, "end"] <= 200)
+        print(res)
 
 
 class TestMerging(unittest.TestCase):

@@ -22,8 +22,8 @@ if __name__ == "__main__":
 	remove = regions_remove("gaps")
 	clustered = main_segment(cns, select, remove, merge_dist=dist, filter_size=dist//10)
 	res_df = segs_to_df(clustered)
-	file = os.path.join(out_path, f'segs_merge_{dist}.tsv')
+	file = os.path.join(out_path, f'segs_merge_{dist}.bed')
 	print("Saving to file:", file)
-	save_segments(res_df, file)
+	save_segments(res_df, file, False, False)
 
 

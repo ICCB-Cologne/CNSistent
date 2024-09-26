@@ -8,15 +8,22 @@ def cytobands_to_df(cytobands):
 
 
 def gaps_to_df(gaps):
-    return pd.DataFrame( gaps, columns=["chrom", "start", "end", "type", "bridge"])
+    return pd.DataFrame(gaps, columns=["chrom", "start", "end", "type", "bridge"])
 
 
 def segs_to_df(segments):
     seg_list = []
     for chrom in sorted(segments.keys()):  # Sort the keys lexicographically
         for seg in segments[chrom]:
-            seg_list.append((chrom, seg[0], seg[1]))
-    return pd.DataFrame(seg_list, columns=["chrom", "start", "end"])
+            if len(seg) > 2:
+                seg_list.append((chrom, seg[0], seg[1], seg[2]))
+            else:
+                seg_list.append((chrom, seg[0], seg[1]))
+    res_df = pd.DataFrame(seg_list)
+    if len(res_df.columns) == 3:
+        return res_df.rename(columns={0: "chrom", 1: "start", 2: "end"})
+    else:
+        return res_df.rename(columns={0: "chrom", 1: "start", 2: "end", 3: "name"})
 
 
 def df_to_segs(segs_df):
@@ -64,21 +71,26 @@ def tuples_to_segments(tuples):
         for tuple in tuples:
             if tuple[0] not in segs:
                 segs[tuple[0]] = []
-            segs[tuple[0]].append((tuple[1], tuple[2]))
+            if len(tuple) == 3:
+                segs[tuple[0]].append((tuple[1], tuple[2]))
+            else:
+                segs[tuple[0]].append((tuple[1], tuple[2], tuple[3]))
     return segs
 
 
 def breaks_to_segments(breakpoints):
     segs = {}
+    seg_i = 0
     for chrom, breaks in breakpoints.items():
         segs[chrom] = []
         for i in range(len(breaks) - 1):
-            segs[chrom].append((breaks[i], breaks[i + 1]))
+            segs[chrom].append((breaks[i], breaks[i + 1], seg_i))
+            seg_i += 1
     return segs
 
 
 def genome_to_segments(assembly=hg19):
     segs = {}
     for chrom, len in assembly.chr_lens.items():
-        segs[chrom] = [(0, len)]
+        segs[chrom] = [(0, len, chrom)]
     return segs
