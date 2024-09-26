@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
-from cns.utils.conversions import df_to_segs
+from cns.utils.conversions import df_to_segs, segs_to_df
 from cns.utils.logging import log_warn
 
 
@@ -68,7 +68,7 @@ def save_segments(segs, path):
     is_bed = path.lower().endswith(".bed")
     if not is_bed:
         log_warn(f"Segments file {path} is not bed file, the coordinates will be 1-based.")
-    seg_df = pd.DataFrame(segs, columns=["chrom", "start", "end", "name"])
+    seg_df = segs_to_df(segs)
     if not is_bed:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1

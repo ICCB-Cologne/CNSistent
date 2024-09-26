@@ -192,8 +192,7 @@ def main():
         select = regions_select(args.select, assembly)
         remove = regions_remove(args.remove, assembly)
         segs = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)        
-        res_df = segs_to_df(segs)
-        save_segments(res_df, out_file)
+        save_segments(segs, out_file)
         log_info(print_info, "Done.")
         return
 
@@ -210,7 +209,6 @@ def main():
         samples_df = fill_sex_if_missing(cns_df, samples_df)
     samples_blocks = dataframe_array_split(samples_df, subsplit) 
 
-
     for i in range(subsplit):
         log_info(print_info, f"Processing block {i+1}/{subsplit}...")
         
@@ -218,7 +216,7 @@ def main():
         
         # Perform the action
         start = time.time()
-        res_dfs = _process(action, cns_df, samples_block, cn_columns, assembly, args)
+        res_list = _process(action, cns_df, samples_block, cn_columns, assembly, args)
         runtime = time.time() - start
 
         if print_info:
@@ -228,15 +226,16 @@ def main():
                 with open("./out/times.tsv", "a") as f:
                     f.write(f"{timestamp}\t{action}\t{args.threads}\t{out_file}\t{runtime}\n")
 
-        for j in range(len(res_dfs)): 
+        for j in range(len(res_list)): 
             mode = "w" if i == 0 and j == 0 else "a"
-            res_df = res_dfs[j]
+            res = res_list[j]
             if action == "segment":
-                save_segments(res_df, out_file)
+                print(out_file)
+                save_segments(res, out_file)
             elif action in ["fill", "impute", "aggregate"]:
-                save_cns(res_df, out_file, change_coords=True, mode=mode)
+                save_cns(res, out_file, change_coords=True, mode=mode)
             elif action in ["coverage", "ploidy", "signatures"]:
-                save_samples(res_df, out_file, mode=mode)
+                save_samples(res, out_file, mode=mode)
             else:
                 raise ValueError(f"Unknown action {action}")
     

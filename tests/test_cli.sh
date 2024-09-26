@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd "$(dirname "$0")" # Set path to the script's path
-
 # Function to run a command and compare its output
 run_and_compare() {
   echo "Test: $1"
@@ -33,23 +31,28 @@ run_and_compare() {
 
 # Commands to run and test
 commands=(
-  "cns fill ./in/test_cns_source.tsv --sample ./in/test_sample_source.tsv --out ./temp/test_cns_fill.tsv"
-  "cns impute ./temp/test_cns_fill.tsv --out ./temp/test_cns_imp.tsv"
-  "cns coverage ./temp/test_cns_fill.tsv --out ./temp/test_sample_cover.tsv"
-  "cns ploidy ./out/test_cns_imp.tsv --samples ./in/test_sample_source.tsv --out ./temp/test_sample_ploidy.tsv"
-  "cns signatures ./out/test_cns_imp.tsv --samples ./in/test_sample_source.tsv --out ./temp/test_sample_signatures.tsv"
-  "cns segment ./temp/test_cns_fill.tsv --merge 100000 --out ./temp/mcs_regions.tsv"
-  "cns segment --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms.tsv --threads 2"
-  "cns segment --select bands ./temp/test_cns_fill.tsv --out ./temp/test_segs_bands.tsv --subsplit 2"
-  "cns segment --split 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_segs_1MB.tsv"
-  "cns segment --split 1000000 ./temp/test_cns_fill.tsv --out ./temp/test_segs_1MB_gaps.tsv --remove gaps --filter 500000"
-  "cns segment --select arms ./temp/test_cns_fill.tsv --out ./temp/test_segs_arms_gaps.tsv --remove gaps --filter 100000"
-  "cns aggregate ./temp/test_cns_fill.tsv --segments ./temp/test_segs_1MB.tsv --out ./temp/test_cns_1MB.tsv"
+  "cns fill ./in/test_cns_double.tsv --samples ./in/test_samples.tsv --out ./temp/test_cns_fill.tsv --verbose"
+  "cns fill ./in/test_cns_single.tsv --out ./temp/test_cns_single_fill.tsv --verbose"
+  "cns impute ./temp/test_cns_fill.tsv --out ./temp/test_cns_imp.tsv --verbose"
+  "cns impute ./temp/test_cns_single_fill.tsv --out ./temp/test_cns_single_imp.tsv --verbose"
+  "cns coverage ./temp/test_cns_fill.tsv --out ./temp/test_sample_cover.tsv --verbose"
+  "cns ploidy ./temp/test_cns_imp.tsv --samples ./in/test_samples.tsv --out ./temp/test_sample_ploidy.tsv --verbose"
+  "cns signatures ./temp/test_cns_imp.tsv --samples ./in/test_samples.tsv --out ./temp/test_sample_signatures.tsv --verbose"
+  "cns segment ./temp/test_cns_fill.tsv --merge 100000 --out ./temp/mcs_regions.bed --verbose "
+  "cns segment dummy --select arms --out ./temp/test_segs_arms.bed --verbose"
+  "cns segment dummy --select bands --out ./temp/test_segs_bands.bed --verbose"
+  "cns segment dummy --split 1000000 --out ./temp/test_segs_1MB.bed --verbose"
+  "cns segment dummy --split 1000000 --out ./temp/test_segs_1MB_gaps.bed --remove gaps --filter 500000 --verbose"
+  "cns segment dummy --select arms --out ./temp/test_segs_arms_gaps.bed --remove gaps --filter 100000"
+  "cns segment dummy --select ../data/COSMIC_consensus_genes.bed --out ./temp/test_COSMIC_gaps.bed --remove gaps --filter 100000"
+  "cns aggregate ./temp/test_cns_fill.tsv --segments ./temp/test_segs_1MB.bed --out ./temp/test_cns_1MB.tsv --verbose"
+  "cns aggregate ./temp/test_cns_imp.tsv --segments ./temp/test_COSMIC_gaps.bed --out ./temp/test_cns_COSMIC.tsv --verbose --how min"
+  "cns aggregate ./in/test_cns_single.tsv --segments ./temp/test_segs_arms_gaps.bed --out ./temp/test_cns_arms.tsv --verbose"
 )
 
-# TODO: Test single-columns BED file
 # TODO: hg38 test
 
+cd "$(dirname "$0")" # enter script dir
 rm -r ./temp
 mkdir ./temp
 # Iterate over commands and run them

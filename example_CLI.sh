@@ -11,26 +11,26 @@ mkdir -p ./tests/out
 # %%
 # Fill in gaps in the CNS data
 cns fill ./tests/in/test_cns_double.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_cns_fill.tsv --verbose
-cns fill ./tests/in/test_cns_single.tsv --out ./tests/out/test_cns_single.tsv --verbose
+cns fill ./tests/in/test_cns_single.tsv --out ./tests/out/test_cns_single_fill.tsv --verbose
 
 # %%
 # Impute the filled regions in the CNS data
 cns impute ./tests/out/test_cns_fill.tsv --out ./tests/out/test_cns_imp.tsv --verbose
-cns impute ./tests/out/test_cns_single.tsv --out ./tests/out/test_cns_single.tsv --verbose
+cns impute ./tests/out/test_cns_single_fill.tsv --out ./tests/out/test_cns_single_imp.tsv --verbose
 
 # %%
 # Calculate portion of the filled regions in the CNS data
 cns coverage ./tests/out/test_cns_fill.tsv --out ./tests/out/test_sample_cover.tsv --verbose
-cns coverage ./tests/out/test_cns_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
+cns coverage ./tests/out/test_cns_single_fill.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
 # %%
 # Calculate the aneuploidy of the filled-in CNS data
 cns ploidy ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_sample_ploidy.tsv --verbose
-cns ploidy ./tests/out/test_cns_single.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
+cns ploidy ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
 # Calculate the aneuploidy of the filled-in CNS data
 cns signatures ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_sample_signatures.tsv --verbose
-cns signatures ./tests/out/test_cns_single.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
+cns signatures ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
 # %%
 # Try different segmentations
