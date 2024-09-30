@@ -9,3 +9,4 @@ pycns.egg-info
 .pytest_cache/
 docs/*.log
 docs/*.aux
+copy_files.ps1

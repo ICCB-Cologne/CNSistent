@@ -4,9 +4,12 @@
 \usepackage{multirow}
 \begin{document}
 \begin{tabular}{|l|c|c|c|c|c|}
-\toprule
+\hline
+\multicolumn{6}{|c|}{\textbf{raw copy number segments}}\\
+\hline 
+
 sample & chrom & start & end & major CN & minor CN \\
-\midrule
+\hline
 s1 & chr19 & 1000000 & 3000000 & 1.00 & NaN \\
 s1 & chr19 & 3000000 & 12000000 & 1.00 & 1.00 \\
 s1 & chr19 & 12000000 & 14000000 & NaN & 1.00 \\
@@ -15,7 +18,7 @@ s1 & chr19 & 21000000 & 25000000 & 3.00 & NaN \\
 s1 & chr19 & 28000000 & 58500000 & 3.00 & NaN \\
 s2 & chr19 & 1000000 & 24000000 & 2.00 & NaN \\
 s2 & chr19 & 29000000 & 58000000 & 0.00 & NaN \\
-\bottomrule
+\hline
 \end{tabular}
 
 \end{document}
