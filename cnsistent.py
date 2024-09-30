@@ -228,7 +228,6 @@ def main():
 
         for j in range(len(res_list)): 
             mode = "w" if i == 0 and j == 0 else "a"
-            print(i, j, mode)
             res = res_list[j]
             if action == "segment":
                 print(out_file)

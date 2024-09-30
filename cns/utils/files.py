@@ -42,7 +42,7 @@ def load_samples(path):
 
 
 def save_samples(samples_df, path, mode='w'):
-    samples_df.to_csv(path, sep="\t", index=True, mode=mode)
+    samples_df.to_csv(path, sep="\t", index=True, mode=mode, header=mode=="w")
 
 
 def fill_sex_if_missing(cns, samples):

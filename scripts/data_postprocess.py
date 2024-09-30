@@ -53,7 +53,7 @@ if __name__ == "__main__":
     if print_debug:
         print("Merging samples for TRACERx...")
     merge_samples(print_debug)
-    merge_samples(print_debug, "_imp")
+    merge_samples(print_debug, "_fill")
     if print_debug:
         print("Merging filled CNS for TRACERx...")
     merge_cns(print_debug, True)    
