@@ -200,7 +200,7 @@ def main():
         raise ValueError(f"Copy number file {cns_file_path} not found.")
     else:
         log_info(print_info, f"CNS file at {cns_file_path}...")     
-    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols)
+    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, assembly=assembly, print_info=print_info)
     cn_columns = find_cn_cols_if_none(cns_df, cncols)     
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df)
@@ -228,6 +228,7 @@ def main():
 
         for j in range(len(res_list)): 
             mode = "w" if i == 0 and j == 0 else "a"
+            print(i, j, mode)
             res = res_list[j]
             if action == "segment":
                 print(out_file)

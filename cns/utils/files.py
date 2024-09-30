@@ -5,12 +5,13 @@ import pandas as pd
 from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
 from cns.utils.conversions import df_to_segs, segs_to_df
 from cns.utils.logging import log_warn
+from cns.utils.assemblies import hg19
 
 
-def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True):
-    cns_df = pd.read_csv(path, sep="\t")
+def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, assembly=hg19, print_info=False):
+    cns_df = pd.read_csv(path, sep="\t", low_memory=False)
     if canonize:
-        cns_df = canonize_cns_df(cns_df, cn_columns)
+        cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
     elif not is_canonical_cns_df(cns_df):
         raise ValueError("CNS file is not canonical, call load_cns(..., canonize=True, ...) instead.")
     if change_coords:
@@ -25,7 +26,7 @@ def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:
         cns_df.loc[:, "start"] += 1
-    cns_df.to_csv(path, sep="\t", index=False, mode=mode)
+    cns_df.to_csv(path, sep="\t", index=False, mode=mode, header=mode=="w")
     if change_coords:
         cns_df.loc[:, "start"] -= 1
 

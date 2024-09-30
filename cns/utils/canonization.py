@@ -130,7 +130,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     not_known = [chrom for chrom in chrom_vals if chrom not in assembly.chr_names]
     if len(not_known) > 0:
         log_info(print_info, f"Found chromosomes not in assembly: {not_known}, these will be dropped.")
-        rows_to_drop = cns_df[cns_df["chrom"].isin(chrom_vals[not_known])].index
+        rows_to_drop = cns_df[cns_df["chrom"].isin(not_known)].index
         cns_df.drop(rows_to_drop, inplace=True) 
 
     # if the column start does not exist, rename the third column to start
@@ -168,6 +168,11 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
         cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
 
     cns_df = cns_df[["sample_id", "chrom", "start", "end"] + cn_columns]
+    # set dtypes
+    col_types = {"sample_id": str, "chrom": str, "start": int, "end": int}
+    for cn_col in cn_columns:
+        col_types[cn_col] = float
+    cns_df = cns_df.astype(col_types)
     return cns_df
 
 
