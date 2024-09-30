@@ -3,11 +3,13 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.segmentation import aggregate_by_segments
+from cns.process.aggregation import aggregate_by_segments
 from cns.process.normalize import get_chr_sets, get_norm_sizes
 from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
+from cns.utils.conversions import tuples_to_segments
 from cns.utils.selection import only_aut
 from cns.utils.assemblies import hg19   
+from cns.utils.gaps import hg19_gaps
     
 class TestPipelines(unittest.TestCase):
     def setUp(self):
@@ -148,7 +150,8 @@ class TestPipelines(unittest.TestCase):
         self.assertTrue('sex' not in res)   
         self.assertTrue('all' not in res)   
 
-    def test_sequence(self):
+class TestData(unittest.TestCase):
+    def setUp(self):
         cns = """
         sample_id, chrom, start, end, major_cn, minor_cn
         s1, chr19, 1000000, 3000000, 1,
@@ -159,10 +162,27 @@ class TestPipelines(unittest.TestCase):
         s2, chr19, 1000000, 24000000, 2,
         s2, chr19, 29000000, 58000000, 0,
         """
-        cns_df = pd.read_csv(io.StringIO(cns.strip()), sep=',\s*', engine='python')
+        self.cns_df = pd.read_csv(io.StringIO(cns.strip()), sep=',\s*', engine='python')
+        pd.set_option('display.max_columns', 10)
 
-        cns_fill_df = main_fill(cns_df, add_missing_chromosomes=False)
+    def test_sequence(self):
+        cns_fill_df = main_fill(self.cns_df, add_missing_chromosomes=False)
         lens = cns_fill_df["end"] - cns_fill_df["start"]
-        self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length
+        self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length        
+        non_nan = cns_fill_df.dropna()
+        lens = non_nan["end"] - non_nan["start"]
+        self.assertGreater(hg19.chr_lens["chr19"], lens.sum() / 2)
+
+    def test_impute(self):        
+        cns_fill_df = main_fill(self.cns_df, add_missing_chromosomes=False)
         cns_imp_df = main_impute(cns_fill_df)
-        print(cns_imp_df)
+        non_nan = cns_imp_df.dropna()
+        lens = non_nan["end"] - non_nan["start"]
+        self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length
+
+    def test_coverage(self):
+        # cns_cov_df = main_coverage(self.cns_df)
+        # print(cns_cov_df)
+        chr19_gaps = {"chr19": tuples_to_segments(hg19_gaps)["chr19"]}
+        cns_cov_gap_df = main_coverage(self.cns_df, segs=chr19_gaps)
+        print(cns_cov_gap_df)

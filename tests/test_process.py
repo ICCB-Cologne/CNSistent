@@ -5,7 +5,7 @@ import io
 
 from cns.process.segments import *
 from cns.process.imputation import *
-from cns.process.segmentation import *
+from cns.process.aggregation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
 from cns.utils.assemblies import hg19, hg38

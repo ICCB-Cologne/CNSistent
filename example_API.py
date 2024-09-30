@@ -1,8 +1,8 @@
 # %%
 from matplotlib import pyplot as plt
 from cns.display.plot import fig_lines, fig_CN_heatmap
-from cns.process.segmentation import group_samples
-from cns.process.segmentation import add_cns_loc, sum_cns
+from cns.process.aggregation import group_samples
+from cns.process.aggregation import add_cns_loc, sum_cns
 from cns.utils.selection import cns_head
 from cns.utils.files import load_cns, load_samples
 from cns.utils.assemblies import get_assembly

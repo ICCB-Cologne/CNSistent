@@ -98,7 +98,7 @@ def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name):
         row_id += 1
         if row_id >= len(sample_rows):
             break
-    while sample_rows[row_id][0] < seg_end:
+    while row_id < len(sample_rows) and sample_rows[row_id][0] < seg_end:
         row = sample_rows[row_id]
         start = max(row[0], seg_start)
         end = min(row[1], seg_end)

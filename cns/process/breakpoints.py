@@ -94,7 +94,7 @@ def get_breaks_from_cns(cns_df, keep_ends=True, assembly=hg19):
 def get_breaks_from_segments(segments, keep_ends=True):
     breaks = { chrom: [] for chrom in segments }
     for chrom, segs in segments.items():
-        for start, end in segs:
+        for start, end, name in segs:
             breaks[chrom].append(start)
             if keep_ends:
                 breaks[chrom].append(end)

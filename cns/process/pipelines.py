@@ -2,7 +2,7 @@ import pandas as pd
 from cns.analyze.aneuploidy import *
 from cns.analyze.coverage import *
 from cns.analyze.breakpoints import *
-from cns.process.segmentation import *
+from cns.process.aggregation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
 from cns.process.imputation import *

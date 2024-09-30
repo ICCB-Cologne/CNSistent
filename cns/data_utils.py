@@ -1,6 +1,6 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-from cns.process.segmentation import add_cns_loc, sum_cns
+from cns.process.aggregation import add_cns_loc, sum_cns
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
