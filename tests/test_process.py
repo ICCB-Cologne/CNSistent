@@ -414,7 +414,7 @@ class TestBinning(unittest.TestCase):
     
     def test_bin_none(self):        
         segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}
-        res = aggregate_by_segments(self.cns, segments, fun_type="none")
+        res = aggregate_by_segments(self.cns, segments, how="none")
         self.assertEqual(res.shape[0], 8)
         for i in range(res.shape[0]):
             if res.at[i, "chrom"] == "chr1":

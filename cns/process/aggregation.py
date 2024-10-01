@@ -27,9 +27,10 @@ def sum_cns(cns_df, cn_columns=None):
 
 
 # TODO: Add empty check
-def group_samples(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid', assembly=hg19):    
-    if fun_type not in ["mean", "max", "min"]:
-        raise ValueError("to group samples, fun_type must be one of ['mean', 'max', 'min']")
+# TODO: Group on start, end
+def group_samples(cns_df, cn_columns=None, how="mean", group_col='cum_mid', assembly=hg19):    
+    if how not in ["mean", "max", "min"]:
+        raise ValueError("to group samples, how must be one of ['mean', 'max', 'min']")
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if group_col not in cns_df.columns:
         raise ValueError(f"cns_df must have a column '{group_col}' to group the samples on")
@@ -46,7 +47,7 @@ def group_samples(cns_df, cn_columns=None, fun_type="mean", group_col='cum_mid',
     if "length" in cns_df.columns:
         agg_scheme["length"] = "first"
     for column in cn_columns:
-        agg_scheme[column] = fun_type
+        agg_scheme[column] = how
     grouped = grouped.agg(agg_scheme).reset_index()
     return grouped
 
@@ -111,21 +112,21 @@ def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name):
     return seg_cns
 
 
-def _get_agg_func(fun_type):
-    if fun_type == "" or fun_type is None or fun_type == "none":
+def _get_agg_func(how):
+    if how == "" or how is None or how == "none":
         return None
-    if fun_type == "mean":
+    if how == "mean":
         return mean_func
-    if fun_type == "max":
+    if how == "max":
         return max_func
-    if fun_type == "min":
+    if how == "min":
         return min_func
-    raise ValueError("fun_type must be one of ['mean', 'max', 'min', 'none', '']  got " + fun_type)
+    raise ValueError("how must be one of ['mean', 'max', 'min', 'none', '']  got " + how)
 
 
 # Add column names
-def aggregate_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_info=True):
-    agg_func = _get_agg_func(fun_type)
+def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=True):
+    agg_func = _get_agg_func(how)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
     cns_df_view = cns_df[sel_cols].set_index(["sample_id", "chrom"])
@@ -153,11 +154,11 @@ def aggregate_by_segments(cns_df, segs, fun_type="mean", cn_columns=None, print_
     return res_df
 
 
-def aggregate_by_breaks(cns_df, breaks, fun_type="mean", cn_columns=None, print_info=True):
+def aggregate_by_breaks(cns_df, breaks, how="mean", cn_columns=None, print_info=True):
     segments = breaks_to_segments(breaks)
-    return aggregate_by_segments(cns_df, segments, fun_type, cn_columns, print_info)
+    return aggregate_by_segments(cns_df, segments, how, cn_columns, print_info)
 
 
-def aggregate_by_break_type(cns_df, break_type, assembly=hg19, fun_type="mean", cn_columns=None, print_info=True):
+def aggregate_by_break_type(cns_df, break_type, assembly=hg19, how="mean", cn_columns=None, print_info=True):
     breaks = make_breaks(break_type, assembly)
-    return aggregate_by_breaks(cns_df, breaks, fun_type, cn_columns, print_info)
+    return aggregate_by_breaks(cns_df, breaks, how, cn_columns, print_info)

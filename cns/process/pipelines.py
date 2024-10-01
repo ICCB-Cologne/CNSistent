@@ -40,8 +40,11 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
     return res_df
 
 
-def main_aggregate(cns_df, segs, fun_type="mean", cn_columns=None, print_info=False):
-    return aggregate_by_segments(cns_df, segs, fun_type, cn_columns, print_info)
+def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
+    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    if how != "" and how != "none" and cns_df[cn_columns].isna().any().any():
+        log_warn("NaNs are not considered in aggregation calculations, it is recommended to impute first.")
+    return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
 
 
 # any: if True, based is considered as covered if any CN column has values assigned

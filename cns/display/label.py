@@ -131,13 +131,13 @@ def add_cytoband_legend(ax):
 
 
 # TODO: overlap issues
-def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
+def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None, color=None):
     for gap in assembly.gaps:
         gap_chrom, start, end, gap_type, bridge = gap        
         if (chrom is not None) and (chrom != gap_chrom):
             continue
         x_pos = (start + assembly.chr_starts[gap_chrom]) if chrom is None else start
-        color = gap_color(gap_type)
+        color = gap_color(gap_type) if color is None else color
         length = end - start + 1
         rect = Rectangle(
             (x_pos, y_min), length, y_max-y_min, color=color, alpha=alpha
