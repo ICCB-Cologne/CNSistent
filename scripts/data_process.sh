@@ -1,5 +1,4 @@
 #!/bin/bash
-
 preprocess=true
 process=true
 postprocess=true
@@ -8,6 +7,9 @@ threads=30
 
 data="../data"
 out="../out"
+
+set -x
+
 cd "$(dirname "$0")" # Set path to the script's path
 
 mkdir -p $out

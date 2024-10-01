@@ -75,12 +75,18 @@ def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False)
     if filter:
         for k, v in samples.items():
             log_info(print_info, k)
+
+            # calculate bend for aneuploidy
             ane_vals = v["ane_het_aut"]
             ane_bends = find_bends(ane_vals)
             ane_min_frac = ane_bends[0][ane_bends[2]]
-            cover_vals = v["cover_het_aut"]
-            cover_bends = find_bends(cover_vals)
-            cover_min_frac = cover_bends[0][cover_bends[4]]
+
+            # calculate the z-score for coverage
+            cover_het_aut = v["cover_het_aut"]
+            z = (cover_het_aut - cover_het_aut.mean()) / cover_het_aut.std()
+            filter = z[(z < -3)]
+            cover_min_frac = cover_het_aut.loc[filter.index].max()
+
             whitelist = k=="PCAWG"
             filter_types = k=="TRACERx"
             samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, whitelist, filter_types, print_info)
