@@ -333,8 +333,8 @@ Aggregation can be done either using explicit segments, explicit breakpoints, or
 
 Three utility functions are included with aggregation:
 
-* `add_cns_loc`: For a CNS df, will add the center (`mid`) of a segment within the chromosome, within the linear genome (`cum_mid`) and the length of the segment (`length`).
-* `group_bins`: Will group all samples in a a CNS df, by default using the `mean` function. Segments are grouped on `cum_mid`.
+* `add_cns_loc`: TODO: Remove
+* `group_bins`: Will group all samples in a a CNS df, by default using the `mean` function. Segments are grouped on `start` and `end` columns.
 * `sum_cns`: Finds columns that match the CN column pattern and sums them up into the column `total_cn`.
 
 

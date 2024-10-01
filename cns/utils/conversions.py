@@ -3,6 +3,20 @@ import pandas as pd
 from cns.utils.assemblies import hg19
 
 
+def calc_len(cns_df):
+    return cns_df["end"] - cns_df["start"]
+
+
+def calc_mid(cns_df):
+    return cns_df["start"] + calc_len(cns_df) // 2
+
+
+def calc_cum_mid(cns_df, assembly=hg19):
+    mid = calc_mid(cns_df)
+    offset = cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
+    return mid + offset
+
+
 def cytobands_to_df(cytobands):
     return pd.DataFrame(cytobands, columns=["chrom", "start", "end", "name", "stain"])
 

@@ -1,6 +1,5 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-from cns.process.aggregation import add_cns_loc, sum_cns
 from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
@@ -23,7 +22,7 @@ def load_cns_out(filename, raw=False):
     cns_df = load_cns(pjoin(out_path, filename))
     if raw:
         return cns_df
-    return sum_cns(add_cns_loc(rename_cns_columns(cns_df)))
+    return rename_cns_columns(cns_df)
 
 
 def load_samples_out(filename):
@@ -31,7 +30,7 @@ def load_samples_out(filename):
 
 
 def load_bins(dataset, segment_type):
-    return sum_cns(add_cns_loc(load_cns(pjoin(out_path, f"{dataset}_bin_{segment_type}.tsv"))))
+    return load_cns(pjoin(out_path, f"{dataset}_bin_{segment_type}.tsv"))
 
 
 def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):

@@ -5,19 +5,11 @@ from numba import njit
 from cns.process.breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments
 from cns.utils.canonization import find_cn_cols_if_none
-from cns.utils import hg19
+from cns.utils.assemblies import hg19
 from cns.utils.logging import log_info
 
 
-def add_cns_loc(cns_df, assembly=hg19):
-    cns_df["length"] = (cns_df["end"] - cns_df["start"]).astype(np.uint32)
-    cns_df["mid"] = cns_df["start"] + cns_df["length"] // 2
-    offset = cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
-    cns_df["cum_mid"] = cns_df["mid"] + offset
-    return cns_df
-
-
-def sum_cns(cns_df, cn_columns=None):
+def add_total_cn(cns_df, cn_columns=None):
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     # remove total_cn from cn_columns if it is there
     if "total_cn" in cn_columns:
@@ -28,22 +20,16 @@ def sum_cns(cns_df, cn_columns=None):
 
 # TODO: Add empty check
 # TODO: Group on start, end
-def group_samples(cns_df, cn_columns=None, how="mean", group_col='cum_mid', assembly=hg19):    
+def group_samples(cns_df, cn_columns=None, how="mean"):    
     if how not in ["mean", "max", "min"]:
         raise ValueError("to group samples, how must be one of ['mean', 'max', 'min']")
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    if group_col not in cns_df.columns:
-        raise ValueError(f"cns_df must have a column '{group_col}' to group the samples on")
-    grouped = cns_df.drop("sample_id", axis=1).groupby([group_col])
+    grouped = cns_df.drop("sample_id", axis=1).groupby(["start", "end"])
 
     # calculate mean on grouped except for chrom, where take the first value
     agg_scheme = {
         "chrom": "first",
-        "start": "first",
-        "end": "first",
     }
-    if "mid" in cns_df.columns:
-        agg_scheme["mid"] = "first"
     if "length" in cns_df.columns:
         agg_scheme["length"] = "first"
     for column in cn_columns:

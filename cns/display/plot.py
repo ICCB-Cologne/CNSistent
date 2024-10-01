@@ -9,41 +9,46 @@ from cns.utils.conversions import chrom_to_sortable
 from cns.utils.assemblies import hg19
 
 
-def plot_lines(ax, grouped, column, color="green", label=None, alpha=1, line_width=1, chrom=None, pos_col=None):
-    chroms = grouped["chrom"].unique() if chrom is None else [chrom]
-    pos_col = ("cum_mid" if chrom is None else "mid") if pos_col is None else pos_col
+def plot_lines(ax, cns_df, column, color="green", label=None, alpha=1, line_width=1, chrom=None, assembly=hg19):
+    chroms = cns_df["chrom"].unique() if chrom is None else [chrom]
     for chr in chroms:
-        df = grouped.query(f"chrom == '{chr}'").copy()
-        df["is_consecutive"] = df["start"] - df["end"].shift(1) != 0
+        chr_start = assembly.chr_starts[chr]
+        chr_cns_df = cns_df.query(f"chrom == '{chr}'")
+        is_consecutive = chr_cns_df["start"] - chr_cns_df["end"].shift(1) != 0
         # plot consecutive segments
-        for _, group_df in df.groupby(df["is_consecutive"].cumsum()):
-            x = group_df[pos_col]
+        for _, group_df in chr_cns_df.groupby(is_consecutive.cumsum()):
+            length = group_df["end"] - group_df["start"]
+            x = group_df["start"] + length / 2 + chr_start
             ax.plot(x, group_df[column], c=color, linewidth=line_width, label=label, alpha=alpha)
             label = None  # only use label for the first chromosome
     return ax
 
 
-def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None, pos_col=None):
+def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None, assembly=hg19):
     chroms = grouped["chrom"].unique() if chrom is None else [chrom]
-    pos_col = ("cum_mid" if chrom is None else "mid") if pos_col is None else pos_col
-    for chr in chroms:		
-        df = grouped.query(f"chrom == '{chr}'")
-        ax.scatter(df[pos_col], df[column], s=dot_size, label=label, color=color, alpha=alpha)
+    for chrom in chroms:		
+        chr_start = assembly.chr_starts[chrom]
+        group_df = grouped.query(f"chrom == '{chrom}'")
+        length = group_df["end"] - group_df["start"]
+        x = group_df["start"] + length / 2 + chr_start
+        ax.scatter(x, group_df[column], s=dot_size, label=label, color=color, alpha=alpha)
         label = None  # only use label for the first chromosome
     return ax
 
 
-def plot_bars(ax, grouped, column, color="green", label=None, alpha=1, chrom=None, pos_col=None):
+def plot_bars(ax, grouped, column, color="green", label=None, alpha=1, chrom=None, assembly=hg19):
     chroms = grouped["chrom"].unique() if chrom is None else [chrom]
-    pos_col = ("cum_mid" if chrom is None else "mid") if pos_col is None else pos_col
     for chrom in chroms:
-        df = grouped.query(f"chrom == '{chrom}'")
-        ax.bar(df[pos_col], df[column], width=df["length"], color=color, label=label, alpha=alpha)
+        chr_start = assembly.chr_starts[chrom]
+        group_df = grouped.query(f"chrom == '{chrom}'")
+        length = group_df["end"] - group_df["start"]
+        x = group_df["start"] + length / 2 + chr_start
+        ax.bar(x, group_df[column], width=length, color=color, label=label, alpha=alpha)
         label = None  # only use label for the first chromosome
     return ax
 
 
-def _check_fig_input(data, column, label, chrom, assembly, pos_col):
+def _check_fig_input(data, column, label, chrom, assembly):
     if chrom != None and not (isinstance(chrom, str) or not chrom in assembly.keys()):
         raise ValueError("chrom must be None or a string")
     
@@ -83,10 +88,6 @@ def _check_fig_input(data, column, label, chrom, assembly, pos_col):
     else:
         raise ValueError("column must be a string or a list of strings")	
     
-    for df in data:
-        if pos_col not in df.columns:
-            raise ValueError(f"all dataframes must have a column '{pos_col}'")
-    
     line_count = len(data)*len(column)
     return data, label, column, line_count, has_label
     
@@ -114,11 +115,11 @@ def _get_colors(colors, line_count):
     return colors
 
 
-def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19, pos_col="cum_mid"):
+def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=None, width=None, dpi=100, assembly=hg19):
     width = width if width != None else (18 if chrom == None else 4)
     height = width / 6 if chrom == None else width
     fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
-    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly, pos_col)
+    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly)
     colors = _get_colors(color, line_count)
     alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
     if chrom == None:
@@ -242,8 +243,7 @@ def fig_CN_heatmap(
         raise ValueError("chrom must be None or a string")
     data_df = data_df.query(f"chrom == '{chrom}'") if chrom is not None else data_df
     sample_ids = data_df["sample_id"].unique()
-    pos_col = "cum_mid" 
-    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly, pos_col)
+    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, column, label, chrom, assembly)
     max_cn = min(max_cn, int(np.ceil(_get_min_max_cn(dfs, columns)[1])))
 
     width = width if width != None else (18 if chrom == None else 6) 
@@ -267,7 +267,7 @@ def fig_CN_heatmap(
         else:
             no_y_ticks(ax)
 
-        pos_per_chr = data_df.groupby("chrom")[pos_col].nunique()
+        pos_per_chr = data_df.groupby("chrom")["start"].nunique()
         chrom_sizes = pos_per_chr.sort_index(key=lambda x: x.map(chrom_to_sortable)).items()
         pos = plot_x_ticks(ax, positions=chrom_sizes, font_size=font_size)
         plot_x_lines(ax, positions=pos)

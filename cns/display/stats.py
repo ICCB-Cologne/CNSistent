@@ -1,17 +1,19 @@
 import numpy as np
 from cns.display.label import plot_cytobands, plot_x_ticks
 import matplotlib.pyplot as plt
+from cns.utils.conversions import calc_cum_mid
 
 
 def plot_nans(nans_df, dataset_name):
     fig, ax = plt.subplots(1, figsize=(16, 4), dpi = 200)
     nans_df = nans_df.copy()
+    cum_mid = calc_cum_mid(nans_df)
     plot_x_ticks(ax)
-    ax.hist(nans_df["cum_mid"], weights=nans_df["len"], bins=310)
+    ax.hist(cum_mid, weights=nans_df["len"], bins=310)
     # get current max y
     max_y = ax.get_ylim()[1]
     plot_cytobands(ax, 0, max_y)
-    ax.hist(nans_df["cum_mid"], weights=nans_df["len"], bins=310, color="blue")
+    ax.hist(cum_mid, weights=nans_df["len"], bins=310, color="blue")
     ax.set_title(f"Distribution of NaNs by chromosome in {dataset_name} dataset")
     ax.set_xlabel("Chromosome and position")
     ax.set_ylabel("Length of NaNs")
