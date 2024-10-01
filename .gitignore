@@ -10,3 +10,4 @@ pycns.egg-info
 docs/*.log
 docs/*.aux
 copy_files.ps1
+test.tsv
