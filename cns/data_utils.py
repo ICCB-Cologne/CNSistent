@@ -162,11 +162,11 @@ def main_load_data(segment_type = None):
 
 
 def load_COSMIC():
-    return load_segments("COSMIC_consensus_genes.bed")
+    return load_segments(pjoin(data_path, "COSMIC_consensus_genes.bed"))
 
 
 def load_ENSEMBL():
-    return load_segments("ENSEMBL_coding_genes.bed")
+    return load_segments(pjoin(data_path, "ENSEMBL_coding_genes.bed"))
 
 
 def save_cns_fig(fig_name, fig = None):

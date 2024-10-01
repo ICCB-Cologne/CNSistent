@@ -39,16 +39,25 @@ def sample_random(samples_df, n=5, seed=0):
     return sample_random.copy()
 
 
-def only_aut(cns_df, assembly=hg19):
+def only_aut(cns_df, assembly=hg19, inplace=False):
+    if inplace:
+        cns_df.drop(cns_df[(cns_df['chrom'] == assembly.chr_y) | (cns_df['chrom'] == assembly.chr_x)].index, inplace=True)
+        return cns_df
     return cns_df.query(f"chrom != '{assembly.chr_x}' and chrom != '{assembly.chr_y}'")
 
 
-def only_sex(cns_df, assembly=hg19):
+def only_sex(cns_df, assembly=hg19, inplace=False):
+    if inplace:
+        cns_df.drop(cns_df[(cns_df['chrom'] != assembly.chr_y) & (cns_df['chrom'] != assembly.chr_x)].index, inplace=True)
+        return cns_df
     return cns_df.query(f"chrom == '{assembly.chr_x}' or chrom == '{assembly.chr_y}'")
 
 
-def drop_Y(cns_df, assembly=hg19):
-    return cns_df.query(f"chrom != '{assembly.chr_y}'")
+def drop_Y(cns_df, assembly=hg19, inplace=False):
+    if inplace:
+        cns_df.drop(cns_df[cns_df['chrom'] == assembly.chr_y].index, inplace=True)
+        return cns_df
+    return cns_df.query(f"chrom != '{assembly.chr_y}'").copy()
 
 
 def select_CNS_samples(cns_df, samples):
