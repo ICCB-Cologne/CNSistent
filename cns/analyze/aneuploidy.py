@@ -1,6 +1,7 @@
 import numpy as np
 from cns.process.normalize import get_chr_sets
 from cns.utils.assemblies import hg19
+from cns.utils.conversions import calc_len
 
 
 def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
@@ -71,7 +72,8 @@ def _get_check_fun(feature):
 def _calc_bases_per_chr_group(res, masked_cns_df, label, groups, assembly=hg19):
     for suffix, names in groups.items():
         subset = masked_cns_df.query("chrom in @names")
-        res[f"{label}_{suffix}"] = subset.groupby("sample_id")["length"].sum()
+        length = calc_len(subset)
+        res[f"{label}_{suffix}"] = length.groupby(subset["sample_id"]).sum()
         res[f"{label}_{suffix}"] = res[f"{label}_{suffix}"].fillna(0).astype(np.int64)
     return res
 

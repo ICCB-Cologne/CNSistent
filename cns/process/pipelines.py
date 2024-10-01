@@ -58,8 +58,6 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     if segs is not None:
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
     norm_sizes = get_norm_sizes(segs, assembly)
-    if "length" not in cns_df.columns:
-        cns_df["length"] = cns_df["end"] - cns_df["start"]
 
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     het_nan_df = get_not_nan(cns_df, cn_columns, True)
@@ -111,8 +109,6 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
     if segs is not None:
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)    
-    if "length" not in cns_df.columns:
-        cns_df["length"] = cns_df["end"] - cns_df["start"]
     norm_sizes = get_norm_sizes(segs, assembly)
 
     if cns_df[cn_columns].isna().any().any():

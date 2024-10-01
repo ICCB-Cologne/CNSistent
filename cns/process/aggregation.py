@@ -30,8 +30,6 @@ def group_samples(cns_df, cn_columns=None, how="mean"):
     agg_scheme = {
         "chrom": "first",
     }
-    if "length" in cns_df.columns:
-        agg_scheme["length"] = "first"
     for column in cn_columns:
         agg_scheme[column] = how
     grouped = grouped.agg(agg_scheme).reset_index()

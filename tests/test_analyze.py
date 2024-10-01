@@ -18,7 +18,6 @@ class TestCoverage(unittest.TestCase):
             'start': [0, 100, 200, 300, 400, 0, 50, 99],
             'end': [100, 200, 300, 400, 500, 50, 99, 100],
         })
-        self.cns["length"] = self.cns["end"] - self.cns["start"]
         self.samples = pd.DataFrame({
             'sex': ['xy', 'NA', 'xx', 'NA']
         }, index=['s1', 's2', 's3', 's4'])
@@ -32,7 +31,6 @@ class TestCoverage(unittest.TestCase):
             'chr_y': 'chrY'
         })
         pd.set_option('display.max_columns', 10)
-        self.cns["length"] = self.cns["end"] - self.cns["start"]
 
     def test_get_missing_chroms(self):
         res = get_missing_chroms(self.cns, self.samples, assembly=self.assembly)
@@ -88,7 +86,6 @@ class TestSignatures(unittest.TestCase):
             'sex_count': 2
         })
         pd.set_option('display.max_columns', 10)
-        self.cns["length"] = self.cns["end"] - self.cns["start"]
 
     def test_calc_breaks_per_chr(self):
         segs_df = prepare_segments(self.cns, "major_cn")
@@ -152,7 +149,6 @@ class TestAneuploidy(unittest.TestCase):
             'chr_y': 'chrY'
         })
         self.ane_cols = ["major_cn", "minor_cn"]
-        self.cns["length"] = self.cns["end"] - self.cns["start"]
 
     def test_get_expected_ploidy(self):
         self.assertEqual(get_expected_ploidy("minor_cn", "chrX", True), 0)
