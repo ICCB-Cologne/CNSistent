@@ -98,7 +98,6 @@ def plot_chr_bg(ax, assembly=hg19, y_min=0, y_max=1, colored=False):
     ax.set_xlim(0, assembly.gen_len)
 
 
-# TODO: overlap issues
 def plot_cytobands(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
     for band in assembly.cytobands:
         band_chr, start, end, name, gie_stain = band
@@ -130,7 +129,6 @@ def add_cytoband_legend(ax):
     ax.legend(handles=legend_elements, bbox_to_anchor=(1, 1), loc='upper left')
 
 
-# TODO: overlap issues
 def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None, color=None):
     for gap in assembly.gaps:
         gap_chrom, start, end, gap_type, bridge = gap        

@@ -59,7 +59,6 @@ def calc_cytoband_breaks(assembly=hg19):
     return { chrom: [0] + [end for end in cyto_df.query(f"chrom == '{chrom}'")["end"]] 
             for chrom in cyto_df["chrom"].unique() }
 
-# TODO: Make breaks should be a dict
 # Create breakpoints
 def make_breaks(break_type, assembly=hg19):
     if break_type == "arms":

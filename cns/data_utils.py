@@ -129,7 +129,7 @@ def rename_cns_columns(cns_df, cn_columns=None):
 def load_merged_bins(select_samples, segment_size):
     cns = {
         "PCAWG": load_cns_out(f"PCAWG_bin_{segment_size}.tsv"),
-        "TRACERx": rename_cns_columns(load_cns_out(f"TRACERx_bin_{segment_size}.tsv")),
+        "TRACERx": load_cns_out(f"TRACERx_bin_{segment_size}.tsv"),
         "TCGA_hg19": load_cns_out(f"TCGA_hg19_bin_{segment_size}.tsv")
     }
     all_cns = pd.concat(cns.values())
@@ -141,7 +141,7 @@ def load_merged_bins(select_samples, segment_size):
 def load_merged_cns(select_samples=None):
     cns = {
         "PCAWG": load_cns_out("PCAWG_cns_imp.tsv"),
-        "TRACERx": rename_cns_columns(load_cns_out("TRACERx_cns_imp.tsv")),
+        "TRACERx": load_cns_out("TRACERx_cns_imp.tsv"),
         "TCGA_hg19": load_cns_out("TCGA_hg19_cns_imp.tsv")
     }
     all_cns = pd.concat(cns.values())

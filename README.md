@@ -331,12 +331,6 @@ There are the following aggregate functions: `mean`, `min`, `max`, and `none`. T
 
 Aggregation can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. `arms`, `1000000`).
 
-Three utility functions are included with aggregation:
-
-* `add_cns_loc`: TODO: Remove
-* `group_bins`: Will group all samples in a a CNS df, by default using the `mean` function. Segments are grouped on `start` and `end` columns.
-* `sum_cns`: Finds columns that match the CN column pattern and sums them up into the column `total_cn`.
-
 
 ### Analyze
 

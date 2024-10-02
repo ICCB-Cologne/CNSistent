@@ -19,7 +19,6 @@ def add_total_cn(cns_df, cn_columns=None):
 
 
 # TODO: Add empty check
-# TODO: Group on start, end
 def group_samples(cns_df, cn_columns=None, how="mean"):    
     if how not in ["mean", "max", "min"]:
         raise ValueError("to group samples, how must be one of ['mean', 'max', 'min']")
@@ -109,6 +108,7 @@ def _get_agg_func(how):
 
 
 # Add column names
+# TODO: Should propagate segment names even for NaN rows
 def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=True):
     agg_func = _get_agg_func(how)
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)

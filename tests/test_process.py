@@ -141,10 +141,6 @@ BCORL1	chrX	129115083	129192058"""
         self.assertGreater(len(res["chr2"]), len(gene_segs["chr2"]))
 
 
-
-
-
-
 # TODO: Add sex chromosome checks
 class TestImputation(unittest.TestCase):
     def setUp(self):
