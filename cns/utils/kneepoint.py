@@ -94,3 +94,14 @@ def find_bends(vals, min_val=0, max_val=1, steps=10000):
     knee_index, knee_value = find_knee(X, Y, knee=True)
     elbow_index, elbow_value = find_knee(X, Y, knee=False)
     return X, Y, knee_index, knee_value, elbow_index, elbow_value
+
+
+# removes values with z-scores below min_val or above max_val
+def z_score_filter(vals, min_val=-3, max_val=3):
+    if min_val is None or max_val is None:
+        return vals
+    if min_val > max_val:
+        raise ValueError('min_val must be less than or equal to max_val')
+    zscore = (vals - vals.mean()) / vals.std()
+    return vals[(zscore >= min_val) & (zscore <= max_val)]
+    

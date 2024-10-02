@@ -41,6 +41,8 @@ def sample_random(samples_df, n=5, seed=0):
 
 def only_aut(cns_df, assembly=hg19, inplace=False):
     if inplace:
+        if not cns_df.index.is_unique:
+            cns_df.reset_index(drop=True, inplace=True)
         cns_df.drop(cns_df[(cns_df['chrom'] == assembly.chr_y) | (cns_df['chrom'] == assembly.chr_x)].index, inplace=True)
         return cns_df
     return cns_df.query(f"chrom != '{assembly.chr_x}' and chrom != '{assembly.chr_y}'")
@@ -48,6 +50,8 @@ def only_aut(cns_df, assembly=hg19, inplace=False):
 
 def only_sex(cns_df, assembly=hg19, inplace=False):
     if inplace:
+        if not cns_df.index.is_unique:
+            cns_df.reset_index(drop=True, inplace=True)
         cns_df.drop(cns_df[(cns_df['chrom'] != assembly.chr_y) & (cns_df['chrom'] != assembly.chr_x)].index, inplace=True)
         return cns_df
     return cns_df.query(f"chrom == '{assembly.chr_x}' or chrom == '{assembly.chr_y}'")

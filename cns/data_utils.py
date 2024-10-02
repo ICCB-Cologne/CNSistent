@@ -4,7 +4,7 @@ from cns.utils.canonization import find_cn_cols_if_none
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples, load_segments
-from cns.utils.kneepoint import find_bends
+from cns.utils.kneepoint import find_bends, z_score_filter
 import matplotlib.pyplot as plt
 
 
@@ -62,7 +62,7 @@ def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=F
     return filtered.copy()
 
 
-def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False):
+def load_all_samples(z_filter=True, retype=True, drop_tcga=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
@@ -71,20 +71,17 @@ def load_all_samples(filter=True, retype=True, drop_tcga=True, print_info=False)
     
     overlap_with_tcga = samples["PCAWG"]["TCGA_id"].dropna().unique()
     
-    if filter:
+    if z_filter:
         for k, v in samples.items():
             log_info(print_info, k)
 
             # calculate bend for aneuploidy
-            ane_vals = v["ane_het_aut"]
-            ane_bends = find_bends(ane_vals)
+            ane_bends = find_bends(v["ane_het_aut"])
             ane_min_frac = ane_bends[0][ane_bends[2]]
 
             # calculate the z-score for coverage
-            cover_het_aut = v["cover_het_aut"]
-            z = (cover_het_aut - cover_het_aut.mean()) / cover_het_aut.std()
-            filter = z[(z < -3)]
-            cover_min_frac = cover_het_aut.loc[filter.index].max()
+            cover_filtered = z_score_filter(v["cover_het_aut"])
+            cover_min_frac = cover_filtered.min()
 
             whitelist = k=="PCAWG"
             filter_types = k=="TRACERx"
@@ -135,7 +132,7 @@ def load_merged_bins(select_samples, segment_size):
     all_cns = pd.concat(cns.values())
     if select_samples is not None:
         all_cns = select_CNS_samples(all_cns, select_samples)
-    return all_cns
+    return all_cns.reset_index(drop=True)
 
 
 def load_merged_cns(select_samples=None):
@@ -148,7 +145,7 @@ def load_merged_cns(select_samples=None):
     cns = None
     if select_samples is not None:
         all_cns = select_CNS_samples(all_cns, select_samples)
-    return all_cns
+    return all_cns.reset_index(drop=True)
 
 
 def main_load_data(segment_type = None):

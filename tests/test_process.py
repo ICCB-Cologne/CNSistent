@@ -76,9 +76,12 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(res["chr1"][0][2], "chr1")
 
         res = regions_select("arms")
+        print(res)
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 2)
         self.assertEqual(res["chr1"][0][2], "chr1p")
+
+        # TODO: Check segment name on chr2p_2
 
         res = regions_select("bands")
         self.assertEqual(len(res), 24)
