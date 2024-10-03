@@ -10,10 +10,11 @@ from cns.utils.assemblies import hg19
 
 
 def plot_lines(ax, cns_df, column, color="green", label=None, alpha=1, line_width=1, chrom=None, assembly=hg19):
-    chroms = cns_df["chrom"].unique() if chrom is None else [chrom]
-    for chr in chroms:
-        chr_start = assembly.chr_starts[chr]
-        chr_cns_df = cns_df.query(f"chrom == '{chr}'")
+    single = chrom is not None
+    chroms = [chrom] if single else cns_df["chrom"].unique()
+    for chrom in chroms:
+        chr_start = 0 if single else assembly.chr_starts[chrom]
+        chr_cns_df = cns_df.query(f"chrom == '{chrom}'")
         is_consecutive = chr_cns_df["start"] - chr_cns_df["end"].shift(1) != 0
         # plot consecutive segments
         for _, group_df in chr_cns_df.groupby(is_consecutive.cumsum()):
@@ -24,11 +25,12 @@ def plot_lines(ax, cns_df, column, color="green", label=None, alpha=1, line_widt
     return ax
 
 
-def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=1, chrom=None, assembly=hg19):
-    chroms = grouped["chrom"].unique() if chrom is None else [chrom]
-    for chrom in chroms:		
-        chr_start = assembly.chr_starts[chrom]
-        group_df = grouped.query(f"chrom == '{chrom}'")
+def plot_dots(ax, cns_df, column, color="green", label=None, alpha=1, dot_size=1, chrom=None, assembly=hg19):
+    single = chrom is not None
+    chroms = [chrom] if single else cns_df["chrom"].unique()
+    for chrom in chroms:
+        chr_start = 0 if single else assembly.chr_starts[chrom]
+        group_df = cns_df.query(f"chrom == '{chrom}'")
         length = group_df["end"] - group_df["start"]
         x = group_df["start"] + length / 2 + chr_start
         ax.scatter(x, group_df[column], s=dot_size, label=label, color=color, alpha=alpha)
@@ -36,11 +38,12 @@ def plot_dots(ax, grouped, column, color="green", label=None, alpha=1, dot_size=
     return ax
 
 
-def plot_bars(ax, grouped, column, color="green", label=None, alpha=1, chrom=None, assembly=hg19):
-    chroms = grouped["chrom"].unique() if chrom is None else [chrom]
+def plot_bars(ax, cns_df, column, color="green", label=None, alpha=1, chrom=None, assembly=hg19):
+    single = chrom is not None
+    chroms = [chrom] if single else cns_df["chrom"].unique()
     for chrom in chroms:
-        chr_start = assembly.chr_starts[chrom]
-        group_df = grouped.query(f"chrom == '{chrom}'")
+        chr_start = 0 if single else assembly.chr_starts[chrom]
+        group_df = cns_df.query(f"chrom == '{chrom}'")
         length = group_df["end"] - group_df["start"]
         x = group_df["start"] + length / 2 + chr_start
         ax.bar(x, group_df[column], width=length, color=color, label=label, alpha=alpha)

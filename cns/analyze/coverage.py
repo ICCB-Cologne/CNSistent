@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from cns.utils.conversions import calc_len
+from cns.utils.conversions import calc_lenghts
 from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
@@ -16,9 +16,9 @@ def get_covered_bases(nan_bases_df, samples_df, het):
     res = samples_df.copy()
     label = "het" if het else "hom"
     aut_df = only_aut(nan_bases_df)
-    aut_df_len = calc_len(aut_df)
+    aut_df_len = calc_lenghts(aut_df)
     sex_df = only_sex(nan_bases_df)
-    sex_df_len = calc_len(sex_df)
+    sex_df_len = calc_lenghts(sex_df)
     # Group the differences by sample_id and compute the sum for each group
     res[f"cover_{label}_aut"] = (
         aut_df_len.groupby(aut_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)

@@ -39,13 +39,16 @@ def group_samples(cns_df, cn_columns=None, how="mean"):
 def mean_func(cns_array):
     return [np.average(cns_array[:, i], weights=cns_array[:, -1]) for i in range(cns_array.shape[1] - 1)]
 
+
 @njit
 def max_func(cns_array):
     return [np.max(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
+
 @njit
 def min_func(cns_array):
     return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
+
 
 def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name, agg_func):
     row_id = 0

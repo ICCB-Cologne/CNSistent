@@ -6,7 +6,7 @@ import pandas as pd
 from cns.process.aggregation import aggregate_by_segments
 from cns.process.normalize import get_chr_sets, get_norm_sizes
 from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
-from cns.utils.conversions import calc_len, tuples_to_segments
+from cns.utils.conversions import calc_lenghts, tuples_to_segments
 from cns.utils.selection import only_aut
 from cns.utils.assemblies import hg19   
 from cns.utils.gaps import hg19_gaps
@@ -43,7 +43,7 @@ class TestPipelines(unittest.TestCase):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
         # assert that length sum is equal to aut_len for each sample
         auts = only_aut(res, self.assembly)
-        self.assertTrue(np.allclose(calc_len(auts).groupby(auts["sample_id"]).sum(),self.assembly.aut_len))
+        self.assertTrue(np.allclose(calc_lenghts(auts).groupby(auts["sample_id"]).sum(),self.assembly.aut_len))
         # assert that chrY exists in chrom column where index is s4 and not in s3
         self.assertTrue("chrY" in res.query("sample_id == 's4'")['chrom'].values)
         self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
@@ -52,7 +52,7 @@ class TestPipelines(unittest.TestCase):
         res = main_fill(self.cns, self.samples, assembly=self.assembly)
         res = main_impute(res, self.samples)
         auts = only_aut(res, self.assembly)
-        self.assertTrue(np.allclose(calc_len(auts).groupby(auts["sample_id"]).sum(), self.assembly.aut_len))
+        self.assertTrue(np.allclose(calc_lenghts(auts).groupby(auts["sample_id"]).sum(), self.assembly.aut_len))
         # assert that chrY exists in chrom column where index is s4 and not in s3
         self.assertTrue("chrY" in res.query("sample_id == 's4'")['chrom'].values)
         self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)

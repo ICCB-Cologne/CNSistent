@@ -5,7 +5,7 @@ from cns.utils.assemblies import hg19
 import numpy as np
 import pandas as pd
 
-from cns.utils.conversions import calc_len
+from cns.utils.conversions import calc_lenghts
 
 
 def prepare_segments(cns_df, cn_col):
@@ -73,6 +73,6 @@ def calc_seg_size_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
     mask = cns_df.apply(lambda x: get_ane_for_col(cn_col, x, samples_df, assembly), axis=1)
     for suffix, names in chrom_types.items():
         subset = cns_df[mask].query("chrom in @names")
-        sub_len = calc_len(subset)
+        sub_len = calc_lenghts(subset)
         res[f"segsize_{cn_col}_{suffix}"] = sub_len.groupby(subset["sample_id"]).mean()
     return res.fillna(0)

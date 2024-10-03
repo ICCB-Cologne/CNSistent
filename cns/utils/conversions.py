@@ -1,20 +1,27 @@
 import pandas as pd
 
 from cns.utils.assemblies import hg19
+from cns.utils.canonization import find_cn_cols_if_none
 
 
-def calc_len(cns_df):
+def calc_lenghts(cns_df):
     return cns_df["end"] - cns_df["start"]
 
 
 def calc_mid(cns_df):
-    return cns_df["start"] + calc_len(cns_df) // 2
+    return cns_df["start"] + calc_lenghts(cns_df) // 2
 
 
 def calc_cum_mid(cns_df, assembly=hg19):
     mid = calc_mid(cns_df)
     offset = cns_df.apply(lambda x: assembly.chr_starts[x["chrom"]], axis=1)
     return mid + offset
+
+
+def calc_nan_cols(cns_df, cn_columns=None):
+    if cn_columns is None:
+        cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    return cns_df[cn_columns].isna().any(axis=1)
 
 
 def cytobands_to_df(cytobands):

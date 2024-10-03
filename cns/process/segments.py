@@ -5,6 +5,10 @@ from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to
 from cns.utils.files import load_segments
 
 
+def count_segments(segs):
+    return sum([len(chr_segs) for chr_segs in segs.values()])
+
+
 def do_segments_overlap(segs, is_sorted=False):
     for chr, chr_segs in segs.items():
         if not is_sorted:
