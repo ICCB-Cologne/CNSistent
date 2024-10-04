@@ -62,6 +62,8 @@ def load_all_samples(filter=True, retype=True, print_info=False):
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
         "TCGA_hg19": load_samples_out("TCGA_hg19_samples.tsv")
     }
+    total_count = sum([len(v) for v in samples.values()])
+    log_info(print_info, f"Total samples: {total_count}")
 
     if filter:
         for k, v in samples.items():

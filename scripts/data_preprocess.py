@@ -126,10 +126,12 @@ def merge_TRACERx_samples(print_info=False):
     met_samples = load_samples_out(f"TRACERx_met_samples_preprocess.tsv")
 
     # Merge the DataFrames on the common key 'sample_id'
-    merged_df = pd.merge(prim_samples, met_samples, on='sample_id', suffixes=('_prim', '_met'))
+    common_samples = pd.merge(prim_samples, met_samples, on='sample_id', suffixes=('_prim', '_met')).index.unique()
 
     # Filtered indices
-    common_samples = merged_df.index.unique()
+    log_info(print_info, f"TRACERx primary samples: {len(prim_samples)}")
+    log_info(print_info, f"TRACERx metastatic samples: {len(met_samples)}")
+    log_info(print_info, f"TRACERx all samples: {len(prim_samples) + len(met_samples)}")
     log_info(print_info, f"TRACERx common samples: {len(common_samples)}")
     met_only = met_samples[~met_samples.index.isin(common_samples)].copy()
 
@@ -165,6 +167,7 @@ def remove_PCAWG_from_TCGA(print_info=False):
     PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
 
     overlap_with_tcga = PCAWG_samples["TCGA_id"].dropna().unique()
+    log_info(print_info, f"Total TCGA samples: {len(TCGA_samples)}")
     log_info(print_info, f"Overlapping samples with PCAWG from total: {len(overlap_with_tcga)}")
     TCGA_samples = TCGA_samples.query("sample_id not in @overlap_with_tcga") 
 
@@ -189,6 +192,7 @@ def remove_not_whitelist_PCAWG(print_info=False):
     PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
 
     blacklist_count = len(PCAWG_samples) - PCAWG_samples["whitelist"].sum()
+    log_info(print_info, f"Total PCAWG samples: {len(PCAWG_samples)}")
     log_info(print_info, f"Blacklisted samples: {blacklist_count}")
 
     # Filter the samples
