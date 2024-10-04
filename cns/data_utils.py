@@ -33,7 +33,7 @@ def load_bins(dataset, segment_type):
     return load_cns(pjoin(out_path, f"{dataset}_bin_{segment_type}.tsv"))
 
 
-def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=False, filter_types=False, print_info=False):
+def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, filter_types=False, print_info=False):
     log_info(print_info, f"Total samples: {len(samples)}")
     
     cn_neutral = samples.query(f"ane_het_aut < {ane_min_frac}").index
@@ -44,12 +44,6 @@ def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=F
     low_coverage = samples.query(f"cover_het_aut < {cover_min_frac}").index
     log_info(print_info, f"{len(low_coverage)} samples have low coverage (below {cover_min_frac:.5f})")
     filtered = filtered.query("(index not in @low_coverage)")
-
-    # Filter out CN neutral and low coverage samples 
-    if whitelist:
-        blacklisted = samples.query("whitelist == False").index
-        log_info(print_info, f"{len(blacklisted)} samples are blacklisted")
-        filtered = filtered.query("(index not in @blacklisted)")
 
     if filter_types:
         samples["type"] = samples["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
@@ -62,16 +56,14 @@ def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, whitelist=F
     return filtered.copy()
 
 
-def load_all_samples(z_filter=True, retype=True, drop_tcga=True, print_info=False):
+def load_all_samples(filter=True, retype=True, print_info=False):
     samples = {
         "PCAWG": load_samples_out("PCAWG_samples.tsv"),
         "TRACERx": load_samples_out("TRACERx_samples.tsv"),
         "TCGA_hg19": load_samples_out("TCGA_hg19_samples.tsv")
     }
-    
-    overlap_with_tcga = samples["PCAWG"]["TCGA_id"].dropna().unique()
-    
-    if z_filter:
+
+    if filter:
         for k, v in samples.items():
             log_info(print_info, k)
 
@@ -83,21 +75,13 @@ def load_all_samples(z_filter=True, retype=True, drop_tcga=True, print_info=Fals
             cover_filtered = z_score_filter(v["cover_het_aut"])
             cover_min_frac = cover_filtered.min()
 
-            whitelist = k=="PCAWG"
-            filter_types = k=="TRACERx"
-            samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, whitelist, filter_types, print_info)
-    
-    if drop_tcga:
-        # drop where TCGA_id is != NaN
-        samples["TCGA_hg19"] = samples["TCGA_hg19"].query("sample_id not in @overlap_with_tcga") 
-        log_info(print_info, f"Overlapping samples with PCAWG: {len(overlap_with_tcga)}")
-        log_info(print_info, f"After overlap removal: {len(samples['TCGA_hg19'])}")
+            filter_types = k=="TRACERx" and retype
+            samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, filter_types, print_info)
 
     if retype:
         samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
+        samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_type"])
         samples["TRACERx"]["type"] = samples["TRACERx"]["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
-    
-    samples["PCAWG"] = samples["PCAWG"].drop(columns=["TCGA_id", "TCGA_type", "whitelist"])
 
     return samples
 
@@ -110,7 +94,7 @@ def get_cns_for_type(cns, samples, type):
 
 
 def load_merged_samples(filter=True, retype=True, print_info=False):
-    samples = load_all_samples(filter, retype, drop_tcga=True, print_info=print_info)
+    samples = load_all_samples(filter, retype, print_info=print_info)
     for k, v in samples.items():
         v["source"] = k
     all_samples = pd.concat(samples.values())        

@@ -6,26 +6,24 @@ import pandas as pd
 import numpy as np
 from cns.utils.canonization import canonize_cns_df
 from cns.utils.assemblies import get_assembly
-from cns.data_utils import out_path, data_path
+from cns.data_utils import load_cns_out, load_samples_out, out_path, data_path
+from cns.utils.files import save_cns, save_samples
+from cns.utils.logging import log_info
 
-def pcawg(print_debug=False):
+
+def pcawg(print_info=False):
     cns_raw_df = pd.read_csv(f"{data_path}/pcawg_cns_source.tsv", sep="\t")
     cns_raw_df = canonize_cns_df(cns_raw_df)
-    if print_debug:
-        print(cns_raw_df.head())
     specimen_df = pd.read_csv(f"{data_path}/pcawg_specimen_histology_August.tsv", sep="\t")
     sample_to_donor_df = specimen_df[["# icgc_specimen_id", "icgc_donor_id"]].rename(columns={"# icgc_specimen_id": "sample_id", "icgc_donor_id": "donor_id"})
     sample_to_donor_df = sample_to_donor_df.drop_duplicates().sort_values(by="sample_id").reset_index(drop=True)
     sample_to_donor_map = sample_to_donor_df.set_index("sample_id").to_dict()["donor_id"]
-    if print_debug:
-        print(sample_to_donor_df.head())
 
     donor_df = pd.read_csv(f"{data_path}/pcawg_donor_clinical_August2016.tsv", sep="\t")
     donor_to_sex_df = donor_df[["icgc_donor_id", "donor_sex"]].rename(columns={"icgc_donor_id": "donor_id"})
     donor_to_sex_df = donor_to_sex_df.drop_duplicates().sort_values(by="donor_id").reset_index(drop=True)
     donor_to_sex_map = donor_to_sex_df.set_index("donor_id").to_dict()["donor_sex"]
-    if print_debug:
-        print(donor_to_sex_df.head())
+
     ids = cns_raw_df["sample_id"].unique()
     donors = map(lambda x: sample_to_donor_map[x], ids)
     sexes = map(lambda x: donor_to_sex_map[x], donors)
@@ -67,50 +65,35 @@ def pcawg(print_debug=False):
     TCGA_type_df = pd.DataFrame(TCGA_type_list, columns=["sample_id", "cancer"]).set_index("sample_id")
     samples_df = samples_df.join(TCGA_type_df).rename(columns={"cancer": "TCGA_type"})
 
-    if print_debug:
-        print(samples_df.head())
-
     return cns_raw_df, samples_df
 
 
-def tcga(hg_ver, print_debug=False):
+def tcga(hg_ver, print_info=False):
     assembly = get_assembly(hg_ver)
     cns_source_df = pd.read_csv(f"{data_path}/tcga_{hg_ver}_cns_source.tsv", sep="\t")
     cns_raw_df = canonize_cns_df(cns_source_df, assembly=assembly)
-    if print_debug:
-        print(cns_raw_df.head())
 
     labels = f"summary.ascatv3TCGA.penalty70.{hg_ver}.tsv"
     specimen_df = pd.read_csv(f"{data_path}/{labels}", sep="\t")
-    if print_debug:
-        print(specimen_df.head())
 
     samples_df = specimen_df[["name", "sex", "cancer_type"]].rename(columns={"name": "sample_id", "cancer_type": "type"})
     samples_df["sex"] = samples_df["sex"].replace({"XY": "xy", "XX": "xx"})
     samples_df.set_index("sample_id", inplace=True)
-    if print_debug:
-        print(samples_df.head())
 
     return cns_raw_df, samples_df
 
 
-def tracerx(primary, print_debug=False):
+def tracerx(primary, print_info=False):
     if primary:
         cns_file = pd.read_csv(f"{data_path}/20220803_TxPri_mphase_by_sample_df.reduced.csv")
     else:
         cns_file = pd.read_csv(f"{data_path}/20220807_TxMets_prim_and_met_mphase_by_sample_df.reduced.csv")
-    if print_debug:
-        print(cns_file.head())
 
     cns_subset = cns_file[["sample", "chr", "startpos", "endpos", "nMajor", "nMinor"]].copy()
     cns_subset["chr"] = "chr" + cns_subset["chr"].astype(str)
     cns_raw_df = canonize_cns_df(cns_subset)
-    if print_debug:
-        print(cns_raw_df.head())
 
     labels = pd.read_csv(f"{data_path}/20221109_TRACERx421_all_patient_df.tsv", sep="\t")
-    if print_debug:
-        print(labels.head())
 
     left = cns_file[["sample", "patient_id"]].drop_duplicates()
     right = labels[["cruk_id", "sex", "histology_multi_full"]].drop_duplicates()
@@ -118,35 +101,141 @@ def tracerx(primary, print_debug=False):
     merged["sex"] = np.where(merged["sex"] == "Female", "xx", "xy")
     samples_df = merged[["sample", "sex", "histology_multi_full"]].rename(columns={"sample": "sample_id", "histology_multi_full": "type"})
     samples_df.set_index(["sample_id"], inplace=True)
-    if print_debug:
-        print(samples_df.head())
 
     return cns_raw_df, samples_df
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Converts source datasets into format usable by cns")
-    parser.add_argument("dataset", type=str, help="Name of the dataset")  
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print debug information")
-    args = parser.parse_args()
-    dataset = args.dataset
-    print_debug = args.verbose
-
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+def get_processed_data(dataset, print_info=False):
     if dataset == "PCAWG":
-        cns_df, samples_df = pcawg(print_debug)
+        return pcawg(print_info)
     elif dataset == "TCGA_hg19":
-        cns_df, samples_df = tcga("hg19", print_debug)
+        return tcga("hg19", print_info)
     elif dataset == "TCGA_hg38":
-        cns_df, samples_df = tcga("hg38", print_debug)
+        return tcga("hg38", print_info)
     elif dataset == "TRACERx_prim":
-        cns_df, samples_df = tracerx(True, print_debug)
+        return tracerx(True, print_info)
     elif dataset == "TRACERx_met":
-        cns_df, samples_df = tracerx(False, print_debug)
+        return tracerx(False, print_info)
     else:
         raise ValueError(f"Dataset {dataset} not recognized.")
-    
-    assert len(cns_df["sample_id"].unique()) == len(samples_df)
-    
-    samples_df.to_csv(f"{out_path}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
-    cns_df.to_csv(f"{out_path}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)
+
+
+def merge_TRACERx_samples(print_info=False):
+    # Load the sample data
+    prim_samples = load_samples_out(f"TRACERx_prim_samples_preprocess.tsv")
+    met_samples = load_samples_out(f"TRACERx_met_samples_preprocess.tsv")
+
+    # Merge the DataFrames on the common key 'sample_id'
+    merged_df = pd.merge(prim_samples, met_samples, on='sample_id', suffixes=('_prim', '_met'))
+
+    # Filtered indices
+    common_samples = merged_df.index.unique()
+    log_info(print_info, f"TRACERx common samples: {len(common_samples)}")
+    met_only = met_samples[~met_samples.index.isin(common_samples)].copy()
+
+    # dataset label
+    prim_samples["TRACERx_set"] = "primary"
+    prim_samples[prim_samples.isin(common_samples)]["TRACERx_set"] = "both"	
+    met_only["TRACERx_set"] = "metastatic"
+
+    all_df = pd.concat([prim_samples,  met_only], axis=0)
+
+    # Save the merged DataFrame
+    save_samples(all_df, f"{out_path}/TRACERx_samples_preprocess.tsv")
+
+
+def merge_TRACERx_cns(print_info=False, filled=False):
+    suffix = "fill" if filled else "imp"
+    prim_cns = load_cns_out(f"TRACERx_prim_cns_preprocess.tsv", raw=True)
+    prim_cns.set_index(["sample_id"], inplace=True)
+    met_cns = load_cns_out(f"TRACERx_met_cns_preprocess.tsv", raw=True)
+    met_cns.set_index(["sample_id"], inplace=True)
+
+    common_samples = list(set(prim_cns.index).intersection(set(met_cns.index)))
+    filtered_met_cns = met_cns[~met_cns.index.isin(common_samples)].reset_index()
+    prim_cns.reset_index(inplace=True)
+
+    res_df = pd.concat([prim_cns, filtered_met_cns]).sort_values(["sample_id", "chrom", "start"])
+    save_cns(res_df, f"{out_path}/TRACERx_cns_preprocess.tsv")
+
+
+def remove_PCAWG_from_TCGA(print_info=False):
+    # Load the sample data
+    TCGA_samples = load_samples_out("TCGA_hg19_samples_preprocess.tsv")
+    PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
+
+    overlap_with_tcga = PCAWG_samples["TCGA_id"].dropna().unique()
+    log_info(print_info, f"Overlapping samples with PCAWG from total: {len(overlap_with_tcga)}")
+    TCGA_samples = TCGA_samples.query("sample_id not in @overlap_with_tcga") 
+
+    # Save the merged DataFrame
+    save_samples(TCGA_samples, f"{out_path}/TCGA_hg19_samples_preprocess.tsv")
+
+
+def filter_TCGA_CNS(print_info=False):
+    # Load the sample data
+    TCGA_cns = load_cns_out("TCGA_hg19_cns_preprocess.tsv", raw=True)
+    TCGA_samples = load_samples_out("TCGA_hg19_samples_preprocess.tsv")
+
+    # Filter the CNS data
+    TCGA_cns = TCGA_cns[TCGA_cns["sample_id"].isin(TCGA_samples.index)]
+
+    # Save the filtered CNS data
+    save_cns(TCGA_cns, f"{out_path}/TCGA_hg19_cns_preprocess.tsv")
+
+
+def remove_not_whitelist_PCAWG(print_info=False):
+    # Load the sample data
+    PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
+
+    blacklist_count = len(PCAWG_samples) - PCAWG_samples["whitelist"].sum()
+    log_info(print_info, f"Blacklisted samples: {blacklist_count}")
+
+    # Filter the samples
+    PCAWG_samples = PCAWG_samples[PCAWG_samples["whitelist"]]
+    PCAWG_samples.drop(columns=["whitelist"], inplace=True)
+
+    # Save the filtered samples
+    save_samples(PCAWG_samples, f"{out_path}/PCAWG_samples_preprocess.tsv")
+
+
+def filter_PCAWG_CNS(print_info=False):
+    # Load the CNS data
+    PCAWG_cns = load_cns_out("PCAWG_cns_preprocess.tsv", raw=True)
+    PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
+
+    # Filter the CNS data
+    PCAWG_cns = PCAWG_cns[PCAWG_cns["sample_id"].isin(PCAWG_samples.index)]
+
+    # Save the filtered CNS data
+    save_cns(PCAWG_cns, f"{out_path}/PCAWG_cns_preprocess.tsv")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Converts source datasets into format usable by cns")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print debug information")
+    args = parser.parse_args()
+    should_print = args.verbose
+    log_fun = lambda x: log_info(should_print, x)
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    for dataset in ["PCAWG", "TCGA_hg19", "TCGA_hg38", "TRACERx_prim", "TRACERx_met"]:
+        log_fun( f"Preprocessing {dataset} data")
+        cns_df, samples_df = get_processed_data(dataset, should_print)
+        assert len(cns_df["sample_id"].unique()) == len(samples_df)
+        samples_df.to_csv(f"{out_path}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
+        cns_df.to_csv(f"{out_path}/{dataset}_cns_preprocess.tsv", sep="\t", index=False, header=True)
+
+    log_fun("Merging samples for TRACERx...")
+    merge_TRACERx_samples(should_print)
+    log_fun("Merging filled CNS for TRACERx...")
+    merge_TRACERx_cns(should_print, True)    
+    log_fun("Merging imputed CNS for TRACERx...")
+    merge_TRACERx_cns(should_print, False)
+    log_fun("Filtering TCGA samples by PCAWG samples...")
+    remove_PCAWG_from_TCGA(should_print)
+    filter_TCGA_CNS(should_print)
+    log_fun("Filtering PCAWG samples by whitelist...")
+    remove_not_whitelist_PCAWG(should_print)
+    filter_PCAWG_CNS(should_print)
+    log_fun("Done!")
