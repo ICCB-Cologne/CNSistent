@@ -54,22 +54,16 @@ def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name,
     row_id = 0
     seg_cns = []
     cns_cols = len(sample_rows.columns) - 2
-    while sample_rows.iloc[row_id, 1] <= seg_start:
-        row_id += 1
-        if row_id >= len(sample_rows):
-            break
     while row_id < len(sample_rows) and sample_rows.iloc[row_id, 0] < seg_end:
-        row = sample_rows.iloc[row_id]
-        start = max(row.iloc[0], seg_start)
-        end = min(row.iloc[1], seg_end)
-        seg_cns.append(np.concatenate([row.iloc[2:],  [end - start]]))
-        if row.iloc[1] >= seg_end:  # last row ends behind the segment
-            break
+        if sample_rows.iloc[row_id, 1] > seg_start:
+            row = sample_rows.iloc[row_id]
+            start = max(row.iloc[0], seg_start)
+            end = min(row.iloc[1], seg_end)
+            seg_cns.append(np.concatenate([row.iloc[2:].fillna(0),  [end - start]]))
         row_id += 1
-
-    seg_cns = [x for x in seg_cns if not np.isnan(x[0]) and not np.isnan(x[1])]
     
     if seg_cns == []:
+        # insert NaN when no data found
         return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols
     sel_array = np.array(seg_cns, dtype=np.uint32)
     cns = agg_func(sel_array)
@@ -79,20 +73,14 @@ def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name,
 def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name):
     row_id = 0
     seg_cns = []
-    while sample_rows.iloc[row_id, 1] <= seg_start:
+    while row_id < len(sample_rows) and sample_rows.iloc[row_id, 0] < seg_end:
+        if sample_rows.iloc[row_id, 1] > seg_start:
+            row = sample_rows.iloc[row_id]
+            start = max(row.iloc[0], seg_start)
+            end = min(row.iloc[1], seg_end)
+            seg_cns.append([sample_id, chrom, start, end] + list(row.iloc[2:]) + [seg_name])
         row_id += 1
-        if row_id >= len(sample_rows):
-            break
-    while row_id < len(sample_rows) and sample_rows.iloc[row_id, 1] < seg_end:
-        row = sample_rows.iloc[row_id]
-        start = max(row.iloc[0], seg_start)
-        end = min(row.iloc[1], seg_end)
-        seg_cns.append([sample_id, chrom, start, end] + list(row.iloc[2:]) + [seg_name])
-        if row.iloc[1] >= seg_end:  # last row ends behind the segment
-            break
-        row_id += 1
-        if row_id >= len(sample_rows):
-            break
+
     return seg_cns
 
 

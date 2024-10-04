@@ -409,9 +409,9 @@ class TestAggregation(unittest.TestCase):
         self.assertEqual(result.at[0, "major_cn"], 1.5)
         self.assertEqual(result.at[0, "minor_cn"], 1.0)
         self.assertEqual(result.at[1, "start"], 100)
-        self.assertTrue(np.isnan(result.at[1, "major_cn"]))
+        self.assertFalse(result.isna().any().any())
     
-    def test_bin_none(self):        
+    def test_agg_none(self):        
         segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}
         res = aggregate_by_segments(self.cns, segments, how="none")
         self.assertEqual(res.shape[0], 8)
@@ -422,8 +422,6 @@ class TestAggregation(unittest.TestCase):
             elif res.at[i, "chrom"] == "chr2":
                 self.assertTrue(res.at[i, "start"] >= 100)
                 self.assertTrue(res.at[i, "end"] <= 200)
-        print(res)
-
 
 class TestMerging(unittest.TestCase):
     def test_prep_clusters(self):
