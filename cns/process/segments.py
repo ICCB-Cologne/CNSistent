@@ -122,7 +122,7 @@ def segment_difference(segs_a, segs_b, sorted=False):
                 new_seg = (new_start, seg_a[1], name_a) if name_a is not None else (new_start, seg_a[1])
                 subsections.append(new_seg)
 
-            if len(subsections) > 1 and len(subsections[0]) > 2:
+            if len(subsections) > 0 and len(subsections[0]) > 2:
                 subsections = [
                     (subsections[i][0], subsections[i][1], f"{subsections[i][2]}_{i}") for i in range(len(subsections))
                 ]

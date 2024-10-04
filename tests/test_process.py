@@ -9,7 +9,7 @@ from cns.process.aggregation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
 from cns.utils.assemblies import hg19, hg38
-from cns.utils.conversions import tuples_to_segments
+from cns.utils.conversions import segs_to_df, tuples_to_segments
 
 class TestSegments(unittest.TestCase):        
     def test_do_segments_overlap(self):
@@ -80,13 +80,18 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(len(res["chr1"]), 2)
         self.assertEqual(res["chr1"][0][2], "chr1p")
 
-        # TODO: Check segment name on chr2p_2
-
         res = regions_select("bands")
         self.assertEqual(len(res), 24)
         self.assertEqual(res["chr1"][0][2], "p36.33")
         self.assertEqual(res["chr10"][-1][1], hg19.chr_lens["chr10"])
 
+    def test_arms_gaps(self):
+        select = regions_select("")
+        remove = regions_remove("gaps")
+        segs = get_genome_segments(select, remove, 1000000)
+        segs_df = segs_to_df(segs)
+        self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
+        self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 
     def test_regions_remove(self):
         filter_size = 0
