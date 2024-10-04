@@ -370,7 +370,7 @@ class TestBreakpoints(unittest.TestCase):
         self.assertEqual(res['chr2'][0], (100, 200, 1))
 
 
-class TestBinning(unittest.TestCase):
+class TestAggregation(unittest.TestCase):
     def setUp(self):
         self.cns = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's2', 's3', 's4', 's4', 's4', 's4', 's4', 's4'],
@@ -392,7 +392,7 @@ class TestBinning(unittest.TestCase):
             'sex_names': ['chrX', 'chrY']
         })
 
-    def test_bin_by_breaks(self):
+    def test_agg_by_breaks(self):
         segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
         breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
         seg_bin = aggregate_by_segments(self.cns, segments, print_info=False)
@@ -400,7 +400,7 @@ class TestBinning(unittest.TestCase):
         self.assertEqual(seg_bin.shape[0], 4)
         pd.testing.assert_frame_equal(seg_bin, break_bin)
     
-    def test_bin_by_segments(self):
+    def test_agg_by_segments(self):
         segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}
         result = aggregate_by_segments(self.cns, segments)
         self.assertEqual(result.shape[0], 4)
