@@ -76,7 +76,6 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(res["chr1"][0][2], "chr1")
 
         res = regions_select("arms")
-        print(res)
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 2)
         self.assertEqual(res["chr1"][0][2], "chr1p")
@@ -85,7 +84,8 @@ class TestSegments(unittest.TestCase):
 
         res = regions_select("bands")
         self.assertEqual(len(res), 24)
-        print(res["chr1"][0][2], "p36.33")
+        self.assertEqual(res["chr1"][0][2], "p36.33")
+        self.assertEqual(res["chr10"][-1][1], hg19.chr_lens["chr10"])
 
 
     def test_regions_remove(self):

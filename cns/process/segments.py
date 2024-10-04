@@ -12,34 +12,34 @@ def count_segments(segs):
 def do_segments_overlap(segs, is_sorted=False):
     for chr, chr_segs in segs.items():
         if not is_sorted:
-            chr_segs.sort(key=lambda x: (x[0]))    
+            chr_segs.sort(key=lambda x: (x[0]))
         # Check for overlaps
         for i in range(len(chr_segs) - 1):
             current_end = chr_segs[i][1]
-            next_start = chr_segs[i+1][0]
-            if  current_end > next_start:
+            next_start = chr_segs[i + 1][0]
+            if current_end > next_start:
                 return True
     return False
 
 
 def find_overlaps(segs, is_sorted=False):
-    overlaps = {} 
+    overlaps = {}
     for chr, chr_segs in segs.items():
         if not is_sorted:
-            chr_segs.sort(key=lambda x: (x[0]))    
+            chr_segs.sort(key=lambda x: (x[0]))
         # Iterate through all pairs of triplets to check for overlap
         n = len(chr_segs)
         for i in range(n):
             current_end = chr_segs[i][1]
-            for j in range(i+1, n):
+            for j in range(i + 1, n):
                 next_start = chr_segs[j][0]
                 if current_end <= next_start:
-                    break                
+                    break
                 # Store the overlap along with the group identifiers
                 if chr not in overlaps:
                     overlaps[chr] = []
                 overlaps[chr].append((next_start, current_end))
-    
+
     return overlaps
 
 
@@ -49,9 +49,9 @@ def merge_segments(segs, is_sorted=False):
         if len(chr_segs) == 0:
             merged[chr] = []
             continue
-        
+
         if not is_sorted:
-            chr_segs.sort(key=lambda x: (x[0]))   
+            chr_segs.sort(key=lambda x: (x[0]))
 
         merged[chr] = [chr_segs[0]]
 
@@ -81,7 +81,7 @@ def segment_union(segs_a, segs_b):
 
 
 def segment_difference(segs_a, segs_b, sorted=False):
-    diffs = {}  
+    diffs = {}
     for chr, chr_segs_a in segs_a.items():
         if chr not in segs_b:
             diffs[chr] = chr_segs_a
@@ -90,23 +90,23 @@ def segment_difference(segs_a, segs_b, sorted=False):
 
         if not sorted:
             chr_segs_a.sort(key=lambda x: (x[0]))
-            chr_segs_b.sort(key=lambda x: (x[0]))    
+            chr_segs_b.sort(key=lambda x: (x[0]))
 
         diffs[chr] = []
 
         # Iterate through each segment in chr_segs_a
         for seg_a in chr_segs_a:
             new_start = seg_a[0]
-            name_a  = seg_a[2] if len(seg_a) > 2 else None
+            name_a = seg_a[2] if len(seg_a) > 2 else None
             subsections = []
-            for seg_b in chr_segs_b:                
+            for seg_b in chr_segs_b:
                 # Skip chr_segs_b that are in a different group or before the current segment in chr_segs_a
                 if seg_b[1] < new_start:
                     continue
                 # Break if the segment in chr_segs_b is beyond the current segment in chr_segs_a
                 if seg_b[0] > seg_a[1]:
                     break
-                
+
                 # Calculate the difference if there's an overlap
                 if seg_b[0] <= new_start < seg_b[1]:
                     # If chr_segs_a starts within chr_segs_b, move its start to the end of chr_segs_b
@@ -115,15 +115,17 @@ def segment_difference(segs_a, segs_b, sorted=False):
                     # If chr_segs_a overlaps the start of chr_segs_b, add the non-overlapping part to the difference
                     new_seg = (new_start, seg_b[0], name_a) if name_a is not None else (new_start, seg_b[0])
                     subsections.append(new_seg)
-                    new_start = seg_b[1]            
-            
+                    new_start = seg_b[1]
+
             # Check if there's any remaining part of chr_segs_a after processing overlaps
             if new_start < seg_a[1]:
                 new_seg = (new_start, seg_a[1], name_a) if name_a is not None else (new_start, seg_a[1])
                 subsections.append(new_seg)
 
             if len(subsections) > 1 and len(subsections[0]) > 2:
-                subsections = [(subsections[i][0], subsections[i][1], f"{subsections[i][2]}_{i}") for i in range(len(subsections))]
+                subsections = [
+                    (subsections[i][0], subsections[i][1], f"{subsections[i][2]}_{i}") for i in range(len(subsections))
+                ]
 
             diffs[chr] += subsections
 
@@ -133,7 +135,7 @@ def segment_difference(segs_a, segs_b, sorted=False):
 def filter_min_size(chr_segs, min_size, merge_first=True):
     if merge_first:
         chr_segs = merge_segments(chr_segs)
-    return { chr : [seg for seg in chr_segs if seg[1] - seg[0] >= min_size] for chr, chr_segs in chr_segs.items() }
+    return {chr: [seg for seg in chr_segs if seg[1] - seg[0] >= min_size] for chr, chr_segs in chr_segs.items()}
 
 
 def split_segment(seg_start, seg_end, seg_name, step_size, strategy="scale"):
@@ -160,13 +162,19 @@ def split_segments(segments, step_size, strategy="scale"):
 def regions_select(select, assembly=hg19):
     if select == "arms":
         arm_breaks = calc_arm_breaks(assembly)
-        return { chrom: [(breaks[0], breaks[1], f"{chrom}p"), (breaks[1], breaks[2], f"{chrom}q")] for chrom, breaks in arm_breaks.items() }
+        return {
+            chrom: [(breaks[0], breaks[1], f"{chrom}p"), (breaks[1], breaks[2], f"{chrom}q")]
+            for chrom, breaks in arm_breaks.items()
+        }
     elif select == "bands":
         bands_df = cytobands_to_df(assembly.cytobands)
-        return { chrom: [(start, end, name) for start, end, name in zip(bands_df["start"], bands_df["end"], bands_df["name"])] for chrom in bands_df["chrom"].unique() }
-    elif select =="":
+        return {
+            chrom: [(start, end, name) for start, end, name in zip(subset["start"], subset["end"], subset["name"])]
+            for chrom, subset in bands_df.groupby("chrom")
+        }
+    elif select == "":
         return genome_to_segments(assembly)
-    else:        
+    else:
         return load_segments(select)
 
 
@@ -194,10 +202,12 @@ def get_genome_segments(select, remove=None, filter_size=0):
 
 
 def calc_chr_sizes(chr_segs_df):
-    return { chr : sum([seg[1] - seg[0] for seg in chr_segs]) for chr, chr_segs in chr_segs_df.items() }
+    return {chr: sum([seg[1] - seg[0] for seg in chr_segs]) for chr, chr_segs in chr_segs_df.items()}
 
 
 def calc_group_sizes(segs_df, assembly=hg19):
     chr_sizes = calc_chr_sizes(segs_df)
-    groups = { "sexXX" : [ assembly.chr_x], "aut" : assembly.aut_names, "sexXY" : [ assembly.chr_y, assembly.chr_x] }
-    return { key : sum([chr_sizes[chrom] if chrom in chr_sizes else 0 for chrom in group]) for key, group in groups.items() } 
+    groups = {"sexXX": [assembly.chr_x], "aut": assembly.aut_names, "sexXY": [assembly.chr_y, assembly.chr_x]}
+    return {
+        key: sum([chr_sizes[chrom] if chrom in chr_sizes else 0 for chrom in group]) for key, group in groups.items()
+    }
