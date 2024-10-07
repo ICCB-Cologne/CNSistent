@@ -50,16 +50,16 @@ def min_func(cns_array):
     return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
 
-def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name, agg_func):
+def _aggregate_regs(sample_id, chrom, values, seg_start, seg_end, seg_name, agg_func):
     row_id = 0
     seg_cns = []
-    cns_cols = len(sample_rows.columns) - 2
-    while row_id < len(sample_rows) and sample_rows.iloc[row_id, 0] < seg_end:
-        if sample_rows.iloc[row_id, 1] > seg_start:
-            row = sample_rows.iloc[row_id]
-            start = max(row.iloc[0], seg_start)
-            end = min(row.iloc[1], seg_end)
-            seg_cns.append(np.concatenate([row.iloc[2:].fillna(0),  [end - start]]))
+    cns_cols = values.shape[0] - 2
+    while row_id < len(values) and values[row_id, 0] < seg_end:
+        if values[row_id, 1] > seg_start:
+            row = values[row_id]
+            start = max(row[0], seg_start)
+            end = min(row[1], seg_end)
+            seg_cns.append(np.concatenate([np.nan_to_num(row[2:], copy=False),  [end - start]]))
         row_id += 1
     
     if seg_cns == []:
@@ -70,15 +70,15 @@ def _aggregate_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name,
     return [sample_id, chrom, seg_start, seg_end] + cns + [seg_name]
 
 
-def _mask_by_regs(sample_id, chrom, sample_rows, seg_start, seg_end, seg_name):
+def _mask_by_regs(sample_id, chrom, values, seg_start, seg_end, seg_name):
     row_id = 0
     seg_cns = []
-    while row_id < len(sample_rows) and sample_rows.iloc[row_id, 0] < seg_end:
-        if sample_rows.iloc[row_id, 1] > seg_start:
-            row = sample_rows.iloc[row_id]
-            start = max(row.iloc[0], seg_start)
-            end = min(row.iloc[1], seg_end)
-            seg_cns.append([sample_id, chrom, start, end] + list(row.iloc[2:]) + [seg_name])
+    while row_id < len(values) and values[row_id, 0] < seg_end:
+        if values[row_id, 1] > seg_start:
+            row = values[row_id]
+            start = max(row[0], seg_start)
+            end = min(row[1], seg_end)
+            seg_cns.append([sample_id, chrom, start, end] + list(row[2:]) + [seg_name])
         row_id += 1
 
     return seg_cns
@@ -113,10 +113,10 @@ def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=
             continue
         for seg_start, seg_end, seg_name in segs[chrom]:
             if agg_func != None:
-                cn_segs = _aggregate_regs(sample, chrom, group, seg_start, seg_end, seg_name, agg_func)
+                cn_segs = _aggregate_regs(sample, chrom, group.values, seg_start, seg_end, seg_name, agg_func)
                 new_rows.append(cn_segs)
             else:
-                cn_segs = _mask_by_regs(sample, chrom, group, seg_start, seg_end, seg_name)
+                cn_segs = _mask_by_regs(sample, chrom, group.values, seg_start, seg_end, seg_name)
                 new_rows.extend(cn_segs)
     if print_info:
         print(f"Aggregation finished. Converting {len(new_rows)} rows...", end="\r")
