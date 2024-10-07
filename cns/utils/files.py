@@ -50,6 +50,14 @@ def fill_sex_if_missing(cns, samples):
     # Set found_sex to True for each sample if there is chrY, otherwise set it to False
     found_sex = cns.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
     found_sex = found_sex.map({True: "xy", False: "xx"})
+    if "sex" in res.columns:
+        res["found_sex"] = found_sex
+        condition = (res["sex"] == "xx") & (res["found_sex"] == "xy")
+        indices = res[condition].index
+        if len(indices) > 0:
+            log_warn(f"Found samples where sex is xx in data but chrY has CNs assigned: {indices.tolist()}. "\
+                    "This may result in an incorrect proportions of sex-chromosome features.")          
+        res.drop(columns=["found_sex"], inplace=True)      
     # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
     res.loc[~res["sex"].isin(["xy", "xx"]), "sex"] = found_sex
     return res

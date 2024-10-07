@@ -48,4 +48,4 @@ cns aggregate ./tests/out/test_cns_fill.tsv --segments ./tests/out/test_segs_1MB
 # Calculate gene selection
 cns aggregate ./tests/out/test_cns_imp.tsv --segments ./tests/out/test_COSMIC_gaps.bed --out ./tests/out/test_cns_COSMIC.tsv --verbose --how min
 # Calculate single-column segmentation 
-cns aggregate ./tests/out/test_cns_single.tsv --segments ./tests/out/test_segs_arms_gaps.bed --out ./tests/out/test_cns_arms.tsv --verbose
+cns aggregate ./tests/in/test_cns_single.tsv --segments ./tests/out/test_segs_arms_gaps.bed --out ./tests/out/test_cns_arms.tsv --verbose
