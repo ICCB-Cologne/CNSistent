@@ -15,7 +15,8 @@ def pcawg(print_info=False):
     cns_raw_df = pd.read_csv(f"{data_path}/pcawg_cns_source.tsv", sep="\t")
     cns_raw_df = canonize_cns_df(cns_raw_df)
     specimen_df = pd.read_csv(f"{data_path}/pcawg_specimen_histology_August.tsv", sep="\t")
-    sample_to_donor_df = specimen_df[["# icgc_specimen_id", "icgc_donor_id"]].rename(columns={"# icgc_specimen_id": "sample_id", "icgc_donor_id": "donor_id"})
+    rename_map = {"# icgc_specimen_id": "sample_id", "icgc_donor_id": "donor_id"}
+    sample_to_donor_df = specimen_df[["# icgc_specimen_id", "icgc_donor_id"]].rename(columns=rename_map)
     sample_to_donor_df = sample_to_donor_df.drop_duplicates().sort_values(by="sample_id").reset_index(drop=True)
     sample_to_donor_map = sample_to_donor_df.set_index("sample_id").to_dict()["donor_id"]
 
@@ -31,17 +32,21 @@ def pcawg(print_info=False):
     samples_df.columns = ["sample_id", "sex"]
     samples_df = samples_df.set_index("sample_id")
     samples_df["sex"] = samples_df["sex"].replace({"male": "xy", "female": "xx"})
-    # sanity check  
+    # Correct for these 5 as they have calls for chrY
+    samples_df.loc[["SP107470", "SP107451", "SP107557", "SP107449", "SP107448", "SP107446"]] = "xy"
+    # sanity check
     assert len(cns_raw_df["sample_id"].unique()) == len(samples_df)
 
     # Add whitelist information
     whitelist = pd.read_csv(f"{data_path}/pcawg_supplementary_table_1.tsv", sep="\t")
     whitelist_sp = whitelist["icgc_specimen_id"].unique()
-    assert(len(whitelist_sp) == 2583) # 2583 white-listed samples (https://www.nature.com/articles/s41586-020-1969-6)
-    samples_df['whitelist'] = samples_df.index.isin(whitelist_sp)
+    assert len(whitelist_sp) == 2583  # 2583 white-listed samples (https://www.nature.com/articles/s41586-020-1969-6)
+    samples_df["whitelist"] = samples_df.index.isin(whitelist_sp)
 
     # Add type
-    types = specimen_df[["# icgc_specimen_id", "histology_abbreviation"]].drop_duplicates().set_index("# icgc_specimen_id")
+    types = (
+        specimen_df[["# icgc_specimen_id", "histology_abbreviation"]].drop_duplicates().set_index("# icgc_specimen_id")
+    )
     types.index.name = "sample_id"
     samples_df["type"] = types
 
@@ -49,19 +54,21 @@ def pcawg(print_info=False):
     ids = specimen_df[["# icgc_specimen_id", "submitted_donor_id"]].drop_duplicates().set_index("# icgc_specimen_id")
     ids.index.name = "sample_id"
     # set ids to empty string if does not start with TCGA
-    ids["submitted_donor_id"] = np.where(ids["submitted_donor_id"].str.startswith("TCGA"), ids["submitted_donor_id"], "")
+    ids["submitted_donor_id"] = np.where(
+        ids["submitted_donor_id"].str.startswith("TCGA"), ids["submitted_donor_id"], ""
+    )
     samples_df["TCGA_id"] = ids
 
     # Add TCGA type
     msi_df = pd.read_csv(f"{data_path}/MS_analysis.PCAWG_release_v1.RIKEN.tsv", sep="\t")
     type_df = msi_df[["ID", "cancer"]].copy()
-    TCGA_type_list  =[]
+    TCGA_type_list = []
     for row in type_df.iterrows():
         id = row[1]["ID"]
         # find all the rows in specimen_df where id is in any column
         found = specimen_df.isin([id]).any(axis=1)
         if np.any(found):
-            TCGA_type_list.append((specimen_df[found]["# icgc_specimen_id"].values[0], row[1]["cancer"]))# %%
+            TCGA_type_list.append((specimen_df[found]["# icgc_specimen_id"].values[0], row[1]["cancer"]))  # %%
     TCGA_type_df = pd.DataFrame(TCGA_type_list, columns=["sample_id", "cancer"]).set_index("sample_id")
     samples_df = samples_df.join(TCGA_type_df).rename(columns={"cancer": "TCGA_type"})
 
@@ -76,7 +83,9 @@ def tcga(hg_ver, print_info=False):
     labels = f"summary.ascatv3TCGA.penalty70.{hg_ver}.tsv"
     specimen_df = pd.read_csv(f"{data_path}/{labels}", sep="\t")
 
-    samples_df = specimen_df[["name", "sex", "cancer_type"]].rename(columns={"name": "sample_id", "cancer_type": "type"})
+    samples_df = specimen_df[["name", "sex", "cancer_type"]].rename(
+        columns={"name": "sample_id", "cancer_type": "type"}
+    )
     samples_df["sex"] = samples_df["sex"].replace({"XY": "xy", "XX": "xx"})
     samples_df.set_index("sample_id", inplace=True)
 
@@ -99,7 +108,9 @@ def tracerx(primary, print_info=False):
     right = labels[["cruk_id", "sex", "histology_multi_full"]].drop_duplicates()
     merged = pd.merge(left, right, left_on="patient_id", right_on="cruk_id")
     merged["sex"] = np.where(merged["sex"] == "Female", "xx", "xy")
-    samples_df = merged[["sample", "sex", "histology_multi_full"]].rename(columns={"sample": "sample_id", "histology_multi_full": "type"})
+    samples_df = merged[["sample", "sex", "histology_multi_full"]].rename(
+        columns={"sample": "sample_id", "histology_multi_full": "type"}
+    )
     samples_df.set_index(["sample_id"], inplace=True)
 
     return cns_raw_df, samples_df
@@ -126,7 +137,7 @@ def merge_TRACERx_samples(print_info=False):
     met_samples = load_samples_out(f"TRACERx_met_samples_preprocess.tsv")
 
     # Merge the DataFrames on the common key 'sample_id'
-    common_samples = pd.merge(prim_samples, met_samples, on='sample_id', suffixes=('_prim', '_met')).index.unique()
+    common_samples = pd.merge(prim_samples, met_samples, on="sample_id", suffixes=("_prim", "_met")).index.unique()
 
     # Filtered indices
     log_info(print_info, f"TRACERx primary samples: {len(prim_samples)}")
@@ -137,10 +148,10 @@ def merge_TRACERx_samples(print_info=False):
 
     # dataset label
     prim_samples["TRACERx_set"] = "primary"
-    prim_samples[prim_samples.isin(common_samples)]["TRACERx_set"] = "both"	
+    prim_samples[prim_samples.isin(common_samples)]["TRACERx_set"] = "both"
     met_only["TRACERx_set"] = "metastatic"
 
-    all_df = pd.concat([prim_samples,  met_only], axis=0)
+    all_df = pd.concat([prim_samples, met_only], axis=0)
 
     # Save the merged DataFrame
     save_samples(all_df, f"{out_path}/TRACERx_samples_preprocess.tsv")
@@ -169,7 +180,7 @@ def remove_PCAWG_from_TCGA(print_info=False):
     overlap_with_tcga = PCAWG_samples["TCGA_id"].dropna().unique()
     log_info(print_info, f"Total TCGA samples: {len(TCGA_samples)}")
     log_info(print_info, f"Overlapping samples with PCAWG from total: {len(overlap_with_tcga)}")
-    TCGA_samples = TCGA_samples.query("sample_id not in @overlap_with_tcga") 
+    TCGA_samples = TCGA_samples.query("sample_id not in @overlap_with_tcga")
 
     # Save the merged DataFrame
     save_samples(TCGA_samples, f"{out_path}/TCGA_hg19_samples_preprocess.tsv")
@@ -224,7 +235,7 @@ if __name__ == "__main__":
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     for dataset in ["PCAWG", "TCGA_hg19", "TCGA_hg38", "TRACERx_prim", "TRACERx_met"]:
-        log_fun( f"Preprocessing {dataset} data")
+        log_fun(f"Preprocessing {dataset} data")
         cns_df, samples_df = get_processed_data(dataset, should_print)
         assert len(cns_df["sample_id"].unique()) == len(samples_df)
         samples_df.to_csv(f"{out_path}/{dataset}_samples_preprocess.tsv", sep="\t", index=True, header=True)
@@ -233,7 +244,7 @@ if __name__ == "__main__":
     log_fun("Merging samples for TRACERx...")
     merge_TRACERx_samples(should_print)
     log_fun("Merging filled CNS for TRACERx...")
-    merge_TRACERx_cns(should_print, True)    
+    merge_TRACERx_cns(should_print, True)
     log_fun("Merging imputed CNS for TRACERx...")
     merge_TRACERx_cns(should_print, False)
     log_fun("Filtering TCGA samples by PCAWG samples...")
