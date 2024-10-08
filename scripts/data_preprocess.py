@@ -152,13 +152,13 @@ def merge_TRACERx_samples(print_info=False):
     met_only["TRACERx_set"] = "metastatic"
 
     all_df = pd.concat([prim_samples, met_only], axis=0)
+    log_info(print_info, f"TRACERx all samples after merge: {len(all_df)}")
 
     # Save the merged DataFrame
     save_samples(all_df, f"{out_path}/TRACERx_samples_preprocess.tsv")
 
 
 def merge_TRACERx_cns(print_info=False, filled=False):
-    suffix = "fill" if filled else "imp"
     prim_cns = load_cns_out(f"TRACERx_prim_cns_preprocess.tsv", raw=True)
     prim_cns.set_index(["sample_id"], inplace=True)
     met_cns = load_cns_out(f"TRACERx_met_cns_preprocess.tsv", raw=True)
@@ -181,6 +181,7 @@ def remove_PCAWG_from_TCGA(print_info=False):
     log_info(print_info, f"Total TCGA samples: {len(TCGA_samples)}")
     log_info(print_info, f"Overlapping samples with PCAWG from total: {len(overlap_with_tcga)}")
     TCGA_samples = TCGA_samples.query("sample_id not in @overlap_with_tcga")
+    log_info(print_info, f"Total TCGA samples after filtering: {len(TCGA_samples)}")
 
     # Save the merged DataFrame
     save_samples(TCGA_samples, f"{out_path}/TCGA_hg19_samples_preprocess.tsv")
@@ -209,6 +210,7 @@ def remove_not_whitelist_PCAWG(print_info=False):
     # Filter the samples
     PCAWG_samples = PCAWG_samples[PCAWG_samples["whitelist"]]
     PCAWG_samples.drop(columns=["whitelist"], inplace=True)
+    log_info(print_info, f"Total PCAWG samples after filtering: {len(PCAWG_samples)}")
 
     # Save the filtered samples
     save_samples(PCAWG_samples, f"{out_path}/PCAWG_samples_preprocess.tsv")

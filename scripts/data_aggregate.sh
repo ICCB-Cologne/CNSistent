@@ -5,17 +5,17 @@ set -x
 # set current directory to the location of the script
 cd "$(dirname "$0")"
 
-threads=10
-subsplit=5
+threads=30
+subsplit=1
 data="../data"
 out="../out"
 segment=true
 cd "$(dirname "$0")" # Set path to the script's path
 
 if [ $segment = true ]; then
-    # for dist in 1000000 500000 250000; do
-    #     python ./data_cluster.py $dist
-    # done
+    for dist in 1000000 500000 250000; do
+        python ./data_cluster.py $dist
+    done
     cns segment "dummy" --out "${out}/segs_10MB.bed" --split 10000000 --remove gaps --filter 1000000 
     cns segment "dummy" --out "${out}/segs_5MB.bed" --split 5000000 --remove gaps --filter 500000
     cns segment "dummy" --out "${out}/segs_3MB.bed" --split 3000000 --remove gaps --filter 300000  
