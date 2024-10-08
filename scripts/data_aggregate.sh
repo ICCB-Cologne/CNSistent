@@ -25,15 +25,18 @@ if [ $segment = true ]; then
     cns segment "dummy" --out "${out}/segs_250KB.bed" --split 250000 --remove gaps --filter 25000
     cns segment "dummy" --select "${data}/COSMIC_consensus_genes.bed" --out "${out}/segs_COSMIC.bed" 
     cns segment "dummy" --select "${data}/ENSEMBL_coding_genes.bed" --out "${out}/segs_ENSEMBL.bed"
+    cns segment "dummy" --out "${out}/segs_whole.bed" --remove gaps --filter 1000000
     cns segment "dummy" --select "arms" --out "${out}/segs_arms.bed" --remove gaps --filter 1000000
     cns segment "dummy" --select "bands" --out "${out}/segs_bands.bed" --remove gaps --filter 100000
 fi
+
 
 # TRACERx PCAWG TCGA_hg19
 for dataset in TRACERx PCAWG TCGA_hg19; 
 do    
     echo "Processing $dataset"
     shared_args="${out}/${dataset}_cns_imp.tsv --samples ${out}/${dataset}_samples.tsv  --verbose --threads $threads --subsplit $subsplit"
+    cns aggregate --segments "${out}/segs_whole.bed" --out "${out}/${dataset}_bin_whole.tsv" $shared_args
     cns aggregate --segments "${out}/segs_arms.bed" --out "${out}/${dataset}_bin_arms.tsv" $shared_args
     cns aggregate --segments "${out}/segs_bands.bed" --out "${out}/${dataset}_bin_bands.tsv" $shared_args
     cns aggregate --segments "${out}/segs_10MB.bed" --out "${out}/${dataset}_bin_10MB.tsv" $shared_args
