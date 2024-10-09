@@ -151,6 +151,10 @@ def load_ENSEMBL():
     return load_segments(pjoin(data_path, "ENSEMBL_coding_genes.bed"))
 
 
+def load_data_file(filename):
+    return pd.read_csv(pjoin(data_path, filename), sep="\t")
+
+
 def save_cns_fig(fig_name, fig = None):
     if fig == None:
         fig = plt.gcf()

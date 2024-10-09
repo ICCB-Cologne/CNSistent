@@ -47,8 +47,13 @@ def pcawg(print_info=False):
     types = (
         specimen_df[["# icgc_specimen_id", "histology_abbreviation"]].drop_duplicates().set_index("# icgc_specimen_id")
     )
+    hist2 = (
+        specimen_df[["# icgc_specimen_id", "histology_tier2"]].drop_duplicates().set_index("# icgc_specimen_id")
+    )
     types.index.name = "sample_id"
+    hist2.index.name = "sample_id"
     samples_df["type"] = types
+    samples_df["histology_tier2"] = hist2
 
     # Add TCGA id
     ids = specimen_df[["# icgc_specimen_id", "submitted_donor_id"]].drop_duplicates().set_index("# icgc_specimen_id")
