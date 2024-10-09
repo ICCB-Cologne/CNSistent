@@ -132,7 +132,7 @@ def segment_difference(segs_a, segs_b, sorted=False):
     return diffs
 
 
-def filter_min_size(chr_segs, min_size, merge_first=True):
+def filter_min_size(chr_segs, min_size, merge_first=False):
     if merge_first:
         chr_segs = merge_segments(chr_segs)
     return {chr: [seg for seg in chr_segs if seg[1] - seg[0] >= min_size] for chr, chr_segs in chr_segs.items()}
@@ -191,13 +191,13 @@ def regions_remove(remove, assembly=hg19):
 def get_genome_segments(select, remove=None, filter_size=0):
     res = select
     if filter_size > 0:
-        res = filter_min_size(res, filter_size)
+        res = filter_min_size(res, filter_size, False)
     if remove != None:
         if filter_size > 0:
-            remove = filter_min_size(remove, filter_size)
+            remove = filter_min_size(remove, filter_size, True)
         res = segment_difference(res, remove)
         if filter_size > 0:
-            res = filter_min_size(res, filter_size)
+            res = filter_min_size(res, filter_size, False)
     return res
 
 
