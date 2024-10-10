@@ -5,8 +5,8 @@ set -x
 # set current directory to the location of the script
 cd "$(dirname "$0")"
 
-threads=30
-subsplit=1
+threads=10
+subsplit=5
 data="../data"
 out="../out"
 segment=true
@@ -25,7 +25,7 @@ if [ $segment = true ]; then
     cns segment "dummy" --out "${out}/segs_250KB.bed" --split 250000 --remove gaps --filter 25000
     cns segment "dummy" --select "${data}/COSMIC_consensus_genes.bed" --out "${out}/segs_COSMIC.bed" 
     cns segment "dummy" --select "${data}/ENSEMBL_coding_genes.bed" --out "${out}/segs_ENSEMBL.bed"
-    cns segment "dummy" --out "${out}/segs_whole.bed" --remove gaps --filter 1000000
+    cns segment "dummy" --out "${out}/segs_whole.bed"
     cns segment "dummy" --select "arms" --out "${out}/segs_arms.bed" --remove gaps --filter 1000000
     cns segment "dummy" --select "bands" --out "${out}/segs_bands.bed" --remove gaps --filter 100000
 fi
