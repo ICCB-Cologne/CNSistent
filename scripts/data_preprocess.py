@@ -32,7 +32,7 @@ def pcawg(print_info=False):
     samples_df.columns = ["sample_id", "sex"]
     samples_df = samples_df.set_index("sample_id")
     samples_df["sex"] = samples_df["sex"].replace({"male": "xy", "female": "xx"})
-    # Correct for these 5 as they have calls for chrY
+    # Correct for these 6 as they have calls for chrY
     samples_df.loc[["SP107470", "SP107451", "SP107557", "SP107449", "SP107448", "SP107446"]] = "xy"
     # sanity check
     assert len(cns_raw_df["sample_id"].unique()) == len(samples_df)
@@ -76,6 +76,7 @@ def pcawg(print_info=False):
             TCGA_type_list.append((specimen_df[found]["# icgc_specimen_id"].values[0], row[1]["cancer"]))  # %%
     TCGA_type_df = pd.DataFrame(TCGA_type_list, columns=["sample_id", "cancer"]).set_index("sample_id")
     samples_df = samples_df.join(TCGA_type_df).rename(columns={"cancer": "TCGA_type"})
+    samples_df.loc["SP116919", "TCGA_type"] = "CMDI" # Not matched, correct manually
 
     return cns_raw_df, samples_df
 
