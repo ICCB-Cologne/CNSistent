@@ -23,12 +23,12 @@ def group_samples(cns_df, cn_columns=None, how="mean"):
     if how not in ["mean", "max", "min"]:
         raise ValueError("to group samples, how must be one of ['mean', 'max', 'min']")
     cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
-    grouped = cns_df.drop("sample_id", axis=1).groupby(["start", "end"])
+    grouped = cns_df.drop("sample_id", axis=1).groupby(["chrom", "start", "end"])
 
     # calculate mean on grouped except for chrom, where take the first value
-    agg_scheme = {
-        "chrom": "first",
-    }
+    agg_scheme = {}
+    if "name" in cns_df.columns:
+        agg_scheme["name"] = "first"
     for column in cn_columns:
         agg_scheme[column] = how
     grouped = grouped.agg(agg_scheme).reset_index()
