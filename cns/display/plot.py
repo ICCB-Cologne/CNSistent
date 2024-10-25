@@ -127,7 +127,7 @@ def _fig_main(data_df, plot_func, label=None, column=None, color=None, chrom=Non
     alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
     if chrom == None:
         min_cn, max_cn = _get_min_max_cn(dfs, columns) 
-        plot_chr_bg(ax, assembly, min_cn * .95, max_cn * 1.05)
+        plot_chr_bg(ax, assembly, -0.05, max_cn * 1.05)
         plot_x_ticks(ax, assembly=assembly)
     for i in range(len(dfs)):
         for j in range(len(columns)):
