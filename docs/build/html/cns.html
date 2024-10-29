@@ -1,0 +1,461 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cns package &mdash; CNSistent 1.12.2024 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=af9e523d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CNSistent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">cns package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-cns.data_utils">cns.data_utils module</a><ul>
+<li><a class="reference internal" href="#cns.data_utils.filter_samples"><code class="docutils literal notranslate"><span class="pre">filter_samples()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.get_cns_for_type"><code class="docutils literal notranslate"><span class="pre">get_cns_for_type()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.get_root_path"><code class="docutils literal notranslate"><span class="pre">get_root_path()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_COSMIC"><code class="docutils literal notranslate"><span class="pre">load_COSMIC()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_ENSEMBL"><code class="docutils literal notranslate"><span class="pre">load_ENSEMBL()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_all_samples"><code class="docutils literal notranslate"><span class="pre">load_all_samples()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_bins"><code class="docutils literal notranslate"><span class="pre">load_bins()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_cns_out"><code class="docutils literal notranslate"><span class="pre">load_cns_out()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_data_file"><code class="docutils literal notranslate"><span class="pre">load_data_file()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_merged_bins"><code class="docutils literal notranslate"><span class="pre">load_merged_bins()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_merged_cns"><code class="docutils literal notranslate"><span class="pre">load_merged_cns()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_merged_samples"><code class="docutils literal notranslate"><span class="pre">load_merged_samples()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.load_samples_out"><code class="docutils literal notranslate"><span class="pre">load_samples_out()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.main_load_data"><code class="docutils literal notranslate"><span class="pre">main_load_data()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.rename_cns_columns"><code class="docutils literal notranslate"><span class="pre">rename_cns_columns()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.save_cns_fig"><code class="docutils literal notranslate"><span class="pre">save_cns_fig()</span></code></a></li>
+<li><a class="reference internal" href="#cns.data_utils.save_doc_fig"><code class="docutils literal notranslate"><span class="pre">save_doc_fig()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CNSistent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">cns package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cns.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cns-package">
+<h1>cns package<a class="headerlink" href="#cns-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cns.analyze.html">cns.analyze package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.aneuploidy">cns.analyze.aneuploidy module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.calc_ane_bases"><code class="docutils literal notranslate"><span class="pre">calc_ane_bases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.calc_imb_bases"><code class="docutils literal notranslate"><span class="pre">calc_imb_bases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.calc_loh_bases"><code class="docutils literal notranslate"><span class="pre">calc_loh_bases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.get_ane_for_col"><code class="docutils literal notranslate"><span class="pre">get_ane_for_col()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.get_expected_ploidy"><code class="docutils literal notranslate"><span class="pre">get_expected_ploidy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.get_het_loh_for_col"><code class="docutils literal notranslate"><span class="pre">get_het_loh_for_col()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.get_hom_loh_for_col"><code class="docutils literal notranslate"><span class="pre">get_hom_loh_for_col()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.is_seg_ane"><code class="docutils literal notranslate"><span class="pre">is_seg_ane()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.aneuploidy.is_seg_loh"><code class="docutils literal notranslate"><span class="pre">is_seg_loh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.breakpoints">cns.analyze.breakpoints module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.breakpoints.calc_breaks_per_chr"><code class="docutils literal notranslate"><span class="pre">calc_breaks_per_chr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.breakpoints.calc_breaks_per_sample"><code class="docutils literal notranslate"><span class="pre">calc_breaks_per_sample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.breakpoints.calc_seg_size_per_sample"><code class="docutils literal notranslate"><span class="pre">calc_seg_size_per_sample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.breakpoints.calc_step_per_chr"><code class="docutils literal notranslate"><span class="pre">calc_step_per_chr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.breakpoints.calc_step_per_sample"><code class="docutils literal notranslate"><span class="pre">calc_step_per_sample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.breakpoints.prepare_segments"><code class="docutils literal notranslate"><span class="pre">prepare_segments()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.coverage">cns.analyze.coverage module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.coverage.get_covered_bases"><code class="docutils literal notranslate"><span class="pre">get_covered_bases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.coverage.get_missing_chroms"><code class="docutils literal notranslate"><span class="pre">get_missing_chroms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.analyze.html#cns.analyze.coverage.get_not_nan"><code class="docutils literal notranslate"><span class="pre">get_not_nan()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.loss">cns.analyze.loss module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cns.display.html">cns.display package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cns.display.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.display.html#module-cns.display.label">cns.display.label module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.add_cytoband_legend"><code class="docutils literal notranslate"><span class="pre">add_cytoband_legend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.add_gap_legend"><code class="docutils literal notranslate"><span class="pre">add_gap_legend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.cytoband_color"><code class="docutils literal notranslate"><span class="pre">cytoband_color()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.gap_color"><code class="docutils literal notranslate"><span class="pre">gap_color()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.get_size_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_size_and_bounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.no_y_ticks"><code class="docutils literal notranslate"><span class="pre">no_y_ticks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.plot_chr_bg"><code class="docutils literal notranslate"><span class="pre">plot_chr_bg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.plot_cytobands"><code class="docutils literal notranslate"><span class="pre">plot_cytobands()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.plot_gaps"><code class="docutils literal notranslate"><span class="pre">plot_gaps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.plot_x_lines"><code class="docutils literal notranslate"><span class="pre">plot_x_lines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.label.plot_x_ticks"><code class="docutils literal notranslate"><span class="pre">plot_x_ticks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.display.html#module-cns.display.plot">cns.display.plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.fig_CN_heatmap"><code class="docutils literal notranslate"><span class="pre">fig_CN_heatmap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.fig_bars"><code class="docutils literal notranslate"><span class="pre">fig_bars()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.fig_dots"><code class="docutils literal notranslate"><span class="pre">fig_dots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.fig_lines"><code class="docutils literal notranslate"><span class="pre">fig_lines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.plot_CN_heatmap"><code class="docutils literal notranslate"><span class="pre">plot_CN_heatmap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.plot_bars"><code class="docutils literal notranslate"><span class="pre">plot_bars()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.plot_dots"><code class="docutils literal notranslate"><span class="pre">plot_dots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.plot.plot_lines"><code class="docutils literal notranslate"><span class="pre">plot_lines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.display.html#module-cns.display.stats">cns.display.stats module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.stats.plot_bends"><code class="docutils literal notranslate"><span class="pre">plot_bends()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.stats.plot_coverage"><code class="docutils literal notranslate"><span class="pre">plot_coverage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.stats.plot_nans"><code class="docutils literal notranslate"><span class="pre">plot_nans()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.display.html#cns.display.stats.plot_segments_per_chr"><code class="docutils literal notranslate"><span class="pre">plot_segments_per_chr()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.display.html#module-cns.display">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cns.process.html">cns.process package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.aggregation">cns.process.aggregation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.add_total_cn"><code class="docutils literal notranslate"><span class="pre">add_total_cn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.aggregate_by_break_type"><code class="docutils literal notranslate"><span class="pre">aggregate_by_break_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.aggregate_by_breaks"><code class="docutils literal notranslate"><span class="pre">aggregate_by_breaks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.aggregate_by_segments"><code class="docutils literal notranslate"><span class="pre">aggregate_by_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.group_samples"><code class="docutils literal notranslate"><span class="pre">group_samples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.max_func"><code class="docutils literal notranslate"><span class="pre">max_func()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.mean_func"><code class="docutils literal notranslate"><span class="pre">mean_func()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.aggregation.min_func"><code class="docutils literal notranslate"><span class="pre">min_func()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.breakpoints">cns.process.breakpoints module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.calc_arm_breaks"><code class="docutils literal notranslate"><span class="pre">calc_arm_breaks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.calc_cytoband_breaks"><code class="docutils literal notranslate"><span class="pre">calc_cytoband_breaks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.calc_seg_breaks"><code class="docutils literal notranslate"><span class="pre">calc_seg_breaks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.create_step_breaks"><code class="docutils literal notranslate"><span class="pre">create_step_breaks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.get_breaks_from_cns"><code class="docutils literal notranslate"><span class="pre">get_breaks_from_cns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.get_breaks_from_segments"><code class="docutils literal notranslate"><span class="pre">get_breaks_from_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.get_breaks_inside_segments"><code class="docutils literal notranslate"><span class="pre">get_breaks_inside_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.insert_breaks_into_segments"><code class="docutils literal notranslate"><span class="pre">insert_breaks_into_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.breakpoints.make_breaks"><code class="docutils literal notranslate"><span class="pre">make_breaks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.cluster">cns.process.cluster module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.cluster.breaks_to_clusters"><code class="docutils literal notranslate"><span class="pre">breaks_to_clusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.cluster.calc_clusters"><code class="docutils literal notranslate"><span class="pre">calc_clusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.cluster.cluster_within_segments"><code class="docutils literal notranslate"><span class="pre">cluster_within_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.cluster.clusters_to_breaks"><code class="docutils literal notranslate"><span class="pre">clusters_to_breaks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.cluster.merge_clusters"><code class="docutils literal notranslate"><span class="pre">merge_clusters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.imputation">cns.process.imputation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.add_missing"><code class="docutils literal notranslate"><span class="pre">add_missing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.add_tails"><code class="docutils literal notranslate"><span class="pre">add_tails()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.cns_impute"><code class="docutils literal notranslate"><span class="pre">cns_impute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.fill_gaps"><code class="docutils literal notranslate"><span class="pre">fill_gaps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.fill_nans_with_zeros"><code class="docutils literal notranslate"><span class="pre">fill_nans_with_zeros()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.get_nan_segs"><code class="docutils literal notranslate"><span class="pre">get_nan_segs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.merge_neighbours"><code class="docutils literal notranslate"><span class="pre">merge_neighbours()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.imputation.remove_outliers"><code class="docutils literal notranslate"><span class="pre">remove_outliers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.normalize">cns.process.normalize module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.normalize.get_chr_sets"><code class="docutils literal notranslate"><span class="pre">get_chr_sets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.normalize.get_norm_sizes"><code class="docutils literal notranslate"><span class="pre">get_norm_sizes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.normalize.normalize_feature"><code class="docutils literal notranslate"><span class="pre">normalize_feature()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.pipelines">cns.process.pipelines module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_aggregate"><code class="docutils literal notranslate"><span class="pre">main_aggregate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_coverage"><code class="docutils literal notranslate"><span class="pre">main_coverage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_fill"><code class="docutils literal notranslate"><span class="pre">main_fill()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_impute"><code class="docutils literal notranslate"><span class="pre">main_impute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_ploidy"><code class="docutils literal notranslate"><span class="pre">main_ploidy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_segment"><code class="docutils literal notranslate"><span class="pre">main_segment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.pipelines.main_signatures"><code class="docutils literal notranslate"><span class="pre">main_signatures()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process.segments">cns.process.segments module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.calc_chr_sizes"><code class="docutils literal notranslate"><span class="pre">calc_chr_sizes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.calc_group_sizes"><code class="docutils literal notranslate"><span class="pre">calc_group_sizes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.count_segments"><code class="docutils literal notranslate"><span class="pre">count_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.do_segments_overlap"><code class="docutils literal notranslate"><span class="pre">do_segments_overlap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.filter_min_size"><code class="docutils literal notranslate"><span class="pre">filter_min_size()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.find_overlaps"><code class="docutils literal notranslate"><span class="pre">find_overlaps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.get_genome_segments"><code class="docutils literal notranslate"><span class="pre">get_genome_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.merge_segments"><code class="docutils literal notranslate"><span class="pre">merge_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.regions_remove"><code class="docutils literal notranslate"><span class="pre">regions_remove()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.regions_select"><code class="docutils literal notranslate"><span class="pre">regions_select()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.segment_difference"><code class="docutils literal notranslate"><span class="pre">segment_difference()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.segment_union"><code class="docutils literal notranslate"><span class="pre">segment_union()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.split_segment"><code class="docutils literal notranslate"><span class="pre">split_segment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.process.html#cns.process.segments.split_segments"><code class="docutils literal notranslate"><span class="pre">split_segments()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.process.html#module-cns.process">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cns.utils.html">cns.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.assemblies">cns.utils.assemblies module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.assemblies.Assembly"><code class="docutils literal notranslate"><span class="pre">Assembly</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.assemblies.get_assembly"><code class="docutils literal notranslate"><span class="pre">get_assembly()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.canonization">cns.utils.canonization module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.canonize_cns_df"><code class="docutils literal notranslate"><span class="pre">canonize_cns_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.find_cn_cols_if_none"><code class="docutils literal notranslate"><span class="pre">find_cn_cols_if_none()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.find_column"><code class="docutils literal notranslate"><span class="pre">find_column()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.is_canonical_cns_df"><code class="docutils literal notranslate"><span class="pre">is_canonical_cns_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.is_cn_column"><code class="docutils literal notranslate"><span class="pre">is_cn_column()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.is_hap_spec"><code class="docutils literal notranslate"><span class="pre">is_hap_spec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.canonization.rename_cn_cols"><code class="docutils literal notranslate"><span class="pre">rename_cn_cols()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.conversions">cns.utils.conversions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.breaks_to_segments"><code class="docutils literal notranslate"><span class="pre">breaks_to_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.calc_cum_mid"><code class="docutils literal notranslate"><span class="pre">calc_cum_mid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.calc_lenghts"><code class="docutils literal notranslate"><span class="pre">calc_lenghts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.calc_mid"><code class="docutils literal notranslate"><span class="pre">calc_mid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.calc_nan_cols"><code class="docutils literal notranslate"><span class="pre">calc_nan_cols()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.chrom_to_sortable"><code class="docutils literal notranslate"><span class="pre">chrom_to_sortable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.cytobands_to_df"><code class="docutils literal notranslate"><span class="pre">cytobands_to_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.df_to_segs"><code class="docutils literal notranslate"><span class="pre">df_to_segs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.gaps_to_df"><code class="docutils literal notranslate"><span class="pre">gaps_to_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.genome_to_segments"><code class="docutils literal notranslate"><span class="pre">genome_to_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.segs_to_chrom_dict"><code class="docutils literal notranslate"><span class="pre">segs_to_chrom_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.segs_to_df"><code class="docutils literal notranslate"><span class="pre">segs_to_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.sortable_to_chrom"><code class="docutils literal notranslate"><span class="pre">sortable_to_chrom()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.conversions.tuples_to_segments"><code class="docutils literal notranslate"><span class="pre">tuples_to_segments()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.cytobands">cns.utils.cytobands module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.files">cns.utils.files module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.dataframe_array_split"><code class="docutils literal notranslate"><span class="pre">dataframe_array_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.fill_sex_if_missing"><code class="docutils literal notranslate"><span class="pre">fill_sex_if_missing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.load_cns"><code class="docutils literal notranslate"><span class="pre">load_cns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.load_samples"><code class="docutils literal notranslate"><span class="pre">load_samples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.load_segments"><code class="docutils literal notranslate"><span class="pre">load_segments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.samples_df_from_cns_df"><code class="docutils literal notranslate"><span class="pre">samples_df_from_cns_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.save_cns"><code class="docutils literal notranslate"><span class="pre">save_cns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.save_samples"><code class="docutils literal notranslate"><span class="pre">save_samples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.files.save_segments"><code class="docutils literal notranslate"><span class="pre">save_segments()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.gaps">cns.utils.gaps module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.genomes">cns.utils.genomes module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.kneepoint">cns.utils.kneepoint module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.calculate_signed_angle"><code class="docutils literal notranslate"><span class="pre">calculate_signed_angle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.count_below_lim"><code class="docutils literal notranslate"><span class="pre">count_below_lim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.count_cum_val"><code class="docutils literal notranslate"><span class="pre">count_cum_val()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.find_bends"><code class="docutils literal notranslate"><span class="pre">find_bends()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.find_knee"><code class="docutils literal notranslate"><span class="pre">find_knee()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.get_direction"><code class="docutils literal notranslate"><span class="pre">get_direction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.kneepoint.z_score_filter"><code class="docutils literal notranslate"><span class="pre">z_score_filter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.logging">cns.utils.logging module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.logging.log_info"><code class="docutils literal notranslate"><span class="pre">log_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.logging.log_warn"><code class="docutils literal notranslate"><span class="pre">log_warn()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils.selection">cns.utils.selection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.cns_head"><code class="docutils literal notranslate"><span class="pre">cns_head()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.cns_random"><code class="docutils literal notranslate"><span class="pre">cns_random()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.cns_tail"><code class="docutils literal notranslate"><span class="pre">cns_tail()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.drop_Y"><code class="docutils literal notranslate"><span class="pre">drop_Y()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.get_cns_for_type"><code class="docutils literal notranslate"><span class="pre">get_cns_for_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.only_aut"><code class="docutils literal notranslate"><span class="pre">only_aut()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.only_sex"><code class="docutils literal notranslate"><span class="pre">only_sex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.sample_head"><code class="docutils literal notranslate"><span class="pre">sample_head()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.sample_random"><code class="docutils literal notranslate"><span class="pre">sample_random()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.sample_tail"><code class="docutils literal notranslate"><span class="pre">sample_tail()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.utils.html#cns.utils.selection.select_CNS_samples"><code class="docutils literal notranslate"><span class="pre">select_CNS_samples()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cns.utils.html#module-cns.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cns.data_utils">
+<span id="cns-data-utils-module"></span><h2>cns.data_utils module<a class="headerlink" href="#module-cns.data_utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.filter_samples">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">filter_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ane_min_frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cover_min_frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.filter_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.get_cns_for_type">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">get_cns_for_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.get_cns_for_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.get_root_path">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">get_root_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.get_root_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_COSMIC">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_COSMIC</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_COSMIC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_ENSEMBL">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_ENSEMBL</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_ENSEMBL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_all_samples">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_all_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_all_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_bins">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_bins" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_cns_out">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_cns_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_cns_out" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_data_file">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_data_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_data_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_merged_bins">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_merged_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">select_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_merged_bins" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_merged_cns">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_merged_cns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">select_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_merged_cns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_merged_samples">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_merged_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_merged_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_samples_out">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_samples_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_samples_out" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.main_load_data">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">main_load_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.main_load_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.rename_cns_columns">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">rename_cns_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.rename_cns_columns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.save_cns_fig">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">save_cns_fig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.save_cns_fig" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.save_doc_fig">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">save_doc_fig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.save_doc_fig" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cns" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dr. Adam Streck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

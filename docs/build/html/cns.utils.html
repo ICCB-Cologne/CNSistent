@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cns.utils package &mdash; CNSistent 1.12.2024 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=af9e523d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CNSistent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">cns.utils package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-cns.utils.assemblies">cns.utils.assemblies module</a><ul>
+<li><a class="reference internal" href="#cns.utils.assemblies.Assembly"><code class="docutils literal notranslate"><span class="pre">Assembly</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.assemblies.get_assembly"><code class="docutils literal notranslate"><span class="pre">get_assembly()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils.canonization">cns.utils.canonization module</a><ul>
+<li><a class="reference internal" href="#cns.utils.canonization.canonize_cns_df"><code class="docutils literal notranslate"><span class="pre">canonize_cns_df()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.canonization.find_cn_cols_if_none"><code class="docutils literal notranslate"><span class="pre">find_cn_cols_if_none()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.canonization.find_column"><code class="docutils literal notranslate"><span class="pre">find_column()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.canonization.is_canonical_cns_df"><code class="docutils literal notranslate"><span class="pre">is_canonical_cns_df()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.canonization.is_cn_column"><code class="docutils literal notranslate"><span class="pre">is_cn_column()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.canonization.is_hap_spec"><code class="docutils literal notranslate"><span class="pre">is_hap_spec()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.canonization.rename_cn_cols"><code class="docutils literal notranslate"><span class="pre">rename_cn_cols()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils.conversions">cns.utils.conversions module</a><ul>
+<li><a class="reference internal" href="#cns.utils.conversions.breaks_to_segments"><code class="docutils literal notranslate"><span class="pre">breaks_to_segments()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.calc_cum_mid"><code class="docutils literal notranslate"><span class="pre">calc_cum_mid()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.calc_lenghts"><code class="docutils literal notranslate"><span class="pre">calc_lenghts()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.calc_mid"><code class="docutils literal notranslate"><span class="pre">calc_mid()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.calc_nan_cols"><code class="docutils literal notranslate"><span class="pre">calc_nan_cols()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.chrom_to_sortable"><code class="docutils literal notranslate"><span class="pre">chrom_to_sortable()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.cytobands_to_df"><code class="docutils literal notranslate"><span class="pre">cytobands_to_df()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.df_to_segs"><code class="docutils literal notranslate"><span class="pre">df_to_segs()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.gaps_to_df"><code class="docutils literal notranslate"><span class="pre">gaps_to_df()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.genome_to_segments"><code class="docutils literal notranslate"><span class="pre">genome_to_segments()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.segs_to_chrom_dict"><code class="docutils literal notranslate"><span class="pre">segs_to_chrom_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.segs_to_df"><code class="docutils literal notranslate"><span class="pre">segs_to_df()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.sortable_to_chrom"><code class="docutils literal notranslate"><span class="pre">sortable_to_chrom()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.conversions.tuples_to_segments"><code class="docutils literal notranslate"><span class="pre">tuples_to_segments()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils.cytobands">cns.utils.cytobands module</a></li>
+<li><a class="reference internal" href="#module-cns.utils.files">cns.utils.files module</a><ul>
+<li><a class="reference internal" href="#cns.utils.files.dataframe_array_split"><code class="docutils literal notranslate"><span class="pre">dataframe_array_split()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.fill_sex_if_missing"><code class="docutils literal notranslate"><span class="pre">fill_sex_if_missing()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.load_cns"><code class="docutils literal notranslate"><span class="pre">load_cns()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.load_samples"><code class="docutils literal notranslate"><span class="pre">load_samples()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.load_segments"><code class="docutils literal notranslate"><span class="pre">load_segments()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.samples_df_from_cns_df"><code class="docutils literal notranslate"><span class="pre">samples_df_from_cns_df()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.save_cns"><code class="docutils literal notranslate"><span class="pre">save_cns()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.save_samples"><code class="docutils literal notranslate"><span class="pre">save_samples()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.files.save_segments"><code class="docutils literal notranslate"><span class="pre">save_segments()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils.gaps">cns.utils.gaps module</a></li>
+<li><a class="reference internal" href="#module-cns.utils.genomes">cns.utils.genomes module</a></li>
+<li><a class="reference internal" href="#module-cns.utils.kneepoint">cns.utils.kneepoint module</a><ul>
+<li><a class="reference internal" href="#cns.utils.kneepoint.calculate_signed_angle"><code class="docutils literal notranslate"><span class="pre">calculate_signed_angle()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.kneepoint.count_below_lim"><code class="docutils literal notranslate"><span class="pre">count_below_lim()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.kneepoint.count_cum_val"><code class="docutils literal notranslate"><span class="pre">count_cum_val()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.kneepoint.find_bends"><code class="docutils literal notranslate"><span class="pre">find_bends()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.kneepoint.find_knee"><code class="docutils literal notranslate"><span class="pre">find_knee()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.kneepoint.get_direction"><code class="docutils literal notranslate"><span class="pre">get_direction()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.kneepoint.z_score_filter"><code class="docutils literal notranslate"><span class="pre">z_score_filter()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils.logging">cns.utils.logging module</a><ul>
+<li><a class="reference internal" href="#cns.utils.logging.log_info"><code class="docutils literal notranslate"><span class="pre">log_info()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.logging.log_warn"><code class="docutils literal notranslate"><span class="pre">log_warn()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils.selection">cns.utils.selection module</a><ul>
+<li><a class="reference internal" href="#cns.utils.selection.cns_head"><code class="docutils literal notranslate"><span class="pre">cns_head()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.cns_random"><code class="docutils literal notranslate"><span class="pre">cns_random()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.cns_tail"><code class="docutils literal notranslate"><span class="pre">cns_tail()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.drop_Y"><code class="docutils literal notranslate"><span class="pre">drop_Y()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.get_cns_for_type"><code class="docutils literal notranslate"><span class="pre">get_cns_for_type()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.only_aut"><code class="docutils literal notranslate"><span class="pre">only_aut()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.only_sex"><code class="docutils literal notranslate"><span class="pre">only_sex()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.sample_head"><code class="docutils literal notranslate"><span class="pre">sample_head()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.sample_random"><code class="docutils literal notranslate"><span class="pre">sample_random()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.sample_tail"><code class="docutils literal notranslate"><span class="pre">sample_tail()</span></code></a></li>
+<li><a class="reference internal" href="#cns.utils.selection.select_CNS_samples"><code class="docutils literal notranslate"><span class="pre">select_CNS_samples()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CNSistent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">cns.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cns.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cns-utils-package">
+<h1>cns.utils package<a class="headerlink" href="#cns-utils-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cns.utils.assemblies">
+<span id="cns-utils-assemblies-module"></span><h2>cns.utils.assemblies module<a class="headerlink" href="#module-cns.utils.assemblies" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cns.utils.assemblies.Assembly">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cns.utils.assemblies.</span></span><span class="sig-name descname"><span class="pre">Assembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aut_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_lens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_starts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aut_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cytobands</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.assemblies.Assembly" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.assemblies.get_assembly">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.assemblies.</span></span><span class="sig-name descname"><span class="pre">get_assembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assembly_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.assemblies.get_assembly" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils.canonization">
+<span id="cns-utils-canonization-module"></span><h2>cns.utils.canonization module<a class="headerlink" href="#module-cns.utils.canonization" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.canonize_cns_df">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">canonize_cns_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_columns=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.canonize_cns_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.find_cn_cols_if_none">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">find_cn_cols_if_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.find_cn_cols_if_none" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.find_column">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">find_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.find_column" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.is_canonical_cns_df">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">is_canonical_cns_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.is_canonical_cns_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.is_cn_column">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">is_cn_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.is_cn_column" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.is_hap_spec">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">is_hap_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.is_hap_spec" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.canonization.rename_cn_cols">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">rename_cn_cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.rename_cn_cols" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils.conversions">
+<span id="cns-utils-conversions-module"></span><h2>cns.utils.conversions module<a class="headerlink" href="#module-cns.utils.conversions" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.breaks_to_segments">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">breaks_to_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">breakpoints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.breaks_to_segments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.calc_cum_mid">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">calc_cum_mid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.calc_cum_mid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.calc_lenghts">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">calc_lenghts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.calc_lenghts" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.calc_mid">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">calc_mid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.calc_mid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.calc_nan_cols">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">calc_nan_cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.calc_nan_cols" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.chrom_to_sortable">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">chrom_to_sortable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aut_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">22</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.chrom_to_sortable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.cytobands_to_df">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">cytobands_to_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cytobands</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.cytobands_to_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.df_to_segs">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">df_to_segs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segs_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.df_to_segs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.gaps_to_df">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">gaps_to_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.gaps_to_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.genome_to_segments">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">genome_to_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.genome_to_segments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.segs_to_chrom_dict">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">segs_to_chrom_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.segs_to_chrom_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.segs_to_df">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">segs_to_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.segs_to_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.sortable_to_chrom">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">sortable_to_chrom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sortable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aut_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">22</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.sortable_to_chrom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.conversions.tuples_to_segments">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.conversions.</span></span><span class="sig-name descname"><span class="pre">tuples_to_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.conversions.tuples_to_segments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils.cytobands">
+<span id="cns-utils-cytobands-module"></span><h2>cns.utils.cytobands module<a class="headerlink" href="#module-cns.utils.cytobands" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cns.utils.files">
+<span id="cns-utils-files-module"></span><h2>cns.utils.files module<a class="headerlink" href="#module-cns.utils.files" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.dataframe_array_split">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">dataframe_array_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_splits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.dataframe_array_split" title="Link to this definition"></a></dt>
+<dd><p>Splits a DataFrame into n_splits parts as equally as possible.</p>
+<p>Parameters:
+- df: The pandas DataFrame to split.
+- n_splits: The number of parts to split the DataFrame into.</p>
+<p>Returns:
+- A list of pandas DataFrame objects.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.fill_sex_if_missing">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">fill_sex_if_missing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.fill_sex_if_missing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.load_cns">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">load_cns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonize=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_coords=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.load_cns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.load_samples">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">load_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.load_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.load_segments">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">load_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.load_segments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.samples_df_from_cns_df">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">samples_df_from_cns_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_sex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.samples_df_from_cns_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.save_cns">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">save_cns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.save_cns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.save_samples">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">save_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.save_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.files.save_segments">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.files.</span></span><span class="sig-name descname"><span class="pre">save_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.files.save_segments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils.gaps">
+<span id="cns-utils-gaps-module"></span><h2>cns.utils.gaps module<a class="headerlink" href="#module-cns.utils.gaps" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cns.utils.genomes">
+<span id="cns-utils-genomes-module"></span><h2>cns.utils.genomes module<a class="headerlink" href="#module-cns.utils.genomes" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cns.utils.kneepoint">
+<span id="cns-utils-kneepoint-module"></span><h2>cns.utils.kneepoint module<a class="headerlink" href="#module-cns.utils.kneepoint" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.calculate_signed_angle">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">calculate_signed_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.calculate_signed_angle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.count_below_lim">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">count_below_lim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.count_below_lim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.count_cum_val">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">count_cum_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.count_cum_val" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.find_bends">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">find_bends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.find_bends" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.find_knee">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">find_knee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knee</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.find_knee" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.get_direction">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">get_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.get_direction" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.kneepoint.z_score_filter">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.kneepoint.</span></span><span class="sig-name descname"><span class="pre">z_score_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.kneepoint.z_score_filter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils.logging">
+<span id="cns-utils-logging-module"></span><h2>cns.utils.logging module<a class="headerlink" href="#module-cns.utils.logging" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.logging.log_info">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.logging.</span></span><span class="sig-name descname"><span class="pre">log_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">should_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.logging.log_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.logging.log_warn">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.logging.</span></span><span class="sig-name descname"><span class="pre">log_warn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.logging.log_warn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils.selection">
+<span id="cns-utils-selection-module"></span><h2>cns.utils.selection module<a class="headerlink" href="#module-cns.utils.selection" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.cns_head">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">cns_head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.cns_head" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.cns_random">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">cns_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.cns_random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.cns_tail">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">cns_tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.cns_tail" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.drop_Y">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">drop_Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.drop_Y" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.get_cns_for_type">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">get_cns_for_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.get_cns_for_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.only_aut">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">only_aut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.only_aut" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.only_sex">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">only_sex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.only_sex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.sample_head">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">sample_head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.sample_head" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.sample_random">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">sample_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.sample_random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.sample_tail">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">sample_tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.sample_tail" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.utils.selection.select_CNS_samples">
+<span class="sig-prename descclassname"><span class="pre">cns.utils.selection.</span></span><span class="sig-name descname"><span class="pre">select_CNS_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.selection.select_CNS_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cns.utils" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dr. Adam Streck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

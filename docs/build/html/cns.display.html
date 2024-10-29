@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cns.display package &mdash; CNSistent 1.12.2024 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=af9e523d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CNSistent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">cns.display package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-cns.display.label">cns.display.label module</a><ul>
+<li><a class="reference internal" href="#cns.display.label.add_cytoband_legend"><code class="docutils literal notranslate"><span class="pre">add_cytoband_legend()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.add_gap_legend"><code class="docutils literal notranslate"><span class="pre">add_gap_legend()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.cytoband_color"><code class="docutils literal notranslate"><span class="pre">cytoband_color()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.gap_color"><code class="docutils literal notranslate"><span class="pre">gap_color()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.get_size_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_size_and_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.no_y_ticks"><code class="docutils literal notranslate"><span class="pre">no_y_ticks()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.plot_chr_bg"><code class="docutils literal notranslate"><span class="pre">plot_chr_bg()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.plot_cytobands"><code class="docutils literal notranslate"><span class="pre">plot_cytobands()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.plot_gaps"><code class="docutils literal notranslate"><span class="pre">plot_gaps()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.plot_x_lines"><code class="docutils literal notranslate"><span class="pre">plot_x_lines()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.label.plot_x_ticks"><code class="docutils literal notranslate"><span class="pre">plot_x_ticks()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.display.plot">cns.display.plot module</a><ul>
+<li><a class="reference internal" href="#cns.display.plot.fig_CN_heatmap"><code class="docutils literal notranslate"><span class="pre">fig_CN_heatmap()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.fig_bars"><code class="docutils literal notranslate"><span class="pre">fig_bars()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.fig_dots"><code class="docutils literal notranslate"><span class="pre">fig_dots()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.fig_lines"><code class="docutils literal notranslate"><span class="pre">fig_lines()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.plot_CN_heatmap"><code class="docutils literal notranslate"><span class="pre">plot_CN_heatmap()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.plot_bars"><code class="docutils literal notranslate"><span class="pre">plot_bars()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.plot_dots"><code class="docutils literal notranslate"><span class="pre">plot_dots()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.plot.plot_lines"><code class="docutils literal notranslate"><span class="pre">plot_lines()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.display.stats">cns.display.stats module</a><ul>
+<li><a class="reference internal" href="#cns.display.stats.plot_bends"><code class="docutils literal notranslate"><span class="pre">plot_bends()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.stats.plot_coverage"><code class="docutils literal notranslate"><span class="pre">plot_coverage()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.stats.plot_nans"><code class="docutils literal notranslate"><span class="pre">plot_nans()</span></code></a></li>
+<li><a class="reference internal" href="#cns.display.stats.plot_segments_per_chr"><code class="docutils literal notranslate"><span class="pre">plot_segments_per_chr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-cns.display">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CNSistent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">cns.display package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cns.display.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cns-display-package">
+<h1>cns.display package<a class="headerlink" href="#cns-display-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cns.display.label">
+<span id="cns-display-label-module"></span><h2>cns.display.label module<a class="headerlink" href="#module-cns.display.label" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.add_cytoband_legend">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">add_cytoband_legend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.add_cytoband_legend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.add_gap_legend">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">add_gap_legend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.add_gap_legend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.cytoband_color">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">cytoband_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gie_stain</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.cytoband_color" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.gap_color">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">gap_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gap_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.gap_color" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.get_size_and_bounds">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">get_size_and_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.get_size_and_bounds" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.no_y_ticks">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">no_y_ticks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.no_y_ticks" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.plot_chr_bg">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">plot_chr_bg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colored=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.plot_chr_bg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.plot_cytobands">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">plot_cytobands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.plot_cytobands" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.plot_gaps">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">plot_gaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.plot_gaps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.plot_x_lines">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">plot_x_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.plot_x_lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.label.plot_x_ticks">
+<span class="sig-prename descclassname"><span class="pre">cns.display.label.</span></span><span class="sig-name descname"><span class="pre">plot_x_ticks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.label.plot_x_ticks" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.display.plot">
+<span id="cns-display-plot-module"></span><h2>cns.display.plot module<a class="headerlink" href="#module-cns.display.plot" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.fig_CN_heatmap">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">fig_CN_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label='CN</span> <span class="pre">Tracks'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cn=10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_legend_correction=0.0025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.fig_CN_heatmap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.fig_bars">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">fig_bars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.fig_bars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.fig_dots">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">fig_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.fig_dots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.fig_lines">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">fig_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.fig_lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.plot_CN_heatmap">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">plot_CN_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'total_cn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.plot_CN_heatmap" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.plot_bars">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">plot_bars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.plot_bars" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.plot_dots">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">plot_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dot_size=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.plot_dots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.plot.plot_lines">
+<span class="sig-prename descclassname"><span class="pre">cns.display.plot.</span></span><span class="sig-name descname"><span class="pre">plot_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color='green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.plot.plot_lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.display.stats">
+<span id="cns-display-stats-module"></span><h2>cns.display.stats module<a class="headerlink" href="#module-cns.display.stats" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.stats.plot_bends">
+<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_bends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knee_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elbow_point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_bends" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.stats.plot_coverage">
+<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_coverage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.stats.plot_nans">
+<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nans_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_nans" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.display.stats.plot_segments_per_chr">
+<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_segments_per_chr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_segments_per_chr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-cns.display">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cns.display" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Dr. Adam Streck.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
