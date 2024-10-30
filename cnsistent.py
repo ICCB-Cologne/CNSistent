@@ -202,10 +202,10 @@ def main():
     cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, assembly=assembly, print_info=print_info)
     cn_columns = find_cn_cols_if_none(cns_df, cncols)     
     if samples_path == "":
-        samples_df = samples_df_from_cns_df(cns_df)
+        samples_df = samples_df_from_cns_df(cns_df, False)
     else:
         samples_df = load_samples(samples_path)
-        samples_df = fill_sex_if_missing(cns_df, samples_df)
+    samples_df = fill_sex_if_missing(cns_df, samples_df)
     samples_blocks = dataframe_array_split(samples_df, subsplit) 
 
     for i in range(subsplit):

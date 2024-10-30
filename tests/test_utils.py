@@ -79,7 +79,7 @@ class TestFiles(unittest.TestCase):
     def setUp(self):
         self.cns_df = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4'],
-            'chrom': ['chr1', 'chrX', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1'],
+            'chrom': ['chrY', 'chrX', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99],
             'end': [100, 200, 300, 400, 500, 50, 99, 100],
             'major_cn': [1, 2, 3, 4, 5, 2, 1, 0],
@@ -95,6 +95,11 @@ class TestFiles(unittest.TestCase):
         self.assertEqual(result.loc['s1', 'sex'], 'xy')
         self.assertEqual(result.loc['s2', 'sex'], 'xy')
         self.assertEqual(result.loc['s4', 'sex'], 'xx')
+
+    def test_chry_col(self):
+        res = find_y_column(self.cns_df, self.samples, ["major_cn", "minor_cn"])
+        self.assertEqual(res.loc['s1', 'y_col'], 'major_cn')
+        self.assertEqual(res.loc['s2', 'y_col'], 'NA')
 
 
 class TestCanonization(unittest.TestCase):
@@ -143,7 +148,7 @@ class TestCanonization(unittest.TestCase):
         cns.loc[3, "cn_X"] = 0
         cns.loc[3, "cn_Y"] = 1
         cns, cols = rename_cn_cols(cns)
-        self.assertEqual(cols, ["hap2_cn", "hap1_cn"])
+        self.assertEqual(cols, ["hap1_cn", "hap2_cn"])
 
         cns = self.cns_df.copy().rename(columns={"major_cn": "cn_X", "minor_cn": "cn_Y"})
         cns = cns.query("chrom != 'chrY'").copy()

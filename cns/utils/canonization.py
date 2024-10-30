@@ -51,14 +51,8 @@ def rename_cn_cols(cns_df, cn_columns=None, print_info=False):
 
     if len(cn_columns) == 2:
         rename_map = _get_major_minor_cols(cns_df, cn_columns)
-        if len(rename_map) == 0: # Try haplotype specific
-            y_only = cns_df.query("chrom == 'chrY'")
-            if (y_only[cn_columns[1]] == 0).all():
-                rename_map={cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn"}
-            elif (y_only[cn_columns[0]] == 0).all():
-                rename_map={cn_columns[0]: "hap2_cn", cn_columns[1]: "hap1_cn"}
-            else:
-                raise ValueError("Haplotypes are of mixed sex. Either of the two CN columns")
+        if len(rename_map) == 0: # Set haplotype specific
+            rename_map={cn_columns[0]: "hap1_cn", cn_columns[1]: "hap2_cn"}
     elif len(cn_columns) == 1:
         rename_map = {cn_columns[0]: "total_cn"}
 
@@ -95,7 +89,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column sample_id does not exist, rename the first column to sample_id
     if "sample_id" not in cns_df.columns:
-        sample_col = find_column(cns_df, ['sample', 'Id', 'sampleId', 'sample_id', 'name'])
+        sample_col = find_column(cns_df, ['sample', 'id', 'sampleId', 'sample_id', 'name'])
         if sample_col is None:
             cns_df.columns = ["sample_id"] + cns_df.columns[1:].tolist()
             log_info(print_info, f"Column sample_id not found, renamed first column to sample_id.")
@@ -135,7 +129,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column start does not exist, rename the third column to start
     if "start" not in cns_df.columns:
-        start_col = find_column(cns_df, ['start', 'begin', 'chromStart'])
+        start_col = find_column(cns_df, ['start', 'begin', 'chromstart'])
         if start_col is None:
             cns_df.columns = cns_df.columns[:2].tolist() + ["start"] + cns_df.columns[3:].tolist()
             log_info(print_info, f"Column start not found, renamed third column to start.")
@@ -146,7 +140,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column end does not exist, rename the fourth column to end
     if "end" not in cns_df.columns:
-        end_col = find_column(cns_df, ['end', 'stop', 'chromEnd'])
+        end_col = find_column(cns_df, ['end', 'stop', 'chromend'])
         if end_col is None:
             cns_df.columns = cns_df.columns[:3].tolist() + ["end"] + cns_df.columns[4:].tolist()
             log_info(print_info, f"Column end not found, renamed fourth column to end.")
@@ -176,14 +170,10 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     return cns_df
 
 
-def is_hap_spec(cn_columns):
-    return len(cn_columns) == 2 and all([cn_col in ["hap1_cn", "hap2_cn"] for cn_col in cn_columns])
-
-
 def is_cn_column(column):
     if not isinstance(column, str):
         return False
-    pattern = re.compile(r'^(cn|CN).*|.*(cn|CN)$|.*(major|minor|hap).*', re.IGNORECASE)
+    pattern = re.compile(r'^(cn).*|.*(cn)$|.*(major|minor|hap).*', re.IGNORECASE)
     return bool(re.search(pattern, column))
 
 

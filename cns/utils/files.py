@@ -45,22 +45,37 @@ def save_samples(samples_df, path, mode='w'):
     samples_df.to_csv(path, sep="\t", index=True, mode=mode, header=mode=="w")
 
 
-def fill_sex_if_missing(cns, samples):
-    res = samples.copy()
+def fill_sex_if_missing(cns_df, samples_df):
+    res_df = samples_df.copy()
     # Set found_sex to True for each sample if there is chrY, otherwise set it to False
-    found_sex = cns.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
+    found_sex = cns_df.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
     found_sex = found_sex.map({True: "xy", False: "xx"})
-    if "sex" in res.columns:
-        res["found_sex"] = found_sex
-        condition = (res["sex"] == "xx") & (res["found_sex"] == "xy")
-        indices = res[condition].index
+    if "sex" in res_df.columns:
+        res_df["found_sex"] = found_sex
+        condition = (res_df["sex"] == "xx") & (res_df["found_sex"] == "xy")
+        indices = res_df[condition].index
         if len(indices) > 0:
             log_warn(f"Found samples where sex is xx in data but chrY has CNs assigned: {indices.tolist()}. "\
                     "This may result in an incorrect proportions of sex-chromosome features.")          
-        res.drop(columns=["found_sex"], inplace=True)      
+        res_df.drop(columns=["found_sex"], inplace=True)      
     # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
-    res.loc[~res["sex"].isin(["xy", "xx"]), "sex"] = found_sex
-    return res
+    res_df.loc[~res_df["sex"].isin(["xy", "xx"]), "sex"] = found_sex
+    return res_df
+
+
+def find_y_column(cns_df, samples_df, cn_columns):
+    res_df = samples_df.copy()
+    res_df["y_col"] = "NA"
+    for sample_id, group_df in cns_df.groupby("sample_id"):
+        chr_y = group_df.query("chrom == 'chrY'")
+        if len(chr_y) > 0:
+            if (chr_y[cn_columns[1]] == 0).all():
+                res_df.loc[sample_id, "y_col"] = cn_columns[0]
+            elif (chr_y[cn_columns[0]] == 0).all():
+                res_df.loc[sample_id, "y_col"] = cn_columns[1]
+            else:
+                log_warn(f"Sample {sample_id} has non-zero chrY CNs for both haplotypes.") 
+    return res_df
 
 
 def samples_df_from_cns_df(cns_df, fill_sex=True):

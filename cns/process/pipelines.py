@@ -96,7 +96,6 @@ def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembl
         segs_df = prepare_segments(cns_df, cn_col)
         res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
         res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
-        res_df = calc_seg_size_per_sample(segs_df, res_df, cn_col, assembly)
     return res_df
 
 
@@ -113,19 +112,20 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
     if cns_df[cn_columns].isna().any().any():
         log_warn("NaNs are not considered in ploidy calculations, it is recommended to impute first.")
+        cns_df = cns_df[cns_df[cn_columns].notna().all(axis=1)]
 
-    res_df = calc_ane_bases(cns_df, res_df, cn_columns, assembly)
+    res_df = calc_ane_bases(res_df, cns_df, cn_columns, "het", assembly)
     res_df = normalize_feature(res_df, "ane_het", norm_sizes)
-    res_df = calc_loh_bases(cns_df, res_df, cn_columns, assembly)
+    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "hom", assembly)
     res_df = normalize_feature(res_df, "loh_hom", norm_sizes)
+    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "het", assembly)    
     res_df = normalize_feature(res_df, "loh_het", norm_sizes)
     if len(cn_columns) == 2:
+        res_df = calc_ane_bases(res_df, cns_df, cn_columns, "hom", assembly)
         res_df = normalize_feature(res_df, "ane_hom", norm_sizes)
-        res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=0, assembly=assembly)
-        res_df = normalize_feature(res_df, f"imb_{cn_columns[0]}", norm_sizes)
-        if is_hap_spec(cn_columns):
-            res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=1, assembly=assembly)
-            res_df = normalize_feature(res_df, f"imb_{cn_columns[1]}", norm_sizes)
+        for col_i in range(2):
+            res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)
+            res_df = normalize_feature(res_df, f"imb_{cn_columns[col_i]}", norm_sizes)
     return res_df
 
 
