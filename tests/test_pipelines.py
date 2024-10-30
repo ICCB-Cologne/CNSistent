@@ -74,15 +74,15 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s2', 'cover_het_aut'], 50/350)
     
     def test_main_ploidy(self):
-        res = main_ploidy(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 19))
-        self.assertTrue(np.all(res['ane_hom_aut'] <= res['ane_het_aut']))   
-        self.assertEqual(res.loc['s1', 'ane_het_sex'], 0)
-        self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
-        self.assertEqual(res.loc['s4', 'ane_het_sex'], 0)
-        self.assertEqual(res.loc['s2', 'loh_het_all'], 1/8)
-        self.assertEqual(res.loc['s2', 'imb_major_cn_aut'], 1/6)        
-        self.assertEqual(res.loc['s4', 'imb_major_cn_sex'], 0)
+        res_df = main_ploidy(self.cns, self.samples, assembly=self.assembly)
+        self.assertEqual(res_df.shape, (4, 19))
+        self.assertTrue(np.all(res_df['ane_hom_aut'] <= res_df['ane_het_aut']))   
+        self.assertEqual(res_df.loc['s1', 'ane_het_sex'], 0)
+        self.assertEqual(res_df.loc['s2', 'ane_het_sex'], 1/2)
+        self.assertEqual(res_df.loc['s4', 'ane_het_sex'], 0)
+        self.assertEqual(res_df.loc['s2', 'loh_het_all'], 1/8)
+        self.assertEqual(res_df.loc['s2', 'imb_major_cn_aut'], 1/6)        
+        self.assertEqual(res_df.loc['s4', 'imb_major_cn_sex'], 0)
 
     def test_main_ploidy_segs(self):
         res = main_ploidy(self.cns, self.samples, segs=self.segs, assembly=self.assembly)
