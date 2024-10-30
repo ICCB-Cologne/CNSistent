@@ -76,16 +76,6 @@ def sortable_to_chrom(sortable, aut_count = 22):
         return "chrM"
 
 
-def segs_to_chrom_dict(segments):
-    res = { }
-    for seg in segments:
-        chrom, start, end = seg
-        if chrom not in res:
-            res[chrom] = []
-        res[chrom].append((start, end))
-    return res
-
-
 def tuples_to_segments(tuples):
     segs = {}
     if len(tuples) > 0 and len(tuples[0]) >= 3:

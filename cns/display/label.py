@@ -104,7 +104,7 @@ def plot_cytobands(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
         if (chrom is not None) and (band_chr != chrom):
             continue
         x_pos = (start + assembly.chr_starts[band_chr]) if chrom is None else start
-        this_color = cytoband_color(gie_stain) if color is None else color
+        color = cytoband_color(gie_stain)
         length = end - start
         rect = Rectangle(
             (x_pos, y_min), length, y_max-y_min, color=color, alpha=alpha
