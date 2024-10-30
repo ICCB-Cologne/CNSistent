@@ -2,9 +2,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_bases, get_expected_ploidy, get_ane_per_seg
+from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_bases, _get_feature_per_seg
 from cns.analyze.coverage import get_covered_bases, get_missing_chroms
-from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
+from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments
 from cns.process.normalize import get_norm_sizes, normalize_feature
 from cns.process.pipelines import main_coverage
 
@@ -114,15 +114,6 @@ class TestSignatures(unittest.TestCase):
         res = calc_step_per_sample(segs_df, self.samples, "minor_cn", self.assembly)
         self.assertEqual(res.loc['s1', 'step_minor_cn_aut'], 2)     
 
-    def test_calc_seg_size_per_sample(self):
-        self.cns.loc[0, "major_cn"] = 2
-        segs_df = prepare_segments(self.cns, "major_cn")
-        res = calc_seg_size_per_sample(segs_df, self.samples, "major_cn", self.assembly)
-        self.assertEqual(res.loc['s1', 'segsize_major_cn_aut'], 200)
-        self.assertEqual(res.loc['s2', 'segsize_major_cn_aut'], 100)
-        self.assertEqual(res.loc['s1', 'segsize_major_cn_sex'], 0)
-        self.assertEqual(res.loc['s2', 'segsize_major_cn_sex'], 100)
-
 
 class TestAneuploidy(unittest.TestCase):
     def setUp(self):
@@ -151,19 +142,9 @@ class TestAneuploidy(unittest.TestCase):
         self.cols = ["major_cn", "minor_cn"]        
         pd.set_option('display.max_columns', 10)
 
-    def test_get_expected_ploidy(self):
-        self.assertEqual(get_expected_ploidy("minor_cn", "chrX", "xy"), 0)
-        self.assertEqual(get_expected_ploidy("major_cn", "chrX", "xy"), 1)
-        self.assertEqual(get_expected_ploidy("total_cn", "chrX", "xx"), 2)
-        self.assertEqual(get_expected_ploidy("major_cn", "chrX", "xx"), 1)
-        self.assertEqual(get_expected_ploidy("minor_cn", "chrY", "xy"), 0)
-        self.assertEqual(get_expected_ploidy("major_cn", "chrY", "xy"), 1)
-        self.assertEqual(get_expected_ploidy("total_cn", "chrY", "xx"), 0)
-        self.assertEqual(get_expected_ploidy("total_cn", "chr1", "xy"), 2)
-        self.assertEqual(get_expected_ploidy("major_cn", "chr1", "xy"), 1)
 
     def test_calc_ane_per_sample(self):
-        res = get_ane_per_seg(self.cns, self.samples, self.cols, True, self.assembly)
+        res = _get_feature_per_seg(self.cns, self.samples, self.cols, True, self.assembly)
         self.assertEqual(len(res), len(self.cns))
 
     def test_get_ane_bases(self):

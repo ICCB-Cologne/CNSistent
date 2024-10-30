@@ -96,7 +96,6 @@ def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembl
         segs_df = prepare_segments(cns_df, cn_col)
         res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
         res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
-        res_df = calc_seg_size_per_sample(segs_df, res_df, cn_col, assembly)
     return res_df
 
 

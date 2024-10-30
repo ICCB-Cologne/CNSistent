@@ -9,7 +9,7 @@ from os.path import exists
 from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
-from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples, find_y_column
+from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
 from cns.process.pipelines import main_fill, main_impute, main_aggregate, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info, log_warn
 
@@ -206,8 +206,6 @@ def main():
     else:
         samples_df = load_samples(samples_path)
     samples_df = fill_sex_if_missing(cns_df, samples_df)
-    if len(cn_columns) > 1:
-        samples_df = find_y_column(cns_df, samples_df, cn_columns)
     samples_blocks = dataframe_array_split(samples_df, subsplit) 
 
     for i in range(subsplit):

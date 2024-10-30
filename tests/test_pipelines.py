@@ -96,21 +96,17 @@ class TestPipelines(unittest.TestCase):
             main_signatures(self.cns, self.samples, assembly=self.assembly)
         self.cns.loc[2, "minor_cn"] = 0
         res = main_signatures(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res.shape, (4, 28))        
+        self.assertEqual(res.shape, (4, 19))        
         self.assertEqual(res.loc['s1', 'breaks_minor_cn_aut'], 1)
         self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
         self.assertEqual(res.loc['s1', 'breaks_total_cn_aut'], 1)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_aut'], 4)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_sex'], 0)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_all'], 4)
-        self.assertEqual(res.loc['s1', 'segsize_total_cn_tot'], 50)
-        self.assertEqual(res.loc['s3', 'segsize_total_cn_aut'], 100)
 
     def test_main_signatures_segs(self):
         res = main_signatures(self.cns, self.samples, segs=self.aut_segs, assembly=self.assembly)
         self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
-        self.assertEqual(res.loc['s1', 'segsize_total_cn_tot'], 50)
-        self.assertEqual(res.loc['s3', 'segsize_total_cn_aut'], 0)
 
     def test_main_segment(self):
         select = {'chr1': [(0, 100, "0")], 'chr2': [(50, 150, "1")], 'chr3': [(100, 200, "2"), (250, 300, "3")]}
