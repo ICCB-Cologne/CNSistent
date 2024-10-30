@@ -123,10 +123,9 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     if len(cn_columns) == 2:
         res_df = calc_ane_bases(res_df, cns_df, cn_columns, "hom", assembly)
         res_df = normalize_feature(res_df, "ane_hom", norm_sizes)
-        res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=0, assembly=assembly)
-        res_df = normalize_feature(res_df, f"imb_{cn_columns[0]}", norm_sizes)
-        res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=1, assembly=assembly)
-        res_df = normalize_feature(res_df, f"imb_{cn_columns[1]}", norm_sizes)
+        for col_i in range(2):
+            res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)
+            res_df = normalize_feature(res_df, f"imb_{cn_columns[col_i]}", norm_sizes)
     return res_df
 
 
