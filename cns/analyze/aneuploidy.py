@@ -43,12 +43,12 @@ def get_hom_loh_for_col(col, cns_row, sample_row, assembly=hg19):
     return get_expected_ploidy(col, cns_row["chrom"], sample_row["sex"], assembly) != 0 and cns_row[col] == 0
 
 
-def is_seg_loh(cns_df, samples_df, cn_columns, het, assembly=hg19):
+def is_seg_loh(cns_df, samples_df, cn_columns, is_het, assembly=hg19):
     if len(cn_columns) == 2:
         is_ane = [cns_df.apply(lambda row: get_het_loh_for_col(col, row, samples_df.loc[row["sample_id"]], assembly), axis=1) for col in cn_columns]
-        return np.any(is_ane, axis=0) if het else np.all(is_ane, axis=0)
+        return np.any(is_ane, axis=0) if is_het else np.all(is_ane, axis=0)
     else:
-        fun = get_het_loh_for_col if het else get_hom_loh_for_col
+        fun = get_het_loh_for_col if is_het else get_hom_loh_for_col
         is_loh = cns_df.apply(lambda row: fun(cn_columns[0], row, samples_df.loc[row["sample_id"]], assembly), axis=1)
         return is_loh
 
@@ -67,7 +67,7 @@ def is_total_seg_ane(row, col_name, sex, assembly):
             return val != 2
         
 
-def are_hap_seg_ane(row, col_names, sex, het, assembly):
+def are_hap_seg_ane(row, col_names, sex, is_het, assembly):
     vals = sorted(row[col_names], reverse=True)
     if sex == "xy":
         if row["chrom"] == assembly.chr_x or row["chrom"] == assembly.chr_y:
@@ -80,14 +80,14 @@ def are_hap_seg_ane(row, col_names, sex, het, assembly):
         else:
             expected = [1, 1]
     matches = [vals[0] == expected[0], vals[1] == expected[1]]
-    return not all(matches) if het else not any(matches)
+    return not all(matches) if is_het else not any(matches)
 
 
-def is_seg_ane(cns_df, samples_df, cn_columns, het, assembly=hg19):
+def is_seg_ane(cns_df, samples_df, cn_columns, is_het, assembly=hg19):
     if len(cn_columns) == 1:
         return cns_df.apply(lambda row: is_total_seg_ane(row, cn_columns, samples_df.loc[row["sample_id"]]["sex"], assembly), axis=1)       
     else:
-        return cns_df.apply(lambda row: are_hap_seg_ane(row, cn_columns, samples_df.loc[row["sample_id"]]["sex"], het, assembly), axis=1)
+        return cns_df.apply(lambda row: are_hap_seg_ane(row, cn_columns, samples_df.loc[row["sample_id"]]["sex"], is_het, assembly), axis=1)
 
 
 def _get_check_fun(feature):
@@ -99,7 +99,7 @@ def _get_check_fun(feature):
         raise ValueError("feature must be one of ['ane', 'loh']")
 
 
-def _calc_bases_per_chr_group(res, masked_cns_df, label, groups, assembly=hg19):
+def _calc_bases_per_chr_group(res, masked_cns_df, label, groups):
     for suffix, names in groups.items():
         subset = masked_cns_df.query("chrom in @names")
         length = calc_lenghts(subset)
@@ -108,27 +108,22 @@ def _calc_bases_per_chr_group(res, masked_cns_df, label, groups, assembly=hg19):
     return res
 
 
-def _calc_bases_per_column(res, cns_df, cn_columns, het, feature, assembly=hg19):
-    label = feature + "_" + ("het" if het else "hom")
+def _count_bases_with_feature(res_df, cns_df, cn_columns, allele_spec, feature, assembly):
+    label = feature + "_" + allele_spec
     function = _get_check_fun(feature)
-    mask = function(cns_df, res, cn_columns, het, assembly)
+    mask = function(cns_df, res_df, cn_columns, allele_spec == "het", assembly)
     chr_sets = get_chr_sets(cns_df, assembly)
-    return _calc_bases_per_chr_group(res, cns_df[mask], label, chr_sets, assembly)
+    return _calc_bases_per_chr_group(res_df, cns_df[mask], label, chr_sets)
 
 
-def calc_ane_bases(cns_df, samples_df, cn_columns, assembly=hg19):
-    res = samples_df.copy()
-    if len(cn_columns) == 2:
-        res = _calc_bases_per_column(res, cns_df, cn_columns, False, "ane", assembly)
-    res = _calc_bases_per_column(res, cns_df, cn_columns, True, "ane", assembly)
-    return res
+def calc_loh_bases(samples_df, cns_df, cn_columns, allele_spec, assembly=hg19):
+    res_df = samples_df.copy()
+    return _count_bases_with_feature(res_df, cns_df, cn_columns, allele_spec, "loh", assembly)
 
 
-def calc_loh_bases(cns_df, samples_df, cn_columns, assembly=hg19):
-    res = samples_df.copy()
-    res = _calc_bases_per_column(res, cns_df, cn_columns, False, "loh", assembly)
-    res = _calc_bases_per_column(res, cns_df, cn_columns, True, "loh", assembly)
-    return res
+def calc_ane_bases(samples_df, cns_df, cn_columns, allele_spec, assembly=hg19):
+    res_df = samples_df.copy()
+    return _count_bases_with_feature(res_df, cns_df, cn_columns, allele_spec, "ane", assembly)
 
 
 def calc_imb_bases(cns_df, samples_df, cn_columns, col_index=0, assembly=hg19):
@@ -140,5 +135,5 @@ def calc_imb_bases(cns_df, samples_df, cn_columns, col_index=0, assembly=hg19):
     mask = cns_df[cn_col1] > cns_df[cn_col2]
     label = "imb_" + cn_col1
     chr_sets = get_chr_sets(cns_df, assembly)
-    res = _calc_bases_per_chr_group(res, cns_df[mask], label, chr_sets, assembly)
+    res = _calc_bases_per_chr_group(res, cns_df[mask], label, chr_sets)
     return res

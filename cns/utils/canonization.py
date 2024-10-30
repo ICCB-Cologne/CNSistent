@@ -176,10 +176,6 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     return cns_df
 
 
-def is_hap_spec(cn_columns):
-    return len(cn_columns) == 2 and all([cn_col in ["hap1_cn", "hap2_cn"] for cn_col in cn_columns])
-
-
 def is_cn_column(column):
     if not isinstance(column, str):
         return False

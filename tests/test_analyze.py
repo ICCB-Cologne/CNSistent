@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import calc_imb_bases, calc_loh_bases, get_expected_ploidy, is_seg_ane, calc_ane_bases
+from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_bases, get_expected_ploidy, is_seg_ane
 from cns.analyze.coverage import get_covered_bases, get_missing_chroms
 from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments, calc_seg_size_per_sample
 from cns.process.normalize import get_norm_sizes, normalize_feature
@@ -148,7 +148,7 @@ class TestAneuploidy(unittest.TestCase):
             'chr_x': 'chrX',
             'chr_y': 'chrY'
         })
-        self.ane_cols = ["major_cn", "minor_cn"]
+        self.cols = ["major_cn", "minor_cn"]
 
     def test_get_expected_ploidy(self):
         self.assertEqual(get_expected_ploidy("minor_cn", "chrX", "xy"), 0)
@@ -162,30 +162,32 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(get_expected_ploidy("major_cn", "chr1", "xy"), 1)
 
     def test_calc_ane_per_sample(self):
-        res = is_seg_ane(self.cns, self.samples, self.ane_cols, True, self.assembly)
+        res = is_seg_ane(self.cns, self.samples, self.cols, True, self.assembly)
         self.assertEqual(len(res), len(self.cns))
 
     def test_get_ane_bases(self):
-        res = calc_ane_bases(self.cns, self.samples, self.ane_cols, self.assembly)
+        res_df = calc_ane_bases(self.samples, self.cns, self.cols, "hom", self.assembly)
+        res_df = calc_ane_bases(res_df, self.cns, self.cols, "het", self.assembly)
         norm_sizes = get_norm_sizes(None, self.assembly)
-        self.assertEqual(res.shape, (4, 7))
-        self.assertEqual(res.loc['s4', 'ane_het_aut'], 170)
-        self.assertEqual(res.loc['s2', 'ane_het_sex'], 100)
-        self.assertEqual(res.loc['s2', 'ane_het_all'], 200)
-        res = normalize_feature(res, "ane_het", norm_sizes)
-        self.assertEqual(res.loc['s2', 'ane_het_sex'], 1/2)
-        res = normalize_feature(res, "ane_hom", norm_sizes)
-        self.assertEqual(res.loc['s1', 'ane_hom_aut'], 1/6)
+        self.assertEqual(res_df.shape, (4, 7))
+        self.assertEqual(res_df.loc['s4', 'ane_het_aut'], 170)
+        self.assertEqual(res_df.loc['s2', 'ane_het_sex'], 100)
+        self.assertEqual(res_df.loc['s2', 'ane_het_all'], 200)
+        res_df = normalize_feature(res_df, "ane_het", norm_sizes)
+        self.assertEqual(res_df.loc['s2', 'ane_het_sex'], 1/2)
+        res_df = normalize_feature(res_df, "ane_hom", norm_sizes)
+        self.assertEqual(res_df.loc['s1', 'ane_hom_aut'], 1/6)
 
     def test_get_loh_bases(self):
-        res = calc_loh_bases(self.cns, self.samples, self.ane_cols, self.assembly)
-        self.assertEqual(res.shape, (4, 7))
-        self.assertEqual(res.loc['s1', 'loh_het_aut'], 100)
-        self.assertEqual(res.loc['s4', 'loh_het_aut'], 70)
-        self.assertEqual(res.loc['s4', 'loh_hom_all'], 1)
+        res_df = calc_loh_bases(self.samples, self.cns, self.cols, "hom", self.assembly)
+        res_df = calc_loh_bases(res_df, self.cns, self.cols, "het", self.assembly)
+        self.assertEqual(res_df.shape, (4, 7))
+        self.assertEqual(res_df.loc['s1', 'loh_het_aut'], 100)
+        self.assertEqual(res_df.loc['s4', 'loh_het_aut'], 70)
+        self.assertEqual(res_df.loc['s4', 'loh_hom_all'], 1)
         
     def test_imb_score(self):
-        res = calc_imb_bases(self.cns, self.samples, self.ane_cols, 0, self.assembly)
+        res = calc_imb_bases(self.cns, self.samples, self.cols, 0, self.assembly)
         self.assertEqual(res.shape, (4, 4))
         self.assertEqual(res.loc['s1', 'imb_major_cn_aut'], 100)
         self.assertEqual(res.loc['s2', 'imb_major_cn_sex'], 0)
