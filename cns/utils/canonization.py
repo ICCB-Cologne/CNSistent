@@ -1,7 +1,7 @@
 import pandas as pd
 import re
-from cns.utils.assemblies import hg19
 from cns.utils.logging import log_info
+from cns.utils import hg19
 
 def _requires_rename(cn_columns):
     if len(cn_columns) > 2:
@@ -21,8 +21,8 @@ def _requires_rename(cn_columns):
 
     return False
 
-
-def find_cn_cols_if_none(cns_df, cn_cols=None):
+# Either obtains CN columns from the DataFrame or checks if the provided columns are valid
+def get_cn_cols(cns_df, cn_cols=None):
     if cn_cols is None:
         cn_cols = [col for col in cns_df.columns if is_cn_column(col)]
     # check if cn_cols is a string
@@ -45,7 +45,7 @@ def find_cn_cols_if_none(cns_df, cn_cols=None):
 
 
 def rename_cn_cols(cns_df, cn_columns=None, print_info=False):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     if not _requires_rename(cn_columns):
         return cns_df, list(cn_columns)
 
@@ -85,7 +85,7 @@ def find_column(cns_df, patterns):
 def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
     # convert columns to strings
     cns_df.columns = cns_df.columns.astype(str)
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
 
     # if the column sample_id does not exist, rename the first column to sample_id
     if "sample_id" not in cns_df.columns:
@@ -148,7 +148,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
             cns_df.rename(columns={end_col: "end"}, inplace=True)
             log_info(print_info, f"Renamed column {end_col} to end.")
 
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)  
+    cn_columns = get_cn_cols(cns_df, cn_columns)  
     log_info(print_info, f"Using CN columns: {cn_columns}")
     if len(cn_columns) == 2 and order_columns:
         major_cn = cns_df[[cn_columns[0], cn_columns[1]]].max(axis=1)

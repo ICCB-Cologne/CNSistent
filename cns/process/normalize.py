@@ -1,7 +1,6 @@
-
-from cns.process.segments import calc_group_sizes, hg19
 import numpy as np
-from cns.utils.assemblies import hg19
+from cns.utils import hg19
+
 
 def normalize_feature(samples, feature, norm_sizes):
     res_df = samples.copy()
@@ -22,6 +21,18 @@ def normalize_feature(samples, feature, norm_sizes):
     return res_df
 
 
+def calc_chr_sizes(chr_segs_df):
+    return {chr: sum([seg[1] - seg[0] for seg in chr_segs]) for chr, chr_segs in chr_segs_df.items()}
+
+
+def calc_group_sizes(segs_df, assembly=hg19):
+    chr_sizes = calc_chr_sizes(segs_df)
+    groups = {"sexXX": [assembly.chr_x], "aut": assembly.aut_names, "sexXY": [assembly.chr_y, assembly.chr_x]}
+    return {
+        key: sum([chr_sizes[chrom] if chrom in chr_sizes else 0 for chrom in group]) for key, group in groups.items()
+    }
+
+
 def get_norm_sizes(segs, assembly=hg19):
     sizes = (
         {
@@ -37,17 +48,5 @@ def get_norm_sizes(segs, assembly=hg19):
     return sizes
 
 
-def get_chr_sets(cns_df, assembly=hg19):
-    chroms = cns_df["chrom"].unique().tolist()
-    aut_selection = [chrom for chrom in chroms if chrom in assembly.aut_names]
-    if len(aut_selection) == 0:
-        print(cns_df)
-        raise ValueError("No autosomes found in the input segments.")    
-    res_dict = { "aut": aut_selection}
-    sex_selection = [chrom for chrom in chroms if chrom in assembly.sex_names]
-    if len(sex_selection) != 0:
-        res_dict["sex"] = sex_selection
-        res_dict["all"] = aut_selection + sex_selection
-    return res_dict
     
     

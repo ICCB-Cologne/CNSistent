@@ -1,5 +1,5 @@
 from cns.process.imputation import merge_neighbours
-from cns.process.normalize import get_chr_sets
+from cns.utils.selection import get_chr_sets
 from cns.utils.assemblies import hg19
 import numpy as np
 import pandas as pd

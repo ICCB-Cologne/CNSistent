@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils.canonization import get_cn_cols
 from cns.utils.logging import log_info
 
 
@@ -148,7 +148,7 @@ def _are_mergeable(a, b, cn_columns):
 
 
 def merge_neighbours(cns_df, cn_columns=None, print_info=True):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
+    cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     idx_to_remove = []
 
@@ -262,7 +262,7 @@ def _impute_diploid(cns_df, samples_df, cn_columns, print_info=True):
 
 
 def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=True):    
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     if method ==  'extend':
         return _impute_extend(cns_df, cn_columns, print_info)
     if method == 'diploid':
@@ -275,7 +275,7 @@ def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=
 
 
 def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)    
+    cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     log_info(print_info, f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")
     # Fully missing chromosomes filled with 0

@@ -8,6 +8,7 @@ from cns.process.imputation import *
 from cns.process.aggregation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
+from cns.process.normalize import *
 from cns.utils.assemblies import hg19, hg38
 from cns.utils.conversions import segs_to_df, tuples_to_segments
 

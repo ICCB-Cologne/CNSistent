@@ -1,4 +1,5 @@
 import numpy as np
+from cns.utils import hg19
 from cns.utils.assemblies import hg19
 
 def cns_head(cns_df, n=5):
@@ -73,3 +74,24 @@ def get_cns_for_type(cns_df, samples, type):
     ids = samples.query(query).index
     select_cns = cns_df.set_index("sample_id").loc[ids].reset_index()
     return select_cns
+
+
+def cn_not_nan(cns_df, cn_columns, het):
+    nan_vals = cns_df[cn_columns].isna()
+    nan_filter = ~nan_vals.all(axis=1) if het else ~nan_vals.any(axis=1)
+    non_nan_df = cns_df.loc[nan_filter]
+    return non_nan_df
+
+
+def get_chr_sets(cns_df, assembly=hg19):
+    chroms = cns_df["chrom"].unique().tolist()
+    aut_selection = [chrom for chrom in chroms if chrom in assembly.aut_names]
+    if len(aut_selection) == 0:
+        print(cns_df)
+        raise ValueError("No autosomes found in the input segments.")
+    res_dict = { "aut": aut_selection}
+    sex_selection = [chrom for chrom in chroms if chrom in assembly.sex_names]
+    if len(sex_selection) != 0:
+        res_dict["sex"] = sex_selection
+        res_dict["all"] = aut_selection + sex_selection
+    return res_dict

@@ -1,10 +1,10 @@
 import unittest
 import pandas as pd
 import numpy as np
-from cns.utils.canonization import canonize_cns_df, find_cn_cols_if_none, rename_cn_cols
+from cns.utils.canonization import canonize_cns_df, get_cn_cols, rename_cn_cols
 from cns.utils.conversions import *
 from cns.utils.files import *
-from cns.utils.kneepoint import *
+from cns.utils.anomaly import *
 
 
 class TestConversions(unittest.TestCase):
@@ -133,7 +133,7 @@ class TestCanonization(unittest.TestCase):
         self.assertEqual(cns_df.shape, (8, 5))
 
     def test_find_cn_cols_if_none(self):
-        cols = find_cn_cols_if_none(self.cns_df, None)
+        cols = get_cn_cols(self.cns_df, None)
         self.assertEqual(cols, ["major_cn", "minor_cn"])
 
     def test_rename_cn_cols(self):

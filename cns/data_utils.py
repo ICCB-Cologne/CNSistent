@@ -1,10 +1,10 @@
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils.canonization import get_cn_cols
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples, load_segments
-from cns.utils.kneepoint import find_bends, z_score_filter
+from cns.utils.anomaly import find_bends, z_score_filter
 import matplotlib.pyplot as plt
 
 
@@ -22,18 +22,14 @@ def load_cns_out(filename, raw=False):
     cns_df = load_cns(pjoin(out_path, filename))
     if raw:
         return cns_df
-    return rename_cns_columns(cns_df)
+    return _rename_cns_columns(cns_df)
 
 
 def load_samples_out(filename):
     return load_samples(pjoin(out_path, filename))
 
 
-def load_bins(dataset, segment_type):
-    return load_cns(pjoin(out_path, f"{dataset}_bin_{segment_type}.tsv"))
-
-
-def filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, filter_types=False, print_info=False):
+def _filter_samples(samples, ane_min_frac=0.001, cover_min_frac=0.95, filter_types=False, print_info=False):
     log_info(print_info, f"Total samples: {len(samples)}")
     
     cn_neutral = samples.query(f"ane_het_aut < {ane_min_frac}").index
@@ -78,7 +74,7 @@ def load_all_samples(filter=True, retype=True, print_info=False):
             cover_min_frac = cover_filtered.min()
 
             filter_types = k=="TRACERx" and retype
-            samples[k] = filter_samples(v, ane_min_frac, cover_min_frac, filter_types, print_info)
+            samples[k] = _filter_samples(v, ane_min_frac, cover_min_frac, filter_types, print_info)
 
     if retype:
         samples["PCAWG"]["type"] = samples["PCAWG"]["TCGA_type"]    
@@ -104,8 +100,8 @@ def load_merged_samples(filter=True, retype=True, print_info=False):
     return all_samples
 
 
-def rename_cns_columns(cns_df, cn_columns=None):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+def _rename_cns_columns(cns_df, cn_columns=None):
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     return cns_df.rename(columns={cn_columns[0]: "major_cn", cn_columns[1]: "minor_cn"})
 
 
@@ -149,10 +145,6 @@ def load_COSMIC():
 
 def load_ENSEMBL():
     return load_segments(pjoin(data_path, "ENSEMBL_coding_genes.bed"))
-
-
-def load_data_file(filename):
-    return pd.read_csv(pjoin(data_path, filename), sep="\t")
 
 
 def save_cns_fig(fig_name, fig = None):

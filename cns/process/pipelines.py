@@ -1,25 +1,25 @@
-import pandas as pd
-from cns.analyze.aneuploidy import *
 from cns.analyze.coverage import *
 from cns.analyze.breakpoints import *
+from cns.analyze.aneuploidy import *
 from cns.process.aggregation import *
 from cns.process.breakpoints import *
 from cns.process.cluster import *
 from cns.process.imputation import *
-from cns.process.normalize import get_norm_sizes, normalize_feature
+from cns.process.normalize import *
 from cns.process.segments import *
 from cns.utils.canonization import *
 from cns.utils.conversions import *
 from cns.utils.files import *
 from cns.utils.logging import *
 from cns.utils.assemblies import *
+from cns.utils.selection import *
 
 
 def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     cns_tailed_df = add_tails(cns_df, assembly.chr_lens, print_info=print_info)
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
@@ -30,7 +30,7 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
 
 
 def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print_info=False):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     if method == "diploid" and samples_df is None:
         log_info(print_info, "Diploid imputation requires samples, but none provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
@@ -41,7 +41,7 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
 
 
 def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     if how != "" and how != "none" and cns_df[cn_columns].isna().any().any():
         log_warn("NaNs are not considered in aggregation calculations, it is recommended to impute first.")
     return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
@@ -53,16 +53,16 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     res_df = samples_df.copy()
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
 
     if segs is not None:
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
     norm_sizes = get_norm_sizes(segs, assembly)
 
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
-    het_nan_df = get_not_nan(cns_df, cn_columns, True)
+    het_nan_df = cn_not_nan(cns_df, cn_columns, True)
     if len(cn_columns) == 2:        
-        hom_nan_df = get_not_nan(cns_df, cn_columns, False)    
+        hom_nan_df = cn_not_nan(cns_df, cn_columns, False)    
     
     res_df = get_missing_chroms(het_nan_df, res_df, segs, assembly)
     
@@ -80,7 +80,7 @@ def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembl
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     res_df = samples_df.copy()
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     if segs is not None:
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
 
@@ -105,7 +105,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     res_df = samples_df.copy()
-    cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     if segs is not None:
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)    
     norm_sizes = get_norm_sizes(segs, assembly)

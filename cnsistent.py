@@ -8,7 +8,7 @@ from os.path import exists
 
 from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
-from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils.canonization import get_cn_cols
 from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
 from cns.process.pipelines import main_fill, main_impute, main_aggregate, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info, log_warn
@@ -200,7 +200,7 @@ def main():
     else:
         log_info(print_info, f"CNS file at {cns_file_path}...")     
     cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, assembly=assembly, print_info=print_info)
-    cn_columns = find_cn_cols_if_none(cns_df, cncols)     
+    cn_columns = get_cn_cols(cns_df, cncols)     
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df, False)
     else:
