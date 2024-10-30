@@ -151,15 +151,15 @@ class TestAneuploidy(unittest.TestCase):
         self.ane_cols = ["major_cn", "minor_cn"]
 
     def test_get_expected_ploidy(self):
-        self.assertEqual(get_expected_ploidy("minor_cn", "chrX", True), 0)
-        self.assertEqual(get_expected_ploidy("major_cn", "chrX", True), 1)
-        self.assertEqual(get_expected_ploidy("total_cn", "chrX", False), 2)
-        self.assertEqual(get_expected_ploidy("major_cn", "chrX", False), 1)
-        self.assertEqual(get_expected_ploidy("minor_cn", "chrY", True), 0)
-        self.assertEqual(get_expected_ploidy("major_cn", "chrY", True), 1)
-        self.assertEqual(get_expected_ploidy("total_cn", "chrY", False), 0)
-        self.assertEqual(get_expected_ploidy("total_cn", "chr1", True), 2)
-        self.assertEqual(get_expected_ploidy("major_cn", "chr1", True), 1)
+        self.assertEqual(get_expected_ploidy("minor_cn", "chrX", "xy"), 0)
+        self.assertEqual(get_expected_ploidy("major_cn", "chrX", "xy"), 1)
+        self.assertEqual(get_expected_ploidy("total_cn", "chrX", "xx"), 2)
+        self.assertEqual(get_expected_ploidy("major_cn", "chrX", "xx"), 1)
+        self.assertEqual(get_expected_ploidy("minor_cn", "chrY", "xy"), 0)
+        self.assertEqual(get_expected_ploidy("major_cn", "chrY", "xy"), 1)
+        self.assertEqual(get_expected_ploidy("total_cn", "chrY", "xx"), 0)
+        self.assertEqual(get_expected_ploidy("total_cn", "chr1", "xy"), 2)
+        self.assertEqual(get_expected_ploidy("major_cn", "chr1", "xy"), 1)
 
     def test_calc_ane_per_sample(self):
         res = is_seg_ane(self.cns, self.samples, self.ane_cols, True, self.assembly)

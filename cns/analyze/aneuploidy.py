@@ -4,9 +4,9 @@ from cns.utils.assemblies import hg19
 from cns.utils.conversions import calc_lenghts
 
 
-def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
+def get_expected_ploidy(column, chrom, sex, assembly=hg19):
     if chrom == assembly.chr_x:
-        if is_xy:
+        if sex == "xy":
             if column == "minor_cn" or column == "hap2":
                 return 0
             else:
@@ -17,7 +17,7 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
             else:
                 return 1
     elif chrom == assembly.chr_y:
-        if is_xy:
+        if sex == "xy":
             if column == "major_cn" or column == "hap1":
                 return 1
             else:
@@ -31,34 +31,64 @@ def get_expected_ploidy(column, chrom, is_xy, assembly=hg19):
             return 1
 
 
-def get_ane_for_col(col, row, samples_df, assembly=hg19):
-    return get_expected_ploidy(col, row["chrom"], samples_df.loc[row["sample_id"]]["sex"] == "xy", assembly) != row[
-        col
-    ] and not np.isnan(row[col])
+def get_ane_for_col(col, cns_row, sample_row, assembly=hg19):
+    return get_expected_ploidy(col, cns_row["chrom"], sample_row["sex"], assembly) != cns_row[col] and not np.isnan(cns_row[col])
 
 
-def is_seg_ane(cns_df, samples_df, cn_columns, het, assembly=hg19):
-    is_ane = [cns_df.apply(lambda x: get_ane_for_col(col, x, samples_df, assembly), axis=1) for col in cn_columns]
-    return np.any(is_ane, axis=0) if het else np.all(is_ane, axis=0)
+def get_het_loh_for_col(col, cns_row, sample_row, assembly=hg19):
+    return get_expected_ploidy(col, cns_row["chrom"], sample_row["sex"], assembly) > cns_row[col]
 
 
-def get_het_loh_for_col(col, row, samples_df, assembly=hg19):
-    return get_expected_ploidy(col, row["chrom"], samples_df.loc[row["sample_id"]]["sex"] == "xy", assembly) > row[col]
-
-
-def get_hom_loh_for_col(col, row, samples_df, assembly=hg19):
-    return get_expected_ploidy(col, row["chrom"], samples_df.loc[row["sample_id"]]["sex"] == "xy", assembly) != 0 and row[col] == 0
+def get_hom_loh_for_col(col, cns_row, sample_row, assembly=hg19):
+    return get_expected_ploidy(col, cns_row["chrom"], sample_row["sex"], assembly) != 0 and cns_row[col] == 0
 
 
 def is_seg_loh(cns_df, samples_df, cn_columns, het, assembly=hg19):
     if len(cn_columns) == 2:
-        is_ane = [cns_df.apply(lambda x: get_het_loh_for_col(col, x, samples_df, assembly), axis=1) for col in cn_columns]
+        is_ane = [cns_df.apply(lambda row: get_het_loh_for_col(col, row, samples_df.loc[row["sample_id"]], assembly), axis=1) for col in cn_columns]
         return np.any(is_ane, axis=0) if het else np.all(is_ane, axis=0)
     else:
         fun = get_het_loh_for_col if het else get_hom_loh_for_col
-        is_loh = cns_df.apply(lambda x: fun(cn_columns[0], x, samples_df, assembly), axis=1)
+        is_loh = cns_df.apply(lambda row: fun(cn_columns[0], row, samples_df.loc[row["sample_id"]], assembly), axis=1)
         return is_loh
-    
+
+
+def is_total_seg_ane(row, col_name, sex, assembly):
+    val = row[col_name]
+    if sex == "xy":
+        if row ["chrom"] == assembly.chr_x or row["chrom"] == assembly.chr_y:
+            return val != 1
+        else:
+            return val != 2
+    else:
+        if row ["chrom"] == assembly.chr_y:
+            return val != 0
+        else:    
+            return val != 2
+        
+
+def are_hap_seg_ane(row, col_names, sex, het, assembly):
+    vals = sorted(row[col_names], reverse=True)
+    if sex == "xy":
+        if row["chrom"] == assembly.chr_x or row["chrom"] == assembly.chr_y:
+            expected = [1, 0]
+        else:
+            expected = [1, 1]
+    else:
+        if row["chrom"] == assembly.chr_y:
+            expected = [0, 0]
+        else:
+            expected = [1, 1]
+    matches = [vals[0] == expected[0], vals[1] == expected[1]]
+    return not all(matches) if het else not any(matches)
+
+
+def is_seg_ane(cns_df, samples_df, cn_columns, het, assembly=hg19):
+    if len(cn_columns) == 1:
+        return cns_df.apply(lambda row: is_total_seg_ane(row, cn_columns, samples_df.loc[row["sample_id"]]["sex"], assembly), axis=1)       
+    else:
+        return cns_df.apply(lambda row: are_hap_seg_ane(row, cn_columns, samples_df.loc[row["sample_id"]]["sex"], het, assembly), axis=1)
+
 
 def _get_check_fun(feature):
     if feature == "ane":

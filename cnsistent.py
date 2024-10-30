@@ -9,8 +9,7 @@ from os.path import exists
 from cns.process.segments import regions_remove, regions_select
 from cns.utils.assemblies import get_assembly
 from cns.utils.canonization import find_cn_cols_if_none
-from cns.utils.conversions import segs_to_df
-from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples
+from cns.utils.files import load_cns, load_segments, save_cns, save_segments, dataframe_array_split, samples_df_from_cns_df, load_samples, fill_sex_if_missing, save_samples, find_y_column
 from cns.process.pipelines import main_fill, main_impute, main_aggregate, main_coverage, main_ploidy, main_segment, main_signatures
 from cns.utils.logging import log_info, log_warn
 
@@ -203,10 +202,12 @@ def main():
     cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, assembly=assembly, print_info=print_info)
     cn_columns = find_cn_cols_if_none(cns_df, cncols)     
     if samples_path == "":
-        samples_df = samples_df_from_cns_df(cns_df)
+        samples_df = samples_df_from_cns_df(cns_df, False)
     else:
         samples_df = load_samples(samples_path)
-        samples_df = fill_sex_if_missing(cns_df, samples_df)
+    samples_df = fill_sex_if_missing(cns_df, samples_df)
+    if len(cn_columns) > 1:
+        samples_df = find_y_column(cns_df, samples_df, cn_columns)
     samples_blocks = dataframe_array_split(samples_df, subsplit) 
 
     for i in range(subsplit):

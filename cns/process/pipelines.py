@@ -113,6 +113,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
     if cns_df[cn_columns].isna().any().any():
         log_warn("NaNs are not considered in ploidy calculations, it is recommended to impute first.")
+        cns_df = cns_df[cns_df[cn_columns].notna().all(axis=1)]
 
     res_df = calc_ane_bases(cns_df, res_df, cn_columns, assembly)
     res_df = normalize_feature(res_df, "ane_het", norm_sizes)

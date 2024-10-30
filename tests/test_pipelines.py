@@ -86,7 +86,9 @@ class TestPipelines(unittest.TestCase):
 
     def test_main_ploidy_segs(self):
         res = main_ploidy(self.cns, self.samples, segs=self.segs, assembly=self.assembly)
-        self.assertEqual(res.loc['s2', 'ane_het_aut'], 0)
+        print(self.cns)
+        print(res)
+        self.assertEqual(res.loc['s2', 'ane_het_aut'], 0) # check that NaN and out of scope are not considered
         self.assertEqual(res.loc['s4', 'loh_hom_aut'], 1/350)
     
     def test_main_signatures(self):
