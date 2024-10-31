@@ -17,4 +17,4 @@ documentation for details.
    intro
    cli_quickstart
    api_quickstart
-   modules
+   cns
