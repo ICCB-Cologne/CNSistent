@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt, colors as mcolors
 from collections.abc import Sequence
 
 from cns.display.label import no_y_ticks, plot_chr_bg, plot_x_ticks, plot_x_lines, get_size_and_bounds
-from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils.canonization import get_cn_cols
 from cns.utils.conversions import chrom_to_sortable
 from cns.utils.assemblies import hg19
 
@@ -76,7 +76,7 @@ def _check_fig_input(data, column, label, chrom, assembly):
         raise ValueError("data must be a pandas DataFrame or a list of pandas DataFrames")
 
     if column == None:
-        column = find_cn_cols_if_none(data[0])
+        column = get_cn_cols(data[0])
         if len(column) == 0:
             raise ValueError("If column is not specified, at least one column ending with '_cn' must exist in data")
     elif isinstance(column, str):

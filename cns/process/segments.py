@@ -1,8 +1,8 @@
 import numpy as np
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, create_step_breaks
-from cns.utils.assemblies import hg19
 from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to_segments, tuples_to_segments
-from cns.utils.files import load_segments
+from cns.utils import hg19
+from cns.utils import load_segments
 
 
 def count_segments(segs):
@@ -199,15 +199,3 @@ def get_genome_segments(select, remove=None, filter_size=0):
         if filter_size > 0:
             res = filter_min_size(res, filter_size, False)
     return res
-
-
-def calc_chr_sizes(chr_segs_df):
-    return {chr: sum([seg[1] - seg[0] for seg in chr_segs]) for chr, chr_segs in chr_segs_df.items()}
-
-
-def calc_group_sizes(segs_df, assembly=hg19):
-    chr_sizes = calc_chr_sizes(segs_df)
-    groups = {"sexXX": [assembly.chr_x], "aut": assembly.aut_names, "sexXY": [assembly.chr_y, assembly.chr_x]}
-    return {
-        key: sum([chr_sizes[chrom] if chrom in chr_sizes else 0 for chrom in group]) for key, group in groups.items()
-    }

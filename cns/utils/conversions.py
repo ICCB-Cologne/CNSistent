@@ -1,15 +1,15 @@
 import pandas as pd
 
-from cns.utils.assemblies import hg19
-from cns.utils.canonization import find_cn_cols_if_none
+from cns.utils import hg19
+from cns.utils.canonization import get_cn_cols
 
 
-def calc_lenghts(cns_df):
+def calc_lengths(cns_df):
     return cns_df["end"] - cns_df["start"]
 
 
 def calc_mid(cns_df):
-    return cns_df["start"] + calc_lenghts(cns_df) // 2
+    return cns_df["start"] + calc_lengths(cns_df) // 2
 
 
 def calc_cum_mid(cns_df, assembly=hg19):
@@ -20,7 +20,7 @@ def calc_cum_mid(cns_df, assembly=hg19):
 
 def calc_nan_cols(cns_df, cn_columns=None):
     if cn_columns is None:
-        cn_columns = find_cn_cols_if_none(cns_df, cn_columns)
+        cn_columns = get_cn_cols(cns_df, cn_columns)
     return cns_df[cn_columns].isna().any(axis=1)
 
 
@@ -74,16 +74,6 @@ def sortable_to_chrom(sortable, aut_count = 22):
         return "chrY"
     if sortable == aut_count + 3:
         return "chrM"
-
-
-def segs_to_chrom_dict(segments):
-    res = { }
-    for seg in segments:
-        chrom, start, end = seg
-        if chrom not in res:
-            res[chrom] = []
-        res[chrom].append((start, end))
-    return res
 
 
 def tuples_to_segments(tuples):

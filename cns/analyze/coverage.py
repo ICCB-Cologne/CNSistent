@@ -1,33 +1,26 @@
 import numpy as np
 import pandas as pd
-from cns.utils.conversions import calc_lenghts
+from cns.utils.conversions import calc_lengths
 from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
 
-def get_not_nan(cns_df, cn_columns, het):
-    nan_vals = cns_df[cn_columns].isna()
-    nan_filter = ~nan_vals.all(axis=1) if het else ~nan_vals.any(axis=1)
-    non_nan_df = cns_df.loc[nan_filter]
-    return non_nan_df
-
-
 def get_covered_bases(nan_bases_df, samples_df, het):
-    res = samples_df.copy()
+    res_df = samples_df.copy()
     label = "het" if het else "hom"
     aut_df = only_aut(nan_bases_df)
-    aut_df_len = calc_lenghts(aut_df)
+    aut_df_len = calc_lengths(aut_df)
     sex_df = only_sex(nan_bases_df)
-    sex_df_len = calc_lenghts(sex_df)
+    sex_df_len = calc_lengths(sex_df)
     # Group the differences by sample_id and compute the sum for each group
-    res[f"cover_{label}_aut"] = (
-        aut_df_len.groupby(aut_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
+    res_df[f"cover_{label}_aut"] = (
+        aut_df_len.groupby(aut_df["sample_id"]).sum().reindex(res_df.index).fillna(0).astype(np.int64)
     )
-    res[f"cover_{label}_sex"] = (
-        sex_df_len.groupby(sex_df["sample_id"]).sum().reindex(res.index).fillna(0).astype(np.int64)
+    res_df[f"cover_{label}_sex"] = (
+        sex_df_len.groupby(sex_df["sample_id"]).sum().reindex(res_df.index).fillna(0).astype(np.int64)
     )
-    res[f"cover_{label}_all"] = res[f"cover_{label}_aut"] + res[f"cover_{label}_sex"]
-    return res
+    res_df[f"cover_{label}_all"] = res_df[f"cover_{label}_aut"] + res_df[f"cover_{label}_sex"]
+    return res_df
 
 
 def get_missing_chroms(cns_df, samples_df, segs=None, assembly=hg19):
