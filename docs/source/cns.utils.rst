@@ -4,6 +4,14 @@ cns.utils package
 Submodules
 ----------
 
+cns.utils.anomaly module
+------------------------
+
+.. automodule:: cns.utils.anomaly
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cns.utils.assemblies module
 ---------------------------
 
@@ -56,14 +64,6 @@ cns.utils.genomes module
 ------------------------
 
 .. automodule:: cns.utils.genomes
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-cns.utils.kneepoint module
---------------------------
-
-.. automodule:: cns.utils.kneepoint
    :members:
    :undoc-members:
    :show-inheritance:

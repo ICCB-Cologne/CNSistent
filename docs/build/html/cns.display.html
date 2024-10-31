@@ -18,7 +18,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cns.process package" href="cns.process.html" />
+    <link rel="prev" title="cns.analyze package" href="cns.analyze.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,47 +42,28 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">cns.display package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cns.display.label">cns.display.label module</a><ul>
-<li><a class="reference internal" href="#cns.display.label.add_cytoband_legend"><code class="docutils literal notranslate"><span class="pre">add_cytoband_legend()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.add_gap_legend"><code class="docutils literal notranslate"><span class="pre">add_gap_legend()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.cytoband_color"><code class="docutils literal notranslate"><span class="pre">cytoband_color()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.gap_color"><code class="docutils literal notranslate"><span class="pre">gap_color()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.get_size_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_size_and_bounds()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.no_y_ticks"><code class="docutils literal notranslate"><span class="pre">no_y_ticks()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.plot_chr_bg"><code class="docutils literal notranslate"><span class="pre">plot_chr_bg()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.plot_cytobands"><code class="docutils literal notranslate"><span class="pre">plot_cytobands()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.plot_gaps"><code class="docutils literal notranslate"><span class="pre">plot_gaps()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.plot_x_lines"><code class="docutils literal notranslate"><span class="pre">plot_x_lines()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.label.plot_x_ticks"><code class="docutils literal notranslate"><span class="pre">plot_x_ticks()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">CLI Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cns</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cns.html">cns package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cns.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cns.analyze.html">cns.analyze package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cns.display package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cns.process.html">cns.process package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cns.utils.html">cns.utils package</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-cns.display.plot">cns.display.plot module</a><ul>
-<li><a class="reference internal" href="#cns.display.plot.fig_CN_heatmap"><code class="docutils literal notranslate"><span class="pre">fig_CN_heatmap()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.fig_bars"><code class="docutils literal notranslate"><span class="pre">fig_bars()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.fig_dots"><code class="docutils literal notranslate"><span class="pre">fig_dots()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.fig_lines"><code class="docutils literal notranslate"><span class="pre">fig_lines()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.plot_CN_heatmap"><code class="docutils literal notranslate"><span class="pre">plot_CN_heatmap()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.plot_bars"><code class="docutils literal notranslate"><span class="pre">plot_bars()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.plot_dots"><code class="docutils literal notranslate"><span class="pre">plot_dots()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.plot.plot_lines"><code class="docutils literal notranslate"><span class="pre">plot_lines()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-cns.display.stats">cns.display.stats module</a><ul>
-<li><a class="reference internal" href="#cns.display.stats.plot_bends"><code class="docutils literal notranslate"><span class="pre">plot_bends()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.stats.plot_coverage"><code class="docutils literal notranslate"><span class="pre">plot_coverage()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.stats.plot_nans"><code class="docutils literal notranslate"><span class="pre">plot_nans()</span></code></a></li>
-<li><a class="reference internal" href="#cns.display.stats.plot_segments_per_chr"><code class="docutils literal notranslate"><span class="pre">plot_segments_per_chr()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-cns.display">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#module-cns.cnsistent">cns.cnsistent module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#module-cns.data_utils">cns.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#module-cns">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</div>
+</li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -95,6 +78,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cns</a></li>
+          <li class="breadcrumb-item"><a href="cns.html">cns package</a></li>
       <li class="breadcrumb-item active">cns.display package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/cns.display.rst.txt" rel="nofollow"> View page source</a>
@@ -211,29 +196,6 @@
 <dd></dd></dl>
 
 </section>
-<section id="module-cns.display.stats">
-<span id="cns-display-stats-module"></span><h2>cns.display.stats module<a class="headerlink" href="#module-cns.display.stats" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.display.stats.plot_bends">
-<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_bends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knee_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elbow_point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_bends" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.display.stats.plot_coverage">
-<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_coverage" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.display.stats.plot_nans">
-<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nans_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_nans" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.display.stats.plot_segments_per_chr">
-<span class="sig-prename descclassname"><span class="pre">cns.display.stats.</span></span><span class="sig-name descname"><span class="pre">plot_segments_per_chr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.display.stats.plot_segments_per_chr" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
 <section id="module-cns.display">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cns.display" title="Link to this heading"></a></h2>
 </section>
@@ -242,7 +204,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cns.analyze.html" class="btn btn-neutral float-left" title="cns.analyze package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cns.process.html" class="btn btn-neutral float-right" title="cns.process package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

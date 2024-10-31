@@ -20,14 +20,6 @@ cns.display.plot module
    :undoc-members:
    :show-inheritance:
 
-cns.display.stats module
-------------------------
-
-.. automodule:: cns.display.stats
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

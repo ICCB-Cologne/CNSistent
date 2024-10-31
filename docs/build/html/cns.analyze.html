@@ -18,7 +18,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cns.display package" href="cns.display.html" />
+    <link rel="prev" title="cns package" href="cns.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,43 +42,28 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">cns.analyze package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cns.analyze.aneuploidy">cns.analyze.aneuploidy module</a><ul>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.calc_ane_bases"><code class="docutils literal notranslate"><span class="pre">calc_ane_bases()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.calc_imb_bases"><code class="docutils literal notranslate"><span class="pre">calc_imb_bases()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.calc_loh_bases"><code class="docutils literal notranslate"><span class="pre">calc_loh_bases()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.get_ane_for_col"><code class="docutils literal notranslate"><span class="pre">get_ane_for_col()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.get_expected_ploidy"><code class="docutils literal notranslate"><span class="pre">get_expected_ploidy()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.get_het_loh_for_col"><code class="docutils literal notranslate"><span class="pre">get_het_loh_for_col()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.get_hom_loh_for_col"><code class="docutils literal notranslate"><span class="pre">get_hom_loh_for_col()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.is_seg_ane"><code class="docutils literal notranslate"><span class="pre">is_seg_ane()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.aneuploidy.is_seg_loh"><code class="docutils literal notranslate"><span class="pre">is_seg_loh()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">CLI Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cns</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cns.html">cns package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cns.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cns.analyze package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cns.display.html">cns.display package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cns.process.html">cns.process package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cns.utils.html">cns.utils package</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-cns.analyze.breakpoints">cns.analyze.breakpoints module</a><ul>
-<li><a class="reference internal" href="#cns.analyze.breakpoints.calc_breaks_per_chr"><code class="docutils literal notranslate"><span class="pre">calc_breaks_per_chr()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.breakpoints.calc_breaks_per_sample"><code class="docutils literal notranslate"><span class="pre">calc_breaks_per_sample()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.breakpoints.calc_seg_size_per_sample"><code class="docutils literal notranslate"><span class="pre">calc_seg_size_per_sample()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.breakpoints.calc_step_per_chr"><code class="docutils literal notranslate"><span class="pre">calc_step_per_chr()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.breakpoints.calc_step_per_sample"><code class="docutils literal notranslate"><span class="pre">calc_step_per_sample()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.breakpoints.prepare_segments"><code class="docutils literal notranslate"><span class="pre">prepare_segments()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-cns.analyze.coverage">cns.analyze.coverage module</a><ul>
-<li><a class="reference internal" href="#cns.analyze.coverage.get_covered_bases"><code class="docutils literal notranslate"><span class="pre">get_covered_bases()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.coverage.get_missing_chroms"><code class="docutils literal notranslate"><span class="pre">get_missing_chroms()</span></code></a></li>
-<li><a class="reference internal" href="#cns.analyze.coverage.get_not_nan"><code class="docutils literal notranslate"><span class="pre">get_not_nan()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-cns.analyze.loss">cns.analyze.loss module</a></li>
-<li><a class="reference internal" href="#module-cns.analyze">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#module-cns.cnsistent">cns.cnsistent module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#module-cns.data_utils">cns.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cns.html#module-cns">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</div>
+</li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -91,6 +78,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cns</a></li>
+          <li class="breadcrumb-item"><a href="cns.html">cns package</a></li>
       <li class="breadcrumb-item active">cns.analyze package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/cns.analyze.rst.txt" rel="nofollow"> View page source</a>
@@ -110,7 +99,7 @@
 <span id="cns-analyze-aneuploidy-module"></span><h2>cns.analyze.aneuploidy module<a class="headerlink" href="#module-cns.analyze.aneuploidy" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.analyze.aneuploidy.calc_ane_bases">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">calc_ane_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.calc_ane_bases" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">calc_ane_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allele_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.calc_ane_bases" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -120,37 +109,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.analyze.aneuploidy.calc_loh_bases">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">calc_loh_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.calc_loh_bases" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.aneuploidy.get_ane_for_col">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">get_ane_for_col</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.get_ane_for_col" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.aneuploidy.get_expected_ploidy">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">get_expected_ploidy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.get_expected_ploidy" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.aneuploidy.get_het_loh_for_col">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">get_het_loh_for_col</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.get_het_loh_for_col" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.aneuploidy.get_hom_loh_for_col">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">get_hom_loh_for_col</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.get_hom_loh_for_col" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.aneuploidy.is_seg_ane">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">is_seg_ane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">het</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.is_seg_ane" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.aneuploidy.is_seg_loh">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">is_seg_loh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">het</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.is_seg_loh" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">calc_loh_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allele_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.calc_loh_bases" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -164,11 +123,6 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.analyze.breakpoints.calc_breaks_per_sample">
 <span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_breaks_per_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.calc_breaks_per_sample" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.breakpoints.calc_seg_size_per_sample">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_seg_size_per_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.calc_seg_size_per_sample" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -199,14 +153,6 @@
 <span class="sig-prename descclassname"><span class="pre">cns.analyze.coverage.</span></span><span class="sig-name descname"><span class="pre">get_missing_chroms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.coverage.get_missing_chroms" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.coverage.get_not_nan">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.coverage.</span></span><span class="sig-name descname"><span class="pre">get_not_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">het</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.coverage.get_not_nan" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
-<section id="module-cns.analyze.loss">
-<span id="cns-analyze-loss-module"></span><h2>cns.analyze.loss module<a class="headerlink" href="#module-cns.analyze.loss" title="Link to this heading"></a></h2>
 </section>
 <section id="module-cns.analyze">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cns.analyze" title="Link to this heading"></a></h2>
@@ -216,7 +162,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cns.html" class="btn btn-neutral float-left" title="cns package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cns.display.html" class="btn btn-neutral float-right" title="cns.display package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

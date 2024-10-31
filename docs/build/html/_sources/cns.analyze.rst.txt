@@ -28,14 +28,6 @@ cns.analyze.coverage module
    :undoc-members:
    :show-inheritance:
 
-cns.analyze.loss module
------------------------
-
-.. automodule:: cns.analyze.loss
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

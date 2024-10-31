@@ -15,6 +15,14 @@ Subpackages
 Submodules
 ----------
 
+cns.cnsistent module
+--------------------
+
+.. automodule:: cns.cnsistent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cns.data\_utils module
 ----------------------
 
