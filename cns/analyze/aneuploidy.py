@@ -1,5 +1,6 @@
 import numpy as np
-from cns.utils import hg19
+import pandas as pd
+from cns.utils.assemblies import hg19
 from cns.utils.conversions import calc_lengths
 from cns.utils.selection import get_chr_sets
 
@@ -96,3 +97,14 @@ def calc_imb_bases(cns_df, samples_df, cn_columns, col_index=0, assembly=hg19):
     chr_sets = get_chr_sets(cns_df, assembly)
     res = _calc_bases_per_chr_group(res, cns_df[mask], label, chr_sets)
     return res
+
+
+def calc_ploidy_per_column(cns_df, cn_column):
+    grouped  = cns_df.groupby('sample_id')
+    # get the ploidy for each sample
+    res = {}
+    for sample_id, group_df in grouped:
+        legnths = group_df["end"] - group_df["start"]
+        ploidy = (group_df[cn_column] * legnths).sum() / legnths.sum()
+        res[sample_id] = ploidy
+    return pd.Series(dict(res))

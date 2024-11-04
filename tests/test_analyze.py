@@ -4,7 +4,8 @@ import pandas as pd
 
 from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_bases, _get_feature_per_seg
 from cns.analyze.coverage import get_covered_bases, get_missing_chroms
-from cns.analyze.breakpoints import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample, prepare_segments
+from cns.analyze.breakage import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample
+from cns.process.imputation import merge_neighbours
 from cns.process.normalize import get_norm_sizes, normalize_feature
 from cns.process.pipelines import main_coverage
 
@@ -87,30 +88,35 @@ class TestSignatures(unittest.TestCase):
         })
         pd.set_option('display.max_columns', 10)
 
+        self.prepare_segments = lambda cns_df, cn_col: merge_neighbours(
+            cns_df[["sample_id", "chrom", "start", "end", cn_col]], cn_col, False
+        )
+
+
     def test_calc_breaks_per_chr(self):
-        segs_df = prepare_segments(self.cns, "major_cn")
+        segs_df = self.prepare_segments(self.cns, "major_cn")
         result = calc_breaks_per_chr(segs_df)
         self.assertEqual(result.query('sample_id == "s1" and chrom == "chr1"')['breaks'].values[0], 1)
         self.assertEqual(result.query('sample_id == "s2" and chrom == "chr2"')['breaks'].values[0], 0)
         self.assertEqual(result.query('sample_id == "s4" and chrom == "chr1"')['breaks'].values[0], 2)
 
     def test_calc_breaks_per_sample(self):
-        segs_df = prepare_segments(self.cns, "major_cn")
+        segs_df = self.prepare_segments(self.cns, "major_cn")
         res = calc_breaks_per_sample(segs_df, self.samples, "major_cn", self.assembly)
         self.assertEqual(res.query('sample_id == "s1"')['breaks_major_cn_aut'].values[0], 1)
         self.assertEqual(res.query('sample_id == "s4"')['breaks_major_cn_all'].values[0], 3)      
 
     def test_calc_step_per_chr(self):
-        segs_df = prepare_segments(self.cns, "major_cn")
+        segs_df = self.prepare_segments(self.cns, "major_cn")
         res = calc_step_per_chr(segs_df, "major_cn")
         self.assertEqual(res.query('sample_id == "s1" and chrom == "chr1"')['step'].values[0], 1)
         self.assertEqual(res.query('sample_id == "s1" and chrom == "chr1"')['count'].values[0], 1)
 
     def test_calc_step_per_sample(self):
-        segs_df = prepare_segments(self.cns, "major_cn")
+        segs_df = self.prepare_segments(self.cns, "major_cn")
         res = calc_step_per_sample(segs_df, self.samples, "major_cn", self.assembly)
         self.assertEqual(res.loc['s1', 'step_major_cn_aut'], 1)    
-        segs_df = prepare_segments(self.cns, "minor_cn") 
+        segs_df = self.prepare_segments(self.cns, "minor_cn") 
         res = calc_step_per_sample(segs_df, self.samples, "minor_cn", self.assembly)
         self.assertEqual(res.loc['s1', 'step_minor_cn_aut'], 2)     
 

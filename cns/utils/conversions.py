@@ -1,6 +1,6 @@
 import pandas as pd
 
-from cns.utils import hg19
+from cns.utils.assemblies import hg19
 from cns.utils.canonization import get_cn_cols
 
 

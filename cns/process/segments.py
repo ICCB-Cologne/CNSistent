@@ -1,7 +1,7 @@
 import numpy as np
 from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, create_step_breaks
 from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to_segments, tuples_to_segments
-from cns.utils import hg19
+from cns.utils.assemblies import hg19
 from cns.utils import load_segments
 
 

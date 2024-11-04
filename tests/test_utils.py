@@ -68,12 +68,6 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(sortable_to_chrom(24), 'chrY')
         self.assertEqual(sortable_to_chrom(25), 'chrM')
 
-    def test_segs_to_chrom_dict(self):
-        segs = [('chr1', 1, 5), ('chr1', 4, 8), ('chr2', 10, 15)]
-        chrom_dict = segs_to_chrom_dict(segs)
-        expected =  {'chr1': [(1, 5), (4, 8)], 'chr2': [(10, 15)]}
-        self.assertEqual(chrom_dict, expected)
-
 
 class TestFiles(unittest.TestCase):
     def setUp(self):

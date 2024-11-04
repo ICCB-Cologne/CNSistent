@@ -1,5 +1,4 @@
 import numpy as np
-from cns.utils import hg19
 from cns.utils.assemblies import hg19
 
 def cns_head(cns_df, n=5):

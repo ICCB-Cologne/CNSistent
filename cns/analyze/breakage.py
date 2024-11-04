@@ -1,14 +1,7 @@
-from cns.process.imputation import merge_neighbours
 from cns.utils.selection import get_chr_sets
 from cns.utils.assemblies import hg19
 import numpy as np
 import pandas as pd
-
-
-def prepare_segments(cns_df, cn_col):
-    cns_subset_df = cns_df[["sample_id", "chrom", "start", "end",  cn_col]]
-    merged_cns_df = merge_neighbours(cns_subset_df, cn_col, False)
-    return merged_cns_df
 
 
 # count segments per chromosome and subtract 1
@@ -33,7 +26,6 @@ def calc_breaks_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
             .fillna(0)
             .astype(np.int64)
         )
-
     return res
 
 

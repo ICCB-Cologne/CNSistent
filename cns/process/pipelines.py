@@ -1,5 +1,5 @@
 from cns.analyze.coverage import *
-from cns.analyze.breakpoints import *
+from cns.analyze.breakage import *
 from cns.analyze.aneuploidy import *
 from cns.process.aggregation import *
 from cns.process.breakpoints import *
@@ -93,7 +93,8 @@ def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembl
         cn_columns.append("total_cn")
 
     for cn_col in cn_columns:
-        segs_df = prepare_segments(cns_df, cn_col)
+        cns_subset_df = cns_df[["sample_id", "chrom", "start", "end",  cn_col]]
+        segs_df = merge_neighbours(cns_subset_df, cn_col, False)
         res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
         res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
     return res_df
@@ -126,6 +127,8 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
         for col_i in range(2):
             res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)
             res_df = normalize_feature(res_df, f"imb_{cn_columns[col_i]}", norm_sizes)
+    for cn_col in cn_columns:
+        res_df[f"ploidy_{cn_col}"] = calc_ploidy_per_column(cns_df, cn_col)
     return res_df
 
 

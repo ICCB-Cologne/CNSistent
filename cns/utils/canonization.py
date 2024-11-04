@@ -1,7 +1,7 @@
 import pandas as pd
 import re
+from cns.utils.assemblies import hg19
 from cns.utils.logging import log_info
-from cns.utils import hg19
 
 def _requires_rename(cn_columns):
     if len(cn_columns) > 2:
