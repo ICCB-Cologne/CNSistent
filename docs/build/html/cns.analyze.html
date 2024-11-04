@@ -51,7 +51,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">cns.analyze package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.analyze.aneuploidy">cns.analyze.aneuploidy module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-cns.analyze.breakpoints">cns.analyze.breakpoints module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cns.analyze.breakage">cns.analyze.breakage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.analyze.coverage">cns.analyze.coverage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.analyze">Module contents</a></li>
 </ul>
@@ -115,32 +115,32 @@
 <span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">calc_loh_bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allele_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.calc_loh_bases" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.analyze.aneuploidy.calc_ploidy_per_column">
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.aneuploidy.</span></span><span class="sig-name descname"><span class="pre">calc_ploidy_per_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.aneuploidy.calc_ploidy_per_column" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="module-cns.analyze.breakpoints">
-<span id="cns-analyze-breakpoints-module"></span><h2>cns.analyze.breakpoints module<a class="headerlink" href="#module-cns.analyze.breakpoints" title="Link to this heading"></a></h2>
+<section id="module-cns.analyze.breakage">
+<span id="cns-analyze-breakage-module"></span><h2>cns.analyze.breakage module<a class="headerlink" href="#module-cns.analyze.breakage" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.breakpoints.calc_breaks_per_chr">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_breaks_per_chr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.calc_breaks_per_chr" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="cns.analyze.breakage.calc_breaks_per_chr">
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakage.</span></span><span class="sig-name descname"><span class="pre">calc_breaks_per_chr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakage.calc_breaks_per_chr" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.breakpoints.calc_breaks_per_sample">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_breaks_per_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.calc_breaks_per_sample" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="cns.analyze.breakage.calc_breaks_per_sample">
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakage.</span></span><span class="sig-name descname"><span class="pre">calc_breaks_per_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakage.calc_breaks_per_sample" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.breakpoints.calc_step_per_chr">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_step_per_chr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.calc_step_per_chr" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="cns.analyze.breakage.calc_step_per_chr">
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakage.</span></span><span class="sig-name descname"><span class="pre">calc_step_per_chr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakage.calc_step_per_chr" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.breakpoints.calc_step_per_sample">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_step_per_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.calc_step_per_sample" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.analyze.breakpoints.prepare_segments">
-<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakpoints.</span></span><span class="sig-name descname"><span class="pre">prepare_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakpoints.prepare_segments" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="cns.analyze.breakage.calc_step_per_sample">
+<span class="sig-prename descclassname"><span class="pre">cns.analyze.breakage.</span></span><span class="sig-name descname"><span class="pre">calc_step_per_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.analyze.breakage.calc_step_per_sample" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

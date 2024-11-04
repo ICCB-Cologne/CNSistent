@@ -12,10 +12,10 @@ cns.analyze.aneuploidy module
    :undoc-members:
    :show-inheritance:
 
-cns.analyze.breakpoints module
+cns.analyze.breakage module
 ------------------------------
 
-.. automodule:: cns.analyze.breakpoints
+.. automodule:: cns.analyze.breakage
    :members:
    :undoc-members:
    :show-inheritance:

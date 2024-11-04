@@ -1,18 +1,6 @@
-from cns.analyze.coverage import *
-from cns.analyze.breakage import *
-from cns.analyze.aneuploidy import *
-from cns.process.aggregation import *
-from cns.process.breakpoints import *
-from cns.process.cluster import *
-from cns.process.imputation import *
-from cns.process.normalize import *
-from cns.process.segments import *
-from cns.utils.canonization import *
-from cns.utils.conversions import *
-from cns.utils.files import *
-from cns.utils.logging import *
-from cns.utils.assemblies import *
-from cns.utils.selection import *
+from cns.analyze import *
+from cns.process import *
+from cns.utils import*
 
 
 def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
@@ -139,7 +127,7 @@ def main_segment(
         select_segs = genome_to_segments(assembly)
     res = get_genome_segments(select_segs, remove_segs, filter_size)
     if merge_dist > 0:
-        breaks = get_breaks_from_cns(cns_df, keep_ends=False, assembly=assembly)
+        breaks = get_breaks_from_cns_df(cns_df, keep_ends=False, assembly=assembly)
         res = cluster_within_segments(breaks, res, merge_dist, print_info)
     if split_size > 0:
         res = split_segments(res, split_size)

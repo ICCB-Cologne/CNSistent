@@ -3,7 +3,7 @@ import pandas as pd
 
 
 # counts how many samples are below each cutoff value
-def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
+def _count_below_lim(vals, min_val=0, max_val=1, steps=1000):
     cutoffs = np.linspace(min_val, max_val, steps + 1)
     #  Finds the indices where elements should be inserted to maintain order, 
     #  effectively counting the number of elements less than or equal to each cutoff.
@@ -11,7 +11,7 @@ def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
     return cutoffs, counts
 
 # Counts the number of samples below each present values
-def count_cum_val(vals, min_val=0, max_val=1):
+def _count_cum_val(vals, min_val=0, max_val=1):
     vals = np.array(vals)
     vals = vals[(vals >= min_val) & (vals <= max_val)]
     unique_vals, counts = np.unique(vals.astype(np.float32), return_counts=True)
@@ -30,7 +30,7 @@ def calculate_signed_angle(s1, s2):
     return angle_degrees
 
 
-def get_direction(y):
+def _get_direction(y):
     if  np.all(np.diff(y) >= 0):
         return 1
     elif np.all(np.diff(y) < 0):
@@ -49,7 +49,7 @@ def find_knee(x, y, knee=True):
         return -1, np.nan
     y = (np.array(y) - y[0]) / y_range 
     x = (np.array(x) - x[0]) / x_range
-    orientation = get_direction(y)
+    orientation = _get_direction(y)
     orientation *= (-1 if knee else 1)
 
     # calculate the difference between slopes on the left and right side of each point 
@@ -78,19 +78,7 @@ def find_knee(x, y, knee=True):
 # max_val - maximum value to be considered
 # steps - number of steps between min_val and max_val
 def find_bends(vals, min_val=0, max_val=1, steps=1000):    
-    X, Y = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
-    knee_index, knee_value = find_knee(X, Y, knee=True)
-    elbow_index, elbow_value = find_knee(X, Y, knee=False)
-    return X, Y, knee_index, knee_value, elbow_index, elbow_value
-
-
-# finds the knee and elbow in a cumulative distribution of values separated by steps between min and max
-# vals - values to be counted
-# min_val - minimum value to be considered
-# max_val - maximum value to be considered
-# steps - number of steps between min_val and max_val
-def find_bends(vals, min_val=0, max_val=1, steps=10000):    
-    X, Y = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
+    X, Y = _count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
     knee_index, knee_value = find_knee(X, Y, knee=True)
     elbow_index, elbow_value = find_knee(X, Y, knee=False)
     return X, Y, knee_index, knee_value, elbow_index, elbow_value

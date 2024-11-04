@@ -3,14 +3,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.process.aggregation import aggregate_by_segments
-from cns.process.normalize import get_norm_sizes
-from cns.process.pipelines import main_segment, main_signatures, main_coverage, main_ploidy, main_fill, main_impute
-from cns.utils.conversions import calc_lengths, tuples_to_segments
-from cns.utils.selection import get_chr_sets, only_aut
-from cns.utils.assemblies import hg19   
-from cns.utils.gaps import hg19_gaps
-    
+from cns.utils import *
+from cns import *
+
 class TestPipelines(unittest.TestCase):
     def setUp(self):
         self.cns = pd.DataFrame({

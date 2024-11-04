@@ -2,8 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt, colors as mcolors
 from collections.abc import Sequence
-
-from cns.display.label import no_y_ticks, plot_chr_bg, plot_x_ticks, plot_x_lines, get_size_and_bounds
+from .label import no_y_ticks, plot_chr_bg, plot_x_ticks, plot_x_lines, get_size_and_bounds
 from cns.utils.canonization import get_cn_cols
 from cns.utils.conversions import chrom_to_sortable
 from cns.utils.assemblies import hg19

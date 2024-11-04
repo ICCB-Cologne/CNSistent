@@ -1,6 +1,6 @@
 import numpy as np
-from cns.process.breakpoints import calc_arm_breaks, calc_cytoband_breaks, create_step_breaks
-from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to_segments, tuples_to_segments
+from cns.process.breakpoints import split_into_bins, make_breaks
+from cns.utils.conversions import cytobands_to_df, genome_to_segments, tuples_to_segments
 from cns.utils.assemblies import hg19
 from cns.utils import load_segments
 
@@ -140,7 +140,7 @@ def filter_min_size(chr_segs, min_size, merge_first=False):
 
 def split_segment(seg_start, seg_end, seg_name, step_size, strategy="scale"):
     length = seg_end - seg_start
-    breaks = create_step_breaks(length, step_size, strategy)
+    breaks = split_into_bins(length, step_size, strategy)
     breaks = (np.array(breaks) + seg_start).tolist()
     if seg_name == None:
         res = [(breaks[i], breaks[i + 1]) for i in range(len(breaks) - 1)]
@@ -161,7 +161,7 @@ def split_segments(segments, step_size, strategy="scale"):
 
 def regions_select(select, assembly=hg19):
     if select == "arms":
-        arm_breaks = calc_arm_breaks(assembly)
+        arm_breaks = make_breaks("arms", assembly)
         return {
             chrom: [(breaks[0], breaks[1], f"{chrom}p"), (breaks[1], breaks[2], f"{chrom}q")]
             for chrom, breaks in arm_breaks.items()

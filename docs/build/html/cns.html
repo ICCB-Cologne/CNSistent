@@ -63,6 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.load_all_samples"><code class="docutils literal notranslate"><span class="pre">load_all_samples()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.load_cns_out"><code class="docutils literal notranslate"><span class="pre">load_cns_out()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.load_merged_bins"><code class="docutils literal notranslate"><span class="pre">load_merged_bins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.load_merged_cns"><code class="docutils literal notranslate"><span class="pre">load_merged_cns()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.load_merged_samples"><code class="docutils literal notranslate"><span class="pre">load_merged_samples()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.load_samples_out"><code class="docutils literal notranslate"><span class="pre">load_samples_out()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cns.data_utils.main_load_data"><code class="docutils literal notranslate"><span class="pre">main_load_data()</span></code></a></li>
@@ -108,7 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cns.analyze.html">cns.analyze package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.aneuploidy">cns.analyze.aneuploidy module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.breakpoints">cns.analyze.breakpoints module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.breakage">cns.analyze.breakage module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze.coverage">cns.analyze.coverage module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.analyze.html#module-cns.analyze">Module contents</a></li>
 </ul>
@@ -276,6 +277,23 @@ and managing file paths.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Combined binned CNS data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.data_utils.load_merged_cns">
+<span class="sig-prename descclassname"><span class="pre">cns.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_merged_cns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">select_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.data_utils.load_merged_cns" title="Link to this definition"></a></dt>
+<dd><p>Load and merge CNS data from all datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>select_samples</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame containing sample information to filter by.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Combined CNS data filtered by the selected samples.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pd.DataFrame</p>

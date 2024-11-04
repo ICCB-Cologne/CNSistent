@@ -40,7 +40,7 @@ def get_size_and_bounds(fig, ax, columns = 1, should_print=False):
     return fig_size, axes_size_inches, bound_box
 
 
-def cytoband_color(gie_stain):
+def _cytoband_color(gie_stain):
     if gie_stain == "acen":
         return "red"
     elif gie_stain == "gneg":
@@ -62,7 +62,7 @@ def cytoband_color(gie_stain):
     
 
 # 'centromere', 'clone', 'contig', 'heterochromatin', 'short_arm', 'telomere'
-def gap_color(gap_type):
+def _gap_color(gap_type):
     if gap_type == "centromere":
         return "red"
     elif gap_type == "short_arm":
@@ -104,7 +104,7 @@ def plot_cytobands(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None):
         if (chrom is not None) and (band_chr != chrom):
             continue
         x_pos = (start + assembly.chr_starts[band_chr]) if chrom is None else start
-        color = cytoband_color(gie_stain)
+        color = _cytoband_color(gie_stain)
         length = end - start
         rect = Rectangle(
             (x_pos, y_min), length, y_max-y_min, color=color, alpha=alpha
@@ -135,7 +135,7 @@ def plot_gaps(ax, assembly=hg19, y_min=0, y_max=1, alpha=.2, chrom=None, color=N
         if (chrom is not None) and (chrom != gap_chrom):
             continue
         x_pos = (start + assembly.chr_starts[gap_chrom]) if chrom is None else start
-        this_color = gap_color(gap_type) if color is None else color
+        this_color = _gap_color(gap_type) if color is None else color
         length = end - start + 1
         rect = Rectangle(
             (x_pos, y_min), length, y_max-y_min, color=this_color, alpha=alpha

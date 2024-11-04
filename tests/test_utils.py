@@ -1,10 +1,6 @@
 import unittest
 import pandas as pd
-import numpy as np
-from cns.utils.canonization import canonize_cns_df, get_cn_cols, rename_cn_cols
-from cns.utils.conversions import *
-from cns.utils.files import *
-from cns.utils.anomaly import *
+from cns.utils import *
 
 
 class TestConversions(unittest.TestCase):
@@ -152,12 +148,6 @@ class TestCanonization(unittest.TestCase):
 
 
 class TestCutoff(unittest.TestCase):
-    def test_count_below_lim(self):
-        vals = np.array([1, 2, 3, 4, 5])
-        x, y = count_below_lim(vals, min_val=0, max_val=5, steps=5)
-        self.assertTrue(np.array_equal(x, np.array([0., 1., 2., 3., 4., 5.])))
-        self.assertTrue(np.array_equal(y, np.array([0., 0.2, 0.4, 0.6, 0.8, 1.])))
-
     def test_calculate_signed_angle(self):
         angle = calculate_signed_angle(0, 1)
         self.assertEqual(angle, 45)

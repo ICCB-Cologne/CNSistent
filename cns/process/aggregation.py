@@ -1,52 +1,25 @@
 import numpy as np
 import pandas as pd
 from numba import njit
-
-from cns.process.breakpoints import make_breaks
+from .breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments
 from cns.utils.canonization import get_cn_cols
 from cns.utils.assemblies import hg19
-from cns.utils.logging import log_info
-
-
-def add_total_cn(cns_df, cn_columns=None):
-    cn_columns = get_cn_cols(cns_df, cn_columns)
-    # remove total_cn from cn_columns if it is there
-    if "total_cn" in cn_columns:
-        cn_columns.remove("total_cn")
-    cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
-    return cns_df
-
-
-# TODO: Add empty check
-def group_samples(cns_df, cn_columns=None, how="mean"):    
-    if how not in ["mean", "max", "min"]:
-        raise ValueError("to group samples, how must be one of ['mean', 'max', 'min']")
-    cn_columns = get_cn_cols(cns_df, cn_columns)
-    grouped = cns_df.drop("sample_id", axis=1).groupby(["chrom", "start", "end"])
-
-    # calculate mean on grouped except for chrom, where take the first value
-    agg_scheme = {}
-    if "name" in cns_df.columns:
-        agg_scheme["name"] = "first"
-    for column in cn_columns:
-        agg_scheme[column] = how
-    grouped = grouped.agg(agg_scheme).reset_index()
-    return grouped
+from cns.utils.logging import log_info, log_warn
 
 
 @njit
-def mean_func(cns_array):
+def _mean_func(cns_array):
     return [np.average(cns_array[:, i], weights=cns_array[:, -1]) for i in range(cns_array.shape[1] - 1)]
 
 
 @njit
-def max_func(cns_array):
+def _max_func(cns_array):
     return [np.max(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
 
 @njit
-def min_func(cns_array):
+def _min_func(cns_array):
     return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
 
 
@@ -88,11 +61,11 @@ def _get_agg_func(how):
     if how == "" or how is None or how == "none":
         return None
     if how == "mean":
-        return mean_func
+        return _mean_func
     if how == "max":
-        return max_func
+        return _max_func
     if how == "min":
-        return min_func
+        return _min_func
     raise ValueError("how must be one of ['mean', 'max', 'min', 'none', '']  got " + how)
 
 
@@ -133,5 +106,33 @@ def aggregate_by_breaks(cns_df, breaks, how="mean", cn_columns=None, print_info=
 
 
 def aggregate_by_break_type(cns_df, break_type, assembly=hg19, how="mean", cn_columns=None, print_info=True):
-    breaks = make_breaks(break_type, assembly)
+    breaks = make_breaks(break_type, assembly=assembly)
     return aggregate_by_breaks(cns_df, breaks, how, cn_columns, print_info)
+
+
+def add_total_cn(cns_df, cn_columns=None):
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    # remove total_cn from cn_columns if it is there
+    if "total_cn" in cn_columns:
+        cn_columns.remove("total_cn")
+    cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
+    return cns_df
+
+
+def group_samples(cns_df, cn_columns=None, how="mean"): 
+    if len(cns_df) == 0:
+        log_warn("No data to group.")
+        return cns_df   
+    if how not in ["mean", "max", "min"]:
+        raise ValueError("to group samples, how must be one of ['mean', 'max', 'min']")
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    grouped = cns_df.drop("sample_id", axis=1).groupby(["chrom", "start", "end"])
+
+    # calculate mean on grouped except for chrom, where take the first value
+    agg_scheme = {}
+    if "name" in cns_df.columns:
+        agg_scheme["name"] = "first"
+    for column in cn_columns:
+        agg_scheme[column] = how
+    grouped = grouped.agg(agg_scheme).reset_index()
+    return grouped

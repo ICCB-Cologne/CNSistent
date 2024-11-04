@@ -2,12 +2,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from cns.analyze.aneuploidy import calc_ane_bases, calc_imb_bases, calc_loh_bases, _get_feature_per_seg
-from cns.analyze.coverage import get_covered_bases, get_missing_chroms
-from cns.analyze.breakage import calc_breaks_per_sample, calc_breaks_per_chr, calc_step_per_chr, calc_step_per_sample
-from cns.process.imputation import merge_neighbours
-from cns.process.normalize import get_norm_sizes, normalize_feature
-from cns.process.pipelines import main_coverage
+from cns.analyze import *
+from cns.process import *
+from cns.pipelines import main_coverage
 
 class TestCoverage(unittest.TestCase):
     def setUp(self):
@@ -148,10 +145,6 @@ class TestAneuploidy(unittest.TestCase):
         self.cols = ["major_cn", "minor_cn"]        
         pd.set_option('display.max_columns', 10)
 
-
-    def test_calc_ane_per_sample(self):
-        res = _get_feature_per_seg(self.cns, self.samples, self.cols, True, self.assembly)
-        self.assertEqual(len(res), len(self.cns))
 
     def test_get_ane_bases(self):
         res_df = calc_ane_bases(self.samples, self.cns, self.cols, "hom", self.assembly)

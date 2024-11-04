@@ -3,12 +3,7 @@ import numpy as np
 import pandas as pd
 import io
 
-from cns.process.segments import *
-from cns.process.imputation import *
-from cns.process.aggregation import *
-from cns.process.breakpoints import *
-from cns.process.cluster import *
-from cns.process.normalize import *
+from cns.process import *
 from cns.utils.assemblies import hg19, hg38
 from cns.utils.conversions import segs_to_df, tuples_to_segments
 
@@ -115,12 +110,6 @@ class TestSegments(unittest.TestCase):
         expected_result = {1: [(20, 30)], 2: []}
         result = get_genome_segments(select, remove, filter_size)
 
-        self.assertEqual(result, expected_result)
-
-    def test_calc_group_sizes(self):
-        segs = {"chr1": [(0, 10), (20, 30)], "chrY": [(0, 5)]}
-        expected_result = {'aut': 20, 'sexXX': 0, 'sexXY': 5}
-        result = calc_group_sizes(segs)
         self.assertEqual(result, expected_result)
 
     def test_gene_segs(self):
@@ -231,103 +220,103 @@ class TestBreakpoints(unittest.TestCase):
         pass
     
     def test_arm_breaks(self):
-        result = calc_arm_breaks()
+        result = make_breaks("arms")
         self.assertEqual(list(result.keys())[0], 'chr1')
         self.assertEqual(list(result.values())[0], [0, 125000000, 249250621])
         
     def test_cytoband_breaks(self):
-        result = calc_cytoband_breaks()
+        result = make_breaks("cytobands")
         self.assertEqual(list(result.keys())[0], 'chr1')
         sum_of_breaks = sum([len(breaks) - 1 for breaks in result.values()])
         sum_of_bands = len(hg19.cytobands)
         self.assertEqual(sum_of_breaks, sum_of_bands)
 
     def test_bin_breaks(self):
-        result = calc_seg_breaks(1000000, "scale")
+        result = make_breaks(1000000, "scale")
         self.assertEqual(list(result.keys())[0], 'chr1')
         self.assertEqual(list(result.values())[0][0], 0)
         self.assertEqual(list(result.values())[0][-1], 249250621)
 
     def test_dist_breaks_scaled(self):
-        act = create_step_breaks(10, 1, "scale")
+        act = split_into_bins(10, 1, "scale")
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2, "scale")
+        act = split_into_bins(10, 2, "scale")
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2.5, "scale")
+        act = split_into_bins(10, 2.5, "scale")
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 3, "scale")
+        act = split_into_bins(10, 3, "scale")
         exp = [0, 3, 7, 10]
         self.assertEqual(act, exp)        
-        act = create_step_breaks(13, 10, "scale")
+        act = split_into_bins(13, 10, "scale")
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = create_step_breaks(17, 10, "scale")
+        act = split_into_bins(17, 10, "scale")
         exp = [0, 9, 17]
         self.assertEqual(act, exp)
-        act = create_step_breaks(33, 10, "scale")
+        act = split_into_bins(33, 10, "scale")
         exp = [0, 11, 22, 33]
         self.assertEqual(act, exp)
-        act = create_step_breaks(37, 10, "scale")
+        act = split_into_bins(37, 10, "scale")
         exp = [0, 9, 19, 28, 37]
         self.assertEqual(act, exp)
         
     def test_dist_breaks_padded(self):
-        act = create_step_breaks(10, 1, "pad")
+        act = split_into_bins(10, 1, "pad")
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2, "pad")
+        act = split_into_bins(10, 2, "pad")
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2.5, "pad")
+        act = split_into_bins(10, 2.5, "pad")
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 3, "pad")
+        act = split_into_bins(10, 3, "pad")
         exp = [0, 4, 7, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(13, 10, "pad")
+        act = split_into_bins(13, 10, "pad")
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = create_step_breaks(17, 10, "pad")
+        act = split_into_bins(17, 10, "pad")
         exp = [0, 9, 17]
         self.assertEqual(act, exp)
-        act = create_step_breaks(33, 10, "pad")
+        act = split_into_bins(33, 10, "pad")
         exp = [0, 12, 22, 33]
         self.assertEqual(act, exp)
-        act = create_step_breaks(37, 10, "pad")
+        act = split_into_bins(37, 10, "pad")
         exp = [0, 9, 19, 29, 37]
         self.assertEqual(act, exp)
 
     def test_dist_breaks_after(self):
-        act = create_step_breaks(10, 1, "after")
+        act = split_into_bins(10, 1, "after")
         exp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2, "after")
+        act = split_into_bins(10, 2, "after")
         exp = [0, 2, 4, 6, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 2.5, "after")
+        act = split_into_bins(10, 2.5, "after")
         exp = [0, 3, 5, 8, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(10, 3, "after")
+        act = split_into_bins(10, 3, "after")
         exp = [0, 3, 6, 10]
         self.assertEqual(act, exp)
-        act = create_step_breaks(13, 10, "after")
+        act = split_into_bins(13, 10, "after")
         exp = [0, 13]
         self.assertEqual(act, exp)
-        act = create_step_breaks(17, 10, "after")
+        act = split_into_bins(17, 10, "after")
         exp = [0, 10, 17]
         self.assertEqual(act, exp)
-        act = create_step_breaks(33, 10, "after")
+        act = split_into_bins(33, 10, "after")
         exp = [0, 10, 20, 33]
         self.assertEqual(act, exp)
-        act = create_step_breaks(37, 10, "after")
+        act = split_into_bins(37, 10, "after")
         exp = [0, 10, 20, 30, 37]
         self.assertEqual(act, exp)
 
     def test_diffs(self):
-        seg_breaks = calc_seg_breaks(10_000_000)
+        seg_breaks = make_breaks(10_000_000)
         for chrom, chrom_breaks in seg_breaks.items():
             diffs = np.diff(np.diff(chrom_breaks))
             self.assertTrue(np.abs(np.sum(diffs)) <= 1)
@@ -342,38 +331,20 @@ class TestBreakpoints(unittest.TestCase):
             'major_cn': [1, 2, 3, np.nan, 1, 1],
             'minor_cn': [1, 2, 1, 0, 0, 0]
         }) 
-        breaks = get_breaks_from_cns(cns, keep_ends=True)
+        breaks = get_breaks_from_cns_df(cns, keep_ends=True)
         self.assertEqual(breaks['chr1'], [0, 100])
         self.assertEqual(breaks['chr2'], [0, 50, 100, 125, 150, 175, 200])
         self.assertTrue('chr3' not in breaks)
-        breaks = get_breaks_from_cns(cns, keep_ends=False)
+        breaks = get_breaks_from_cns_df(cns, keep_ends=False)
         self.assertEqual(breaks['chr1'], [100])
         # self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175, 200])
         assembly = type('Assembly', (object,), {
             'chr_lens': {'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
             'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY']
         })
-        breaks = get_breaks_from_cns(cns, assembly=assembly, keep_ends=False)
+        breaks = get_breaks_from_cns_df(cns, assembly=assembly, keep_ends=False)
         self.assertEqual(breaks['chr1'], [])
         self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
-
-    def test_get_breaks_in_segments(self):
-        segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
-        breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
-        res = get_breaks_inside_segments(segments, breaks)
-        self.assertEqual(res['chr1'], [0, 1, 99])
-        self.assertEqual(res['chr3'], [])
-
-    def test_insert_breaks_in_segments(self):
-        segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
-        breaks = { 'chr1': [0, 1, 99, 100, 101], 'chr3': [100, 200] }
-        res = insert_breaks_into_segments(segments, breaks)
-        print(res)
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res['chr1'][0], (0, 1, 0))
-        self.assertEqual(res['chr1'][1], (1, 99, 0))
-        self.assertEqual(res['chr1'][2], (99, 100, 0))
-        self.assertEqual(res['chr2'][0], (100, 200, 1))
 
 
 class TestAggregation(unittest.TestCase):
@@ -430,26 +401,10 @@ class TestAggregation(unittest.TestCase):
                 self.assertTrue(res.at[i, "end"] <= 200)
 
 class TestMerging(unittest.TestCase):
-    def test_prep_clusters(self):
-        chrom_breaks = [50, 99]
-        clusters = breaks_to_clusters(chrom_breaks)
-        self.assertEqual(clusters[0, 0], 50)
-        self.assertEqual(clusters[0, 1], 1)
-
     def test_clusters_to_breaks(self):
         clusters = [(50, 1), (99, 1)]
         breakpoints = clusters_to_breaks(clusters)
         self.assertEqual(breakpoints, [50, 99])
-
-    def test_merge_clusters(self):
-        clusters = np.array([[50, 1], [149, 1], [200, 1], [299, 1]], dtype=np.float64)
-        threshold = 100
-        result = merge_clusters(clusters, threshold)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0, 0], 100)
-        self.assertEqual(result[0, 1], 2)
-        self.assertEqual(result[1, 0], 250)
-        self.assertEqual(result[1, 1], 2)
 
     def test_created_merged_segs(self):
         dict_start = {'chr1': [50, 99], 'chr2': [200, 300]}

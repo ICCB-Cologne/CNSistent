@@ -1,6 +1,6 @@
 import os
 from cns.data_utils import *
-from cns.process.pipelines import main_segment
+from cns.pipelines import main_segment
 from cns.utils.conversions import segs_to_df
 from cns.utils.files import save_segments
 from cns.process.segments import regions_select, regions_remove

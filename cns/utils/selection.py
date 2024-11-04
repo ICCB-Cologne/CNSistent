@@ -1,6 +1,7 @@
 import numpy as np
 from cns.utils.assemblies import hg19
 
+
 def cns_head(cns_df, n=5):
     samples = np.sort(cns_df["sample_id"].unique())[:n]
     cns_head = cns_df.query('sample_id in @samples')

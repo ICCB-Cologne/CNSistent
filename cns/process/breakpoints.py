@@ -4,7 +4,7 @@ from cns.utils.assemblies import hg19
 from cns.utils.conversions import cytobands_to_df
 
 
-def create_step_breaks(reg_len, step_size, strategy="after"):
+def split_into_bins(reg_len, step_size, strategy="after"):
     if (step_size < 1) or (reg_len < step_size):
         return [0, reg_len]
     padding = reg_len % step_size
@@ -40,12 +40,11 @@ def create_step_breaks(reg_len, step_size, strategy="after"):
         return [np.int32(np.floor(frac + .5)) for frac in fracs] + [reg_len]
         
 
-# Calculate breakpoints at the given resolution. The boundaries either use half
-def calc_seg_breaks(step_size, strategy="scale", assembly=hg19):
-    return { chrom: create_step_breaks(length, step_size, strategy) for chrom, length in assembly.chr_lens.items() }
+def _calc_genome_breaks(step_size, strategy="scale", assembly=hg19):
+    return { chrom: split_into_bins(length, step_size, strategy) for chrom, length in assembly.chr_lens.items() }
 
 
-def calc_arm_breaks(assembly=hg19):
+def _calc_arm_breaks(assembly=hg19):
     cyto_df = cytobands_to_df(assembly.cytobands)
     acen = cyto_df.query("stain == 'acen' and name.str.contains('p')", engine="python")                                
     max_ends = cyto_df.groupby("chrom")["end"].max().to_dict()
@@ -54,27 +53,26 @@ def calc_arm_breaks(assembly=hg19):
 
 
 # all the breakpoints around cytobands
-def calc_cytoband_breaks(assembly=hg19):
+def _calc_cytoband_breaks(assembly=hg19):
     cyto_df = cytobands_to_df(assembly.cytobands)
     return { chrom: [0] + [end for end in cyto_df.query(f"chrom == '{chrom}'")["end"]] 
             for chrom in cyto_df["chrom"].unique() }
 
 # Create breakpoints
-def make_breaks(break_type, assembly=hg19):
+def make_breaks(break_type, strategy='scale', assembly=hg19):
     if break_type == "arms":
-        return calc_arm_breaks(assembly)
+        return _calc_arm_breaks(assembly)
     elif break_type == "cytobands":
-        return calc_cytoband_breaks(assembly)
+        return _calc_cytoband_breaks(assembly)
     else:
         try:
             step_size = int(break_type)
         except:
             raise ValueError("break_type must be 'arms', 'cytobands' or an integer, got " + break_type)
-        return calc_seg_breaks(step_size, strategy="scale", assembly=assembly)
+        return _calc_genome_breaks(step_size, strategy=strategy, assembly=assembly)
     
 
-# Obtain breakpoints from a cns dataframe
-def get_breaks_from_cns(cns_df, keep_ends=True, assembly=hg19):
+def get_breaks_from_cns_df(cns_df, keep_ends=True, assembly=hg19):
     breaks_start = cns_df[["chrom", "start"]].copy().drop_duplicates().rename(columns={"start": "break"})
     breaks_end = cns_df[["chrom", "end"]].copy().drop_duplicates().rename(columns={"end": "break"})
     breaks = pd.concat([breaks_start, breaks_end]).drop_duplicates()
@@ -100,42 +98,3 @@ def get_breaks_from_segments(segments, keep_ends=True):
     for chrom in breaks:
         breaks[chrom] = sorted(set(breaks[chrom]))
     return breaks
-
-
-def get_breaks_inside_segments(segs, breaks, min_dist = 0):
-    res = { chrom: [] for chrom in breaks }
-    for chrom, chrom_segs in segs.items():
-        if chrom not in breaks:
-            continue
-        for seg in chrom_segs:
-            for br in breaks[chrom]:
-                if seg[0] + min_dist <= br < seg[1] - min_dist:
-                    res[chrom].append(br)
-    return res
-
-
-def insert_breaks_into_segments(segs, breaks, min_dist=0):
-    res = {}
-    for chrom, chrom_segs in segs.items():
-        if chrom not in breaks:
-            res[chrom] = chrom_segs
-            continue
-        res[chrom] = []
-        for seg in chrom_segs:
-            seg_breaks = []
-            start = seg[0]
-            end = seg[1]
-            name = seg[2] if len(seg) > 2 else None
-            for br in breaks[chrom]:
-                if start + min_dist <= br < end - min_dist:
-                    seg_breaks.append(br)
-            if len(seg_breaks) == 0:
-                new_seg = (start, end, name) if name != None else (start, end)
-                res[chrom].append(new_seg)
-            else:
-                seg_breaks = [start] + sorted(set(seg_breaks)) + [end]
-                for i in range(len(seg_breaks) - 1):
-                    if seg_breaks[i + 1] - seg_breaks[i] > 0:
-                        new_seg = (seg_breaks[i], seg_breaks[i + 1], name) if name != None else (seg_breaks[i], seg_breaks[i + 1])
-                        res[chrom].append(new_seg)
-    return res
