@@ -9,5 +9,6 @@ pycns.egg-info
 .pytest_cache/
 docs/*.log
 docs/*.aux
+docs/build/
 copy_files.ps1
 test.tsv
