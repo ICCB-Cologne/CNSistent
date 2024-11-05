@@ -12,6 +12,10 @@ class Assembly:
         The name of the assembly.
     aut_names : list
         The names of the autosomes.
+    chr_names : list
+        The names of all chromosomes.
+    sex_names : list
+        The names of the sex chromosomes.
     chr_x : str
         The name of the X chromosome.
     chr_y : str
@@ -33,36 +37,10 @@ class Assembly:
     """
 
     def __init__(self, name, aut_names, x_name, y_name, chr_lens, chr_starts, chr_colors, gen_len, aut_len, cytobands, gaps):
-        """
-        Constructs all the necessary attributes for the Assembly object.
-
-        Parameters
-        ----------
-        name : str
-            The name of the assembly.
-        aut_names : list
-            The names of the autosomes.
-        x_name : str
-            The name of the X chromosome.
-        y_name : str
-            The name of the Y chromosome.
-        chr_lens : dict
-            The lengths of the chromosomes.
-        chr_starts : dict
-            The start positions of the chromosomes.
-        chr_colors : dict
-            The colors of the chromosomes.
-        gen_len : int
-            The total length of the genome.
-        aut_len : int
-            The total length of the autosomes.
-        cytobands : list
-            The cytobands of the chromosomes.
-        gaps : list
-            The gaps in the chromosomes.
-        """
         self.name = name
+        self.chr_names = aut_names + [x_name, y_name]
         self.aut_names = aut_names
+        self.sex_names = [x_name, y_name]
         self.chr_x = x_name
         self.chr_y = y_name
         self.chr_lens = chr_lens

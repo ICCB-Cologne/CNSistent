@@ -1,6 +1,6 @@
 from cns.analyze import *
 from cns.process import *
-from cns.utils import*
+from cns.utils import *
 
 
 def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
@@ -96,25 +96,32 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     res_df = samples_df.copy()
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if segs is not None:
+        log_info(print_info, "Aggregating CN data by provided segments.")
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)    
+        
     norm_sizes = get_norm_sizes(segs, assembly)
 
     if cns_df[cn_columns].isna().any().any():
         log_warn("NaNs are not considered in ploidy calculations, it is recommended to impute first.")
         cns_df = cns_df[cns_df[cn_columns].notna().all(axis=1)]
 
-    res_df = calc_ane_bases(res_df, cns_df, cn_columns, "het", assembly)
-    res_df = normalize_feature(res_df, "ane_het", norm_sizes)
+    log_info(print_info, "Calculating LOH for each sample.")
     res_df = calc_loh_bases(res_df, cns_df, cn_columns, "hom", assembly)
     res_df = normalize_feature(res_df, "loh_hom", norm_sizes)
     res_df = calc_loh_bases(res_df, cns_df, cn_columns, "het", assembly)    
     res_df = normalize_feature(res_df, "loh_het", norm_sizes)
+    log_info(print_info, "Calculating aneuploidy for each sample.")
+    res_df = calc_ane_bases(res_df, cns_df, cn_columns, "het", assembly)
+    res_df = normalize_feature(res_df, "ane_het", norm_sizes)
     if len(cn_columns) == 2:
         res_df = calc_ane_bases(res_df, cns_df, cn_columns, "hom", assembly)
         res_df = normalize_feature(res_df, "ane_hom", norm_sizes)
+        log_info(print_info, "Calculating imbalance for each sample.")
         for col_i in range(2):
             res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)
             res_df = normalize_feature(res_df, f"imb_{cn_columns[col_i]}", norm_sizes)
+    
+    log_info(print_info, "Calculating ploidy for each sample.")
     for cn_col in cn_columns:
         res_df[f"ploidy_{cn_col}"] = calc_ploidy_per_column(cns_df, cn_col)
     return res_df

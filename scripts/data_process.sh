@@ -20,7 +20,7 @@ cns segment dummy --remove gaps --out ${out}/gaps_hg19_segs.bed --verbose --asse
 cns segment dummy --remove gaps --out ${out}/gaps_hg38_segs.bed --verbose --assembly hg38
 
 # TRACERx_met TRACERx_prim PCAWG TCGA_hg19 TCGA_hg38
-for dataset in TRACERx PCAWG TCGA_hg19;
+for dataset in TRACERx;
 do
     # Set assembly variable based on dataset
     if [ "$dataset" = "TCGA_hg38" ]; then

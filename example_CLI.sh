@@ -5,6 +5,7 @@
 cns -v
 cns -h
 cns fill -h
+set -x
 
 mkdir -p ./tests/out
 

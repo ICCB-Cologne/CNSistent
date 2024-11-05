@@ -127,7 +127,7 @@ class TestAneuploidy(unittest.TestCase):
             'chrom': ['chr1', 'chr1', 'chr2', 'chrY', 'chr3', 'chr1', 'chr1', 'chr1', 'chr2', 'chr2', 'chr2'],
             'start': [0, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [100, 200, 300, 400, 500, 50, 99, 100, 100, 120, 130],
-        })       
+        }).fillna(0)  
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
             'sex': ['xx', 'xy', 'xx', 'xy']
