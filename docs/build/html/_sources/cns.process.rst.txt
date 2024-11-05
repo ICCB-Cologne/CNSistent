@@ -44,13 +44,6 @@ cns.process.normalize module
    :undoc-members:
    :show-inheritance:
 
-cns.process.pipelines module
-----------------------------
-
-.. automodule:: cns.process.pipelines
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 cns.process.segments module
 ---------------------------

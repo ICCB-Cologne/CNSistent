@@ -13,7 +13,7 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=af9e523d"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
@@ -41,7 +41,9 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">CLI Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">Tool usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_quickstart.html">API Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cns.html">cns package</a></li>
 </ul>
@@ -120,10 +122,6 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cns.process.html#cns.process.cluster.breaks_to_clusters">breaks_to_clusters() (in module cns.process.cluster)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cns.utils.html#cns.utils.conversions.breaks_to_segments">breaks_to_segments() (in module cns.utils.conversions)</a>
 </li>
   </ul></td>
@@ -134,21 +132,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cns.analyze.html#cns.analyze.aneuploidy.calc_ane_bases">calc_ane_bases() (in module cns.analyze.aneuploidy)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.breakpoints.calc_arm_breaks">calc_arm_breaks() (in module cns.process.breakpoints)</a>
-</li>
       <li><a href="cns.analyze.html#cns.analyze.breakage.calc_breaks_per_chr">calc_breaks_per_chr() (in module cns.analyze.breakage)</a>
 </li>
       <li><a href="cns.analyze.html#cns.analyze.breakage.calc_breaks_per_sample">calc_breaks_per_sample() (in module cns.analyze.breakage)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.normalize.calc_chr_sizes">calc_chr_sizes() (in module cns.process.normalize)</a>
-</li>
       <li><a href="cns.process.html#cns.process.cluster.calc_clusters">calc_clusters() (in module cns.process.cluster)</a>
 </li>
       <li><a href="cns.utils.html#cns.utils.conversions.calc_cum_mid">calc_cum_mid() (in module cns.utils.conversions)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.breakpoints.calc_cytoband_breaks">calc_cytoband_breaks() (in module cns.process.breakpoints)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.normalize.calc_group_sizes">calc_group_sizes() (in module cns.process.normalize)</a>
 </li>
       <li><a href="cns.analyze.html#cns.analyze.aneuploidy.calc_imb_bases">calc_imb_bases() (in module cns.analyze.aneuploidy)</a>
 </li>
@@ -161,8 +151,6 @@
       <li><a href="cns.utils.html#cns.utils.conversions.calc_nan_cols">calc_nan_cols() (in module cns.utils.conversions)</a>
 </li>
       <li><a href="cns.analyze.html#cns.analyze.aneuploidy.calc_ploidy_per_column">calc_ploidy_per_column() (in module cns.analyze.aneuploidy)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.breakpoints.calc_seg_breaks">calc_seg_breaks() (in module cns.process.breakpoints)</a>
 </li>
       <li><a href="cns.analyze.html#cns.analyze.breakage.calc_step_per_chr">calc_step_per_chr() (in module cns.analyze.breakage)</a>
 </li>
@@ -244,12 +232,21 @@
 </li>
       </ul></li>
       <li>
+    cns.pipelines
+
+      <ul>
+        <li><a href="cns.html#module-cns.pipelines">module</a>
+</li>
+      </ul></li>
+      <li>
     cns.process
 
       <ul>
         <li><a href="cns.process.html#module-cns.process">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cns.process.aggregation
 
@@ -257,8 +254,6 @@
         <li><a href="cns.process.html#module-cns.process.aggregation">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cns.process.breakpoints
 
@@ -285,13 +280,6 @@
 
       <ul>
         <li><a href="cns.process.html#module-cns.process.normalize">module</a>
-</li>
-      </ul></li>
-      <li>
-    cns.process.pipelines
-
-      <ul>
-        <li><a href="cns.process.html#module-cns.process.pipelines">module</a>
 </li>
       </ul></li>
       <li>
@@ -386,15 +374,7 @@
 </li>
       <li><a href="cns.utils.html#cns.utils.selection.cns_tail">cns_tail() (in module cns.utils.selection)</a>
 </li>
-      <li><a href="cns.utils.html#cns.utils.anomaly.count_below_lim">count_below_lim() (in module cns.utils.anomaly)</a>
-</li>
-      <li><a href="cns.utils.html#cns.utils.anomaly.count_cum_val">count_cum_val() (in module cns.utils.anomaly)</a>
-</li>
       <li><a href="cns.process.html#cns.process.segments.count_segments">count_segments() (in module cns.process.segments)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.breakpoints.create_step_breaks">create_step_breaks() (in module cns.process.breakpoints)</a>
-</li>
-      <li><a href="cns.display.html#cns.display.label.cytoband_color">cytoband_color() (in module cns.display.label)</a>
 </li>
       <li><a href="cns.utils.html#cns.utils.conversions.cytobands_to_df">cytobands_to_df() (in module cns.utils.conversions)</a>
 </li>
@@ -440,8 +420,6 @@
 </li>
       <li><a href="cns.utils.html#cns.utils.anomaly.find_bends">find_bends() (in module cns.utils.anomaly)</a>
 </li>
-      <li><a href="cns.utils.html#cns.utils.canonization.find_column">find_column() (in module cns.utils.canonization)</a>
-</li>
       <li><a href="cns.utils.html#cns.utils.anomaly.find_knee">find_knee() (in module cns.utils.anomaly)</a>
 </li>
       <li><a href="cns.process.html#cns.process.segments.find_overlaps">find_overlaps() (in module cns.process.segments)</a>
@@ -454,19 +432,15 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cns.display.html#cns.display.label.gap_color">gap_color() (in module cns.display.label)</a>
-</li>
       <li><a href="cns.utils.html#cns.utils.conversions.gaps_to_df">gaps_to_df() (in module cns.utils.conversions)</a>
 </li>
       <li><a href="cns.utils.html#cns.utils.conversions.genome_to_segments">genome_to_segments() (in module cns.utils.conversions)</a>
 </li>
       <li><a href="cns.utils.html#cns.utils.assemblies.get_assembly">get_assembly() (in module cns.utils.assemblies)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.breakpoints.get_breaks_from_cns">get_breaks_from_cns() (in module cns.process.breakpoints)</a>
+      <li><a href="cns.process.html#cns.process.breakpoints.get_breaks_from_cns_df">get_breaks_from_cns_df() (in module cns.process.breakpoints)</a>
 </li>
       <li><a href="cns.process.html#cns.process.breakpoints.get_breaks_from_segments">get_breaks_from_segments() (in module cns.process.breakpoints)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.breakpoints.get_breaks_inside_segments">get_breaks_inside_segments() (in module cns.process.breakpoints)</a>
 </li>
       <li><a href="cns.utils.html#cns.utils.selection.get_chr_sets">get_chr_sets() (in module cns.utils.selection)</a>
 </li>
@@ -481,8 +455,6 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cns.analyze.html#cns.analyze.coverage.get_covered_bases">get_covered_bases() (in module cns.analyze.coverage)</a>
-</li>
-      <li><a href="cns.utils.html#cns.utils.anomaly.get_direction">get_direction() (in module cns.utils.anomaly)</a>
 </li>
       <li><a href="cns.process.html#cns.process.segments.get_genome_segments">get_genome_segments() (in module cns.process.segments)</a>
 </li>
@@ -504,13 +476,7 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cns.process.html#cns.process.breakpoints.insert_breaks_into_segments">insert_breaks_into_segments() (in module cns.process.breakpoints)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cns.utils.html#cns.utils.canonization.is_canonical_cns_df">is_canonical_cns_df() (in module cns.utils.canonization)</a>
-</li>
-      <li><a href="cns.utils.html#cns.utils.canonization.is_cn_column">is_cn_column() (in module cns.utils.canonization)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -552,35 +518,27 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cns.process.html#cns.process.pipelines.main_aggregate">main_aggregate() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_aggregate">main_aggregate() (in module cns.pipelines)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.pipelines.main_coverage">main_coverage() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_coverage">main_coverage() (in module cns.pipelines)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.pipelines.main_fill">main_fill() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_fill">main_fill() (in module cns.pipelines)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.pipelines.main_impute">main_impute() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_impute">main_impute() (in module cns.pipelines)</a>
 </li>
       <li><a href="cns.html#cns.data_utils.main_load_data">main_load_data() (in module cns.data_utils)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.pipelines.main_ploidy">main_ploidy() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_ploidy">main_ploidy() (in module cns.pipelines)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.pipelines.main_segment">main_segment() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_segment">main_segment() (in module cns.pipelines)</a>
 </li>
-      <li><a href="cns.process.html#cns.process.pipelines.main_signatures">main_signatures() (in module cns.process.pipelines)</a>
+      <li><a href="cns.html#cns.pipelines.main_signatures">main_signatures() (in module cns.pipelines)</a>
 </li>
       <li><a href="cns.process.html#cns.process.breakpoints.make_breaks">make_breaks() (in module cns.process.breakpoints)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.aggregation.max_func">max_func() (in module cns.process.aggregation)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.aggregation.mean_func">mean_func() (in module cns.process.aggregation)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.cluster.merge_clusters">merge_clusters() (in module cns.process.cluster)</a>
 </li>
       <li><a href="cns.process.html#cns.process.imputation.merge_neighbours">merge_neighbours() (in module cns.process.imputation)</a>
 </li>
       <li><a href="cns.process.html#cns.process.segments.merge_segments">merge_segments() (in module cns.process.segments)</a>
-</li>
-      <li><a href="cns.process.html#cns.process.aggregation.min_func">min_func() (in module cns.process.aggregation)</a>
 </li>
       <li>
     module
@@ -604,6 +562,8 @@
 </li>
         <li><a href="cns.display.html#module-cns.display.plot">cns.display.plot</a>
 </li>
+        <li><a href="cns.html#module-cns.pipelines">cns.pipelines</a>
+</li>
         <li><a href="cns.process.html#module-cns.process">cns.process</a>
 </li>
         <li><a href="cns.process.html#module-cns.process.aggregation">cns.process.aggregation</a>
@@ -615,8 +575,6 @@
         <li><a href="cns.process.html#module-cns.process.imputation">cns.process.imputation</a>
 </li>
         <li><a href="cns.process.html#module-cns.process.normalize">cns.process.normalize</a>
-</li>
-        <li><a href="cns.process.html#module-cns.process.pipelines">cns.process.pipelines</a>
 </li>
         <li><a href="cns.process.html#module-cns.process.segments">cns.process.segments</a>
 </li>
@@ -744,6 +702,8 @@
       <li><a href="cns.utils.html#cns.utils.selection.select_CNS_samples">select_CNS_samples() (in module cns.utils.selection)</a>
 </li>
       <li><a href="cns.utils.html#cns.utils.conversions.sortable_to_chrom">sortable_to_chrom() (in module cns.utils.conversions)</a>
+</li>
+      <li><a href="cns.process.html#cns.process.breakpoints.split_into_bins">split_into_bins() (in module cns.process.breakpoints)</a>
 </li>
       <li><a href="cns.process.html#cns.process.segments.split_segment">split_segment() (in module cns.process.segments)</a>
 </li>

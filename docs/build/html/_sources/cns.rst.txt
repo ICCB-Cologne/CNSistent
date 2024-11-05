@@ -15,6 +15,14 @@ Subpackages
 Submodules
 ----------
 
+cns.pipelines module
+----------------------
+
+.. automodule:: cns.pipelines
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cns.data\_utils module
 ----------------------
 

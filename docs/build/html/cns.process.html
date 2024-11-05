@@ -14,7 +14,7 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=af9e523d"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -44,7 +44,9 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">CLI Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">Tool usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_quickstart.html">API Quickstart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="cns.html">cns package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="cns.html#subpackages">Subpackages</a><ul class="current">
@@ -57,7 +59,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.process.cluster">cns.process.cluster module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.process.imputation">cns.process.imputation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.process.normalize">cns.process.normalize module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-cns.process.pipelines">cns.process.pipelines module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.process.segments">cns.process.segments module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-cns.process">Module contents</a></li>
 </ul>
@@ -66,6 +67,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cns.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.html#module-cns.pipelines">cns.pipelines module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.html#module-cns.data_utils">cns.data_utils module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.html#module-cns">Module contents</a></li>
 </ul>
@@ -129,47 +131,12 @@
 <span class="sig-prename descclassname"><span class="pre">cns.process.aggregation.</span></span><span class="sig-name descname"><span class="pre">group_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.aggregation.group_samples" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.aggregation.max_func">
-<span class="sig-prename descclassname"><span class="pre">cns.process.aggregation.</span></span><span class="sig-name descname"><span class="pre">max_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.aggregation.max_func" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.aggregation.mean_func">
-<span class="sig-prename descclassname"><span class="pre">cns.process.aggregation.</span></span><span class="sig-name descname"><span class="pre">mean_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.aggregation.mean_func" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.aggregation.min_func">
-<span class="sig-prename descclassname"><span class="pre">cns.process.aggregation.</span></span><span class="sig-name descname"><span class="pre">min_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.aggregation.min_func" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </section>
 <section id="module-cns.process.breakpoints">
 <span id="cns-process-breakpoints-module"></span><h2>cns.process.breakpoints module<a class="headerlink" href="#module-cns.process.breakpoints" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.calc_arm_breaks">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_arm_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.calc_arm_breaks" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.calc_cytoband_breaks">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_cytoband_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.calc_cytoband_breaks" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.calc_seg_breaks">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">calc_seg_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy='scale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.calc_seg_breaks" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.create_step_breaks">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">create_step_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reg_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'after'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.create_step_breaks" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.get_breaks_from_cns">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">get_breaks_from_cns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_ends=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.get_breaks_from_cns" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="cns.process.breakpoints.get_breaks_from_cns_df">
+<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">get_breaks_from_cns_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_ends=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.get_breaks_from_cns_df" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -178,28 +145,18 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.get_breaks_inside_segments">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">get_breaks_inside_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">breaks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.get_breaks_inside_segments" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.breakpoints.insert_breaks_into_segments">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">insert_breaks_into_segments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">breaks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.insert_breaks_into_segments" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="cns.process.breakpoints.make_breaks">
-<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">make_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">break_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.make_breaks" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">make_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">break_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy='scale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.make_breaks" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cns.process.breakpoints.split_into_bins">
+<span class="sig-prename descclassname"><span class="pre">cns.process.breakpoints.</span></span><span class="sig-name descname"><span class="pre">split_into_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reg_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'after'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.breakpoints.split_into_bins" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-cns.process.cluster">
 <span id="cns-process-cluster-module"></span><h2>cns.process.cluster module<a class="headerlink" href="#module-cns.process.cluster" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.cluster.breaks_to_clusters">
-<span class="sig-prename descclassname"><span class="pre">cns.process.cluster.</span></span><span class="sig-name descname"><span class="pre">breaks_to_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chrom_breaks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.cluster.breaks_to_clusters" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.process.cluster.calc_clusters">
 <span class="sig-prename descclassname"><span class="pre">cns.process.cluster.</span></span><span class="sig-name descname"><span class="pre">calc_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.cluster.calc_clusters" title="Link to this definition"></a></dt>
@@ -213,11 +170,6 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.process.cluster.clusters_to_breaks">
 <span class="sig-prename descclassname"><span class="pre">cns.process.cluster.</span></span><span class="sig-name descname"><span class="pre">clusters_to_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.cluster.clusters_to_breaks" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.cluster.merge_clusters">
-<span class="sig-prename descclassname"><span class="pre">cns.process.cluster.</span></span><span class="sig-name descname"><span class="pre">merge_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.cluster.merge_clusters" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -267,16 +219,6 @@
 <section id="module-cns.process.normalize">
 <span id="cns-process-normalize-module"></span><h2>cns.process.normalize module<a class="headerlink" href="#module-cns.process.normalize" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.process.normalize.calc_chr_sizes">
-<span class="sig-prename descclassname"><span class="pre">cns.process.normalize.</span></span><span class="sig-name descname"><span class="pre">calc_chr_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chr_segs_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.normalize.calc_chr_sizes" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.normalize.calc_group_sizes">
-<span class="sig-prename descclassname"><span class="pre">cns.process.normalize.</span></span><span class="sig-name descname"><span class="pre">calc_group_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segs_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.normalize.calc_group_sizes" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="cns.process.normalize.get_norm_sizes">
 <span class="sig-prename descclassname"><span class="pre">cns.process.normalize.</span></span><span class="sig-name descname"><span class="pre">get_norm_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.normalize.get_norm_sizes" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -284,44 +226,6 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.process.normalize.normalize_feature">
 <span class="sig-prename descclassname"><span class="pre">cns.process.normalize.</span></span><span class="sig-name descname"><span class="pre">normalize_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_sizes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.normalize.normalize_feature" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
-<section id="module-cns.process.pipelines">
-<span id="cns-process-pipelines-module"></span><h2>cns.process.pipelines module<a class="headerlink" href="#module-cns.process.pipelines" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_aggregate">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_aggregate" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_coverage">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_coverage" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_fill">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_missing_chromosomes=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_fill" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_impute">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_impute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extend'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_impute" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_ploidy">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_ploidy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_ploidy" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_segment">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_segs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_segs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_size=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_dist=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_size=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_segment" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.process.pipelines.main_signatures">
-<span class="sig-prename descclassname"><span class="pre">cns.process.pipelines.</span></span><span class="sig-name descname"><span class="pre">main_signatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_df=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_columns=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly=&lt;cns.utils.assemblies.Assembly</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.process.pipelines.main_signatures" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

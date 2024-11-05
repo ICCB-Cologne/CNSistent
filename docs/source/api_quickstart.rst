@@ -1,5 +1,3 @@
-.. _api_quickstart:
-
 API Quickstart
 ==============
 

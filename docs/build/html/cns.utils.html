@@ -14,7 +14,7 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=af9e523d"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -43,7 +43,9 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">CLI Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_quickstart.html">Tool usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_quickstart.html">API Quickstart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="cns.html">cns package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="cns.html#subpackages">Subpackages</a><ul class="current">
@@ -68,6 +70,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cns.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cns.html#module-cns.pipelines">cns.pipelines module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.html#module-cns.data_utils">cns.data_utils module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cns.html#module-cns">Module contents</a></li>
 </ul>
@@ -112,28 +115,13 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.utils.anomaly.count_below_lim">
-<span class="sig-prename descclassname"><span class="pre">cns.utils.anomaly.</span></span><span class="sig-name descname"><span class="pre">count_below_lim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.anomaly.count_below_lim" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.utils.anomaly.count_cum_val">
-<span class="sig-prename descclassname"><span class="pre">cns.utils.anomaly.</span></span><span class="sig-name descname"><span class="pre">count_cum_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.anomaly.count_cum_val" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="cns.utils.anomaly.find_bends">
-<span class="sig-prename descclassname"><span class="pre">cns.utils.anomaly.</span></span><span class="sig-name descname"><span class="pre">find_bends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.anomaly.find_bends" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">cns.utils.anomaly.</span></span><span class="sig-name descname"><span class="pre">find_bends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.anomaly.find_bends" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.utils.anomaly.find_knee">
 <span class="sig-prename descclassname"><span class="pre">cns.utils.anomaly.</span></span><span class="sig-name descname"><span class="pre">find_knee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knee</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.anomaly.find_knee" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.utils.anomaly.get_direction">
-<span class="sig-prename descclassname"><span class="pre">cns.utils.anomaly.</span></span><span class="sig-name descname"><span class="pre">get_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.anomaly.get_direction" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -164,11 +152,6 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="cns.utils.canonization.find_column">
-<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">find_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.find_column" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="cns.utils.canonization.get_cn_cols">
 <span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">get_cn_cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cn_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.get_cn_cols" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -176,11 +159,6 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="cns.utils.canonization.is_canonical_cns_df">
 <span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">is_canonical_cns_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cns_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.is_canonical_cns_df" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cns.utils.canonization.is_cn_column">
-<span class="sig-prename descclassname"><span class="pre">cns.utils.canonization.</span></span><span class="sig-name descname"><span class="pre">is_cn_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cns.utils.canonization.is_cn_column" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
