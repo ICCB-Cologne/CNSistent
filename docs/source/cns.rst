@@ -1,19 +1,5 @@
-cns package
-===========
-
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 2
-
-   cns.analyze
-   cns.display
-   cns.process
-   cns.utils
-
-Submodules
-----------
+`cns` Reference
+===============
 
 cns.pipelines module
 ----------------------
@@ -30,6 +16,17 @@ cns.data\_utils module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 2   
+
+   cns.analyze
+   cns.display
+   cns.process
+   cns.utils
 
 Module contents
 ---------------

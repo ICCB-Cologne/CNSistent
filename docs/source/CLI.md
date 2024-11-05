@@ -14,7 +14,7 @@ The following commands are available (see details below)
 * `bin`: Creates bins for CNS data.
 * `cluster`: Creates a clustering of breakpoints.
 
-The `cns_file_path` must point to a CNS file as described in the [Data](#Data) section.
+The `cns_file_path` must point to a CNS file as described in the following section.
 
 ## Data
 

@@ -3,12 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-
-
 .. image:: ../Logo.png
    :alt: Example Data
-
-
 
 Introduction
 ============
@@ -22,7 +18,7 @@ The tool is designed to be easy to use, and to provide a comprehensive set of an
    :caption: Contents:
 
    self
-   data_processing
-   cli_quickstart
-   api_quickstart
+   quickstart
+   CLI
+   API
    cns
