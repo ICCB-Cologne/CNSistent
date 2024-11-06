@@ -15,7 +15,7 @@ do
     cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples_preprocess.tsv" --out "${temp_folder}/${dataset}_samples.tsv" $common_args
     cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${temp_folder}/${dataset}_cns_imp.tsv" $common_args
     cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${temp_folder}/${dataset}_samples.tsv" $common_args
-    cns aggregate "${out}/${dataset}_cns_imp.tsv" --out "${temp_folder}/${dataset}_bin_1MB.tsv" --bins 1000000 --remove gaps --filter 100000 $common_args
-    cns aggregate "${out}/${dataset}_cns_imp.tsv" --select "${data}/COSMIC_consensus_genes.tsv" --out "${temp_folder}/${dataset}_bin_COSMIC.tsv" $common_args
+    cns aggregate "${out}/${dataset}_cns_imp.tsv" --segments "${out}/segs_1MB.bed" --out "${temp_folder}/${dataset}_bin_1MB.tsv" $common_args
+    cns aggregate "${out}/${dataset}_cns_imp.tsv" --segments "${out}/segs_COSMIC.bed" --out "${temp_folder}/${dataset}_bin_COSMIC.tsv" $common_args
 done
 rm -r $temp_folder

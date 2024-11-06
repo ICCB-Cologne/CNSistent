@@ -290,7 +290,8 @@ def main():
             print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")
             if args.time:
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
-                with open("./out/times.tsv", "a") as f:
+                write_mode = "a" if exists("./out/times.tsv") else "w"
+                with open("../out/times.tsv", write_mode) as f:
                     f.write(f"{timestamp}\t{action}\t{args.threads}\t{out_file}\t{runtime}\n")
 
         for j in range(len(res_list)):
