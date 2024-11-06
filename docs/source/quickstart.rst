@@ -8,18 +8,18 @@ Processing bundled data
 
 The `cnsistent` repository contains data from the PCAWG, TCGA, and TRACERx studies, which can be preprocessed and segmented using bundled scripts under the following steps:
 
-1. Start a `bash`-compatible shell.
-2. Create the conda environment: `conda env create -f ./cnsistent.yml`
-3. Activate the environment: `conda activate cns`
-4. Install the package from location: `pip install -e .`
-5. Process data: `bash ./scripts/data_process.sh`
-6. Optional: Aggregate processed data: `bash ./scripts/data_aggregate.sh`
+1. Start a ``bash``-compatible shell.
+2. Create the conda environment: ``conda env create -f ./cnsistent.yml``
+3. Activate the environment: ``conda activate cns``
+4. Install the package from location: ``pip install -e .``
+5. Process data: ``bash ./scripts/data_process.sh``
+6. Optional: Aggregate processed data: ``bash ./scripts/data_aggregate.sh``
 
 **NOTES:**
 
 * The aggregation step will take several hours and produce ~40GB of data.
-* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_aggregate.sh` scripts.
-* You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accessible then.
+* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the ``data_process.sh`` and ``data_aggregate.sh`` scripts.
+* You can also install the package with ``pip install``, however there is a set of utility functions for loading data in ``cns.data_utils.py``` that will not be accessible then.
 
 Accessing bundled data
 ----------------------
@@ -28,7 +28,7 @@ TODO
 Basic tool usage
 ----------------
 
-`cnsistent` SCNA profiles as `.tsv` files. Have an example file `data.tsv`:
+CNSistent reads SCNA profiles as ``.tsv`` files. Have an example file ``data.tsv``:
 
 .. code-block:: tsv
 

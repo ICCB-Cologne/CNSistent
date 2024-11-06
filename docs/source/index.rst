@@ -6,10 +6,7 @@
 .. _introduction:
 
 .. image:: ../Logo.png
-   :alt: Example Data
-
-.. raw:: html
-   <br>
+   :alt: CNSistent Logo
 
 
 Introduction
