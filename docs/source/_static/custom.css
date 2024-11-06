@@ -1,0 +1,8 @@
+/* Ensure the page always fills the browser screen */
+body {
+    width: 100%;
+}
+
+.wy-nav-content {
+    max-width: 100%;
+}
