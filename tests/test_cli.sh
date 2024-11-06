@@ -37,7 +37,7 @@ commands=(
   "cns impute ./temp/test_cns_single_fill.tsv --out ./temp/test_cns_single_imp.tsv --verbose"
   "cns coverage ./temp/test_cns_fill.tsv --out ./temp/test_sample_cover.tsv --verbose"
   "cns ploidy ./temp/test_cns_imp.tsv --samples ./in/test_samples.tsv --out ./temp/test_sample_ploidy.tsv --verbose"
-  "cns signatures ./temp/test_cns_imp.tsv --samples ./in/test_samples.tsv --out ./temp/test_sample_signatures.tsv --verbose"
+  "cns breakage ./temp/test_cns_imp.tsv --samples ./in/test_samples.tsv --out ./temp/test_sample_breakage.tsv --verbose"
   "cns segment ./temp/test_cns_fill.tsv --merge 100000 --out ./temp/mcs_regions.bed --verbose "
   "cns segment dummy --select arms --out ./temp/test_segs_arms.bed --verbose"
   "cns segment dummy --select bands --out ./temp/test_segs_bands.bed --verbose"

@@ -115,8 +115,8 @@ def _parse_args():
     sp_dict["ploidy"] = subparsers.add_parser(
         "ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored)."
     )
-    sp_dict["signatures"] = subparsers.add_parser(
-        "signatures", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored)."
+    sp_dict["breakage"] = subparsers.add_parser(
+        "breakage", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored)."
     )
     sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
     sp_dict["aggregate"] = subparsers.add_parser(
@@ -166,8 +166,8 @@ def _action_to_fun(action):
         return main_coverage
     elif action == "ploidy":
         return main_ploidy
-    elif action == "signatures":
-        return main_signatures
+    elif action == "breakage":
+        return main_breakage
     elif action == "segment":
         return main_segment
     elif action == "aggregate":

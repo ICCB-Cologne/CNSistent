@@ -63,7 +63,7 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     return res_df
 
 
-def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
@@ -74,7 +74,7 @@ def main_signatures(cns_df, samples_df=None, cn_columns=None, segs=None, assembl
 
     # check if non of the cn_columns are NaN
     if cns_df[cn_columns].isna().any().any():
-        raise RuntimeError("Cannot calculate signatures with NaN values in CN columns, impute first.")
+        raise RuntimeError("Cannot calculate breakage with NaN values in CN columns, impute first.")
 
     if len(cn_columns) == 2:
         cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)

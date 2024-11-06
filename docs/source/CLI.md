@@ -7,12 +7,13 @@ The command line interface uses the following pattern:
 
 The following commands are available (see details below)
 
-* `fill`: Adds NaN regions to the CNS data to match the assembly.
+* `fill`: Adds missing segments to the CNS data to match the assembly (fills gaps with NaNs).
 * `impute`: Imputes missing values in the CNS data.
 * `coverage`: Calculates coverage for filled (but not imputed) CNS data.
 * `ploidy`: Calculates aneuploidy for CNS data (NaNs are ignored).
-* `bin`: Creates bins for CNS data.
-* `cluster`: Creates a clustering of breakpoints.
+* `breakage`: Creates a clustering of breakpoints.
+* `segment`: Create a consistent segmentation.
+* `aggregate`: Creates bins for CNS data.
 
 The `cns_file_path` must point to a CNS file as described in the following section.
 
@@ -117,7 +118,7 @@ The following statistics are calculated and stored in a *samples* file:
 * `ane_+_*`: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), `+` expands into CN columns names
 * `ane_+_frac_*`: the fraction of aneuploid bases over the total number of bases
 
-### `signatures`
+### `breakage`
 
 TODO
 

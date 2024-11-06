@@ -148,7 +148,7 @@ The following statistics are calculated and stored in a *samples* file:
 * `ane_+_*`: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), `+` expands into CN columns names
 * `ane_+_frac_*`: the fraction of aneuploid bases over the total number of bases
 
-## `signatures`
+## `breakage`
 
 TODO
 
@@ -338,7 +338,7 @@ The analyze module calculates statistics for the CNS data.
 
 * `coverage`: Calculates the proportion of genome with assigned (not NaN) CN values.
 * `ploidy`: Calculates the proportion of genome with aneuploid CN values (different from 2 or 1 for male sex chroms).
-* `signatures`: Calculates the signatures related statistics - currently it only calculates breakpoints per sample/chromosome.
+* `breakage`: Calculates the signatures related statistics - currently it only calculates breakpoints per sample/chromosome.
 
 ### Display
 

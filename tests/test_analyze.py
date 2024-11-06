@@ -56,7 +56,7 @@ class TestCoverage(unittest.TestCase):
         self.assertEqual(res['chrom_missing']['s3'].size, 3)
 
 
-class TestSignatures(unittest.TestCase):
+class TestBreakage(unittest.TestCase):
     def setUp(self):
         self.cns = pd.DataFrame({
             'sample_id': ['s1', 's1', 's2', 's2', 's3', 's4', 's4', 's4', 's4', 's4', 's4'],

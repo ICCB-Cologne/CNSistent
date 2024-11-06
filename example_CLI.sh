@@ -30,8 +30,8 @@ cns ploidy ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --
 cns ploidy ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
 # Calculate the aneuploidy of the filled-in CNS data
-cns signatures ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_sample_signatures.tsv --verbose
-cns signatures ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
+cns breakage ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_sample_signatures.tsv --verbose
+cns breakage ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
 # %%
 # Try different segmentations

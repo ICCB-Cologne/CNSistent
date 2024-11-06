@@ -3,15 +3,16 @@ import pandas as pd
 
 
 # counts how many samples are below each cutoff value
-def _count_below_lim(vals, min_val=0, max_val=1, steps=1000):
+def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
     cutoffs = np.linspace(min_val, max_val, steps + 1)
     #  Finds the indices where elements should be inserted to maintain order, 
     #  effectively counting the number of elements less than or equal to each cutoff.
     counts = np.searchsorted(np.sort(vals), cutoffs, side='right') / len(vals)	
     return cutoffs, counts
 
+
 # Counts the number of samples below each present values
-def _count_cum_val(vals, min_val=0, max_val=1):
+def count_cum_val(vals, min_val=0, max_val=1):
     vals = np.array(vals)
     vals = vals[(vals >= min_val) & (vals <= max_val)]
     unique_vals, counts = np.unique(vals.astype(np.float32), return_counts=True)
@@ -78,7 +79,7 @@ def find_knee(x, y, knee=True):
 # max_val - maximum value to be considered
 # steps - number of steps between min_val and max_val
 def find_bends(vals, min_val=0, max_val=1, steps=1000):    
-    X, Y = _count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
+    X, Y = count_below_lim(vals, min_val=min_val, max_val=max_val, steps=steps)
     knee_index, knee_value = find_knee(X, Y, knee=True)
     elbow_index, elbow_value = find_knee(X, Y, knee=False)
     return X, Y, knee_index, knee_value, elbow_index, elbow_value

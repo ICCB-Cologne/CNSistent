@@ -86,11 +86,11 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s2', 'ane_het_aut'], 0) # check that NaN and out of scope are not considered
         self.assertEqual(res.loc['s4', 'loh_hom_aut'], 1/350)
     
-    def test_main_signatures(self):
+    def test_main_breakage(self):
         with self.assertRaises(Exception):
-            main_signatures(self.cns, self.samples, assembly=self.assembly)
+            main_breakage(self.cns, self.samples, assembly=self.assembly)
         self.cns.loc[2, "minor_cn"] = 0
-        res = main_signatures(self.cns, self.samples, assembly=self.assembly)
+        res = main_breakage(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res.shape, (4, 19))        
         self.assertEqual(res.loc['s1', 'breaks_minor_cn_aut'], 1)
         self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
@@ -99,8 +99,8 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.loc['s4', 'breaks_total_cn_sex'], 0)
         self.assertEqual(res.loc['s4', 'breaks_total_cn_all'], 4)
 
-    def test_main_signatures_segs(self):
-        res = main_signatures(self.cns, self.samples, segs=self.aut_segs, assembly=self.assembly)
+    def test_main_breakage_segs(self):
+        res = main_breakage(self.cns, self.samples, segs=self.aut_segs, assembly=self.assembly)
         self.assertEqual(res.loc['s1', 'breaks_major_cn_aut'], 1)
 
     def test_main_segment(self):
