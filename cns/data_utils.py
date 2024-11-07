@@ -87,6 +87,26 @@ def load_samples_out(filename, use_filter=True, print_info=False):
     return samples_df
 
 
+def load_segs_out(filename, print_info=False):
+    """Load segment data from the output directory.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the segment file to load.
+    print_info : bool, optional
+        Whether to print progress information.
+    
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing segment data.
+    """
+    log_info(print_info, f"Loading segments from {filename}")
+    return load_segments(pjoin(out_path, filename))
+
+
+
 def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_info=False):
     """Filter samples based on aneuploidy and coverage criteria.
 
@@ -191,27 +211,6 @@ def main_load(segment_type=None, use_filter=True, print_info=False):
     
     return samples_df, cns_df
 
-
-def load_COSMIC():
-    """Load COSMIC consensus genes.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame containing COSMIC gene data.
-    """
-    return load_segments(pjoin(data_path, "COSMIC_consensus_genes.bed"))
-
-
-def load_ENSEMBL():
-    """Load ENSEMBL coding genes.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame containing ENSEMBL gene data.
-    """
-    return load_segments(pjoin(data_path, "ENSEMBL_coding_genes.bed"))
 
 
 def select_cns_by_type(cns, samples, type):
