@@ -65,15 +65,9 @@ def drop_Y(cns_df, assembly=hg19, inplace=False):
     return cns_df.query(f"chrom != '{assembly.chr_y}'").copy()
 
 
-def select_CNS_samples(cns_df, samples):
-    return cns_df.query("sample_id in @samples.index")
+def select_CNS_samples(cns_df, samples_df):
+    return cns_df.query("sample_id in @samples_df.index")
 
-
-def get_cns_for_type(cns_df, samples, type):
-    query = f"type == '{type}'"
-    ids = samples.query(query).index
-    select_cns = cns_df.set_index("sample_id").loc[ids].reset_index()
-    return select_cns
 
 
 def cn_not_nan(cns_df, cn_columns, het):

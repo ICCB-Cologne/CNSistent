@@ -224,7 +224,7 @@ def remove_not_whitelist_PCAWG(print_info=False):
 
 def filter_PCAWG_CNS(print_info=False):
     # Load the CNS data
-    PCAWG_cns = load_cns_out("PCAWG_cns_preprocess.tsv", raw=True)
+    PCAWG_cns = load_cns_out("PCAWG_cns_preprocess.tsv")
     PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
 
     # Filter the CNS data

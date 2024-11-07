@@ -206,7 +206,7 @@ cns aggregate cns.tsv --segments segments.tsv
 
 The repository contains a set of utility functions for loading the available data in `cns.data_utils`. 
 
-* `main_load_data`: The entry point function. It loads and filters samples from the datasets (PCAWG, TCGA, TRACERx) together with the imputed CNS data. If bins value is provided, instead of CNS data, binned data is loaded for the perspective bin size.
+* `main_load`: The entry point function. It loads and filters samples from the datasets (PCAWG, TCGA, TRACERx) together with the imputed CNS data. If bins value is provided, instead of CNS data, binned data is loaded for the perspective bin size.
 * `load_COSMIC`: Loads the gene set from COSMIC with columns `gene, chrom, start, end`.
 * `load_ENSEMBL`: Loads the gene set from Ensembl with columns `gene, chrom, start, end`.
 
