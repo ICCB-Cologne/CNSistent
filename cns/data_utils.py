@@ -130,6 +130,45 @@ def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_i
 
 
 def main_load(segment_type=None, use_filter=True, print_info=False):
+    """
+    Load samples and CNS data for PCAWG, TRACERx, and TCGA.
+
+    The type of segments depends on the segment type. (If none is specified, only samples are loaded.)
+
+    Possible segments for non-aggregated data are:
+
+    * imp: Imputed segments
+    * preprocess: Preprocessed segments
+    * fill: Filled segments
+
+    Possible segments for aggregated data are:
+
+    * whole: Whole genome segments
+    * arm: Arm-level segments
+    * bands: Cytoband-level segments
+    * COSMIC: COSMIC consensus genes
+    * ENSEMBL: ENSEMBL coding genes
+    * 10MB, 5MB, 3MB, 2MB, 1MB, 500KB, 250KB: Binned segments of this size
+    * merge_10000000, merge_5000000, merge_250000: Clustered breakpoints of this size.
+
+    Parameters
+    ----------
+    segment_type : string, optional
+        If provided, load binned data with this segment type. Default is None.
+    use_filter : bool, optional
+        Whether to filter samples based on coverage and aneuploidy. Default is True.
+    retype : bool, optional
+        Whether to standardize cancer type labels. Default is True.
+    print_info : bool, optional
+        Whether to print progress information. Default is False.
+
+    Returns
+    -------
+    samples_df : pd.DataFrame
+        Combined DataFrame containing all samples.
+    cns_df : pd.DataFrame
+        Combined DataFrame containing all CNS data. If segment_type is None, this is None.
+    """
     datasets = ["PCAWG", "TRACERx", "TCGA_hg19"]
 
     samples_list = []
@@ -143,7 +182,7 @@ def main_load(segment_type=None, use_filter=True, print_info=False):
     if segment_type is None:
         return samples_df, None
         
-    file_type = "cns" if segment_type in ["imp", "raw", "fill"] else "bin"
+    file_type = "cns" if segment_type in ["imp", "preprocess", "fill"] else "bin"
     cns_dict = [ load_cns_out(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets ]
     cns_df = pd.concat(cns_dict)
     log_info(print_info, f"Total CNS segments: {len(cns_df)}")
