@@ -1,9 +1,6 @@
 cns.analyze package
 ===================
 
-Submodules
-----------
-
 cns.analyze.aneuploidy module
 -----------------------------
 
@@ -24,14 +21,6 @@ cns.analyze.coverage module
 ---------------------------
 
 .. automodule:: cns.analyze.coverage
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: cns.analyze
    :members:
    :undoc-members:
    :show-inheritance:

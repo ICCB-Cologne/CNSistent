@@ -7,6 +7,8 @@
 
 .. image:: ../Logo.png
    :alt: CNSistent Logo
+   :width: 800px
+   :align: center
 
 
 Introduction

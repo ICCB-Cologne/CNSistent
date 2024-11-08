@@ -1,8 +1,6 @@
 cns.utils package
 =================
 
-Submodules
-----------
 
 cns.utils.anomaly module
 ------------------------
@@ -80,14 +78,6 @@ cns.utils.selection module
 --------------------------
 
 .. automodule:: cns.utils.selection
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: cns.utils
    :members:
    :undoc-members:
    :show-inheritance:

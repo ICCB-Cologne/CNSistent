@@ -1,8 +1,6 @@
 cns.process package
 ===================
 
-Submodules
-----------
 
 cns.process.aggregation module
 ------------------------------
@@ -52,10 +50,3 @@ cns.process.segments module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: cns.process
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -63,6 +63,9 @@ CNSistent reads SCNA profiles as ``.tsv`` files. Have an example file ``data.tsv
     sample1      chr1    100     200     1       
     ...
 
+.. note::
+    Column naming is fully describe in the :ref:`Column Naming` section.
+
 To preprocess the segments:
 
 .. code-block:: bash

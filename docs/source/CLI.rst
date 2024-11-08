@@ -9,15 +9,17 @@ The command line interface uses the following pattern:
 
 The following commands are available (see details below):
 
-* `fill`_: Adds missing segments to the CNS data to match the assembly (fills gaps with NaNs).
-* `impute`_: Imputes missing values in the CNS data.
-* `coverage`_: Calculates coverage for filled (but not imputed) CNS data.
-* `ploidy`_: Calculates aneuploidy for CNS data (NaNs are ignored).
-* `breakage`_: Creates a clustering of breakpoints.
-* `segment`_: Create a consistent segmentation.
-* `aggregate`_: Creates bins for CNS data.
+* :ref:`fill_cmd`: Adds missing segments to the CNS data to match the assembly (fills gaps with NaNs).
+* :ref:`impute_cmd`: Imputes missing values in the CNS data.
+* :ref:`coverage_cmd`: Calculates coverage for filled (but not imputed) CNS data.
+* :ref:`ploidy_cmd`: Calculates aneuploidy for CNS data (NaNs are ignored).
+* :ref:`breakage_cmd`: Creates a clustering of breakpoints.
+* :ref:`segment_cmd`: Create a consistent segmentation.
+* :ref:`aggregate_cmd`: Creates bins for CNS data.
 
 The ``cns_file_path`` must point to a CNS file as described in the following section.
+
+.. _cli_data:
 
 Data
 ----
@@ -31,15 +33,24 @@ The tool expects an unprocessed copy number dataset in the form of a ``TSV`` fil
 
 E.g.:
 
-.. code-block:: tsv
+.. csv-table:: Raw CN data for two samples.
 
-    sample_id    chrom   start   end     major_cn    minor_cn
-    sample1      chr1    100     200     1           0
-    sample1      chr1    550     1000    2           0
-    ...
+    sample_id, chrom, start, end, CN1, CN2
+    s1, chr19, 1000000, 3000000, 1,
+    s1, chr19, 3000000, 12000000, 1, 1
+    s1, chr19, 12000000, 14000000, , 1
+    s1, chr19, 14000000, 21000000, 3, 1
+    s1, chr19, 21000000, 25000000, 3, 
+    s1, chr19, 28000000, 58500000, 3,
+    s2, chr19, 1000000, 24000000, 2,
+    s2, chr19, 29000000, 58000000, 0,
 
-.. image:: ../cns_raw.png
-   :width: 640px
+.. _cns_raw_image:
+
+.. figure:: ../cns_raw.png
+    :width: 500px
+
+    Raw copy number data for each sample and allele.
 
 .. note::
 
@@ -47,7 +58,7 @@ E.g.:
     However, for the sake of sanity of the author, these are converted to 0-based, and the end position is exclusive. See details on usage: TODO: link.
 
 BED File Input
-``````````````
+--------------
 
 BED files do not have a sample identifier, so the ``sample_id`` column is not present. If you aim to process just a single sample, you can format it for input using the following command:
 
@@ -58,27 +69,10 @@ BED files do not have a sample identifier, so the ``sample_id`` column is not pr
 Commands
 --------
 
-The following additional optional arguments are shared:
-
-* ``--cols int``: Number of copy number columns. If specified the columns on position ``5:5+cols`` are used as copy numbers. If not specified, the parser will consider columns that start or end with ``"CN"`` or ``"cn"``.
-* ``--samples string``: Path to the file with labelling of the samples. The file should be a TSV with the following columns: ``sample_id, sex``. This is an optional argument.
-    * If ``sex`` is not provided, it is derived from the presence of ``chrY`` in the dataset.
-    * If ``--samples`` is used, only the samples in the file are processed.
-    * If the samples file contains additional columns, and the program outputs a ``samples`` file (e.g. ``coverage``), these columns are copied to the output file.
-* ``--out string``: Output file. This is an optional argument. If not provided, it defaults to ``./cns.out.tsv``.
-* ``--noheader``: If provided, the header is not expected in the input file.
-* ``--nosample``: If provided, the sample_id column is not expected in the input file.
-* ``--assembly [hg19, hg38]``: Assembly to use. If not provided, it defaults to ``hg19``.
-* ``--threads int``: Number of threads to use, defaults to ``1``. (Note: ``cluster`` is not parallelizable).
-* ``--subsplit int``: Number of segments to split the data into for parallel processing. If not provided, the default value is ``1`` for no splitting. This helps to limit memory consumption for large datasets.
-* ``--verbose``: If provided, progress will be printed.
-
-.. note::
-
-    For examples of using the CLI, you can refer to the file ``example_CLI.sh``.
+.. _fill_cmd:
 
 ``fill``
-`````````
+--------
 
 Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 
@@ -87,8 +81,10 @@ Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 3. Add missing chromosomes, if they are missing compared to the reference.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major must match.
 
+.. _impute_cmd:
+
 ``impute``
-``````````
+----------
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
@@ -100,8 +96,10 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 .. image:: ../cns_imputed.png
    :width: 640px
 
+.. _coverage_cmd:
+
 ``coverage``
-````````````
+------------
 
 .. note::
 
@@ -121,8 +119,10 @@ The following statistics are calculated and stored in a *samples* file:
 * ``bases_*``: total number of bases with CNS values assigned. ``*`` is for ``aut``, ``sex``, ``tot``, referring to autosomes, sex chromosomes, and the sum of both, respectively
 * ``frac_*``: fraction of bases with CNS values assigned over the total number of bases
 
+.. _ploidy_cmd:
+
 ``ploidy``
-``````````
+----------
 
 Calculates the portions of the genome that are aneuploid, or for absent in case of male sex chromosomes.
 
@@ -136,13 +136,17 @@ The following statistics are calculated and stored in a *samples* file:
 * ``ane_+_*``: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), ``+`` expands into CN columns names
 * ``ane_+_frac_*``: the fraction of aneuploid bases over the total number of bases
 
+.. _breakage_cmd:
+
 ``breakage``
-````````````
+------------
 
 TODO
 
+.. _segment_cmd:
+
 ``segment``
-```````````
+-----------
 
 Conducts the binning - for selected segments, the aggregate CN value for selected samples are calculated.
 
@@ -164,26 +168,10 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
 .. image:: ../cns_segmented.png
    :width: 640px
 
-Additional arguments:
-
-* ``--select string``: Path to the selection file or one of [``arms``, ``bands``]. The file should be a TSV with the following columns: ``chrom, start, end``. This is an optional argument. Default is whole chromosomes.
-* ``--remove string``: Path to the removal file or ``gaps``. The file should be a TSV with the following columns: ``chrom, start, end``. This is an optional argument. Default is no removal.
-* ``--split int``: Size of the bins. This is an optional argument. If not provided, the default value is ``0`` for no bins.
-* ``--merge``: Maximum distance between breakpoints to be considered a part of the same segment. If not provided, the default value is ``0``, which will create the exact segments of the dataset.
-* ``--filter int``: Minimum size of the segment. This is an optional argument. If not provided, the default value is ``0`` for no filtering.
-* ``--aggregate [mean, min, max]``: Aggregation function to use. This is an optional argument. If not provided, the default value is ``mean``.
-
-An example of use:
-
-.. code-block:: bash
-
-    ## Create bins of 1Mb size, exclude gaps, and filter out small segments
-    cns segment cns.tsv --split 200000 --remove gaps --filter
-    ## Sample copy numbers of genes, take the minimum CN value across the gene to exclude fractional segments
-    cns segment cns.tsv --select genes.tsv --aggregate min
+.. _aggregate_cmd:
 
 ``aggregate``
-`````````````
+-------------
 
 TODO
 

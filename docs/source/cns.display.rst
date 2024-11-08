@@ -1,9 +1,6 @@
 cns.display package
 ===================
 
-Submodules
-----------
-
 cns.display.label module
 ------------------------
 
@@ -20,10 +17,3 @@ cns.display.plot module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: cns.display
-   :members:
-   :undoc-members:
-   :show-inheritance:
