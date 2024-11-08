@@ -1,3 +1,6 @@
+"""
+
+"""
 
 from matplotlib.patches import Rectangle
 import matplotlib.patches as mpatches

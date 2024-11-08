@@ -1,3 +1,8 @@
+"""
+Analyzes breakpoints in the genome and calculates statistics related to genomic breakage events. 
+This module provides information on the number of breakpoints per sample or chromosome.
+"""
+
 from cns.utils.selection import get_chr_sets
 from cns.utils.assemblies import hg19
 import numpy as np

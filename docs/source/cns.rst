@@ -28,11 +28,3 @@ Subpackages
    cns.display
    cns.process
    cns.utils
-
-Module contents
----------------
-
-.. automodule:: cns
-   :members:
-   :undoc-members:
-   :show-inheritance:

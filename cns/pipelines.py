@@ -1,9 +1,59 @@
+"""
+This module provides functions for processing Copy Number Segment (CNS) data. It includes functions to fill gaps, impute missing values, aggregate data, calculate coverage, and more.
+
+Functions
+---------
+- main_fill: Fills gaps in the CNS data and adds missing chromosomes.
+- main_impute: Imputes missing values in the CNS data.
+- main_breakage: Identifies breakpoints in CNS data.
+- main_coverage: Calculates coverage statistics for CNS data.
+- main_ploidy: Calculates ploidy statistics for CNS data.
+- main_segment: Segments CNS data based on specified parameters.
+- main_aggregate: Aggregates CNS data over specified genomic segments.
+"""
+
 from cns.analyze import *
 from cns.process import *
 from cns.utils import *
 
 
 def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
+    """
+    Fills gaps in the CNS data and adds missing chromosomes.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS (Copy Number Segment) data.
+    samples_df : pandas.DataFrame, optional
+        DataFrame containing sample information. If None, samples are created from `cns_df`.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
+    add_missing_chromosomes : bool, optional
+        If True, adds missing chromosomes to the data. Default is True.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with filled gaps and added missing chromosomes.
+
+    Notes
+    -----
+    This function performs the following steps:
+    1. Adds tails to the CNS data to cover chromosome ends.
+    2. Fills gaps between segments.
+    3. Optionally adds missing chromosomes.
+    4. Removes outlier segments.
+    5. Merges neighboring segments with the same copy number.
+
+    Examples
+    --------
+    >>> filled_cns = main_fill(cns_df)
+    """
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
@@ -18,6 +68,38 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
 
 
 def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print_info=False):
+    """
+    Imputes missing values in the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame, optional
+        DataFrame containing sample information. Required if `method` is "diploid".
+    method : str, optional
+        Imputation method to use. Options are "extend" or "diploid". Default is "extend".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with imputed copy number values.
+
+    Notes
+    -----
+    This function performs the following steps:
+    1. Imputes missing values based on the specified method.
+    2. Fills any remaining NaNs with zeros.
+    3. Merges neighboring segments with the same copy number.
+
+    Examples
+    --------
+    >>> imputed_cns = main_impute(cns_df, method="diploid")
+    """
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if method == "diploid" and samples_df is None:
         log_info(print_info, "Diploid imputation requires samples, but none provided, creating samples from CNS data.")
@@ -29,14 +111,74 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
 
 
 def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
+    """
+    Aggregates CNS data over specified genomic segments.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    segs : pandas.DataFrame
+        DataFrame containing segments over which to aggregate CNS data.
+    how : str, optional
+        Aggregation method. Options are "mean", "min", "max", or "none". Default is "mean".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with aggregated copy number values.
+
+    Notes
+    -----
+    If `how` is not "none" and there are NaNs in `cns_df`, a warning is issued because NaNs are not considered in aggregation.
+
+    Examples
+    --------
+    >>> aggregated_cns = main_aggregate(cns_df, segs, how="max")
+    """
     cn_columns = get_cn_cols(cns_df, cn_columns)
-    if how != "" and how != "none" and cns_df[cn_columns].isna().any().any():
-        log_warn("NaNs are not considered in aggregation calculations, it is recommended to impute first.")
+    if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
+        log_warn("NaNs are not considered in aggregation calculations; it is recommended to impute first.")
     return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
 def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+    """
+    Calculates coverage statistics for CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame, optional
+        DataFrame containing sample information. If None, samples are created from `cns_df`.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    segs : pandas.DataFrame, optional
+        DataFrame containing segments to consider for coverage calculation.
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing coverage statistics for each sample.
+
+    Notes
+    -----
+    The function calculates coverage metrics such as the fraction of the genome covered by CNS data.
+
+    Examples
+    --------
+    >>> coverage_stats = main_coverage(cns_df)
+    """
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
@@ -64,6 +206,33 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
 
 
 def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+    """
+    Identifies breakpoints in CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    threshold : float, optional
+        Threshold for detecting breakpoints. Default is 0.5.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing breakpoint information.
+
+    Notes
+    -----
+    This function detects breakpoints in the CNS data based on changes in copy number values.
+
+    Examples
+    --------
+    >>> breakpoints = main_breakage(cns_df, threshold=1.0)
+    """
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
@@ -90,6 +259,35 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
 
 # NaNs are no
 def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
+    """
+    Calculates ploidy statistics for CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame, optional
+        DataFrame containing sample information. If None, samples are created from `cns_df`.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing ploidy statistics for each sample.
+
+    Notes
+    -----
+    This function calculates ploidy metrics such as the fraction of the genome that is aneuploid.
+
+    Examples
+    --------
+    >>> ploidy_stats = main_ploidy(cns_df)
+    """
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
@@ -130,6 +328,37 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 def main_segment(
     cns_df, select_segs=None, remove_segs=None, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False
 ):
+    """
+    Segments CNS data based on specified parameters.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    segs : pandas.DataFrame, optional
+        DataFrame containing segments to use for segmentation.
+    merge_distance : int, optional
+        Distance in base pairs to merge nearby segments. Default is 0.
+    split_size : int, optional
+        Size in base pairs to split segments. Default is 0.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with segmented CNS data.
+
+    Notes
+    -----
+    This function allows for segmentation of the CNS data by merging or splitting segments based on the provided parameters.
+
+    Examples
+    --------
+    >>> segmented_cns = main_segment(cns_df, merge_distance=1000)
+    """
     if select_segs == None:
         select_segs = genome_to_segments(assembly)
     res = get_genome_segments(select_segs, remove_segs, filter_size)

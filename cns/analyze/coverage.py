@@ -1,3 +1,8 @@
+"""
+Calculates the proportion of the genome with assigned (not NaN) copy number (CN) values. 
+This module helps determine how much of the genome is covered by the CNS data, providing insights into the completeness and quality of the dataset.
+"""
+
 import numpy as np
 import pandas as pd
 from cns.utils.conversions import calc_lengths
