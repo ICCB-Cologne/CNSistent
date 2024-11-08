@@ -21,6 +21,8 @@ cns.data\_utils module
 Subpackages
 -----------
 
+Below are links to the definitions and default parameters of public functions in each subpackage:
+
 .. toctree::
    :maxdepth: 2   
 

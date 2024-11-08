@@ -1,8 +1,6 @@
 cns.analyze package
 ===================
 
-The `cns.analyze` subpackage provides modules for calculating statistics on CNS data, including coverage, aneuploidy, and breakage analysis.
-
 cns.analyze.aneuploidy module
 -----------------------------
 

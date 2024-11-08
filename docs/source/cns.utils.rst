@@ -34,34 +34,10 @@ cns.utils.conversions module
    :undoc-members:
    :show-inheritance:
 
-cns.utils.cytobands module
---------------------------
-
-.. automodule:: cns.utils.cytobands
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 cns.utils.files module
 ----------------------
 
 .. automodule:: cns.utils.files
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-cns.utils.gaps module
----------------------
-
-.. automodule:: cns.utils.gaps
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-cns.utils.genomes module
-------------------------
-
-.. automodule:: cns.utils.genomes
    :members:
    :undoc-members:
    :show-inheritance:

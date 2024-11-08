@@ -1,8 +1,3 @@
-
-"""
-Computes the proportion of the genome that is aneuploid, meaning regions where the CN value differs from the expected normal CN (e.g., 2 for autosomes or 1 for male sex chromosomes). 
-"""
-
 import numpy as np
 import pandas as pd
 from cns.utils.assemblies import hg19
