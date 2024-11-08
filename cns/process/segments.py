@@ -172,7 +172,7 @@ def regions_select(select, assembly=hg19):
             chrom: [(start, end, name) for start, end, name in zip(subset["start"], subset["end"], subset["name"])]
             for chrom, subset in bands_df.groupby("chrom")
         }
-    elif select == "":
+    elif select == "" or select == "whole":
         return genome_to_segments(assembly)
     else:
         return load_segments(select)

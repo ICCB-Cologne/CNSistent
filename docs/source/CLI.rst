@@ -21,8 +21,8 @@ The ``cns_file_path`` must point to a CNS file as described in the following sec
 
 .. _cli_data:
 
-Data
-----
+Input Data
+----------
 
 The tool expects an unprocessed copy number dataset in the form of a ``TSV`` file with the following column scheme: ``sample_id, chrom, start, end, [*_cn]``.
 
@@ -35,7 +35,7 @@ E.g.:
 
 .. csv-table:: Raw CN data for two samples.
 
-    sample_id, chrom, start, end, CN1, CN2
+    **sample_id**, **chrom**, **start**, **end**, **CN1**, **CN2**
     s1, chr19, 1000000, 3000000, 1,
     s1, chr19, 3000000, 12000000, 1, 1
     s1, chr19, 12000000, 14000000, , 1
@@ -54,11 +54,25 @@ E.g.:
 
 .. note::
 
-    For conformation with the standard, the start and end positions are 1-based, and the end position is inclusive.
-    However, for the sake of sanity of the author, these are converted to 0-based, and the end position is exclusive. See details on usage: TODO: link.
+    To conform with the standard practice, the start and end positions are 1-based, and the end position is inclusive.
+    However, for the sake of sanity of the author, internally these are converted to 0-based, and the end position is exclusive.
+
+Input columns
+`````````````
+The canonical format of the input data is ``sample_id, chrom, start, end`` for the segment positions and
+``major_cn, minor_cn`` for the copy number values if there are two value ordered alleles, ``hap1_cn, hap2_cn`` if there are two unordered alleles, and ``total_cn`` if there is only one value for the copy number.
+
+The following alternate names are also parsed`, CASE INSENSITIVE:
+
+* ``sample_id``: ``sample, id, sampleid, sample-id, sample_name, samplename, sample-name``
+* ``chrom``: ``chromosome, chr``
+* ``start``: ``being, startpos, start_pos, start-pos, chromstart, chrom_start, chrom-start``
+* ``end``: ``stop, endpos, end_pos, end-pos, chromend, chrom_end, chrom-end``
+* CN column: Has ``cn | hap | major | minor | total | allele`` in the name.	
+
 
 BED File Input
---------------
+``````````````
 
 BED files do not have a sample identifier, so the ``sample_id`` column is not present. If you aim to process just a single sample, you can format it for input using the following command:
 
@@ -69,10 +83,16 @@ BED files do not have a sample identifier, so the ``sample_id`` column is not pr
 Commands
 --------
 
+.. _argumnets:
+
+Arguments
+`````````
+
+
 .. _fill_cmd:
 
 ``fill``
---------
+````````
 
 Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 
@@ -84,7 +104,7 @@ Fills any gaps in *CNS* file with Nan values. The following steps are performed:
 .. _impute_cmd:
 
 ``impute``
-----------
+``````````
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
@@ -99,7 +119,7 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 .. _coverage_cmd:
 
 ``coverage``
-------------
+````````````
 
 .. note::
 
@@ -116,13 +136,20 @@ The following statistics are calculated and stored in a *samples* file:
 * ``sex``: ``xy`` for male, ``xx`` for female. If this information is not specified, ``xy`` is used if and only if ``chrY`` is present in the sample.
 * ``chrom_count``: the number of autosomes that had any CN values assigned
 * ``chrom_missing``: the list of chromosomes that have no CN values assigned
-* ``bases_*``: total number of bases with CNS values assigned. ``*`` is for ``aut``, ``sex``, ``tot``, referring to autosomes, sex chromosomes, and the sum of both, respectively
-* ``frac_*``: fraction of bases with CNS values assigned over the total number of bases
+* ``coverage_{het,hot}_{aut,sex,all}``: proportion of the genome that has a CN value assigned, 
+    * ``het`` for heterozygous (one allele is sufficient), 
+    * ``hom`` for homozygous (both alleles are required), 
+
+.. csv-table:: Coverage statistics for the samples.
+
+    **feature**, **s1**, **s2**
+    coverage (het), 0.966139, 0.928091
+    coverage (hom), 0.285566, 0.0
 
 .. _ploidy_cmd:
 
 ``ploidy``
-----------
+``````````	
 
 Calculates the portions of the genome that are aneuploid, or for absent in case of male sex chromosomes.
 
@@ -132,52 +159,93 @@ Calculates the portions of the genome that are aneuploid, or for absent in case 
 
 The following statistics are calculated and stored in a *samples* file:
 
-* ``breaks_*``: the number of breakpoints, a healthy genome should have 0
-* ``ane_+_*``: the number of bases that have a CN different from normal (so 2, or 1 for male sex chromosomes), ``+`` expands into CN columns names
-* ``ane_+_frac_*``: the fraction of aneuploid bases over the total number of bases
+* ``loh_{het,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN=0 for an allele (``het``) or both alleles (``hom``). 
+* ``ane_{het,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN different from 1 for an allele (``het``) or both alleles (``hom``). In one column format ``het`` can't be established.
+* ``imb_{CN1,CN2}_{aut,sex,all}``: proportion of the chromosome set where one allele has strictly higher CN. In one column format this is not calculated.
+
+.. csv-table::  Ploidy statistics for the samples.
+
+    **feature**,**s1**,**s2**
+    aneuploidy (hom),0.0,1.0
+    aneuploidy (het),0.767977,1.0
+    LOH (hom),0.0,0.560374
+    LOH (het),0.0,1.0
+    imbalance (CN1),0.767977,0.439626
+    imbalance (CN2),0.0,0.0
 
 .. _breakage_cmd:
 
 ``breakage``
-------------
+````````````
 
-TODO
+Calculates the number of breaks and the step size between the breaks for the samples. The following statistics are calculated:
+
+* ``breaks_{CN1,CN2,total_cn}_{aut,sex,all}``: the number of breaks in the CN values for the allele.
+* ``step_{CN1,CN2,total_cn}_{aut,sex,all}``: the average step size between the breaks in the CN values for the allele.
+
+.. csv-table::  Breakage statistics.
+
+    **feature**, **s1**, **s2**
+    breaks (CN1), 1, 1
+    step (CN1), 2, 2
+    breaks (CN2), 0, 0
+    step (CN2), 0, 0
+    breaks (total), 1, 1
+    step (total), 2, 2
 
 .. _segment_cmd:
 
 ``segment``
------------
+```````````
 
-Conducts the binning - for selected segments, the aggregate CN value for selected samples are calculated.
+Creates a segmentation scheme. 
 
 .. note::
 
-    binning should be run on an imputed dataset.
+    A CNS file is always expected as input, but if breakpoint merging is not done, this argument is not further used.
 
 Binning can be done on the whole genome, or on selected segments. Additionally, segments can be removed from the dataset before binning. The following steps are performed:
 
-1. If ``--select`` is provided, only the selected segments are used for binning. The segments are selected based on the ``chrom``, ``start``, and ``end`` columns. The segments can be selected by chromosome, chromosome arm, or chromosome band. If select is not provided, the whole genome is used, based on the assembly.
-    1.1 If ``--filter`` is provided, segments that are strictly smaller than the value are removed.
-2. If ``--remove`` is provided, these segments are subtracted from the selection. The segments are removed based on the ``chrom``, ``start``, and ``end`` columns. The segments can be removed by chromosome, chromosome arm, or chromosome band.
-    2.1 If ``--filter`` is provided, segments that are strictly smaller than the value are removed both before and after the subtraction process, i.e. a if a remove segment is smaller than the filter value, it is not used in subtraction. If the subtraction results in a segments smaller than the filter, it is likewise not used for binning.
-3. If ``--bins`` is provided, the data is binned into segments of the given size. The segments are created by aggregating the CN values of the selected segments.
-    3.1 The aggregation can be done using one of the following ``--aggregate`` functions: ``mean``, ``min``, ``max``. For ``mean``, the aggregation is weighted by the segment length.
-4. The binned data is stored in a TSV file with the following columns: ``sample_id, chrom, start, end, major_cn, minor_cn``. The names of the columns can be different, but the order must be the same.
-    4.1 If ``--segfile`` is provided, only the segments are created, with the columns ``chrom, start, end``.
+1. If ``--select`` is provided, only the selected segments are used for binning. The segments are selected based on the ``chrom``, ``start``, and ``end`` columns. The segments can be selected by chromosome, chromosome arm, or chromosome band.
+    1.1 Values ``arms``, and ``bands`` are used to select chromosome arms, or chromosome bands, respectively.
 
-.. image:: ../cns_segmented.png
-   :width: 640px
+    1.2 If ``--filter`` is provided, segments that are strictly smaller than the value are removed.
+2. If ``--remove`` is provided, these segments are subtracted from the selection. The segments are removed based on the ``chrom``, ``start``, and ``end`` columns. The segments can be removed by chromosome, chromosome arm, or chromosome band.
+    2.1 Value ``gaps`` can be used to remove genomic gaps (regions of low mappability) from the selection.
+
+    2.2 If ``--filter`` is provided, segments that are strictly smaller than the value are removed both before and after the subtraction process, i.e. a if a remove segment is smaller than the filter value, it is not used in subtraction. If the subtraction results in a segments smaller than the filter, it is likewise not used for binning.
+3. If ``--merge`` is provided existing breakpoints are merged to match the specified merge distance.
+4. If ``--split`` is provided, the data is binned into segments of the given size. The segments are created by aggregating the CN values of the selected segments.
+
+
+.. figure:: ../cns_segmented.png
+   :width: 500px
+
+   5 mb segmentation of the imputed example segments with gaps removed.
+
 
 .. _aggregate_cmd:
 
 ``aggregate``
--------------
+`````````````
 
-TODO
+Aggregates CN values across segments, creating a consistent segmentation for each sample based on a provided BED file. 
+
+.. note::
+
+    BED file is 0 indexed!
+
+Arguments:
+* ``--segments``: a BED file with the segments to aggregate. The BED file must have the following columns: ``chrom``, ``start``, ``end``.
+* ``--how``: ``mean, min, max, none``. The method to aggregate the CN values. If ``none`` is selected, the CN values are not aggregated, but existing segments are masked by the provided segments.
 
 .. code-block:: bash
 
-    cns aggregate cns.tsv --segments segments.tsv
+    cns aggregate cns.tsv --segments segments.bed
+    
 
-.. image:: ../cns_aggregated.png
-   :width: 640px
+.. figure:: ../cns_aggregated.png
+    :width: 500px
+
+    Aggregated CN values for the example segments.
+

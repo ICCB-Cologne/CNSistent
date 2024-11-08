@@ -89,7 +89,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column sample_id does not exist, rename the first column to sample_id
     if "sample_id" not in cns_df.columns:
-        sample_col = _find_column(cns_df, ['sample', 'id', 'sampleId', 'sample_id', 'name'])
+        sample_col = _find_column(cns_df, ['sample', 'id', 'sampleId', 'sample_id', 'sample-id', 'sample_name', 'sampleName', 'sample-name'])	
         if sample_col is None:
             cns_df.columns = ["sample_id"] + cns_df.columns[1:].tolist()
             log_info(print_info, f"Column sample_id not found, renamed first column to sample_id.")
@@ -129,7 +129,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column start does not exist, rename the third column to start
     if "start" not in cns_df.columns:
-        start_col = _find_column(cns_df, ['start', 'begin', 'chromstart'])
+        start_col = _find_column(cns_df, ['start', 'begin', 'chromstart', 'chrom-start', 'chrom_start', 'startpos', 'start-pos', 'start_pos'])
         if start_col is None:
             cns_df.columns = cns_df.columns[:2].tolist() + ["start"] + cns_df.columns[3:].tolist()
             log_info(print_info, f"Column start not found, renamed third column to start.")
@@ -140,7 +140,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     # if the column end does not exist, rename the fourth column to end
     if "end" not in cns_df.columns:
-        end_col = _find_column(cns_df, ['end', 'stop', 'chromend'])
+        end_col = _find_column(cns_df, ['end', 'stop', 'endpos', 'end-pos', 'end_pos' 'chromend', 'chrom-end', 'chrom_end'])
         if end_col is None:
             cns_df.columns = cns_df.columns[:3].tolist() + ["end"] + cns_df.columns[4:].tolist()
             log_info(print_info, f"Column end not found, renamed fourth column to end.")
@@ -173,7 +173,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 def _is_cn_column(column):
     if not isinstance(column, str):
         return False
-    pattern = re.compile(r'^(cn).*|.*(cn)$|.*(major|minor|hap).*', re.IGNORECASE)
+    pattern = re.compile(r'^(cn).*|.*(cn)$|.*(major|minor|hap|total|allele).*', re.IGNORECASE)
     return bool(re.search(pattern, column))
 
 
