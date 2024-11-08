@@ -21,8 +21,8 @@ The ``cns_file_path`` must point to a CNS file as described in the following sec
 
 .. _cli_data:
 
-Input Data
-----------
+Data format
+-----------
 
 The tool expects an unprocessed copy number dataset in the form of a ``TSV`` file with the following column scheme: ``sample_id, chrom, start, end, [*_cn]``.
 
@@ -48,7 +48,7 @@ E.g.:
 .. _cns_raw_image:
 
 .. figure:: ../cns_raw.png
-    :width: 500px
+    :width: 640px
 
     Raw copy number data for each sample and allele.
 
@@ -57,8 +57,8 @@ E.g.:
     To conform with the standard practice, the start and end positions are 1-based, and the end position is inclusive.
     However, for the sake of sanity of the author, internally these are converted to 0-based, and the end position is exclusive.
 
-Input columns
-`````````````
+Input format
+````````````
 The canonical format of the input data is ``sample_id, chrom, start, end`` for the segment positions and
 ``major_cn, minor_cn`` for the copy number values if there are two value ordered alleles, ``hap1_cn, hap2_cn`` if there are two unordered alleles, and ``total_cn`` if there is only one value for the copy number.
 
@@ -71,23 +71,60 @@ The following alternate names are also parsed`, CASE INSENSITIVE:
 * CN column: Has ``cn | hap | major | minor | total | allele`` in the name.	
 
 
-BED File Input
-``````````````
+Samples file
+````````````
+To know which sex chromosomes are expected in each sample, it is possible to provide a samples file using the ``--samples`` argument with the following format:
 
-BED files do not have a sample identifier, so the ``sample_id`` column is not present. If you aim to process just a single sample, you can format it for input using the following command:
+.. csv-table:: Samples file.
+
+    **sample_id**, **sex**
+    s1, xy
+    s2, xx
+
+If this is not provided, the sex is determined by presence of the Y chromosome in the data.
+
+If the samples files is provided, only the samples listed in the file are processed, even if the CNS file would have more samples.
+
+Some of the commands create samples information, for example ``ploidy``. It is possible to use the same file as both input and output.
+
+Segmentation files
+``````````````````
+A calculation can be restricted to certain segments by providing a BED file with the segments to be used. The BED file must have the following columns: ``chrom``, ``start``, ``end``.
+
+.. csv-table:: Segment file.
+
+    **chrom**, **start**, **end**
+    chr1, 1000000, 2000000
+    chr1, 3000000, 4000000
+    ...
+
+The ``segment`` command creates a segmentation file.
+
+Single sample input
+```````````````````
+
+If you aim to process just a single sample, you can format it for input using the following command:
 
 .. code-block:: bash
 
-    awk 'BEGIN{FS="[ \t]+";OFS="\t"} {print "sample1", $1, $2, $3}' yourfile.txt | sed '1isample_id\tchrom\tstart\tend' > modified_file.tsv
+    awk 'BEGIN{FS="[ \t]+";OFS="\t"} {print "sample1", $1, $2, $3}' yourfile.txt | sed 'sample_id\tchrom\tstart\tend' > modified_file.tsv
 
 Commands
 --------
 
 .. _argumnets:
 
-Arguments
-`````````
+Common arugments
+````````````````
 
+* ``--samples``: path to the samples file.
+* ``--out``: path to the output file. Default is ``cns.out.tsv``.
+* ``--assembly``: assembly version to use. Default is ``hg19``.
+* ``--cncols``: If the CN columns do not conform to the naming as above, or if there are more columns, one or two columns can be specified, comma separated, no whitespace e.g. ``cn1,cn2``.
+* ``--threads``: number of threads to use. Default is 1.
+* ``--subsplit``: will split the data in multiple blocks and process them in sequence, in case of low memory. Default is 1.
+* ``--verbose``: print progress information.
+* ``--timeit``: times the calculation and writes to 
 
 .. _fill_cmd:
 
@@ -120,16 +157,19 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 
 ``coverage``
 ````````````
+Calculates the coverage of the *CNS* file. The coverage is calculated as the fraction of the genome that has a CN value assigned. 
+
+.. note::
+
+    Coverage should be run on a filled, but **not** imputed dataset.
 
 .. note::
 
     For all sample statistics, the values are calculated for autosomes, sex chromosomes, and the total genome, with the values being suffixed with ``_aut``, ``_sex``, ``_tot``, respectively. If sex chromosomes are missing from data altogether, only ``_aut`` values are calculated.
 
-Calculates the coverage of the *CNS* file. The coverage is calculated as the fraction of the genome that has a CN value assigned.
+Additional arguments:
 
-.. note::
-
-    coverage should be run on a filled, but **not** imputed dataset.
+* ``--segments``: a BED file with the segments where to calculate the coverage.    
 
 The following statistics are calculated and stored in a *samples* file:
 
@@ -140,7 +180,7 @@ The following statistics are calculated and stored in a *samples* file:
     * ``het`` for heterozygous (one allele is sufficient), 
     * ``hom`` for homozygous (both alleles are required), 
 
-.. csv-table:: Coverage statistics for the samples.
+.. csv-table:: Coverage statistics for the samples in the example.
 
     **feature**, **s1**, **s2**
     coverage (het), 0.966139, 0.928091
@@ -157,13 +197,17 @@ Calculates the portions of the genome that are aneuploid, or for absent in case 
 
     ploidy should be run on an imputed dataset.
 
+Additional arguments:
+
+    * ``--segments``: a BED file with the segments where to calculate the coverage. 
+
 The following statistics are calculated and stored in a *samples* file:
 
 * ``loh_{het,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN=0 for an allele (``het``) or both alleles (``hom``). 
 * ``ane_{het,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN different from 1 for an allele (``het``) or both alleles (``hom``). In one column format ``het`` can't be established.
 * ``imb_{CN1,CN2}_{aut,sex,all}``: proportion of the chromosome set where one allele has strictly higher CN. In one column format this is not calculated.
 
-.. csv-table::  Ploidy statistics for the samples.
+.. csv-table::  Ploidy statistics for the samples in the example.
 
     **feature**,**s1**,**s2**
     aneuploidy (hom),0.0,1.0
@@ -178,12 +222,18 @@ The following statistics are calculated and stored in a *samples* file:
 ``breakage``
 ````````````
 
-Calculates the number of breaks and the step size between the breaks for the samples. The following statistics are calculated:
+Calculates the number of breaks and the step size between the breaks for the samples.
+
+Additional arguments:
+
+    * ``--segments``: a BED file with the segments where to calculate the coverage. 
+
+ The following statistics are calculated:
 
 * ``breaks_{CN1,CN2,total_cn}_{aut,sex,all}``: the number of breaks in the CN values for the allele.
 * ``step_{CN1,CN2,total_cn}_{aut,sex,all}``: the average step size between the breaks in the CN values for the allele.
 
-.. csv-table::  Breakage statistics.
+.. csv-table::  Breakage statistics in the example.
 
     **feature**, **s1**, **s2**
     breaks (CN1), 1, 1
@@ -219,7 +269,7 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
 
 
 .. figure:: ../cns_segmented.png
-   :width: 500px
+   :width: 640px
 
    5 mb segmentation of the imputed example segments with gaps removed.
 
@@ -235,7 +285,8 @@ Aggregates CN values across segments, creating a consistent segmentation for eac
 
     BED file is 0 indexed!
 
-Arguments:
+Additional arguments:
+
 * ``--segments``: a BED file with the segments to aggregate. The BED file must have the following columns: ``chrom``, ``start``, ``end``.
 * ``--how``: ``mean, min, max, none``. The method to aggregate the CN values. If ``none`` is selected, the CN values are not aggregated, but existing segments are masked by the provided segments.
 
@@ -245,7 +296,7 @@ Arguments:
     
 
 .. figure:: ../cns_aggregated.png
-    :width: 500px
+    :width: 640px
 
     Aggregated CN values for the example segments.
 

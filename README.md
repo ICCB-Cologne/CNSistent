@@ -199,7 +199,6 @@ TODO
 cns aggregate cns.tsv --segments segments.tsv
 ```
 
-
 # API (Python library)
 
 ## Quickstart

@@ -19,23 +19,23 @@ def _add_sp_args(action, parser):
     parser.add_argument(
         "--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19"
     )
+    parser.add_argument(
+        "--cncols",
+        type=str,
+        help="The name of either a single CN column or two comma separated columns. E.g. 'total_cn' or 'major_cn,minor_cn'.",
+        required=False,
+        default=None,
+    )
     parser.add_argument("--threads", type=int, help="number of threads to use", required=False, default=1)
-    parser.add_argument("--verbose", help="print progress to console", action="store_true")
-    parser.add_argument("--time", help="save runtime info", action="store_true")
     parser.add_argument(
         "--subsplit",
         type=int,
         help="will split the processing into chunks to lower memory needs",
         required=False,
-        default=1,
+        default=1
     )
-    parser.add_argument(
-        "--cncols",
-        type=str,
-        help="The name of either a single CN column or two comma separated columns.",
-        required=False,
-        default=None,
-    )
+    parser.add_argument("--verbose", help="print progress to console", action="store_true")
+    parser.add_argument("--time", help="save runtime info", action="store_true")
 
     if action in ["coverage", "ploidy", "signatures"]:
         parser.add_argument(
