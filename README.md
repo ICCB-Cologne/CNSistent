@@ -2,6 +2,8 @@
 
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
+Full documentation including examples is available [here](./docs/build/html/index.html).
+
 # Usage
 
 CNSistent is available both as a [stand-alone](#cli) tool and as a [Python library](#library).
@@ -20,9 +22,6 @@ Requires:
 2. Activate the environment: `conda activate cns`
 3. Install the package from location: `pip install -e .`
 4. Process data: `bash ./scripts/data_process.sh`
-5. Aggregate processed data: `bash ./scripts/data_aggregate.sh`
-6. Run example analysis: `python ./example_API.py`
-
 
 NOTES:
 

@@ -45,14 +45,13 @@ def plot_bars(ax, cns_df, column, color="green", label=None, alpha=1, chrom=None
         group_df = cns_df.query(f"chrom == '{chrom}'")
         length = group_df["end"] - group_df["start"]
         x = group_df["start"] + length / 2 + chr_start
-        print(x, length)
         ax.bar(x, group_df[column], width=length, color=color, label=label, alpha=alpha)
         label = None  # only use label for the first chromosome
     return ax
 
 
 
-def _check_fig_input(cns_df, cn_columns, label, chrom, assembly):
+def _get_columns(cns_df, cn_columns, chrom, assembly):
     if chrom != None and not (isinstance(chrom, str) or not chrom in assembly.keys()):
         raise ValueError("chrom must be None or a string")
     
@@ -61,28 +60,25 @@ def _check_fig_input(cns_df, cn_columns, label, chrom, assembly):
         if len(cn_columns) == 0:
             raise ValueError("If cn_columns is not specified, at least one column ending with '_cn' must exist in data")
     elif isinstance(cn_columns, str):
-        if not cn_columns in cns_df[0].columns:
+        if not cn_columns in cns_df.columns:
             raise ValueError("specified CN column must in cns_df.columns")
         cn_columns = [cn_columns]	
     elif isinstance(cn_columns, Sequence):
         if len(cn_columns) <= 0:
             raise ValueError("cn_columns must be a string or a non-empty list of strings")
-        elif not all(c in cns_df[0].columns for c in cn_columns):
+        elif not all(c in cns_df.columns for c in cn_columns):
             raise ValueError("all elements in cn_columns must be columns in data")
     else:
         raise ValueError("cn_columns must be a string or a list of strings")	
-    
-    line_count = len(cns_df)*len(cn_columns)
-    return cns_df, label, cn_columns, line_count
-    
 
-def _get_min_max_cn(dfs, columns):
+    return cn_columns
+
+def _get_min_max_cn(cns_df, columns):
     min_cn = np.inf
     max_cn = -np.inf
-    for df in dfs:
-        for column in columns:
-            min_cn = min(min_cn, df[column].min())
-            max_cn = max(max_cn, df[column].max())
+    for column in columns:
+        min_cn = min(min_cn, cns_df[column].min())
+        max_cn = max(max_cn, cns_df[column].max())
     return min_cn, max_cn
 
 
@@ -94,31 +90,34 @@ def _get_colors(colors, line_count):
             colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, line_count))
     elif line_count == 1:
         colors = [colors]
-    elif line_count != len(colors):
+    elif isinstance(colors, Sequence):
+        if  line_count != len(colors):
+            raise ValueError("colors must be None or a list with the same length as the number of lines")
+    else:
         raise ValueError("colors must be None or a list with the same length as the number of lines")
     return colors
 
 
-def _fig_main(cns_df, plot_func, cn_columns=None, color=None, chrom=None, width=None, assembly=hg19):
+def _fig_main(cns_df, plot_func, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
     width = width if width != None else (18 if chrom == None else 4)
     height = width / 6 if chrom == None else width
     fig, ax = plt.subplots(1, figsize=(width, height))
-    sample_df, columns, line_count = _check_fig_input(cns_df, cn_columns, chrom, assembly)
-    colors = _get_colors(color, line_count)
+    cn_columns = _get_columns(cns_df, cn_columns, chrom, assembly)   
+    groups_df = cns_df.groupby("sample_id")        
+    line_count = len(groups_df)*len(cn_columns)
+    colors = _get_colors(colors, line_count)
     alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
     if chrom == None:
-        min_cn, max_cn = _get_min_max_cn(sample_df, columns) 
+        min_cn, max_cn = _get_min_max_cn(cns_df, cn_columns) 
         plot_chr_bg(ax, assembly, -0.05, max_cn * 1.05)
         plot_x_ticks(ax, assembly=assembly)
-    for i in range(len(sample_df)):
-        for j in range(len(columns)):
-            color = colors[i*len(columns) + j]
-            label = labels[i]
-            if len(columns) > 1:
-                label += " - " + columns[j]
-            cn_columns = columns[j]
-            plot_func(ax, sample_df[i], column=cn_columns, color=color, label=label, chrom=chrom, alpha=alpha)
-    if has_label: 
+    for i, (group_key, group_df) in enumerate(groups_df):
+        for j in range(len(cn_columns)):
+            color = colors[i*len(cn_columns) + j]
+            label = group_key
+            if len(cn_columns) > 1:
+                label += " - " + cn_columns[j]
+            plot_func(ax, group_df, column=cn_columns[j], color=color, label=label, chrom=chrom, alpha=alpha)
         if line_count > 3:
             ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
         else:
@@ -128,24 +127,23 @@ def _fig_main(cns_df, plot_func, cn_columns=None, color=None, chrom=None, width=
     return fig, ax
 
 
-def fig_lines(cns_df, cn_columns=None, color=None, chrom=None, width=None, assembly=hg19):
-    return _fig_main(cns_df, plot_lines, cn_columns, color, chrom, width, assembly)
+def fig_lines(cns_df, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
+    return _fig_main(cns_df, plot_lines, cn_columns, colors, chrom, width, assembly)
 
 
-def fig_dots(cns_df, cn_columns=None, color=None, chrom=None, width=None, assembly=hg19):
-    return _fig_main(cns_df, plot_dots, cn_columns, color, chrom, width, assembly)
+def fig_dots(cns_df, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
+    return _fig_main(cns_df, plot_dots, cn_columns, colors, chrom, width, assembly)
 
 
-def fig_bars(cns_df, cn_columns=None, color=None, chrom=None, width=None, assembly=hg19):
-    return _fig_main(cns_df, plot_bars, cn_columns, color, chrom, width, assembly)
+def fig_bars(cns_df, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
+    return _fig_main(cns_df, plot_bars, cn_columns, colors, chrom, width, assembly)
 
 
 def fig_heatmap(data_df, cn_columns=None, chrom=None, width=None, dpi=100, assembly=hg19):
     width = width if width != None else (18 if chrom == None else 4)
     height = width / 6 if chrom == None else width
     fig, ax = plt.subplots(1, figsize=(width, height), dpi=dpi)
-    dfs, labels, columns, line_count, has_label = _check_fig_input(data_df, cn_columns,  chrom, assembly)
-
+    dfs, labels, columns, line_count, has_label = _get_columns(data_df, cn_columns,  chrom, assembly)
 
     if chrom is not None:
         data_df = data_df[data_df['chrom'] == chrom]

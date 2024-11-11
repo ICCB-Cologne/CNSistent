@@ -119,7 +119,7 @@ def add_total_cn(cns_df, cn_columns=None):
     return cns_df
 
 
-def group_samples(cns_df, cn_columns=None, how="mean"): 
+def group_samples(cns_df, cn_columns=None, how="mean", group_name="grouped"): 
     if len(cns_df) == 0:
         log_warn("No data to group.")
         return cns_df   
@@ -135,5 +135,5 @@ def group_samples(cns_df, cn_columns=None, how="mean"):
     for column in cn_columns:
         agg_scheme[column] = how
     grouped = grouped.agg(agg_scheme).reset_index()
-    grouped["sample_id"] = "grouped"
+    grouped["sample_id"] = group_name
     return grouped

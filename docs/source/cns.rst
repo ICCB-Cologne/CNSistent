@@ -1,31 +1,12 @@
 `cns` Reference
 ===============
 
-cns.pipelines module
-----------------------
-
-.. automodule:: cns.pipelines
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-cns.data\_utils module
-----------------------
-
-.. automodule:: cns.data_utils
-   :members:
-   :exclude-members: save_cns_fig, save_doc_fig
-   :undoc-members:
-   :show-inheritance:
-
-Subpackages
------------
-
-Below are links to the definitions and default parameters of public functions in each subpackage:
 
 .. toctree::
    :maxdepth: 2   
 
+   cns.data_utils
+   cns.pipelines
    cns.analyze
    cns.display
    cns.process
