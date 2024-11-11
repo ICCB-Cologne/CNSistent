@@ -23,7 +23,7 @@ plt.show()
 # Plot mean total_cn per segment along the genome
 # %%
 groups = group_samples(cns_df)
-fig_lines(groups, width=12, column="total_cn", dpi = 200)
+fig_lines(groups, width=12, cn_columns="total_cn", dpi = 200)
 plt.show()
 
 # Load sample information
@@ -56,6 +56,6 @@ liver = filtered.query("type == 'Liver-HCC'").index
 liver_group = group_samples(cns_df.query("sample_id in @liver"))
 pancreas = filtered.query("type == 'Panc-AdenoCA'").index
 pancreas_group = group_samples(cns_df.query("sample_id in @pancreas"))
-fig_lines([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], column="total_cn", dpi=200)
+fig_lines([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], cn_columns="total_cn", dpi=200)
 plt.show()
 # %%

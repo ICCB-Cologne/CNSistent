@@ -57,6 +57,8 @@ E.g.:
     To conform with the standard practice, the start and end positions are 1-based, and the end position is inclusive.
     However, for the sake of sanity of the author, internally these are converted to 0-based, and the end position is exclusive.
 
+.. _input_format:
+
 Input format
 ````````````
 The canonical format of the input data is ``sample_id, chrom, start, end`` for the segment positions and

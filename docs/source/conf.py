@@ -18,7 +18,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    "nbsphinx",
 ]
 
 templates_path = ['_templates']

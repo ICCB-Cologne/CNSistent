@@ -6,7 +6,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
-    'myst_parser'
+    "nbsphinx",
 ]
 
 html_theme = 'sphinx_rtd_theme'

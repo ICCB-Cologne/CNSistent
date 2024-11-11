@@ -135,4 +135,5 @@ def group_samples(cns_df, cn_columns=None, how="mean"):
     for column in cn_columns:
         agg_scheme[column] = how
     grouped = grouped.agg(agg_scheme).reset_index()
+    grouped["sample_id"] = "grouped"
     return grouped

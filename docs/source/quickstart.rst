@@ -1,5 +1,3 @@
-.. _quickstart:
-
 Quickstart
 ==========
 
@@ -57,14 +55,14 @@ Basic tool usage
 
 CNSistent reads SCNA profiles as ``.tsv`` files. Have an example file ``data.tsv``:
 
-.. code-block:: tsv
+.. code-block:: python
 
     sample_id    chrom   start   end     total_cn
     sample1      chr1    100     200     1       
     ...
 
 .. note::
-    Column naming is fully describe in the :ref:`Column Naming` section.
+    Column naming is fully describe in the :ref:`input_format` section.
 
 To preprocess the segments:
 
@@ -101,8 +99,3 @@ To conduct segmentation using 5 mb bins:
 
     cns segment whole --step 5000000 --out clust.bed
     cns aggregate data.tsv  --segments clust.bed --out c_bins.tsv
-
-
-Basic library usage
--------------------
-TODO
