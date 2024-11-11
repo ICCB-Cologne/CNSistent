@@ -387,9 +387,9 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
 def main_seg_agg(
     cns_df,
     cn_columns=None,
-    how="mean",
     select_segs=None,
     remove_segs=None,
+    how="mean",
     split_size=0,
     merge_dist=0,
     filter_size=0,

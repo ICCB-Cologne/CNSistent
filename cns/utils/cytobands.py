@@ -1729,3 +1729,14 @@ hg38_cytobands = (
     ("chrY", 23800000, 26600000, "q11.23", "gneg"),
     ("chrY", 26600000, 57227415, "q12", "gvar"),
 )
+
+cytoband_color = {
+    "acen": "red",
+    "gneg": "white",
+    "gpos25": "lightgray",
+    "gpos50": "gray",
+    "gpos75": "darkgray",
+    "gpos100": "black",
+    "stalk": "black",
+    "gvar": "yellow"
+}

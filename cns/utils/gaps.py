@@ -965,3 +965,13 @@ hg38_gaps = (
     ("chrY", 56771509, 56821509, "contig", False),
     ("chrY", 57217415, 57227415, "telomere", False),
 )
+
+
+gap_color = {
+    "centromere": "red",
+    "short_arm": "yellow",
+    "telomere": "blue",
+    "heterochromatin": "gray",
+    "clone": "purple",
+    "contig": "green"
+}

@@ -8,7 +8,6 @@ and managing file paths.
 
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-from cns.utils.canonization import get_cn_cols
 from cns.utils.logging import log_info
 from cns.utils.selection import select_CNS_samples
 from cns.utils.files import load_cns, load_samples, load_segments
