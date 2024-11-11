@@ -16,7 +16,7 @@ from cns.utils.anomaly import find_bends, z_score_filter
 import matplotlib.pyplot as plt
 
 
-def _get_root_path():
+def get_root_path():
     """Get the root path of the CNSistent package.
 
     Returns
@@ -27,10 +27,10 @@ def _get_root_path():
     return abspath(pjoin(dirname(__file__), ".."))
 
 
-img_path = pjoin(_get_root_path(), "img")
-out_path = pjoin(_get_root_path(), "out")
-data_path = pjoin(_get_root_path(), "data")
-docs_path = pjoin(_get_root_path(), "docs")
+img_path = pjoin(get_root_path(), "img")
+out_path = pjoin(get_root_path(), "out")
+data_path = pjoin(get_root_path(), "data")
+docs_path = pjoin(get_root_path(), "docs")
 
 
 def load_cns_out(filename, print_info=False):

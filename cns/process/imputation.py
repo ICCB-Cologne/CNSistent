@@ -216,7 +216,7 @@ def _impute_extend(cns_df, cn_columns, print_info=True):
     # remove from cns_df where idx_to_remove is in the index
     filtered_df = cns_df.drop(idx_to_remove)
     # concat the new_table to cns_df
-    res_df = pd.concat([filtered_df, imputation_df])
+    res_df = filtered_df if len(imputation_df) == 0 else pd.concat([filtered_df, imputation_df])
     # sort cns_df by sample_id, chr, start
     res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     return res_df
@@ -280,5 +280,5 @@ def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):
     log_info(print_info, f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")
     # Fully missing chromosomes filled with 0
     for col in cn_columns:
-        res_df[col] = res_df[col].fillna(0).astype(int)
+        res_df[col] = res_df[col].fillna(0.0).infer_objects(copy=False).astype(int)
     return res_df

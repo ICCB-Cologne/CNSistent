@@ -65,7 +65,7 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
 
     def test_regions_select(self):        
-        res = regions_select("")
+        res = regions_select("whole")
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 1)
         self.assertEqual(res["chr1"][0][0], 0)
@@ -81,22 +81,21 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(res["chr1"][0][2], "p36.33")
         self.assertEqual(res["chr10"][-1][1], hg19.chr_lens["chr10"])
 
-    def test_arms_gaps(self):
-        select = regions_select("")
-        remove = regions_remove("gaps")
-        segs = get_genome_segments(select, remove, 1000000)
-        segs_df = segs_to_df(segs)
-        self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
-        self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
-
-    def test_regions_remove(self):
         filter_size = 0
-        select = regions_select("")
-        remove = regions_remove("gaps")
+        select = regions_select("whole")
+        remove = regions_select("gaps")
         self.assertGreater(len(remove), 0)
         segs = get_genome_segments(select, remove, filter_size)
         self.assertGreater(len(segs["chr1"]), 0)
         self.assertEqual(remove["chr1"][0][1], segs["chr1"][0][0])  # check if the first segment is a gap
+
+    def test_arms_gaps(self):
+        select = regions_select("whole")
+        remove = regions_select("gaps")
+        segs = get_genome_segments(select, remove, 1000000)
+        segs_df = segs_to_df(segs)
+        self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
+        self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 
     def test_get_genome_segments(self):
         select = {1: [(0, 10), (20, 30)], 2: [(0, 5)]}
@@ -137,7 +136,6 @@ BCORL1	chrX	129115083	129192058"""
         self.assertEqual(res["chr1"][0][0], 2200000) # cut by the other segment
         res = split_segments(gene_segs, 100000)
         self.assertGreater(len(res["chr2"]), len(gene_segs["chr2"]))
-
 
 # TODO: Add sex chromosome checks
 class TestImputation(unittest.TestCase):

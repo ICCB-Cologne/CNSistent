@@ -1,9 +1,8 @@
 import os
 from cns.data_utils import *
 from cns.pipelines import main_segment
-from cns.utils.conversions import segs_to_df
 from cns.utils.files import save_segments
-from cns.process.segments import regions_select, regions_remove
+from cns.process.segments import regions_select
 import argparse
 
 if __name__ == "__main__":
@@ -15,12 +14,11 @@ if __name__ == "__main__":
 	if dist <= 0:
 		raise ValueError("Distance must be greater than 0")
 
-	samples = _concat_samples(print_info=False)
-	cns = _concat_cns(samples)
+	samples_df, cns_df = main_load()
 
-	select = regions_select("")
-	remove = regions_remove("gaps")
-	clustered = main_segment(cns, select, remove, merge_dist=dist, filter_size=dist//10)
+	select = regions_select("whole")
+	remove = regions_select("gaps")
+	clustered = main_segment(cns_df, select, remove, merge_dist=dist, filter_size=dist//10)
 	file = os.path.join(out_path, f'segs_merge_{dist}.bed')
 	print("Saving to file:", file)
 	save_segments(clustered, file)

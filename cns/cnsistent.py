@@ -6,8 +6,8 @@ import time
 import argparse
 from os.path import exists
 
-from cns.process import regions_remove, regions_select
-from cns.utils import get_assembly, get_cn_cols, log_info, log_warn
+from cns.process import regions_select
+from cns.utils import get_assembly, get_cn_cols, log_info
 from cns.utils.files import *
 from cns.pipelines import *
 
@@ -72,9 +72,9 @@ def _add_sp_args(action, parser):
         parser.add_argument(
             "--select",
             type=str,
-            help="Selects the regions to create segments based  on, can be either 'arms', 'bands', path to a BED file, or empty for whole chromosomes.",
+            help="Selects the regions to create segments based on, can be either 'whole', 'arms', 'bands', or a path to a BED file.",
             required=False,
-            default="",
+            default="whole",
         )
         parser.add_argument(
             "--remove",
@@ -197,7 +197,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
         return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)
     elif action == "segment":
         select = regions_select(args.select, assembly)
-        remove = regions_remove(args.remove, assembly)
+        remove = regions_select(args.remove, assembly)
         select_block = [select] * block_count
         remove_block = [remove] * block_count
         split_block = [args.split] * block_count
@@ -257,7 +257,7 @@ def main():
     # For segmentation without cns file we don't use cns files and multiprocessing
     if action == "segment" and args.merge == 0:
         select = regions_select(args.select, assembly)
-        remove = regions_remove(args.remove, assembly)
+        remove = regions_select(args.remove, assembly)
         segs = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)
         save_segments(segs, out_file)
         log_info(print_info, "Done.")

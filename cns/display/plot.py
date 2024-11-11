@@ -45,9 +45,11 @@ def plot_bars(ax, cns_df, column, color="green", label=None, alpha=1, chrom=None
         group_df = cns_df.query(f"chrom == '{chrom}'")
         length = group_df["end"] - group_df["start"]
         x = group_df["start"] + length / 2 + chr_start
+        print(x, length)
         ax.bar(x, group_df[column], width=length, color=color, label=label, alpha=alpha)
         label = None  # only use label for the first chromosome
     return ax
+
 
 
 def _check_fig_input(data, column, label, chrom, assembly):

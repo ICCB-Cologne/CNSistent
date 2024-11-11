@@ -110,40 +110,11 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
     return res_df
 
 
-def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
-    """
-    Aggregates CNS data over specified genomic segments.
-
-    Parameters
-    ----------
-    cns_df : pandas.DataFrame
-        DataFrame containing CNS data.
-    segs : pandas.DataFrame
-        DataFrame containing segments over which to aggregate CNS data.
-    how : str, optional
-        Aggregation method. Options are "mean", "min", "max", or "none". Default is "mean".
-    cn_columns : list of str, optional
-        List of column names for copy number data. If None, columns are inferred from `cns_df`.
-    print_info : bool, optional
-        If True, prints informational messages during processing. Default is False.
-
-    Returns
-    -------
-    pandas.DataFrame
-        DataFrame with aggregated copy number values.
-
-    Notes
-    -----
-    If `how` is not "none" and there are NaNs in `cns_df`, a warning is issued because NaNs are not considered in aggregation.
-
-    Examples
-    --------
-    >>> aggregated_cns = main_aggregate(cns_df, segs, how="max")
-    """
-    cn_columns = get_cn_cols(cns_df, cn_columns)
-    if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
-        log_warn("NaNs are not considered in aggregation calculations; it is recommended to impute first.")
-    return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
+def main_fill_imp(
+    cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, method="extend", print_info=False
+):
+    res_df = main_fill(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
+    return main_impute(res_df, samples_df, method, cn_columns, print_info)
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
@@ -191,11 +162,11 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
 
     # Select the rows where copy-numbers are not Not a Number (NaN == NaN) is false
     het_nan_df = cn_not_nan(cns_df, cn_columns, True)
-    if len(cn_columns) == 2:        
-        hom_nan_df = cn_not_nan(cns_df, cn_columns, False)    
-    
+    if len(cn_columns) == 2:
+        hom_nan_df = cn_not_nan(cns_df, cn_columns, False)
+
     res_df = get_missing_chroms(het_nan_df, res_df, segs, assembly)
-    
+
     res_df = get_covered_bases(het_nan_df, res_df, True)
     res_df = normalize_feature(res_df, "cover_het", norm_sizes)
 
@@ -250,7 +221,7 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
         cn_columns.append("total_cn")
 
     for cn_col in cn_columns:
-        cns_subset_df = cns_df[["sample_id", "chrom", "start", "end",  cn_col]]
+        cns_subset_df = cns_df[["sample_id", "chrom", "start", "end", cn_col]]
         segs_df = merge_neighbours(cns_subset_df, cn_col, False)
         res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
         res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
@@ -295,8 +266,8 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if segs is not None:
         log_info(print_info, "Aggregating CN data by provided segments.")
-        cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)    
-        
+        cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
+
     norm_sizes = get_norm_sizes(segs, assembly)
 
     if cns_df[cn_columns].isna().any().any():
@@ -306,7 +277,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     log_info(print_info, "Calculating LOH for each sample.")
     res_df = calc_loh_bases(res_df, cns_df, cn_columns, "hom", assembly)
     res_df = normalize_feature(res_df, "loh_hom", norm_sizes)
-    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "het", assembly)    
+    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "het", assembly)
     res_df = normalize_feature(res_df, "loh_het", norm_sizes)
     log_info(print_info, "Calculating aneuploidy for each sample.")
     res_df = calc_ane_bases(res_df, cns_df, cn_columns, "het", assembly)
@@ -318,7 +289,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
         for col_i in range(2):
             res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)
             res_df = normalize_feature(res_df, f"imb_{cn_columns[col_i]}", norm_sizes)
-    
+
     log_info(print_info, "Calculating ploidy for each sample.")
     for cn_col in cn_columns:
         res_df[f"ploidy_{cn_col}"] = calc_ploidy_per_column(cns_df, cn_col)
@@ -326,7 +297,14 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
 
 def main_segment(
-    cns_df, select_segs=None, remove_segs=None, split_size=0, merge_dist=0, filter_size=0, assembly=hg19, print_info=False
+    cns_df,
+    select_segs=None,
+    remove_segs=None,
+    split_size=0,
+    merge_dist=-1,
+    filter_size=0,
+    assembly=hg19,
+    print_info=False,
 ):
     """
     Segments CNS data based on specified parameters.
@@ -362,9 +340,61 @@ def main_segment(
     if select_segs == None:
         select_segs = genome_to_segments(assembly)
     res = get_genome_segments(select_segs, remove_segs, filter_size)
-    if merge_dist > 0:
+    if merge_dist >= 0:
         breaks = get_breaks_from_cns_df(cns_df, keep_ends=False, assembly=assembly)
         res = cluster_within_segments(breaks, res, merge_dist, print_info)
     if split_size > 0:
         res = split_segments(res, split_size)
     return res
+
+
+def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
+    """
+    Aggregates CNS data over specified genomic segments.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    segs : pandas.DataFrame
+        DataFrame containing segments over which to aggregate CNS data.
+    how : str, optional
+        Aggregation method. Options are "mean", "min", "max", or "none". Default is "mean".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with aggregated copy number values.
+
+    Notes
+    -----
+    If `how` is not "none" and there are NaNs in `cns_df`, a warning is issued because NaNs are not considered in aggregation.
+
+    Examples
+    --------
+    >>> aggregated_cns = main_aggregate(cns_df, segs, how="max")
+    """
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
+        log_warn("NaNs are not considered in aggregation calculations; it is recommended to impute first.")
+    return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
+
+
+def main_seg_agg(
+    cns_df,
+    cn_columns=None,
+    how="mean",
+    select_segs=None,
+    remove_segs=None,
+    split_size=0,
+    merge_dist=0,
+    filter_size=0,
+    assembly=hg19,
+    print_info=False,
+):
+    segs = main_segment(cns_df, select_segs, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
+    return main_aggregate(cns_df, segs, how, cn_columns, print_info)

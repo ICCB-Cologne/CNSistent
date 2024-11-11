@@ -172,20 +172,13 @@ def regions_select(select, assembly=hg19):
             chrom: [(start, end, name) for start, end, name in zip(subset["start"], subset["end"], subset["name"])]
             for chrom, subset in bands_df.groupby("chrom")
         }
-    elif select == "" or select == "whole":
+    elif select == "whole":
         return genome_to_segments(assembly)
-    else:
-        return load_segments(select)
-
-
-def regions_remove(remove, assembly=hg19):
-    if remove == "gaps":
+    elif select == "gaps":
         breaks = assembly.gaps
         return tuples_to_segments(breaks)
-    elif remove == "":
-        return None
     else:
-        return load_segments(remove)
+        return load_segments(select)
 
 
 def get_genome_segments(select, remove=None, filter_size=0):

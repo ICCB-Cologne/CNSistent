@@ -104,7 +104,7 @@ def calc_clusters(dict_start, dist):
         new_breaks = []
         if len(old_breaks) > 0:
             clusters = _breaks_to_clusters(old_breaks)
-            merged = _merge_clusters(clusters, dist)
+            merged = _merge_clusters(clusters, dist) if dist > 0 else clusters
             new_breaks = clusters_to_breaks(merged)
         res[chrom] = new_breaks
     return res
