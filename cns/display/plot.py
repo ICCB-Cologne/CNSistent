@@ -8,7 +8,7 @@ from cns.utils.conversions import chrom_to_sortable
 from cns.utils.assemblies import hg19
 
 
-def plot_lines(ax, cns_df, column, color="green", label=None, alpha=1, line_width=1, chrom=None, assembly=hg19):
+def plot_lines(ax, cns_df, column, color="green", label=None, alpha=1, size=1, chrom=None, assembly=hg19):
     single = chrom is not None
     chroms = [chrom] if single else cns_df["chrom"].unique()
     for chrom in chroms:
@@ -19,12 +19,12 @@ def plot_lines(ax, cns_df, column, color="green", label=None, alpha=1, line_widt
         for _, group_df in chr_cns_df.groupby(is_consecutive.cumsum()):
             length = group_df["end"] - group_df["start"]
             x = group_df["start"] + length / 2 + chr_start
-            ax.plot(x, group_df[column], c=color, linewidth=line_width, label=label, alpha=alpha)
+            ax.plot(x, group_df[column], c=color, linewidth=size, label=label, alpha=alpha)
             label = None  # only use label for the first chromosome
     return ax
 
 
-def plot_dots(ax, cns_df, column, color="green", label=None, alpha=1, dot_size=1, chrom=None, assembly=hg19):
+def plot_dots(ax, cns_df, column, color="green", label=None, alpha=1, size=1, chrom=None, assembly=hg19):
     single = chrom is not None
     chroms = [chrom] if single else cns_df["chrom"].unique()
     for chrom in chroms:
@@ -32,12 +32,12 @@ def plot_dots(ax, cns_df, column, color="green", label=None, alpha=1, dot_size=1
         group_df = cns_df.query(f"chrom == '{chrom}'")
         length = group_df["end"] - group_df["start"]
         x = group_df["start"] + length / 2 + chr_start
-        ax.scatter(x, group_df[column], s=dot_size, label=label, color=color, alpha=alpha)
+        ax.scatter(x, group_df[column], s=size, label=label, color=color, alpha=alpha)
         label = None  # only use label for the first chromosome
     return ax
 
 
-def plot_bars(ax, cns_df, column, color="green", label=None, alpha=1, chrom=None, assembly=hg19):
+def plot_bars(ax, cns_df, column, color="green", label=None, alpha=1, size=1, chrom=None, assembly=hg19):
     single = chrom is not None
     chroms = [chrom] if single else cns_df["chrom"].unique()
     for chrom in chroms:
@@ -50,11 +50,7 @@ def plot_bars(ax, cns_df, column, color="green", label=None, alpha=1, chrom=None
     return ax
 
 
-
-def _get_columns(cns_df, cn_columns, chrom, assembly):
-    if chrom != None and not (isinstance(chrom, str) or not chrom in assembly.keys()):
-        raise ValueError("chrom must be None or a string")
-    
+def _get_columns(cns_df, cn_columns):    
     if cn_columns == None:
         cn_columns = get_cn_cols(cns_df[0])
         if len(cn_columns) == 0:
@@ -98,26 +94,30 @@ def _get_colors(colors, line_count):
     return colors
 
 
-def _fig_main(cns_df, plot_func, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
-    width = width if width != None else (18 if chrom == None else 4)
-    height = width / 6 if chrom == None else width
-    fig, ax = plt.subplots(1, figsize=(width, height))
-    cn_columns = _get_columns(cns_df, cn_columns, chrom, assembly)   
+def _fig_main(cns_df, f_plot, cn_columns=None, colors=None, chrom=None, size=1, assembly=hg19):    
+    cn_columns = _get_columns(cns_df, cn_columns)   
     groups_df = cns_df.groupby("sample_id")        
     line_count = len(groups_df)*len(cn_columns)
     colors = _get_colors(colors, line_count)
-    alpha = (1 / line_count) ** (1/3) if plot_func == plot_lines else 1 / line_count
-    if chrom == None:
+    alpha = (1 / line_count) ** (1/3) if f_plot == plot_lines else 1 / line_count     
+
+    if chrom != None:
+        if chrom not in assembly.keys():
+            raise ValueError("chrom must be None or a chromosome present in the assembly")
+        fig, ax = plt.subplots(figsize=(18, 4))        
         min_cn, max_cn = _get_min_max_cn(cns_df, cn_columns) 
-        plot_chr_bg(ax, assembly, -0.05, max_cn * 1.05)
-        plot_x_ticks(ax, assembly=assembly)
+        plot_chr_bg(ax, chrom, assembly, -0.05, max_cn * 1.05)
+        plot_x_ticks(ax, chrom, assembly=assembly)
+    else:
+        fig, ax = plt.subplots(figsize=(4, 4))
+ 
     for i, (group_key, group_df) in enumerate(groups_df):
         for j in range(len(cn_columns)):
             color = colors[i*len(cn_columns) + j]
             label = group_key
             if len(cn_columns) > 1:
                 label += " - " + cn_columns[j]
-            plot_func(ax, group_df, column=cn_columns[j], color=color, label=label, chrom=chrom, alpha=alpha)
+            f_plot(ax, group_df, column=cn_columns[j], color=color, label=label, chrom=chrom, size=size, alpha=alpha)
         if line_count > 3:
             ax.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0))
         else:
@@ -127,16 +127,16 @@ def _fig_main(cns_df, plot_func, cn_columns=None, colors=None, chrom=None, width
     return fig, ax
 
 
-def fig_lines(cns_df, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
-    return _fig_main(cns_df, plot_lines, cn_columns, colors, chrom, width, assembly)
+def fig_lines(cns_df, cn_columns=None, colors=None, chrom=None, size=1, assembly=hg19):
+    return _fig_main(cns_df, plot_lines, cn_columns, colors, chrom, size, assembly)
 
 
-def fig_dots(cns_df, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
-    return _fig_main(cns_df, plot_dots, cn_columns, colors, chrom, width, assembly)
+def fig_dots(cns_df, cn_columns=None, colors=None, chrom=None, size=1, assembly=hg19):
+    return _fig_main(cns_df, plot_dots, cn_columns, colors, chrom, size, assembly)
 
 
-def fig_bars(cns_df, cn_columns=None, colors=None, chrom=None, width=None, assembly=hg19):
-    return _fig_main(cns_df, plot_bars, cn_columns, colors, chrom, width, assembly)
+def fig_bars(cns_df, cn_columns=None, colors=None, chrom=None, assembly=hg19):
+    return _fig_main(cns_df, plot_bars, cn_columns, colors, chrom, 1, assembly)
 
 
 def fig_heatmap(data_df, cn_columns=None, chrom=None, width=None, dpi=100, assembly=hg19):
