@@ -203,30 +203,5 @@ def fig_bars(cns_df, cn_columns=None, colors=None, chrom=None, assembly=hg19):
 
 
 def fig_cn_heatmap(cns_df, cn_columns=None, chrom=None, assembly=hg19):
-    cn_columns = _get_columns(cns_df, cn_columns)
-
-    n_columns = len(cn_columns)
-    width = 18 if chrom is None else 4
-    height = 4 * n_columns
-    fig, axes = plt.subplots(n_columns, 1, figsize=(width, height), sharex=True)
-
-    if n_columns == 1:
-        axes = [axes]
-
-    for j, cn_column in enumerate(cn_columns):
-        ax = axes[j]
-        if chrom is None:
-            plot_x_ticks(ax, assembly=assembly)
-        else:
-            if chrom not in assembly.keys():
-                raise ValueError("chrom must be None or a chromosome present in the assembly")
-
-        if len(cn_columns) > 1:
-            label += " - " + cn_column
-        plot_heatmap(ax, cns_df, column=cn_column, chrom=chrom)
-
-        ax.set_ylabel(f"CN tracks for {cn_column}")
-
-    axes[-1].set_xlabel(f"position on {chrom if chrom is not None else 'linear genome'}")
-    plt.tight_layout()
-    return fig, axes
+    # TODO
+    raise NotImplementedError("fig_cn_heatmap is not implemented yet")
