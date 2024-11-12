@@ -126,8 +126,8 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
 
     n_columns = len(cn_columns)
     x_min, x_max = x_limits(cns_df, assembly)
-    width = (x_max - x_min) / 200_000_000
-    height = 2 * n_columns
+    width = max(3, (x_max - x_min) / 200_000_000)
+    height = 3 * n_columns
     fig, axes = plt.subplots(n_columns, 1, figsize=(width, height), sharex=True)
     axes = axes if n_columns > 1 else [axes]
 
@@ -135,7 +135,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
         ax = axes[j]
 
         max_cn = cns_df[cn_column].max()
-        plot_chr_bg(ax, assembly=assembly, y_min = 0.05, y_max=max_cn+0.05, alpha=0.2)
+        plot_chr_bg(ax, assembly=assembly, y_min = -0.05, y_max=max_cn*1.05, alpha=0.2)
         for i, (group_key, group_df) in enumerate(groups_df):
             color = colors[i]
             label = group_key
@@ -163,6 +163,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
     
     axes[-1].set_xlabel(f"position on the linear genome")
     plt.tight_layout()
+    axes = axes if n_columns > 1 else axes[0]
     return fig, axes
 
 
@@ -215,6 +216,7 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
 
     # TODO: add colorbar
 
+    axes = axes if n_columns > 1 else axes[0]
     return fig, axes
 
 

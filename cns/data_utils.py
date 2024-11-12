@@ -29,7 +29,7 @@ def get_root_path():
 img_path = pjoin(get_root_path(), "img")
 out_path = pjoin(get_root_path(), "out")
 data_path = pjoin(get_root_path(), "data")
-docs_path = pjoin(get_root_path(), "docs")
+docs_path = pjoin(get_root_path(), "docs/img")
 
 
 def load_cns_out(filename, print_info=False):
@@ -265,3 +265,11 @@ def save_doc_fig(fig_name, fig=None):
         fig = plt.gcf()
     fig.savefig(f"{docs_path}/{fig_name}.png", bbox_inches="tight", transparent=True, dpi=300)
     fig.savefig(f"{docs_path}/{fig_name}.pdf", bbox_inches="tight", transparent=True)
+
+
+def load_COSMIC():
+    return load_segments(pjoin(data_path, "COSMIC_consensus_genes.bed"))
+
+
+def load_ENSEMBL():
+    return load_segments(pjoin(data_path, "ENSEMBL_coding_genes.bed"))
