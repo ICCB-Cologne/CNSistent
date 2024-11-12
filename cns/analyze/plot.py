@@ -267,18 +267,14 @@ def plot_chr_bg(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2, colored=False):
     _plot_rectangles(ax, items, y_min, y_max, assembly, color_func, alpha=alpha)
 
 
-def plot_cytobands(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2):
-    def color_func(item):
-        return cytoband_color[item[4]]
-
-    _plot_rectangles(ax, assembly.cytobands, y_min, y_max, assembly, color_func, alpha)
+def plot_cytobands(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2, color=None):
+    f_color = lambda item: color if color is not None else cytoband_color[item[4]]
+    _plot_rectangles(ax, assembly.cytobands, y_min, y_max, assembly, f_color, alpha)
 
 
-def plot_gaps(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2):
-    def color_func(item):
-        return gap_color[item[3]]
-
-    _plot_rectangles(ax, assembly.gaps, y_min, y_max, assembly, color_func, alpha)
+def plot_gaps(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2, color=None):
+    f_color = lambda item: color if color is not None else gap_color[item[3]]
+    _plot_rectangles(ax, assembly.gaps, y_min, y_max, assembly, f_color, alpha)
 
 
 def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):

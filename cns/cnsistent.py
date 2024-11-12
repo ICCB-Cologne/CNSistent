@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from multiprocessing import Pool
-import pandas as pd
 import time
 import argparse
 from os.path import exists

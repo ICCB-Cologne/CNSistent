@@ -1,14 +1,12 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 23.1) (preloaded format=pdflatex 2023.2.21)  30 OCT 2024 15:03
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.12) (preloaded format=pdflatex 2021.1.10)  12 NOV 2024 20:11
 entering extended mode
- restricted \write18 enabled.
- %&-line parsing enabled.
-**C:/Users/adams/Ubuntu/cnsistent/docs/segs_with_gaps_filter_df.tex
-(C:/Users/adams/Ubuntu/cnsistent/docs/segs_with_gaps_filter_df.tex
-LaTeX2e <2022-11-01> patch level 1
-L3 programming layer <2023-02-02>
+**D:/Ubuntu/CNSistent/docs/files/segs_with_gaps_filter_df.tex
+(D:/Ubuntu/CNSistent/docs/files/segs_with_gaps_filter_df.tex
+LaTeX2e <2020-10-01> patch level 2
+L3 programming layer <2020-12-07> xparse <2020-03-03>
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/standalone\standalone.c
 ls
-Document Class: standalone 2022/10/10 v1.3b Class to compile TeX sub-files stan
+Document Class: standalone 2018/03/26 v1.3a Class to compile TeX sub-files stan
 dalone
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/tools\shellesc.sty
 Package: shellesc 2019/11/08 v1.0c unified shell escape interface for LaTeX
@@ -18,79 +16,79 @@ Package shellesc Info: Restricted shell escape enabled on input line 77.
 Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
-Package: iftex 2022/02/03 v1.0f TeX engine tests
+Package: iftex 2020/03/06 v1.0d TeX engine tests
 ))
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/xkeyval\xkeyval.sty
-Package: xkeyval 2022/06/16 v2.9 package option processing (HA)
+Package: xkeyval 2020/11/20 v2.8 package option processing (HA)
 
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\xkeyval.tex
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\xkvutils.tex
-\XKV@toks=\toks16
-\XKV@tempa@toks=\toks17
+\XKV@toks=\toks15
+\XKV@tempa@toks=\toks16
 
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/generic/xkeyval\keyval.tex))
-\XKV@depth=\count185
+\XKV@depth=\count177
 File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
 ))
-\sa@internal=\count186
-\c@sapage=\count187
+\sa@internal=\count178
+\c@sapage=\count179
 
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/standalone\standalone.c
 fg
-File: standalone.cfg 2022/10/10 v1.3b Default configuration file for 'standalon
+File: standalone.cfg 2018/03/26 v1.3a Default configuration file for 'standalon
 e' class
 ) (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
-Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
+Document Class: article 2020/04/10 v1.4m Standard LaTeX document class
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
-File: size10.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
+File: size10.clo 2020/04/10 v1.4m Standard LaTeX file (size option)
 )
-\c@part=\count188
-\c@section=\count189
-\c@subsection=\count190
-\c@subsubsection=\count191
-\c@paragraph=\count192
-\c@subparagraph=\count193
-\c@figure=\count194
-\c@table=\count195
-\abovecaptionskip=\skip48
-\belowcaptionskip=\skip49
-\bibindent=\dimen140
+\c@part=\count180
+\c@section=\count181
+\c@subsection=\count182
+\c@subsubsection=\count183
+\c@paragraph=\count184
+\c@subparagraph=\count185
+\c@figure=\count186
+\c@table=\count187
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen138
 )
-\sa@box=\box51
+\sa@box=\box47
 )
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen141
-\lightrulewidth=\dimen142
-\cmidrulewidth=\dimen143
-\belowrulesep=\dimen144
-\belowbottomsep=\dimen145
-\aboverulesep=\dimen146
-\abovetopsep=\dimen147
-\cmidrulesep=\dimen148
-\cmidrulekern=\dimen149
-\defaultaddspace=\dimen150
-\@cmidla=\count196
-\@cmidlb=\count197
-\@aboverulesep=\dimen151
-\@belowrulesep=\dimen152
-\@thisruleclass=\count198
-\@lastruleclass=\count199
-\@thisrulewidth=\dimen153
+\heavyrulewidth=\dimen139
+\lightrulewidth=\dimen140
+\cmidrulewidth=\dimen141
+\belowrulesep=\dimen142
+\belowbottomsep=\dimen143
+\aboverulesep=\dimen144
+\abovetopsep=\dimen145
+\cmidrulesep=\dimen146
+\cmidrulekern=\dimen147
+\defaultaddspace=\dimen148
+\@cmidla=\count188
+\@cmidlb=\count189
+\@aboverulesep=\dimen149
+\@belowrulesep=\dimen150
+\@thisruleclass=\count190
+\@lastruleclass=\count191
+\@thisrulewidth=\dimen151
 )
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty
 Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
-\multirow@colwidth=\skip50
-\multirow@cntb=\count266
-\multirow@dima=\skip51
-\bigstrutjot=\dimen154
+\multirow@colwidth=\skip49
+\multirow@cntb=\count192
+\multirow@dima=\skip50
+\bigstrutjot=\dimen152
 )
 (C:\Users\adams\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
-File: l3backend-pdftex.def 2023-01-16 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count267
-\l__pdf_internal_box=\box52
-) (C:\Users\adams\Ubuntu\cnsistent\docs\segs_with_gaps_filter_df.aux)
+File: l3backend-pdftex.def 2020-09-24 L3 backend support: PDF output (pdfTeX)
+\l__kernel_color_stack_int=\count193
+\l__pdf_internal_box=\box48
+) (D:\Ubuntu\CNSistent\docs\files\segs_with_gaps_filter_df.aux)
 \openout1 = `segs_with_gaps_filter_df.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 5.
@@ -111,27 +109,26 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 6.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 6.
+ [1
 
-[1
-
-{C:/Users/adams/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-(C:\Users\adams\Ubuntu\cnsistent\docs\segs_with_gaps_filter_df.aux) ) 
+{C:/Users/adams/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
+(D:\Ubuntu\CNSistent\docs\files\segs_with_gaps_filter_df.aux) ) 
 Here is how much of TeX's memory you used:
- 1186 strings out of 476374
- 23351 string characters out of 5788854
- 1852340 words of memory out of 5000000
- 21616 multiletter control sequences out of 15000+600000
- 512595 words of font info for 33 fonts, out of 8000000 for 9000
+ 1044 strings out of 479697
+ 18890 string characters out of 2867133
+ 284179 words of memory out of 3000000
+ 18178 multiletter control sequences out of 15000+200000
+ 403738 words of font info for 28 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,7n,71p,261b,187s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/
-adams/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><
-C:/Users/adams/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr
-10.pfb>
-Output written on C:\Users\adams\Ubuntu\cnsistent\docs\segs_with_gaps_filter_df
-.pdf (1 page, 29851 bytes).
+ 66i,7n,72p,256b,176s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Users/adams/
+AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Use
+rs/adams/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb
+>
+Output written on D:\Ubuntu\CNSistent\docs\files\segs_with_gaps_filter_df.pdf (
+1 page, 28134 bytes).
 PDF statistics:
- 16 PDF objects out of 1000 (max. 8388607)
+ 14 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
