@@ -111,7 +111,13 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
 
 
 def main_fill_imp(
-    cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, method="extend", print_info=False
+    cns_df,
+    samples_df=None,
+    cn_columns=None,
+    assembly=hg19,
+    add_missing_chromosomes=True,
+    method="extend",
+    print_info=False,
 ):
     res_df = main_fill(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
     return main_impute(res_df, samples_df, method, cn_columns, print_info)

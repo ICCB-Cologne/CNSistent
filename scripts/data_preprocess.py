@@ -139,8 +139,8 @@ def get_processed_data(dataset, print_info=False):
 
 def merge_TRACERx_samples(print_info=False):
     # Load the sample data
-    prim_samples = load_samples_out(f"TRACERx_prim_samples_preprocess.tsv")
-    met_samples = load_samples_out(f"TRACERx_met_samples_preprocess.tsv")
+    prim_samples = load_samples_out(f"TRACERx_prim_samples_preprocess.tsv", use_filter=False)
+    met_samples = load_samples_out(f"TRACERx_met_samples_preprocess.tsv", use_filter=False)
 
     # Merge the DataFrames on the common key 'sample_id'
     common_samples = pd.merge(prim_samples, met_samples, on="sample_id", suffixes=("_prim", "_met")).index.unique()
@@ -165,9 +165,9 @@ def merge_TRACERx_samples(print_info=False):
 
 
 def merge_TRACERx_cns(print_info=False, filled=False):
-    prim_cns = load_cns_out(f"TRACERx_prim_cns_preprocess.tsv", raw=True)
+    prim_cns = load_cns_out(f"TRACERx_prim_cns_preprocess.tsv")
     prim_cns.set_index(["sample_id"], inplace=True)
-    met_cns = load_cns_out(f"TRACERx_met_cns_preprocess.tsv", raw=True)
+    met_cns = load_cns_out(f"TRACERx_met_cns_preprocess.tsv")
     met_cns.set_index(["sample_id"], inplace=True)
 
     common_samples = list(set(prim_cns.index).intersection(set(met_cns.index)))
@@ -180,8 +180,8 @@ def merge_TRACERx_cns(print_info=False, filled=False):
 
 def remove_PCAWG_from_TCGA(print_info=False):
     # Load the sample data
-    TCGA_samples = load_samples_out("TCGA_hg19_samples_preprocess.tsv")
-    PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv")
+    TCGA_samples = load_samples_out("TCGA_hg19_samples_preprocess.tsv", use_filter=False)
+    PCAWG_samples = load_samples_out("PCAWG_samples_preprocess.tsv", use_filter=False)
 
     overlap_with_tcga = PCAWG_samples["TCGA_id"].dropna().unique()
     log_info(print_info, f"Total TCGA samples: {len(TCGA_samples)}")
@@ -195,7 +195,7 @@ def remove_PCAWG_from_TCGA(print_info=False):
 
 def filter_TCGA_CNS(print_info=False):
     # Load the sample data
-    TCGA_cns = load_cns_out("TCGA_hg19_cns_preprocess.tsv", raw=True)
+    TCGA_cns = load_cns_out("TCGA_hg19_cns_preprocess.tsv")
     TCGA_samples = load_samples_out("TCGA_hg19_samples_preprocess.tsv")
 
     # Filter the CNS data

@@ -89,7 +89,6 @@ class TestBreakage(unittest.TestCase):
             cns_df[["sample_id", "chrom", "start", "end", cn_col]], cn_col, False
         )
 
-
     def test_calc_breaks_per_chr(self):
         segs_df = self.prepare_segments(self.cns, "major_cn")
         result = calc_breaks_per_chr(segs_df)
@@ -144,7 +143,6 @@ class TestAneuploidy(unittest.TestCase):
         })
         self.cols = ["major_cn", "minor_cn"]        
         pd.set_option('display.max_columns', 10)
-
 
     def test_get_ane_bases(self):
         res_df = calc_ane_bases(self.samples, self.cns, self.cols, "hom", self.assembly)

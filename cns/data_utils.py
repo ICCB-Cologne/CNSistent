@@ -51,7 +51,7 @@ def load_cns_out(filename, print_info=False):
     return load_cns(pjoin(out_path, filename))
 
 
-def load_samples_out(filename, use_filter=True, print_info=False):
+def load_samples_out(filename, use_filter=False, print_info=False):
     """Load sample data from the output directory.
 
     Parameters
