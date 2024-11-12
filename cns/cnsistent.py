@@ -37,7 +37,7 @@ def _add_sp_args(action, parser):
     parser.add_argument("--verbose", help="print progress to console", action="store_true")
     parser.add_argument("--time", help="save runtime info", action="store_true")
 
-    if action in ["coverage", "ploidy", "signatures"]:
+    if action in ["coverage", "ploidy", "breakage"]:
         parser.add_argument(
             "--segments",
             type=str,
@@ -65,9 +65,9 @@ def _add_sp_args(action, parser):
         parser.add_argument(
             "--split",
             type=int,
-            help="Distance in which regions should be, can be a positive integer or 0 for no splitting (whole regions).",
+            help="Distance in which regions should be, can be a positive integer or negative for no splitting (whole regions).",
             required=False,
-            default=0,
+            default=-1,
         )
         parser.add_argument(
             "--select",
@@ -86,16 +86,16 @@ def _add_sp_args(action, parser):
         parser.add_argument(
             "--filter",
             type=int,
-            help="If set, regions smaller than the given size are excluded from selection and gaps.",
+            help="If set, regions smaller than the given size are excluded from selection and gaps. If negative, no filtering is done.",
             required=False,
-            default=0,
+            default=-1,
         )
         parser.add_argument(
             "--merge",
             type=int,
-            help="Maximum distance between breakpoint clusters for breakpoint merging",
+            help="Maximum distance between breakpoint clusters for breakpoint merging. If negative, no breakpoints are merged.",
             required=False,
-            default=0,
+            default=-1,
         )
 
 
@@ -133,11 +133,11 @@ def _parse_args():
         raise ValueError(f"Action {args.action} not recognized.")
 
     if args.action == "segment":
-        if args.merge > 0 and not args.data:
+        if args.merge >= 0 and not args.data:
             raise ValueError("Merging breakpoints requires the --data option to provide CNS data.")
         if args.split < 0:
             args.split = 0
-        if args.select not in ["", "arms", "bands"] and not exists(args.select):
+        if args.select not in ["whole", "arms", "bands"] and not exists(args.select):
             raise ValueError(f"Selection {args.select} is not a build-in or a path to a file.")
         if args.remove not in ["", "gaps"] and not exists(args.remove):
             raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
@@ -204,7 +204,7 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
         merge_block = [args.merge] * block_count
         filter_block = [args.filter] * block_count
         return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
-    elif action in ["coverage", "ploidy", "signatures"]:
+    elif action in ["coverage", "ploidy", "breakage"]:
         segs_block = [_get_segs_df(args.segments)] * block_count
         return zip(cns_blocks, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "aggregate":
@@ -255,7 +255,7 @@ def main():
     log_info(print_info, f"***** cns {action} *****")
 
     # For segmentation without cns file we don't use cns files and multiprocessing
-    if action == "segment" and args.merge == 0:
+    if action == "segment" and args.merge < 0:
         select = regions_select(args.select, assembly)
         remove = regions_select(args.remove, assembly)
         segs = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)
@@ -302,7 +302,7 @@ def main():
                 save_segments(res, out_file)
             elif action in ["fill", "impute", "aggregate"]:
                 save_cns(res, out_file, change_coords=True, mode=mode)
-            elif action in ["coverage", "ploidy", "signatures"]:
+            elif action in ["coverage", "ploidy", "breakage"]:
                 save_samples(res, out_file, mode=mode)
             else:
                 raise ValueError(f"Unknown action {action}")

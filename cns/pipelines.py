@@ -300,9 +300,9 @@ def main_segment(
     cns_df,
     select_segs=None,
     remove_segs=None,
-    split_size=0,
+    split_size=-1,
     merge_dist=-1,
-    filter_size=0,
+    filter_size=-1,
     assembly=hg19,
     print_info=False,
 ):

@@ -117,7 +117,7 @@ def _get_colors(colors, line_count):
     return colors
 
 
-def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical = True, assembly=hg19):
+def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=hg19):
     cn_columns = _get_columns(cns_df, cn_columns)
     groups_df = cns_df.groupby("sample_id")
     line_count = len(groups_df)
@@ -126,16 +126,15 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
 
     n_columns = len(cn_columns)
     x_min, x_max = x_limits(cns_df, assembly)
-    width = max(3, (x_max - x_min) / 200_000_000)
-    height = 3 * n_columns
+    width = max(4, (x_max - x_min) / 200_000_000)
+    height = 4*n_columns
     fig, axes = plt.subplots(n_columns, 1, figsize=(width, height), sharex=True)
-    axes = axes if n_columns > 1 else [axes]
 
     for j, cn_column in enumerate(cn_columns):
-        ax = axes[j]
+        ax = axes[j] if n_columns > 1 else axes
 
         max_cn = cns_df[cn_column].max()
-        plot_chr_bg(ax, assembly=assembly, y_min = -0.05, y_max=max_cn + 1, alpha=0.2)
+        plot_chr_bg(ax, assembly=assembly, y_min = 0, y_max=max_cn + 1, alpha=0.2)
         for i, (group_key, group_df) in enumerate(groups_df):
             color = colors[i]
             label = group_key
@@ -152,19 +151,18 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
                 assembly=assembly,
             )
 
-        if 1 < line_count <= 3:
-            ax.legend(loc="upper right")
-        elif line_count > 3:
-            ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
-
+        # if 1 < line_count <= 3:
+        ax.legend(loc="upper right")
+        # elif line_count > 3:
+        #     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
 
         ax.set_ylabel(f"mean CN - {cn_column}")
-        plot_x_ticks(ax, assembly, x_min, x_max)   
         ax.set_xlim(x_min, x_max)
+        if j == n_columns - 1:
+            plot_x_ticks(ax, assembly, x_min, x_max)   
+            ax.set_xlabel("position on the linear genome")
     
-    axes[-1].set_xlabel(f"position on the linear genome")
     plt.tight_layout()
-    axes = axes if n_columns > 1 else axes[0]
     return fig, axes
 
 
@@ -178,16 +176,10 @@ def fig_dots(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
 
 def fig_bars(cns_df, cn_columns=None, colors=None, assembly=hg19):
     return _fig_common(cns_df, plot_bars, cn_columns, colors, 1, assembly)
+ 
 
-
-def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=hg19):
-    cn_columns = _get_columns(cns_df, cn_columns)
-
-    sample_count = len(cns_df["sample_id"].unique())
-    n_columns = len(cn_columns)
-    x_min, x_max = x_limits(cns_df, assembly)
-    width = (x_max - x_min) / 200_000_000
-    height = sample_count / 5
+def _make_layout(width, height, n_columns):
+    vertical = width > height
     if vertical:
         height = height * n_columns
         sharex, sharey = True, False
@@ -198,11 +190,21 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
         n_rows, n_cols = 1, n_columns
     width = max(3, width)
     height = max(3, height)
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(width, height), sharex=sharex, sharey=sharey)
-    axes = axes if n_columns > 1 else [axes]
+    return plt.subplots(n_rows, n_cols, figsize=(width, height), sharex=sharex, sharey=sharey)
+
+
+def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=hg19):
+    cn_columns = _get_columns(cns_df, cn_columns)
+
+    sample_count = len(cns_df["sample_id"].unique())
+    n_columns = len(cn_columns)
+    x_min, x_max = x_limits(cns_df, assembly)
+    width = (x_max - x_min) / 200_000_000
+    height = sample_count / 5
+    fig, axes = _make_layout(width, height, n_columns)
 
     for j, cn_column in enumerate(cn_columns):
-        ax = axes[j]
+        ax = axes[j] if n_columns > 1 else axes
         plot_heatmap(
             ax = ax,
             cns_df = cns_df,
@@ -211,20 +213,19 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
             assembly=assembly,
         )
         if vertical:
-            axes[j].set_ylabel(f"sample_id - {cn_column}")
+            ax.set_ylabel(f"sample_id - {cn_column}")
         elif j == 0:
-            axes[j].set_ylabel(f"sample_id")
+            ax.set_ylabel(f"sample_id")
         if not vertical:
-            axes[j].set_xlabel(f"{cn_column}")
+            ax.set_xlabel(f"{cn_column}")
         elif j == n_columns - 1:
-            axes[j].set_xlabel(f"position on the linear genome")
+            ax.set_xlabel(f"position on the linear genome")
         plot_x_lines(ax, assembly)
         plot_x_ticks(ax, assembly, x_min, x_max)   
         ax.set_xlim(x_min, x_max)
 
     # TODO: add colorbar
 
-    axes = axes if n_columns > 1 else axes[0]
     return fig, axes
 
 
@@ -281,46 +282,32 @@ def plot_gaps(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2):
 
 
 def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
-    """
-    Plots x-axis ticks for chromosome positions between min_x and max_x.
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axes on which to plot the ticks.
-    assembly : object, optional
-        Genome assembly object like hg19.
-    positions : list of tuples, optional
-        List of chromosome positions to plot. If None, all chromosomes are used.
-    min_x : int, optional
-        Minimum x position to plot ticks. Default is 0.
-    max_x : int, optional
-        Maximum x position to plot ticks. If None, the maximum position is the end of the genome.
-
-    Returns
-    -------
-    tick_pos : list
-        List of tick positions.
-    """
     positions = list(assembly.chr_lens.items())
     if max_x is None:
         max_x = assembly.aut_len
 
     x_pos = 0
-    tick_pos = []
+    major_tick_pos = []
+    minor_tick_pos = []
+    minor_tick_labels = []
     for chrom, length in positions:
         if min_x <= x_pos <= max_x:
             label_text = "\n" + chrom[3:]
-            if x_pos + length <= max_x:                
-                ax.text(x_pos + length / 2, ax.get_ylim()[0], label_text, ha="center", va="center_baseline")
-            tick_pos.append(x_pos)
+            major_tick_pos.append(x_pos)
+            minor_tick_pos.append(x_pos + length / 2)
+            minor_tick_labels.append(label_text)
         # Update the x position for the next chromosome
         x_pos += length
 
-    ax.set_xticks(tick_pos)
-    ax.set_xticklabels([" "] * len(tick_pos))
+    ax.set_xticks(major_tick_pos)
+    ax.set_xticks(minor_tick_pos, minor=True)
+    ax.set_xticklabels([" "] * len(major_tick_pos))
+    ax.set_xticklabels(minor_tick_labels, minor=True)
     ax.set_xlim(min_x, max_x)
-    return tick_pos
+        # Hide the lines for the minor ticks
+    ax.tick_params(axis='x', which='minor', length=0, pad=-8)
+
+    return major_tick_pos, minor_tick_pos
 
 
 def add_cytoband_legend(ax):

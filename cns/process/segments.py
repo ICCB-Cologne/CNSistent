@@ -160,6 +160,8 @@ def split_segments(segments, step_size, strategy="scale"):
 
 
 def regions_select(select, assembly=hg19):
+    if select == "":
+        return {}
     if select == "arms":
         arm_breaks = make_breaks("arms", assembly)
         return {
@@ -181,7 +183,7 @@ def regions_select(select, assembly=hg19):
         return load_segments(select)
 
 
-def get_genome_segments(select, remove=None, filter_size=0):
+def get_genome_segments(select, remove=None, filter_size=-1):
     res = select
     if filter_size > 0:
         res = filter_min_size(res, filter_size, False)

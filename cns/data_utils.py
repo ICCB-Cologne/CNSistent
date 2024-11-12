@@ -148,68 +148,34 @@ def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_i
     return filtered_df.copy()
 
 
-def main_load(segment_type=None, use_filter=True, print_info=False):
+def main_load(segment_type=None, use_filter=True, dataset="all", concat=True, print_info=False):
     """
-    Load samples and CNS data for PCAWG, TRACERx, and TCGA.
-
-    The type of segments depends on the segment type. (If none is specified, only samples are loaded.)
-
-    Possible segments for non-aggregated data are:
-
-    * imp: Imputed segments
-    * preprocess: Preprocessed segments
-    * fill: Filled segments
-
-    Possible segments for aggregated data are:
-
-    * whole: Whole genome segments
-    * arm: Arm-level segments
-    * bands: Cytoband-level segments
-    * COSMIC: COSMIC consensus genes
-    * ENSEMBL: ENSEMBL coding genes
-    * 10MB, 5MB, 3MB, 2MB, 1MB, 500KB, 250KB: Binned segments of this size
-    * merge_10000000, merge_5000000, merge_250000: Clustered breakpoints of this size.
-
-    Parameters
-    ----------
-    segment_type : string, optional
-        If provided, load binned data with this segment type. Default is None.
-    use_filter : bool, optional
-        Whether to filter samples based on coverage and aneuploidy. Default is True.
-    retype : bool, optional
-        Whether to standardize cancer type labels. Default is True.
-    print_info : bool, optional
-        Whether to print progress information. Default is False.
-
-    Returns
-    -------
-    samples_df : pd.DataFrame
-        Combined DataFrame containing all samples.
-    cns_df : pd.DataFrame
-        Combined DataFrame containing all CNS data. If segment_type is None, this is None.
+    TODO: Add docstring
     """
-    datasets = ["PCAWG", "TRACERx", "TCGA_hg19"]
+    if dataset == "all":
+        datasets = ["PCAWG", "TRACERx", "TCGA_hg19"]
+    else:
+        datasets = [dataset]
 
-    samples_list = []
+    samples_dict = {}
     for dataset in datasets:
         samples = load_samples_out(f"{dataset}_samples.tsv", use_filter, print_info)
         samples["source"] = dataset
-        samples_list.append(samples)
-    samples_df = pd.concat(samples_list)
-    log_info(print_info, f"Loaded samples: {len(samples_df)}")
+        samples_dict[dataset] = samples
+    samples_df = pd.concat(samples_dict.values()) if (concat or len(datasets) == 1) else samples_dict
+    log_info(print_info, f"Total samples: {len(samples_df)}")
 
     if segment_type is None:
+        log_info(print_info, "No segment type specified. Returning sample data only.")
         return samples_df, None
         
     file_type = "cns" if segment_type in ["imp", "preprocess", "fill"] else "bin"
-    cns_dict = [ load_cns_out(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets ]
-    cns_df = pd.concat(cns_dict)
+    cns_dict = {dataset: load_cns_out(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets}
+    cns_dict = {k: select_CNS_samples(v, samples_dict[k]).reset_index(drop=True) for k, v in cns_dict.items()}
+    cns_df = pd.concat(cns_dict.values()) if (concat or len(datasets) == 1) else cns_dict
     log_info(print_info, f"Total CNS segments: {len(cns_df)}")
-    cns_df = select_CNS_samples(cns_df, samples_df).reset_index(drop=True)
-    log_info(print_info, f"Total CNS segments (after filtering): {len(cns_df)}")
     
     return samples_df, cns_df
-
 
 
 def select_cns_by_type(cns, samples, type):
