@@ -135,7 +135,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
         ax = axes[j]
 
         max_cn = cns_df[cn_column].max()
-        plot_chr_bg(ax, assembly=assembly, y_min = -0.05, y_max=max_cn*1.05, alpha=0.2)
+        plot_chr_bg(ax, assembly=assembly, y_min = -0.05, y_max=max_cn + 1, alpha=0.2)
         for i, (group_key, group_df) in enumerate(groups_df):
             color = colors[i]
             label = group_key
@@ -153,9 +153,10 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, vertical =
             )
 
         if 1 < line_count <= 3:
-            ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
-        elif line_count > 3:
             ax.legend(loc="upper right")
+        elif line_count > 3:
+            ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
+
 
         ax.set_ylabel(f"mean CN - {cn_column}")
         plot_x_ticks(ax, assembly, x_min, x_max)   
@@ -188,9 +189,16 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
     width = (x_max - x_min) / 200_000_000
     height = sample_count / 5
     if vertical:
-        fig, axes = plt.subplots(n_columns, 1, figsize=(width, height * n_columns), sharex=True)
+        height = height * n_columns
+        sharex, sharey = True, False
+        n_rows, n_cols = n_columns, 1
     else:
-        fig, axes = plt.subplots(1, n_columns, figsize=(width * n_columns, height), sharey=True)
+        width = width * n_columns
+        sharex, sharey = False, True
+        n_rows, n_cols = 1, n_columns
+    width = max(3, width)
+    height = max(3, height)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(width, height), sharex=sharex, sharey=sharey)
     axes = axes if n_columns > 1 else [axes]
 
     for j, cn_column in enumerate(cn_columns):

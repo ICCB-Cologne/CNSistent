@@ -24,3 +24,11 @@ cns.analyze.coverage module
    :members:
    :undoc-members:
    :show-inheritance:
+
+cns.analyze.plot module
+-----------------------
+
+.. automodule:: cns.analyze.plot
+   :members:
+   :undoc-members:
+   :show-inheritance:

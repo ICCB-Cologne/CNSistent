@@ -5,8 +5,9 @@ channels:
   - defaults
 dependencies:
   - python>=3.9
-  - pandas
+  - pandas>=2.2
   - numpy
   - matplotlib
   - numba
+  - scikit-learn
   - pyensembl
