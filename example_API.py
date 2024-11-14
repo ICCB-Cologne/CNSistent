@@ -1,61 +1,31 @@
 # %%
-from matplotlib import pyplot as plt
-from cns.analyze.plot import fig_lines, fig_CN_heatmap
-from cns.process.aggregation import group_samples, add_total_cn
-from cns.utils.selection import cns_head
-from cns.utils.files import load_cns, load_samples
-from cns.utils.assemblies import get_assembly
+%load_ext autoreload
+%autoreload 2
 
-hg19 = get_assembly("hg19")
-
-# Load CNS
-# %%  
-cns_df = load_cns("./out/PCAWG_bin_3MB.tsv")
-print(cns_df.head())
-
-
-# Plot heatmap for the first 50 segments
 # %%
-head_50 = cns_head(cns_df, 50)
-fig_CN_heatmap(head_50, print_info=True, dpi=100)
-plt.show()
+import pandas as pd
+from cns import main_fill_imp, main_seg_agg
+from cns.analyze import fig_lines, fig_heatmap
+from cns.process import group_samples
+from cns.utils import load_cns, load_samples, cns_head, select_cns_by_type
 
-# Plot mean total_cn per segment along the genome
 # %%
-groups = group_samples(cns_df)
-fig_lines(groups, width=12, cn_columns="total_cn", dpi = 200)
-plt.show()
+raw_df = load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMinor", "nMajor"], canonize=True, print_info=True, sep=",")
 
-# Load sample information
 # %%
-samples = load_samples("./out/PCAWG_samples.tsv")
-print(samples.info())
+fig_heatmap(cns_head(raw_df, 5), max_cn=6)
 
-# Find CN neutral samples at the autosomes
 # %%
-cn_netural = samples.query("ane_minor_cn_frac_aut == 0.0 & ane_major_cn_frac_aut == 0.0").index
-print(len(cn_netural), "samples are CN neutral")
+imp_df = main_fill_imp(raw_df, print_info=True)
 
-# Find samples with low coverage (below 95% in autosomes)
 # %%
-low_coverage = samples.query("cover_frac_aut < 0.95").index
-print(len(low_coverage), "samples have low coverage")
+fig_heatmap(cns_head(imp_df, 5), max_cn=6)
 
-# Filter out CN neutral and low coverage samples 
 # %%
-filtered = samples.query("(index not in @cn_netural) & (index not in @low_coverage) & whitelist")
-len(filtered.index.unique())
+seg_df = main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
 
-# Find the representation of cancer types
 # %%
-print(filtered["type"].value_counts())
-
-# Plot mean total_cn per segment along the genome for liver and pancreas
-# %% 
-liver = filtered.query("type == 'Liver-HCC'").index
-liver_group = group_samples(cns_df.query("sample_id in @liver"))
-pancreas = filtered.query("type == 'Panc-AdenoCA'").index
-pancreas_group = group_samples(cns_df.query("sample_id in @pancreas"))
-fig_lines([liver_group, pancreas_group], ["Liver-HCC", "Panc-AdenoCA"], cn_columns="total_cn", dpi=200)
-plt.show()
-# %%
+sample_df = load_samples("./data/20221109_TRACERx421_all_patient_df.tsv", cananonize=True)
+type_groups = {c: select_cns_by_type(seg_df, sample_df, c, "histology_multi_full") for c in ["LUAD", "LUSC"]}	
+groups_df = pd.concat([group_samples(v, group_name=k) for k, v in type_groups.items()])
+fig_lines(groups_df)

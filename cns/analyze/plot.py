@@ -9,17 +9,18 @@ from cns.utils.gaps import gap_color
 from cns.utils import get_cn_cols, hg19
 
 
-def _get_CN_color(cn, max_cn):
+def _get_CN_color(cn, min_cn, max_cn):
+    val_range = max_cn - min_cn
     if cn == 0:
         return (1, 0, 0)  # Red for zero
     else:
-        ratio = 1 - min(1, cn / max_cn)
+        ratio = 1 - min(1, (cn - min_cn) / val_range)
         return (ratio, ratio, 1)  # Blue gradient based on cn
 
 
-def _get_CN_color_vector(max_cn):
+def _get_CN_color_vector(min_cn, max_cn):
     # Vectorize with otypes for float output
-    vectorized_func = np.vectorize(lambda cn: _get_CN_color(cn, max_cn), otypes=[float, float, float])
+    vectorized_func = np.vectorize(lambda cn: _get_CN_color(cn, min_cn, max_cn), otypes=[float, float, float])
     return lambda cn_array: np.stack(vectorized_func(cn_array), axis=-1)
 
 
@@ -59,9 +60,10 @@ def plot_bars(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1,
     return ax
 
 
-def plot_heatmap(ax, cns_df, cn_column, max_cn, assembly=hg19):
+def plot_heatmap(ax, cns_df, cn_column, min_cn = 0, max_cn = 16, assembly=hg19):
     f_start_pos = _get_start_vector(assembly)
-    f_col = _get_CN_color_vector(min(cns_df[cn_column].max(), max_cn))
+    # lowest value strictly greater than 0
+    f_col = _get_CN_color_vector(min_cn, max_cn)
 
     ax.set_facecolor("gray")
     labels = []
@@ -138,8 +140,6 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
         for i, (group_key, group_df) in enumerate(groups_df):
             color = colors[i]
             label = group_key
-            if len(cn_columns) > 1:
-                label += " - " + cn_column
             f_plot(
                 ax = ax,
                 cns_df = group_df,
@@ -156,7 +156,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
         # elif line_count > 3:
         #     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
 
-        ax.set_ylabel(f"mean CN - {cn_column}")
+        ax.set_ylabel(f"{cn_column}")
         ax.set_xlim(x_min, x_max)
         if j == n_columns - 1:
             plot_x_ticks(ax, assembly, x_min, x_max)   
@@ -193,7 +193,7 @@ def _make_layout(width, height, n_columns):
     return plt.subplots(n_rows, n_cols, figsize=(width, height), sharex=sharex, sharey=sharey)
 
 
-def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=hg19):
+def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = True, assembly=hg19):
     cn_columns = _get_columns(cns_df, cn_columns)
 
     sample_count = len(cns_df["sample_id"].unique())
@@ -202,6 +202,9 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
     width = (x_max - x_min) / 200_000_000
     height = sample_count / 5
     fig, axes = _make_layout(width, height, n_columns)
+    
+    min_cn = cns_df[cn_columns][cns_df[cn_columns] > 0].min().min()
+    max_cn = min(cns_df[cn_columns].max().max(), max_cn)
 
     for j, cn_column in enumerate(cn_columns):
         ax = axes[j] if n_columns > 1 else axes
@@ -209,13 +212,14 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
             ax = ax,
             cns_df = cns_df,
             cn_column=cn_column,
+            min_cn = min_cn,
             max_cn = max_cn,
             assembly=assembly,
         )
         if vertical:
-            ax.set_ylabel(f"sample_id - {cn_column}")
+            ax.set_ylabel(f"{cn_column}")
         elif j == 0:
-            ax.set_ylabel(f"sample_id")
+            ax.set_ylabel("")
         if not vertical:
             ax.set_xlabel(f"{cn_column}")
         elif j == n_columns - 1:
@@ -223,9 +227,16 @@ def fig_heatmap(cns_df, cn_columns=None, max_cn = 16, vertical = True, assembly=
         plot_x_lines(ax, assembly)
         plot_x_ticks(ax, assembly, x_min, x_max)   
         ax.set_xlim(x_min, x_max)
+    
+    ax.margins(x=0, y=0)
 
-    # TODO: add colorbar
-
+    # Add legend
+    blue_patch = mpatches.Patch(facecolor ='blue', label=f'{max_cn:.2f}', edgecolor='black')
+    white_patch = mpatches.Patch(facecolor ='white', label=f'{min_cn:.2f}', edgecolor='black')
+    red_patch = mpatches.Patch(facecolor ='red', label='0', edgecolor='black')
+    gray_patch = mpatches.Patch(facecolor ='gray', label='NaN', edgecolor='black')
+    axes[0].legend(handles=[blue_patch, white_patch, red_patch, gray_patch], loc='upper left', bbox_to_anchor=(1, 1))
+    
     return fig, axes
 
 

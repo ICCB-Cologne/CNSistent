@@ -37,7 +37,7 @@ def get_cn_cols(cns_df, cn_cols=None):
             if col not in cns_df.columns:
                 raise ValueError(f"Column {col} not found in the CNS DataFrame.")
         if len(cn_cols) > 2:
-            raise ValueError("Only one (total) or two (major, minor) CN columns are allowed.")
+            raise ValueError(f"Only one (total) or two (major, minor) CN columns are allowed. Found {cn_cols} instead.")
         if len(cn_cols) == 0:
             raise ValueError("No CN columns found.")
         return cn_cols
@@ -82,22 +82,21 @@ def _find_column(cns_df, patterns):
     return matching_column
 
 
-def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
-    # convert columns to strings
-    cns_df.columns = cns_df.columns.astype(str)
-    cn_columns = get_cn_cols(cns_df, cn_columns)
-
+def canonize_sample_id(df, print_info=False):
     # if the column sample_id does not exist, rename the first column to sample_id
-    if "sample_id" not in cns_df.columns:
-        sample_col = _find_column(cns_df, ['sample', 'id', 'sampleId', 'sample_id', 'sample-id', 'sample_name', 'sampleName', 'sample-name'])	
+    if "sample_id" not in df.columns:
+        sample_col = _find_column(df, ['sample', 'id', 'sampleId', 'sample_id', 'sample-id', 'sample_name', 'sampleName', 'sample-name'])	
         if sample_col is None:
-            cns_df.columns = ["sample_id"] + cns_df.columns[1:].tolist()
+            df.columns = ["sample_id"] + df.columns[1:].tolist()
             log_info(print_info, f"Column sample_id not found, renamed first column to sample_id.")
         else:
-            cns_df.rename(columns={sample_col: "sample_id"}, inplace=True)
+            df.rename(columns={sample_col: "sample_id"}, inplace=True)
             log_info(print_info, f"Renamed column {sample_col} to sample_id.")
+    return df
 
-    # if the column chrom does not exist, rename the second column to chrom
+
+def canonize_chroms(cns_df, assembly=hg19, print_info=False):
+        # if the column chrom does not exist, rename the second column to chrom
     if "chrom" not in cns_df.columns:
         chrom_col = _find_column(cns_df, ['chrom', 'chr', 'chromosome'])
         if chrom_col is None:
@@ -109,8 +108,8 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
 
     chrom_vals = cns_df["chrom"].unique()
     # if the chromosomes values are all either digits or single characters, convert to chrX format
-    if all([chrom.isdigit() or len(chrom) == 1 for chrom in chrom_vals]):
-        cns_df["chrom"] = "chr" + cns_df["chrom"]
+    if all([str(chrom).isdigit() or len(chrom) == 1 for chrom in chrom_vals]):
+        cns_df["chrom"] = "chr" + cns_df["chrom"].astype(str)
         chrom_vals = cns_df["chrom"].unique()
         log_info(print_info, "Chromosome values converted to chr[1-Y] format.")
     # if the first 3 letters of the chromosome values are not lower case, convert these 3 letters to lower case
@@ -126,8 +125,11 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
         log_info(print_info, f"Found chromosomes not in assembly: {not_known}, these will be dropped.")
         rows_to_drop = cns_df[cns_df["chrom"].isin(not_known)].index
         cns_df.drop(rows_to_drop, inplace=True) 
+    return cns_df
 
-    # if the column start does not exist, rename the third column to start
+
+def canonize_positions(cns_df, print_info=False):
+        # if the column start does not exist, rename the third column to start
     if "start" not in cns_df.columns:
         start_col = _find_column(cns_df, ['start', 'begin', 'chromstart', 'chrom-start', 'chrom_start', 'startpos', 'start-pos', 'start_pos'])
         if start_col is None:
@@ -147,6 +149,17 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
         else:
             cns_df.rename(columns={end_col: "end"}, inplace=True)
             log_info(print_info, f"Renamed column {end_col} to end.")
+    return cns_df
+
+
+def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
+    # convert columns to strings
+    cns_df.columns = cns_df.columns.astype(str)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+
+    cns_df = canonize_sample_id(cns_df, print_info)
+    cns_df = canonize_chroms(cns_df, assembly, print_info)
+    cns_df = canonize_positions(cns_df, print_info)
 
     cn_columns = get_cn_cols(cns_df, cn_columns)  
     log_info(print_info, f"Using CN columns: {cn_columns}")
@@ -159,7 +172,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
         cn_columns = ["major_cn", "minor_cn"]
         log_info(print_info, f"Converted columns to ordered")
     else:
-        cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns)
+        cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns, print_info)
 
     cns_df = cns_df[["sample_id", "chrom", "start", "end"] + cn_columns]
     # set dtypes

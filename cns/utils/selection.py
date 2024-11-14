@@ -69,6 +69,14 @@ def select_CNS_samples(cns_df, samples_df):
     return cns_df.query("sample_id in @samples_df.index")
 
 
+def select_cns_by_type(cns_df, samples, type_val, type_col="type"):
+    query = f"{type_col} == '{type_val}'"
+    ids = samples.query(query).index
+    cns_ids = cns_df["sample_id"].unique()
+    intersect = np.intersect1d(ids, cns_ids)
+    select_cns = cns_df.set_index("sample_id").loc[intersect].reset_index()
+    return select_cns
+
 
 def cn_not_nan(cns_df, cn_columns, het):
     nan_vals = cns_df[cn_columns].isna()

@@ -396,9 +396,9 @@ def main_seg_agg(
     select_segs=None,
     remove_segs=None,
     how="mean",
-    split_size=0,
-    merge_dist=0,
-    filter_size=0,
+    split_size=-1,
+    merge_dist=-1,
+    filter_size=-1,
     assembly=hg19,
     print_info=False,
 ):

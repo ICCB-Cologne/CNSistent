@@ -178,29 +178,6 @@ def main_load(segment_type=None, dataset="all", use_filter=True, concat=True, pr
     return samples_df, cns_df
 
 
-def select_cns_by_type(cns, samples, type):
-    """Extract CNS data for a specific cancer type.
-
-    Parameters
-    ----------
-    cns : pd.DataFrame
-        CNS data.
-    samples : pd.DataFrame
-        Sample information.
-    type : str
-        Cancer type to extract.
-
-    Returns
-    -------
-    pd.DataFrame
-        CNS data filtered for the specified cancer type.
-    """
-    query = f"type == '{type}'"
-    ids = samples.query(query).index
-    select_cns = cns.set_index("sample_id").loc[ids].reset_index()
-    return select_cns
-
-
 def save_cns_fig(fig_name, fig=None):
     """Save a figure to the images directory.
 

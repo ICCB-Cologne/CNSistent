@@ -2,14 +2,14 @@ from os.path import abspath, exists
 import numpy as np
 import pandas as pd
 
-from cns.utils.canonization import canonize_cns_df, is_canonical_cns_df
+from cns.utils.canonization import canonize_cns_df, canonize_sample_id, is_canonical_cns_df
 from cns.utils.conversions import df_to_segs, segs_to_df
 from cns.utils.logging import log_warn
 from cns.utils.assemblies import hg19
 
 
-def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, assembly=hg19, print_info=False):
-    cns_df = pd.read_csv(path, sep="\t", low_memory=False)
+def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, assembly=hg19, print_info=False, sep="\t"):
+    cns_df = pd.read_csv(path, sep=sep, low_memory=False)
     if canonize:
         cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
     elif not is_canonical_cns_df(cns_df):
@@ -31,13 +31,17 @@ def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
         cns_df.loc[:, "start"] -= 1
 
 
-def load_samples(path):
+def load_samples(path, cananonize=False, sep="\t"):
     if not exists(path):
         raise ValueError(f"File {path} not found.")
-    samples_df = pd.read_csv(path, sep="\t", index_col=0)
-    samples_df.index.name = "sample_id"
+    samples_df = pd.read_csv(path, sep=sep)
+    if cananonize:
+        samples_df = canonize_sample_id(samples_df)
+    elif "sample_id" not in samples_df.columns:
+        raise ValueError("Column 'sample_id' not found in the samples file. Call load_samples(..., cananonize=True, ...) instead.")	
     if "sex" not in samples_df.columns:
         samples_df["sex"] = "NA"     
+    samples_df.set_index("sample_id", inplace=True)
     return samples_df   
 
 
