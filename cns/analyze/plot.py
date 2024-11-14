@@ -301,7 +301,7 @@ def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
     ax.set_xticklabels(minor_tick_labels, minor=True)
     ax.set_xlim(min_x, max_x)
         # Hide the lines for the minor ticks
-    ax.tick_params(axis='x', which='minor', length=0, pad=-8)
+    ax.tick_params(axis='x', which='minor', length=0, pad=-8, labelsize=10)
 
     return major_tick_pos, minor_tick_pos
 
