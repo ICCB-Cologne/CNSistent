@@ -1,7 +1,9 @@
+import numpy as np
 import pandas as pd
 
 from cns.utils.assemblies import hg19
 from cns.utils.canonization import get_cn_cols
+from cns.utils.selection import only_aut
 
 
 def calc_lengths(cns_df):
@@ -19,8 +21,7 @@ def calc_cum_mid(cns_df, assembly=hg19):
 
 
 def calc_nan_cols(cns_df, cn_columns=None):
-    if cn_columns is None:
-        cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, cn_columns)
     return cns_df[cn_columns].isna().any(axis=1)
 
 
@@ -105,3 +106,27 @@ def genome_to_segments(assembly=hg19):
     for chrom, len in assembly.chr_lens.items():
         segs[chrom] = [(0, len, chrom)]
     return segs
+
+
+def bins_to_features(cns_df, cn_columns=None, drop_sex=True):
+	cn_columns = get_cn_cols(cns_df, cn_columns)
+	sel_df = only_aut(cns_df, inplace=False) if drop_sex else cns_df
+	groups = sel_df.groupby("sample_id")
+	columns = next(iter(groups))[1][['chrom', 'start', 'end']]
+	rows = list(groups.groups.keys())
+
+	# Calculate the cumulative count for each group without assigning it to the DataFrame
+	cumcount = groups.cumcount()
+
+	if len(cumcount) != len(columns) * len(rows):
+		raise ValueError("The number of cumulative counts does not match the number of rows and columns. Make sure that each sample has the same number of bins.")
+
+	arrays = []
+	for cn_col in cn_columns:
+		# Use the cumulative count directly in the pivot operation
+		array = sel_df.pivot_table(index="sample_id", columns=cumcount, values=cn_col)
+		arrays.append(array)
+
+	stacked = np.stack(arrays, axis=0)
+
+	return stacked, rows, columns

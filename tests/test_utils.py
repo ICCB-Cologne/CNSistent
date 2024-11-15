@@ -64,6 +64,20 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(sortable_to_chrom(24), 'chrY')
         self.assertEqual(sortable_to_chrom(25), 'chrM')
 
+    def test_bins_to_features(self):
+        cns_df = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's2', 's2'],
+            'chrom': ['chr1', 'chr1', 'chr2', 'chr2'],
+            'start': [0, 0, 0, 0],
+            'end': [100, 100, 200, 200],
+            'major_cn': [1 ,2, 3, 4],
+            'minor_cn': [0, 1, 1, 0]
+        })
+        features, rows, columns = bins_to_features(cns_df)
+        self.assertEqual(features.shape, (2, 2, 2))
+        self.assertEqual(rows, ['s1', 's2'])
+        self.assertEqual(columns.iloc[0].to_list(), ['chr1', 0, 100])
+
 
 class TestFiles(unittest.TestCase):
     def setUp(self):

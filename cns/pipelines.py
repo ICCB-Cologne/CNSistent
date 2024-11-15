@@ -120,7 +120,8 @@ def main_fill_imp(
     print_info=False,
 ):
     res_df = main_fill(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
-    return main_impute(res_df, samples_df, method, cn_columns, print_info)
+    res_df = main_impute(res_df, samples_df, method, cn_columns, print_info)
+    return res_df
 
 
 # any: if True, based is considered as covered if any CN column has values assigned
@@ -403,4 +404,5 @@ def main_seg_agg(
     print_info=False,
 ):
     segs = main_segment(cns_df, select_segs, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
-    return main_aggregate(cns_df, segs, how, cn_columns, print_info)
+    res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
+    return res_df

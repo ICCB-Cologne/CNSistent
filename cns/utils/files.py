@@ -8,7 +8,7 @@ from cns.utils.logging import log_warn
 from cns.utils.assemblies import hg19
 
 
-def load_cns(path, canonize=False, cn_columns=None, sort=False, change_coords=True, assembly=hg19, print_info=False, sep="\t"):
+def load_cns(path, canonize=False, cn_columns=None, sep="\t", sort=False, change_coords=True, assembly=hg19, print_info=False):
     cns_df = pd.read_csv(path, sep=sep, low_memory=False)
     if canonize:
         cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
