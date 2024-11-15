@@ -67,7 +67,7 @@ def _get_major_minor_cols(cns_df, cn_columns):
     if (cns_df[col1] >= cns_df[col2]).all():
         return {col1: "major_cn", col2: "minor_cn"}
     elif (cns_df[col2] >= cns_df[col1]).all():
-        return {col1: "major_cn", col2: "minor_cn"}
+        return {col1: "minor_cn", col2: "major_cn"}
     else:
         return {}  
 

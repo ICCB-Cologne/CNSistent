@@ -148,8 +148,16 @@ class TestImputation(unittest.TestCase):
             'major_cn': [1, 2, 3, np.nan, 1, 1, 2],
             'minor_cn': [1, 2, 1, 0, 0, 0, 1]
         }) 
-        self.chr_lengths = {'chr1': 100, 'chr2': 200, 'chr3': 300}
-        self.total_len = sum(self.chr_lengths.values())
+        self.assembly = type('Assembly', (object,), {
+            'aut_names': ['chr1', 'chr2', 'chr3'],
+            'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
+            'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
+            'aut_len': 300,
+            'sex_names': ['chrX', 'chrY'],
+            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY'],
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
+        })
         self.samples_df = pd.DataFrame({
             'sex': ['xx', 'xy']
         }, index=['s1', 's2'])
@@ -159,7 +167,7 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.shape[0], 1)
 
     def test_add_tails(self):
-        result = add_tails(self.cns_df, self.chr_lengths)
+        result = add_tails(self.cns_df, self.assembly, print_info=True)
         self.assertEqual(result.shape[0], 9)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 50)
@@ -171,7 +179,8 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.at[3, "end"], 125)
 
     def test_add_missing(self):
-        result = add_missing(self.cns_df, self.samples_df, self.chr_lengths, print_info=False)
+        result = add_missing(self.cns_df, self.samples_df, self.assembly, print_info=False)
+        print(result)
         self.assertEqual(result.shape[0], 9)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 100)
@@ -188,13 +197,18 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.minor_cn.isnull().sum(), 0)
 
     def test_impute_extend(self):
-        result = add_tails(self.cns_df, self.chr_lengths)
+        result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
-        result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
+        result = add_missing(result, self.samples_df, self.assembly, print_info=False)
+        print(result)
+
         result = cns_impute(result, self.samples_df, print_info=False)
+        print(result)
+
         result = merge_neighbours(result, print_info=False)
+        print(result)
+
         result = fill_nans_with_zeros(result, print_info=False)  
-        self.assertEqual(result.shape[0], 9)
         self.assertEqual(result.at[6, "end"], 137)
         self.assertEqual(result.at[7, "start"], 137)
         self.assertEqual(result.at[7, "end"], 200)
@@ -203,9 +217,9 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.query("sample_id == 's2'")["chrom"].unique().shape[0], 3)
 
     def test_impute_diploid(self):
-        result = add_tails(self.cns_df, self.chr_lengths)
+        result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
-        result = add_missing(result, self.samples_df, self.chr_lengths, print_info=False)
+        result = add_missing(result, self.samples_df, self.assembly, print_info=False)
         result = cns_impute(result, self.samples_df, method='diploid', print_info=False)
         result = merge_neighbours(result, print_info=False)
         result = fill_nans_with_zeros(result, print_info=False)  

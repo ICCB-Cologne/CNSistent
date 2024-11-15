@@ -58,11 +58,11 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     cn_columns = get_cn_cols(cns_df, cn_columns)
-    cns_tailed_df = add_tails(cns_df, assembly.chr_lens, print_info=print_info)
+    cns_tailed_df = add_tails(cns_df, assembly, print_info=print_info)
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
-        cns_filled_df = add_missing(cns_filled_df, samples_df, assembly.chr_lens, print_info=print_info)
-    cns_cleared_df = remove_outliers(cns_filled_df, assembly.chr_lens, print_info=print_info)
+        cns_filled_df = add_missing(cns_filled_df, samples_df, assembly, print_info=print_info)
+    cns_cleared_df = remove_outliers(cns_filled_df, assembly, print_info=print_info)
     res_df = merge_neighbours(cns_cleared_df, cn_columns, print_info=print_info)
     return res_df
 

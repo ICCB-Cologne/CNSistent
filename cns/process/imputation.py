@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from cns.utils.canonization import get_cn_cols
 from cns.utils.logging import log_info
+from cns.utils.assemblies import hg19
 
 
 def get_nan_segs(cns_df):
@@ -9,7 +10,8 @@ def get_nan_segs(cns_df):
     return nans
 
 
-def add_tails(cns_df, chr_lengths, print_info=True):
+def add_tails(cns_df, assembly=hg19, print_info=True):
+    chr_lens = assembly.chr_lens
     grouped = cns_df.groupby(["sample_id", "chrom"]).agg({"start": "min", "end": "max"})
     grouped = grouped.rename(columns={"start": "min_start", "end": "max_end"})
     grouped = grouped.reset_index()
@@ -24,13 +26,13 @@ def add_tails(cns_df, chr_lengths, print_info=True):
                     "end": row.min_start
                 }
             )
-        if row.max_end < chr_lengths[f"{row.chrom}"]:
+        if row.max_end < chr_lens[f"{row.chrom}"]:
             missing_ranges.append(
                     {
                         "sample_id": row.sample_id,
                         "chrom":  row.chrom,
                         "start": row.max_end,
-                        "end": chr_lengths[str(row.chrom)]
+                        "end": chr_lens[str(row.chrom)]
                     }
             )
 
@@ -83,21 +85,24 @@ def fill_gaps(cns_df, print_info=True):
 
 
 # Add fully missing chromosomes
-def add_missing(cns_df, samples_df, chr_lengths, print_info=True):
+def add_missing(cns_df, samples_df=None, assembly=hg19, print_info=True):
     res_df = cns_df.set_index("sample_id")
-    chromosomes = chr_lengths.keys()
 
     new_entries = []
     for sample in res_df.index.unique():
         cns_sample_df = res_df.loc[sample]
         sample_chroms = cns_sample_df["chrom"].values
-        for chromosome in chromosomes:
-            if chromosome not in sample_chroms and (chromosome != "chrY" or samples_df.loc[sample].sex == "xy"):
+        for chromosome in assembly.chr_names:
+            if chromosome not in sample_chroms:
+                if chromosome == assembly.chr_x and samples_df is None:
+                    continue
+                if chromosome == assembly.chr_y and (samples_df is None or samples_df.loc[sample].sex == "xx"):
+                    continue
                 new_entry = {
                     "sample_id": sample,
                     "chrom": chromosome,
                     "start": 0,
-                    "end": chr_lengths[chromosome],
+                    "end": assembly.chr_lens[chromosome],
                 }
                 new_entries.append(new_entry)
 
@@ -115,8 +120,9 @@ def add_missing(cns_df, samples_df, chr_lengths, print_info=True):
         return res_df
 
 
-def remove_outliers(cns_df, chr_lengths, print_info=True):
+def remove_outliers(cns_df, assembly=hg19, print_info=True):
     res_df = cns_df.copy()
+    chr_lens = assembly.chr_lens
     idx_to_remove = []
     for i, (index, row) in enumerate(res_df.iterrows()):
         if row.start < 0:
@@ -125,12 +131,12 @@ def remove_outliers(cns_df, chr_lengths, print_info=True):
                 log_info(print_info, f"Removed outlier:\n{row}")
             else:
                 res_df.at[index, "start"] = 0
-        if row.end > chr_lengths[row.chrom]:
-            if row.start > chr_lengths[row.chrom]:
+        if row.end > chr_lens[row.chrom]:
+            if row.start > chr_lens[row.chrom]:
                 idx_to_remove.append(i)
                 log_info(print_info, f"Removed outlier:\n{row}")
             else:
-                res_df.at[index, "end"] = chr_lengths[row.chrom]
+                res_df.at[index, "end"] = chr_lens[row.chrom]
 
     log_info(print_info, f"Removed outliers: {len(idx_to_remove)}")
     # remove from cns_df where idx_to_remove is in the index

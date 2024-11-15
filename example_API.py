@@ -10,7 +10,7 @@ from cns.process import group_samples
 from cns.utils import load_cns, load_samples, cns_head, select_cns_by_type, bins_to_features
 
 # %%
-raw_df = load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMinor", "nMajor"], sep=",", canonize=True, print_info=True)
+raw_df = load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMajor", "nMinor"], sep=",", canonize=True, print_info=True)
 fig_heatmap(cns_head(raw_df, 5), max_cn=6)
 
 # %%
