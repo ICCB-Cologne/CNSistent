@@ -154,7 +154,7 @@ class TestImputation(unittest.TestCase):
             'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
             'aut_len': 300,
             'sex_names': ['chrX', 'chrY'],
-            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY'],
+            'chr_names': ['chr1', 'chr2', 'chr3'],
             'chr_x': 'chrX',
             'chr_y': 'chrY'
         })
