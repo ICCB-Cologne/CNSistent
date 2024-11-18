@@ -110,12 +110,14 @@ def aggregate_by_break_type(cns_df, break_type, assembly=hg19, how="mean", cn_co
     return aggregate_by_breaks(cns_df, breaks, how, cn_columns, print_info)
 
 
-def add_total_cn(cns_df, cn_columns=None):
+def add_total_cn(cns_df, cn_columns=None, remove_cn_columns=False):
     cn_columns = get_cn_cols(cns_df, cn_columns)
     # remove total_cn from cn_columns if it is there
     if "total_cn" in cn_columns:
         cn_columns.remove("total_cn")
     cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
+    if remove_cn_columns:
+        cns_df.drop(columns=cn_columns, inplace=True)
     return cns_df
 
 
@@ -137,3 +139,14 @@ def group_samples(cns_df, cn_columns=None, how="mean", group_name="grouped"):
     grouped = grouped.agg(agg_scheme).reset_index()
     grouped["sample_id"] = group_name
     return grouped
+
+
+def stack_groups(cns_dfs, labels=None):
+    if not isinstance(cns_dfs, list):
+        cns_dfs = [cns_dfs]
+    if labels is not None:
+        if len(cns_dfs) != len(labels):
+            raise ValueError("If specified, the length of labels must be equal to the number of dataframes.")
+        for i, df in enumerate(cns_dfs):
+            df["sample_id"] = labels[i]
+    return pd.concat(cns_dfs)

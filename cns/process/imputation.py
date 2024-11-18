@@ -177,6 +177,10 @@ def _is_same_contig(df, id, chrom, j):
 
 
 def _impute_extend(cns_df, cn_columns, print_info=True):
+    """
+    For each column with NaN, find the previous and next existing value and fill up to midpoint. 
+    If only one exists, fill up to the next or previous value. If none exist, fill with 0.
+    """
     new_entries = []
     new_vals = {}
     for i in range(len(cns_df)):

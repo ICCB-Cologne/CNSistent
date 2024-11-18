@@ -5,10 +5,12 @@ import time
 import argparse
 from os.path import exists
 
+from cns.utils.selection import dataframe_array_split
 from cns.process import regions_select
 from cns.utils import get_assembly, get_cn_cols, log_info
 from cns.utils.files import *
 from cns.pipelines import *
+from cns.utils.selection import dataframe_array_split
 
 
 def _add_sp_args(action, parser):

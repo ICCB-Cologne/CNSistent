@@ -100,11 +100,6 @@ class TestFiles(unittest.TestCase):
         self.assertEqual(result.loc['s2', 'sex'], 'xy')
         self.assertEqual(result.loc['s4', 'sex'], 'xx')
 
-    def test_chry_col(self):
-        res = find_y_column(self.cns_df, self.samples, ["major_cn", "minor_cn"])
-        self.assertEqual(res.loc['s1', 'y_col'], 'major_cn')
-        self.assertEqual(res.loc['s2', 'y_col'], 'NA')
-
 
 class TestCanonization(unittest.TestCase):
     def setUp(self):

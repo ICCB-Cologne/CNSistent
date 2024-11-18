@@ -5,16 +5,18 @@ Functions
 ---------
 - main_fill: Fills gaps in the CNS data and adds missing chromosomes.
 - main_impute: Imputes missing values in the CNS data.
+- main_fill_imp: Fills gaps, adds missing chromosomes, and imputes missing values in the CNS data.
 - main_breakage: Identifies breakpoints in CNS data.
 - main_coverage: Calculates coverage statistics for CNS data.
 - main_ploidy: Calculates ploidy statistics for CNS data.
 - main_segment: Segments CNS data based on specified parameters.
 - main_aggregate: Aggregates CNS data over specified genomic segments.
+- main_seg_agg: Segments CNS data and aggregates the results.
 """
 
-from cns.analyze import *
-from cns.process import *
-from cns.utils import *
+from .analyze import *
+from .process import *
+from .utils import *
 
 
 def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
@@ -119,6 +121,31 @@ def main_fill_imp(
     method="extend",
     print_info=False,
 ):
+    """
+    Fills gaps in the CNS data, adds missing chromosomes, and imputes missing values.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS (Copy Number Segment) data.
+    samples_df : pandas.DataFrame, optional
+        DataFrame containing sample information. If None, samples are created from `cns_df`.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
+    add_missing_chromosomes : bool, optional
+        If True, adds missing chromosomes to the data. Default is True.
+    method : str, optional
+        Imputation method to use. Options are "extend" or "diploid". Default is "extend".
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with filled gaps, added missing chromosomes, and imputed values.
+    """
     res_df = main_fill(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
     res_df = main_impute(res_df, samples_df, method, cn_columns, print_info)
     return res_df
@@ -403,6 +430,39 @@ def main_seg_agg(
     assembly=hg19,
     print_info=False,
 ):
+    """
+    Segments CNS data and aggregates the results.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS (Copy Number Segment) data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    select_segs : pandas.DataFrame, optional
+        DataFrame containing segments to select for binning.
+    remove_segs : pandas.DataFrame, optional
+        DataFrame containing segments to remove from the selection.
+    how : str, optional
+        Aggregation method to use. Default is "mean".
+    split_size : int, optional
+        Size in base pairs to split segments. Default is -1 (no splitting).
+    merge_dist : int, optional
+        Distance in base pairs to merge nearby segments. Default is -1 (no merging).
+    filter_size : int, optional
+        Minimum size in base pairs to filter segments. Default is -1 (no filtering).
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with aggregated CNS data.
+    """
     segs = main_segment(cns_df, select_segs, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df
+
+

@@ -97,3 +97,41 @@ def get_chr_sets(cns_df, assembly=hg19):
         res_dict["sex"] = sex_selection
         res_dict["all"] = aut_selection + sex_selection
     return res_dict
+
+
+def dataframe_array_split(df, n_splits):
+    """
+    Splits a DataFrame into n_splits parts as equally as possible.
+
+    Parameters:
+    - df: The pandas DataFrame to split.
+    - n_splits: The number of parts to split the DataFrame into.
+
+    Returns:
+    - A list of pandas DataFrame objects.
+    """
+    # Ensure n_splits is a positive integer
+    n_splits = max(int(n_splits), 1)
+
+    # Calculate the number of rows in each split
+    total_rows = len(df)
+    rows_per_split = total_rows // n_splits
+    remainder = total_rows % n_splits
+
+    # Initialize variables to keep track of the current row and the list of splits
+    current_row = 0
+    splits = []
+
+    for i in range(n_splits):
+        # Calculate the number of rows for this split
+        # Add one to some of the splits to distribute the remainder
+        rows_in_split = rows_per_split + (1 if i < remainder else 0)
+
+        # Slice the DataFrame for this split and append to the list
+        split_df = df.iloc[current_row:current_row + rows_in_split]
+        if rows_in_split > 0:
+            splits.append(split_df)
+            # Update the current row index
+            current_row += rows_in_split
+
+    return splits

@@ -92,6 +92,7 @@ def canonize_sample_id(df, print_info=False):
         else:
             df.rename(columns={sample_col: "sample_id"}, inplace=True)
             log_info(print_info, f"Renamed column {sample_col} to sample_id.")
+
     return df
 
 
