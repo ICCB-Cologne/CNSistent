@@ -236,7 +236,8 @@ def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = Tru
     handles.append(mpatches.Patch(facecolor ='white', label=f'{min_cn:.2f}', edgecolor='black'))
     handles.append(mpatches.Patch(facecolor ='red', label='0', edgecolor='black'))
     handles.append(mpatches.Patch(facecolor ='gray', label='NaN', edgecolor='black'))
-    axes[0].legend(handles=handles, loc='upper left', bbox_to_anchor=(1, 1))
+    last_ax = axes[-1] if n_columns > 1 else axes
+    last_ax.legend(handles=handles, loc='upper left', bbox_to_anchor=(1, 1))
     
     return fig, axes
 
