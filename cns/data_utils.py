@@ -8,10 +8,7 @@ and managing file paths.
 
 import pandas as pd
 from os.path import join as pjoin, abspath, dirname
-from cns.utils.logging import log_info
-from cns.utils.selection import select_CNS_samples
-from cns.utils.files import load_cns, load_samples, load_segments
-from cns.utils.anomaly import find_bends, z_score_filter
+from cns.utils import log_info, select_CNS_samples, load_cns, load_samples, load_segments, find_bends, z_score_filter
 import matplotlib.pyplot as plt
 
 

@@ -266,7 +266,7 @@ def main():
         raise ValueError(f"Copy number file {cns_file_path} not found.")
     else:
         log_info(print_info, f"CNS file at {cns_file_path}...")
-    cns_df = load_cns(cns_file_path, canonize=True, cn_columns=cncols, assembly=assembly, print_info=print_info)
+    cns_df = load_cns(cns_file_path, cn_columns=cncols, assembly=assembly, print_info=print_info)
     cn_columns = get_cn_cols(cns_df, cncols)
     if samples_path == "":
         samples_df = samples_df_from_cns_df(cns_df, False)

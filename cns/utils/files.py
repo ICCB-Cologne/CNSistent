@@ -2,18 +2,27 @@ from os.path import abspath, exists
 import numpy as np
 import pandas as pd
 
-from cns.utils.canonization import canonize_cns_df, canonize_sample_id, is_canonical_cns_df
+from cns.utils.canonization import canonize_cns_df, canonize_sample_id
 from cns.utils.conversions import df_to_segs, segs_to_df
 from cns.utils.logging import log_warn
 from cns.utils.assemblies import hg19
 
 
-def load_cns(path, canonize=False, cn_columns=None, sep="\t", sort=False, change_coords=True, assembly=hg19, print_info=False):
+def _get_separator(path):
+    if path.endswith(".csv"):
+        return ","
+    elif path.endswith(".tsv"):
+        return "\t"
+    else:
+        raise ValueError(f"Unknown file format for file {path}, cannot determine separator.")
+
+
+def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, assembly=hg19, print_info=False):
+    if not exists(path):
+        raise ValueError(f"File {path} not found.")
+    sep = sep if sep is not None else _get_separator(path)
     cns_df = pd.read_csv(path, sep=sep, low_memory=False)
-    if canonize:
-        cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
-    elif not is_canonical_cns_df(cns_df):
-        raise ValueError("CNS file is not canonical, call load_cns(..., canonize=True, ...) instead.")
+    cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
     if change_coords:
         cns_df.loc[:, "start"] -= 1
     if sort:
@@ -31,14 +40,12 @@ def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
         cns_df.loc[:, "start"] -= 1
 
 
-def load_samples(path, cananonize=False, sep="\t"):
+def load_samples(path, sep=None):
     if not exists(path):
         raise ValueError(f"File {path} not found.")
+    sep = sep if sep is not None else _get_separator(path)
     samples_df = pd.read_csv(path, sep=sep)
-    if cananonize:
-        samples_df = canonize_sample_id(samples_df)
-    elif "sample_id" not in samples_df.columns:
-        raise ValueError("Column 'sample_id' not found in the samples file. Call load_samples(..., cananonize=True, ...) instead.")	
+    samples_df = canonize_sample_id(samples_df)
     if "sex" not in samples_df.columns:
         samples_df["sex"] = "NA"     
     samples_df.set_index("sample_id", inplace=True)
@@ -105,6 +112,8 @@ def save_segments(segs, path):
 
 
 def load_segments(path):
+    if not exists(path):
+        raise ValueError(f"File {path} not found.")
     is_bed = path.lower().endswith(".bed")
     if not is_bed:
         log_warn(f"Segments file {path} is not bed file, the coordinates will be 1-based.")

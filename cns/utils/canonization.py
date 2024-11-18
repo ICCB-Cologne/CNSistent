@@ -189,6 +189,3 @@ def _is_cn_column(column):
     pattern = re.compile(r'^(cn).*|.*(cn)$|.*(major|minor|hap|total|allele).*', re.IGNORECASE)
     return bool(re.search(pattern, column))
 
-
-def is_canonical_cns_df(cns_df):
-    return "sample_id" in cns_df.columns and "chrom" in cns_df.columns and "start" in cns_df.columns and "end" in cns_df.columns and any([_is_cn_column(col) for col in cns_df.columns])
