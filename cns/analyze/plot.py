@@ -230,16 +230,12 @@ def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = Tru
     
     ax.margins(x=0, y=0)
 
-    has_nans = cns_df[cn_columns].isna().any().any()
-    has_zeros = (cns_df[cn_columns] == 0).any().any()
     # Add legend
     handles = []
     handles.append(mpatches.Patch(facecolor ='blue', label=f'{max_cn:.2f}', edgecolor='black'))
     handles.append(mpatches.Patch(facecolor ='white', label=f'{min_cn:.2f}', edgecolor='black'))
-    if has_zeros:
-        handles.append(mpatches.Patch(facecolor ='red', label='0', edgecolor='black'))
-    if has_nans:
-        handles.append(mpatches.Patch(facecolor ='gray', label='NaN', edgecolor='black'))
+    handles.append(mpatches.Patch(facecolor ='red', label='0', edgecolor='black'))
+    handles.append(mpatches.Patch(facecolor ='gray', label='NaN', edgecolor='black'))
     axes[0].legend(handles=handles, loc='upper left', bbox_to_anchor=(1, 1))
     
     return fig, axes

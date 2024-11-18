@@ -118,7 +118,7 @@ def load_samples(path, sep=None, print_info=False):
         samples_df["sex"] = "NA"
     else:
         # where samples_df["sex"] is not xy or xx, replace with NA
-        unknowns = samples_df["sex"].isin(["xy", "xx"])["sex"].unique()
+        unknowns = samples_df[samples_df["sex"].isin(["xy", "xx"])]["sex"].unique()
         if len(unknowns) > 0:
             log_warn(f"Found unknown sex values: {unknowns}. Replacing with 'NA'. Use ['xx', 'xy'].")
         samples_df.loc[~samples_df["sex"].isin(["xy", "xx"]), "sex"] = "NA"
