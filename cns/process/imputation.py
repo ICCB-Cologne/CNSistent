@@ -195,11 +195,11 @@ def _impute_extend(cns_df, cn_columns, print_info=True):
                 next_idx = i + 1
                 while prev_idx >= 0 and np.isnan(cns_df.at[prev_idx, col]) and _is_same_contig(cns_df, id, chrom, prev_idx):
                     prev_idx -= 1
-                if prev_idx < 0 or np.isnan(cns_df.at[prev_idx, col]):
+                if prev_idx < 0 or np.isnan(cns_df.at[prev_idx, col]) or not _is_same_contig(cns_df, id, chrom, prev_idx):
                     prev_idx = -1
                 while next_idx < len(cns_df) and np.isnan(cns_df.at[next_idx, col]) and _is_same_contig(cns_df, id, chrom, next_idx):
                     next_idx += 1
-                if next_idx >= len(cns_df) or np.isnan(cns_df.at[next_idx, col]):
+                if next_idx >= len(cns_df) or np.isnan(cns_df.at[next_idx, col]) or not _is_same_contig(cns_df, id, chrom, next_idx):
                     next_idx = -1
                 if prev_idx == -1 and next_idx == -1:
                     new_vals[col] = 0
