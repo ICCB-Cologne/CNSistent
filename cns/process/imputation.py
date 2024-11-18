@@ -172,46 +172,74 @@ def merge_neighbours(cns_df, cn_columns=None, print_info=True):
     return res_df
 
 
-def _is_same_chrom(df, i, j):
-    return df.at[j, "sample_id"] == df.at[i, "sample_id"] and df.at[j, "chrom"] == df.at[i, "chrom"]
+def _is_same_contig(df, id, chrom, j):
+    return df.at[j, "sample_id"] == id and df.at[j, "chrom"] == chrom
 
 
 def _impute_extend(cns_df, cn_columns, print_info=True):
     new_entries = []
+    new_vals = {}
     for i in range(len(cns_df)):
         if any(np.isnan(cns_df.at[i, col]) for col in cn_columns):
-            prev_vals = [np.nan for _ in cn_columns]
-            next_vals = list(prev_vals)
-            for k in range(len(cn_columns)):
-                j = i
-                while j >= 0 and np.isnan(prev_vals[k]) and _is_same_chrom(cns_df, i, j):
-                    prev_vals[k] = cns_df.at[j, cn_columns[k]]
-                    j -= 1
-                j = i
-                while j < len(cns_df) and np.isnan(next_vals[k]) and _is_same_chrom(cns_df, i, j):
-                    next_vals[k] = cns_df.at[j, cn_columns[k]]
-                    j += 1
-                if np.isnan(prev_vals[k]) and np.isnan(next_vals[k]):
-                    prev_vals[k] = 0
-                    next_vals[k] = 0
-                elif np.isnan(prev_vals[k]):
-                    prev_vals[k] = next_vals[k]
-                elif np.isnan(next_vals[k]):
-                    next_vals[k] = prev_vals[k]
             
             id = cns_df.at[i, "sample_id"]
             chrom = cns_df.at[i, "chrom"]            
             start = cns_df.at[i, "start"]
             end = cns_df.at[i, "end"]
-            if all([prev_vals[k] == next_vals[k] for k in range(len(cn_columns))]):
-                new_simple = [id, chrom, start, end] + prev_vals
+
+            for col in cn_columns:
+                if not np.isnan(cns_df.at[i, col]):
+                    new_vals[col] = cns_df.at[i, col]
+                    continue
+                prev_idx = i - 1
+                next_idx = i + 1
+                while prev_idx >= 0 and np.isnan(cns_df.at[prev_idx, col]) and _is_same_contig(cns_df, id, chrom, prev_idx):
+                    prev_idx -= 1
+                if prev_idx < 0 or np.isnan(cns_df.at[prev_idx, col]):
+                    prev_idx = -1
+                while next_idx < len(cns_df) and np.isnan(cns_df.at[next_idx, col]) and _is_same_contig(cns_df, id, chrom, next_idx):
+                    next_idx += 1
+                if next_idx >= len(cns_df) or np.isnan(cns_df.at[next_idx, col]):
+                    next_idx = -1
+                if prev_idx == -1 and next_idx == -1:
+                    new_vals[col] = 0
+                elif prev_idx == -1 and next_idx != -1:
+                    new_vals[col] = cns_df.at[next_idx, col]
+                elif prev_idx != -1 and next_idx == -1:
+                    new_vals[col] = cns_df.at[prev_idx, col]
+                else:
+                    prev_end = cns_df.at[prev_idx, "end"]
+                    next_start = cns_df.at[next_idx, "start"]
+                    midpoint = prev_end + (next_start - prev_end) // 2
+                    if midpoint <= start:
+                        new_vals[col] = cns_df.at[next_idx, col]
+                    elif midpoint >= end:
+                        new_vals[col] = cns_df.at[prev_idx, col]
+                    else:
+                        new_vals[col] = (midpoint, cns_df.at[prev_idx, col], cns_df.at[next_idx, col])
+            mid_count = 0
+            for k, v in new_vals.items():
+                if isinstance(v, tuple):
+                    mid_count += 1
+                    break
+            if mid_count == 0:
+                new_simple = [id, chrom, start, end] + [new_vals[col] for col in cn_columns]
                 new_entries.append(new_simple)
-            else:
-                midpoint = start + (end - start) // 2
-                first_half = [id, chrom, start, midpoint] + prev_vals
-                second_half = [id, chrom, midpoint, end] + next_vals
+            elif mid_count == 1 or new_vals[cn_columns[0]][0] == new_vals[cn_columns[1]][0]:
+                midpoint = new_vals[cn_columns[0]][0] if isinstance(new_vals[cn_columns[0]], tuple) else new_vals[cn_columns[1]][0]
+                first_half = [id, chrom, start, midpoint] + [new_vals[col][1] if isinstance(new_vals[col], tuple) else new_vals[col] for col in cn_columns]
+                second_half = [id, chrom, midpoint, end] + [new_vals[col][2] if isinstance(new_vals[col], tuple) else new_vals[col] for col in cn_columns]
                 new_entries.append(first_half)                    
-                new_entries.append(second_half)                
+                new_entries.append(second_half)
+            else:
+                midpoints = sorted([new_vals[col][0] for col in cn_columns])
+                first_part = [id, chrom, start, midpoints[0]] + [new_vals[col][1] for col in cn_columns]
+                second_part = [id, chrom, midpoints[0], midpoints[1]] + [new_vals[col][1] if new_vals[col][0] <= midpoints[1] else new_vals[col][2] for col in cn_columns]
+                third_part = [id, chrom, midpoints[1], end] + [new_vals[col][2] for col in cn_columns]
+                new_entries.append(first_part)
+                new_entries.append(second_part)
+                new_entries.append(third_part)
+
     
     new_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
     imputation_df = pd.DataFrame(new_entries, columns=new_cols)

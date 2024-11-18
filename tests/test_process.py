@@ -209,9 +209,9 @@ class TestImputation(unittest.TestCase):
         print(result)
 
         result = fill_nans_with_zeros(result, print_info=False)  
-        self.assertEqual(result.at[6, "end"], 137)
-        self.assertEqual(result.at[7, "start"], 137)
-        self.assertEqual(result.at[7, "end"], 200)
+        self.assertEqual(result.at[4, "end"], 112)
+        self.assertEqual(result.at[5, "end"], 125)
+        self.assertEqual(result.at[6, "end"], 200)
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.query("sample_id == 's1'")["chrom"].unique().shape[0], 3)
         self.assertEqual(result.query("sample_id == 's2'")["chrom"].unique().shape[0], 3)
