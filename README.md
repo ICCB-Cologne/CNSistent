@@ -37,9 +37,9 @@ Aggregate the imputed CNS data into 3 MB segments and convert it into a feature 
 ```python
 seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
 features, rows, columns = cns.bins_to_features(seg_df)
-print("(alleles, samples, bins):", features.shape)
+print("Alleles: {0}, samples: {1}, bins: {2}.".format(*features.shape))
 ```
-`(alleles, samples, bins): (2, 403, 960)`
+`Alleles: 2, samples: 403, bins: 960.`
 
 ## 4. Group Segments by Cancer Type
 Group the CNS data by cancer type, calculate the total CN, and visualize mean linear profiles.

@@ -36,6 +36,7 @@ Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
 
 .. image:: ../files/intro_1.png
     :alt: Raw Data Heatmap
+    :width: 800px
 
 2. Impute Missing Segments
 ``````````````````````````
@@ -49,6 +50,7 @@ Fill in missing segments in the data, impute using the extension method, and dis
 
 .. image:: ../files/intro_2.png
     :alt: Imputed Data Heatmap
+    :width: 800px
 
 3. Create 3 mb Segments and convert to a feature array
 ``````````````````````````````````````````````````````
@@ -57,11 +59,11 @@ Aggregate the imputed CNS data into 3 MB segments and convert it into a feature 
 
 .. code-block:: python
 
-    seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
-    features, rows, columns = cns.bins_to_features(seg_df)
-    print("(alleles, samples, bins):", features.shape)
+   seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
+   features, rows, columns = cns.bins_to_features(seg_df)
+   print("Alleles: {0}, samples: {1}, bins: {2}.".format(*features.shape))
 
-``(alleles, samples, bins): (2, 403, 960)``
+``Alleles: 2, samples: 403, bins: 960.``
 
 4. Group Segments by Cancer Type
 ````````````````````````````````
@@ -77,6 +79,7 @@ Group the CNS data by cancer type, calculate the total CN, and visualize mean li
 
 .. image:: ../files/intro_3.png
     :alt: Grouped Data Heatmap
+    :width: 800px
 
 The example code is also in ``example_API.py``.
 
