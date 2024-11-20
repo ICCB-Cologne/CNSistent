@@ -1,12 +1,15 @@
 ![Example Data](./docs/Logo.png)
 
-CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
+CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
-Full documentation including examples is available [here](./docs/build/html/index.html).
+> This repository also contains data from the PCAWG, TCGA, and TRACERx datasets, as well as gene sets from COSMIC and Ensembl, therefore git clone will download around 1GB of data. If you only want to use the library, download via PyPI (TODO)
+
+<a href="./docs/build/html/index.html" style="font-size: 2.5em;">DOCUMENTATION HERE</a>
+
 
 # Example
 
-The below data are directly taken from the published [TRACERx Zenodo archive](https://zenodo.org/records/7649257).
+The below used files are directly taken from the [TRACERx Zenodo archive](https://zenodo.org/records/7649257).
 
 ## 1. Load CNS Data and Display Heatmap
 Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
@@ -51,240 +54,156 @@ cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
 
 The example code is also in `example_API.py`.
 
-# Usage
+# Repository Data Quickstart
 
-CNSistent is available both as a [stand-alone](#cli) tool and as a [Python library](#library).
+This repository contains raw data from PCAWG, TCGA, TRACERx, as well as genomic locations. The data needs to be processed first before it can be used.
 
-Requires:
+## Requirements
 
 * Git LFS
 * Python 3.8+
 * Pip 21.3+
+* (Optional) Conda for environment creation
 
-> Git Clone the will also download all source datasets, in total around ~1GB.
+## Processing
 
-## Quickstart (from Bash)
+1. Clone the repository: `git clone https://bitbucket.org/schwarzlab/cnsistent`
+2. Create the conda environment: `conda env create -f ./cnsistent.yml`
+3. Activate the environment: `conda activate cns`
+4. Install the package from location: `pip install -e .`
+5. Process data: `bash ./scripts/data_process.sh`
+6. (Optional) Aggregate data: `bash ./scripts/data_aggregate.sh`
 
-1. Create the conda environment: `conda env create -f ./cnsistent.yml`
-2. Activate the environment: `conda activate cns`
-3. Install the package from location: `pip install -e .`
-4. Process data: `bash ./scripts/data_process.sh`
+## Usage
 
-NOTES:
+To load the data use:
+
+``` python
+from cns.data_utils import main_load
+samples_df, cns_df = main_load("imp")
+```
+
+This will load the imputed and filtered data for all datasets. Alternativelly you can call:
+* `main_load` to only load samples,
+* `main_load("preprocess")` to load the raw data,
+* `main_load("agg_type")` to load the aggregated bins, if the aggregation has been done, which can be one of: `["1MB", "2MB", "3MB", "5MB", "10MB", "250KB", "500KB", "whole", "arms", "bands", "COSMIC", "ENSEMBL"]`.
+
+## Notes
 
 * By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_aggregate.sh` scripts.
 * The `example_API.py` is split into cells that can be run individually in an IDE.
 * You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
+* Conda is optional, you can also install required packages manually using PIP based on the list in [cnsistent.yml](./cnsistent.yml).
 
+# Repository Structure
 
-# API (Python library)
+### `cnsistent.yml`
 
-## Quickstart
+Conda environment file for the CNSistent package.
 
-The repository contains a set of utility functions for loading the available data in `cns.data_utils`. 
+### `example_API.py`
 
-* `main_load`: The entry point function. It loads and filters samples from the datasets (PCAWG, TCGA, TRACERx) together with the imputed CNS data. If bins value is provided, instead of CNS data, binned data is loaded for the perspective bin size.
-* `load_COSMIC`: Loads the gene set from COSMIC with columns `gene, chrom, start, end`.
-* `load_ENSEMBL`: Loads the gene set from Ensembl with columns `gene, chrom, start, end`.
+Example code for using the CNSistent package.
 
-### Data subfunctions:
+### `example_CLI.sh`
 
-* `filter_samples`: Filters samples based on the provided criteria.
-* `load_all_samples`: Loads samples only, with possible filtering.
-* `load_merged_samples`: Same as `load_all_samples`, but merges the samples from the datasets into a dataframe.
-* `load_merged_bins`: Only loads bins for provided list of samples.
-* `load_merged_cns`: Only loads CNS for provided list of samples.
+Example code for using the CNSistent package from the command line.
 
-### Utility functions
+## `cns`
+Contains the main code for the CNSistent package.
 
-* `get_cns_for_type`: Obtains CNS for samples for a given cancer type.
+## `data`
+Contains the raw data from PCAWG, TCGA, TRACERx, as well as genomic locations, also a notebook used to obtain them or merge source files.
 
-### File accecss:
-* `out_path`: Returns the default output path where output of processing/binning files are stored.
-* `data_path`: Returns the default data path where the input files (bundled together with the repository) are stored.
-* `load_cns_out`: Loads CNS file from the output folder.
-* `load_samples_out`: Loads samples file from the output folder.
-* `load_bins`: Loads bins from the output folder.
+## `docs`
+Contains the documentation for the CNSistent package. The documentation is built using Sphinx, with the source in the `./docs/source` folder. The documentation can be built using the `make html` command in the `./docs` folder, provided the requirements in `./docs/requirements.txt` are met.
 
-## Library
+## `notebooks`
 
-The library is split into three blocks:
-* `cns.process`: The methods for processing the data, including filling, imputing, and calculating coverage.
-* `cns.analyze`: Statistics and summary metrics.
-* `cns.display`: Plotting of binned data.
-* `cns.utils`: Conversion, selection, file IO.
+Contains notebooks used for data processing and analysis.
 
-> Note that many functions have assembly as an optional parameter, if not provided, the default assembly is `hg19`.
+### `analyze_break_clusters.ipynb`
 
-### Data types:
+A notebook used to analyze the breakpoint clustering, based on the distance between merged breakpoints.
 
-Functions for conversions between data types can be found in `cns.utils.conversions`.
+### `analyze_CN_clipping.ipynb`
 
-#### CNS DataFrame
+Evaluation of result of clipping the CN segment values, in particular the effects on distribution and proportion that is clipped of.
 
-The CNS DataFrame is a pandas DataFrame with the following columns: `sample_id, chrom, start, end` followed by copy number column or columns. Typically, the columns are `major_cn, minor_cn` or `total_cn`. CNSiststen considers any column whose name starts or ends with `CN` or `cn` as a copy number column. 
+### `analyze_coverage.ipynb`
 
-```tsv
-sample_id   	chrom   start   end     major_cn    minor_cn
-sample1         chr1    100     200     1           0
-sample1         chr1    550     1000    2           0
-...
-```
+Calculates the proportion of the genome that is covered by segments and locations where it applies.
 
-This is the main data type used in the library.
+### `analyze_features.ipynb`	
 
-#### Breakpoints
+Calculates and plots features across datasets.
 
-Breakpoints are stored in a dictionary mapping a set of breakpoints to a chromosome. Boundaries are normally excluded, e.g.
-```
-{
-    'chr1' : [125000000],
-    ...
-}
-```
-would be the arm breakpoints for hg19 chromosome 1.
+### `analyze_lung.ipynb` 
 
-#### Segments
+Plots the lung cancer data across datasets and cancer types, in particular for chromosome 3 and genes that have been established as important by IG method.
 
-Segments are analogous to breakpoints, instead of position defining a range. The range is start-inclusive, end-exclusive. E.g.
+### `analyze_SOX2_overlay.ipynb`
 
-```
-{
-    'chr1' : [(0, 125000000), (125000000, 249250621)],
-    ...
-}
-```
-would be the arm breakpoints for hg19 chromosome 1.
+Plots the SOX2 gene overlay on the lung cancer data.
 
-#### Assemblies
+### `analyze_types.ipynb`
 
-Assembly a class that provides information about the species. CNSistent currently supports `hg19` and `hg38` assemblies, if you want to use it with a different assembly, you need to create a new object.
+Plots the distribution of cancer types and overall CN across datasets.
 
-Note that sex chromosomes are always expected to be named `chrX` and `chrY`.	
+### `data_obtain.ipynb`
 
-### Process
+A notebook that has been used to obtain the raw data and potentially merge files where needed.
 
-#### Pipelines
+### `docs_illustrations.ipynb`
 
-The commands that are available from CMD are executed via a main function for each command, e.g. `main_impute`.
+A notebook used to create illustrations for the documentation.
 
-The file also contains high-level functions for region manipulation, in particular `get_genome_segments` has the following procedure:
+### `docs_knee_detection.ipynb`
 
-1. Select regions from the assembly (emptystring for the whole assembly), filter those below `filter_size`.
-2. If `remove` is specified, remove regions from the selection, and filter the remaining regions.
-3. If `bin_size` is specified, bin the regions into equidistant segments of the given size.
+A demo of the kneepoint detection algorithm.
 
-#### Segment
+### `docs_runtime.ipynb`
 
-Functions for working with segments. Segments are dictionaries of tuples `{chr: [(start, end), ...], ...}`, where the start is inclusive, and the end is exclusive.
+Calculates the runtime of the data processing across 1-32 threads (log scale).
 
-Note that you can pass longer tuples, but the result will discard the 4th and further elements.
+## `scripts`
 
-Notable functions:
+### `data_process.sh`
 
-* `merge_segments`: Will merge overlapping segments, merging is possible if `end==start` for two consecutive segments on the same chromosome. Note that if the segments are not sorted, you need to set `sort=True` to sort them first.
-* `split_segments`: Will split into equidistant chunks based on specified size (useful for binning).
-* `segment_difference`: Will remove regions from a list of segments found in another list of segments.
-* `filter_min_size`: Will remove segments strictly smaller than the specified size.
+Fills and imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy.
 
-#### Imputation
+Depends on `data_preprocess.py` for preprocessing of raw data.
 
-Functions for adding missing segments and values in the CNS data. The process is to first add missing regions with NaN values and then impute the missing values.
+### `data_aggregate.sh`
 
-There are separate functions to fill the telomeres, fill the gaps, and add missing chromosomes. 
+Creates various segmentations, and aggregates the preprocessed data based on these segmentations.
 
-If guessing values in imputation is not desired, the `fill_nans_with_zeros` function can be used to simply fill with 0 instead.
+Depends on `data_cluster.py` for breakpoint clustering.
 
+### `data_time.sh`
 
-#### Breakpoints
+Run time tests for the data processing across `1-32` threads (log scale).
 
-Creating of breakpoints (see Breakpoint data type above). The function `make_breaks` will create de-novo breakpoints of a certain size, whereas `get_breaks` will return the breakpoints for a given `CNS_df`.
+## `tests`
 
-#### Aggregation
+### `in` and `out`
 
-Aggregation will produce segments of a certain size, aggregating the copy number values of the segment chunks into a single segment.
+Contains the input and output data for the tests. Output is generated using `./example_CLI.sh`. 
 
-There are the following aggregate functions: `mean`, `min`, `max`, and `none`. The `none` function will just split exiting bins, without additional aggregation. This is useful if you want to introduce additional breakpoints into the data.
+### `test_cli.sh` 
 
-Aggregation can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. `arms`, `1000000`).
+Executes the tests and outputs to `./tests/temp`. 
 
+### `test_*`
 
-### Analyze
+unittest based tests of the public API.
 
-The analyze module calculates statistics for the CNS data.
 
-* `coverage`: Calculates the proportion of genome with assigned (not NaN) CN values.
-* `ploidy`: Calculates the proportion of genome with aneuploid CN values (different from 2 or 1 for male sex chroms).
-* `breakage`: Calculates the signatures related statistics - currently it only calculates breakpoints per sample/chromosome.
+# Reference
 
-### Display
+## Data
 
-Display functions are in three categories:
-
-* `fig`: A Whole figure with labels.
-* `plot`: Only plots an individual axis.
-* `labels`: Either labels or backgrounds for individual axes.
-
-There are two main plot types:
-
-* joint plots: `fig_line, fig_dots, fig_bars` - these display joint CN data from aggregates. Line plot is the primary plot, compared to a normal line plot, segments are connected only if they overlap. Dots are more practical for small regions, e.g. genes. Bars are useful for coarse data, e.g. arms.
-
-![Lines Plot](./docs/lines.png)
-![Dots Plot](./docs/dots.png)
-![Bars Plot](./docs/bars.png)
-
-* individual plots: `fig_CN_tracks` - this plot inserts all bins into a heatmap per sample, being more practical for dense data or equalized representation. Unlike the joint plots, the position on the genome is not considered and there are no gaps, so the sizes of chromosomes and the position therein are only for orientation.
-
-![CN Tracks](./docs/tracks.png)
-
-For the figures, the first parameter is always the `CNS_df`, or a list thereof in the case of joint plots. Following optional parameters:
-* column: a string describing the column to plot or a list thereof. If none is specified, all columns matching the CN column pattern are used.
-* chrom: a string describing the chromosome to plot. If none is specified, all chromosomes are used.
-* label: string describing the CNS_df or a list thereof. If none is specified, no label is output.
-* width: width of the figure in inches, is calculated automatically if not specified.
-* max_cn: The CN tracks values are cropped to avoid outliers collapsing the color scale. If not specified, `10` is used.
-
-### Utils
-
-Utils contain the specification for the hg19, hg38 assemblies, including the gaps and cytobands. In addition, functions for files and data are provided:
-
-#### Filtering (cutoff)
-
-To help with defining cutoff regions for samples, it is possible to use a utility function that finds a knee/elbow point for a dataset. 
-
-The primary function is `find_bends`, which will convert a value (e.g. coverage) into a cumulative distribution between `min_val` and `max_val` with `steps` steps. The function will then find the knee/elbow point in the distribution.
-
-The function will return the point where the slope of the cumulative distribution has the highest convex (knee) or concave (elbow) curvature. To avoid finding local minimum, `dist` can be set to consider the angle between the mean of the nearest `dist` points. If `allow_pad` is set to true, the endpoinst are also considered as potential knees/elbows, with the slope at the beginning and the end being 0.
-
-![CN Tracks](./docs/example_knee.png)
-
-#### Files
-
-* `load_cns/save_cns`: Load/Save CNS data from a TSV file, with optional header and sample_id. By default, this moves from 1-based to 0-based coordinates.
-* `load_regions/save_regions`: Load/Save regions from a TSV file, reading only the `chrom, start, end` columns. By default, this moves from 1-based to 0-based coordinates.
-* `load_samples/save_samples`: Load samples from a TSV file. The first column is used as "sample_id" index and should match the CNS sample names.
-* `get_cn_columns`: Get the CN columns from a CNS DataFrame (start or end with `CN` or `cn`).
-
-
-#### Selection
-
-Functions to select samples set from CNS df (head, tail, random), to filter chromosomes (autosomes, sex chromosomes...) and samples/CNS by type.
-
-#### Conversions
-
-Converts between CNS df, breakpoints, and segments. 
-
-### Data Utils
-
-* Functions to load the datasets (PCAWG, TCGA, TRACERx) and gene sets (Ensembl, COSMIC).
-* Default filtering to remove samples from the datasets (low coverage, diploid, blacklisted, ...)
-* Loading binned data / processed samples.
-
-## REFERENCE
-
-### Data
-
-The data are obtained and processed using the code in `./notebooks/data/data_obtain.ipynb`. Sources:
+The data are obtained and processed using the code in `./data/data_obtain.ipynb`. Sources:
 
 TCGA data obtained from ASCATv3 at: https://github.com/VanLoo-lab/ascat/tree/master/ReleasedData    
 Cite: https://www.pnas.org/doi/full/10.1073/pnas.1009843107   
@@ -305,11 +224,11 @@ Cite: https://academic.oup.com/nar/article/51/D1/D933/6786199
 Cytoband, Gap data obtained from: https://genome.ucsc.edu
 Cite: https://www.nature.com/articles/35057062
 
-### Please cite
+## Please cite
 
-TBD, pre-print expected summmer 2024.
+TBD, pre-print expected 2024.
 
-### The MIT License
+## The MIT License
 
 Copyright © 2023 Dr. Adam Streck, adam.streck@gmail.com
 

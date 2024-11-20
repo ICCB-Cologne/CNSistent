@@ -25,5 +25,5 @@ The tool is designed to be easy to use, and to provide a comprehensive set of an
    self
    quickstart
    CLI
-   examples
-   cns
+   API
+   reference
