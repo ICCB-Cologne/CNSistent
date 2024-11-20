@@ -1,3 +1,5 @@
+.. _API:
+
 Library usage (API)
 ===================
 
@@ -131,7 +133,6 @@ Converts between CNS df, breakpoints, and segments.
 * Functions to load the datasets (PCAWG, TCGA, TRACERx) and gene sets (Ensembl, COSMIC).
 * Default filtering to remove samples from the datasets (low coverage, diploid, blacklisted, ...)
 * Loading binned data / processed samples.
-
 
 
 

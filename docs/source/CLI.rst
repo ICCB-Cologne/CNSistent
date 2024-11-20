@@ -1,4 +1,4 @@
-.. _CLI_usage:
+.. _CLI:
 
 Tool usage (CLI)
 ================

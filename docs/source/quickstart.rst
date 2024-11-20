@@ -1,5 +1,9 @@
-Quickstart
-==========
+Repository Data Quickstart
+==========================
+
+The below is only relevant if you have cloned the `Bitbucket repository <https://bitbucket.org/schwarzlab/cnsistent/src/main/>`_ and have access to the bundled data.
+
+Otherwise refer to the :ref:`CLI` or :ref:`API` sections for usage of the CNSistent Python package.
 
 Processing the bundled data
 ---------------------------
