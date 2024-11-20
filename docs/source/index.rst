@@ -18,9 +18,71 @@ CNSistent is a Python tool for processing and analyzing copy number data.
 It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. 
 The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
+Example
+-------
+
+The below used files are directly taken from the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
+
+1. Load CNS Data and Display Heatmap
+````````````````````````````````````
+
+Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
+
+.. code-block:: python
+
+    import cns
+    raw_df = cns.load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMajor", "nMinor"], sep=",", print_info=True)
+    cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
+
+.. image:: ../files/intro_1.png
+    :alt: Raw Data Heatmap
+
+2. Impute Missing Segments
+``````````````````````````
+
+Fill in missing segments in the data, impute using the extension method, and display a heatmap for the first 5 rows.
+
+.. code-block:: python
+
+    imp_df = cns.main_fill_imp(raw_df, print_info=True)
+    cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
+
+.. image:: ../files/intro_2.png
+    :alt: Imputed Data Heatmap
+
+3. Create 3 mb Segments and convert to a feature array
+``````````````````````````````````````````````````````
+
+Aggregate the imputed CNS data into 3 MB segments and convert it into a feature array.
+
+.. code-block:: python
+
+    seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
+    features, rows, columns = cns.bins_to_features(seg_df)
+    print("(alleles, samples, bins):", features.shape)
+
+``(alleles, samples, bins): (2, 403, 960)``
+
+4. Group Segments by Cancer Type
+````````````````````````````````
+
+Group the CNS data by cancer type, calculate the total CN, and visualize mean linear profiles.
+
+.. code-block:: python
+
+    sample_df = cns.load_samples("./data/20221109_TRACERx421_all_patient_df.tsv")
+    type_groups = {c: cns.select_cns_by_type(seg_df, sample_df, c, "histology_multi_full") for c in ["LUAD", "LUSC"]}
+    groups_df = cns.stack_groups([cns.group_samples(v, group_name=k) for k, v in type_groups.items()])
+    cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
+
+.. image:: ../files/intro_3.png
+    :alt: Grouped Data Heatmap
+
+The example code is also in ``example_API.py``.
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    self
    quickstart
