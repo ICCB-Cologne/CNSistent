@@ -1,7 +1,6 @@
 `cns` Reference
 ===============
 
-
 .. toctree::
    :maxdepth: 2   
 

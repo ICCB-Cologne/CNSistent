@@ -178,8 +178,7 @@ def fig_bars(cns_df, cn_columns=None, colors=None, assembly=hg19):
     return _fig_common(cns_df, plot_bars, cn_columns, colors, 1, assembly)
  
 
-def _make_layout(width, height, n_columns):
-    vertical = width > height
+def _make_layout(width, height, n_columns, vertical):
     if vertical:
         height = height * n_columns
         sharex, sharey = True, False
@@ -193,7 +192,7 @@ def _make_layout(width, height, n_columns):
     return plt.subplots(n_rows, n_cols, figsize=(width, height), sharex=sharex, sharey=sharey)
 
 
-def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = True, assembly=hg19):
+def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = None, assembly=hg19):
     cn_columns = _get_columns(cns_df, cn_columns)
 
     sample_count = len(cns_df["sample_id"].unique())
@@ -201,7 +200,8 @@ def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = Tru
     x_min, x_max = x_limits(cns_df, assembly)
     width = (x_max - x_min) / 200_000_000
     height = sample_count / 5
-    fig, axes = _make_layout(width, height, n_columns)
+    vertical = vertical if vertical != None else width > height
+    fig, axes = _make_layout(width, height, n_columns, vertical)
     
     min_cn = cns_df[cn_columns][cns_df[cn_columns] > 0].min().min()
     max_cn = min(cns_df[cn_columns].max().max(), max_cn)
