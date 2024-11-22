@@ -132,7 +132,20 @@ def segment_difference(segs_a, segs_b, sorted=False):
     return diffs
 
 
+def filter_cons_size(chr_segs, min_size):
+    # TODO DOCUMENT
+    res = {}
+    for chrom, seg_group in chr_segs.items():
+        cons_groups = get_consecutive_segs(seg_group)
+        res[chrom] = []
+        for con_group in cons_groups:
+            if con_group[-1][1] - con_group[0][0] >= min_size:
+                res[chrom] += con_group
+    return res        
+
+
 def filter_min_size(chr_segs, min_size, merge_first=False):
+    # TODO DOCUMENT
     if merge_first:
         chr_segs = merge_segments(chr_segs)
     return {chr: [seg for seg in chr_segs if seg[1] - seg[0] >= min_size] for chr, chr_segs in chr_segs.items()}
@@ -183,18 +196,32 @@ def regions_select(select, assembly=hg19):
         return load_segments(select)
 
 
-def process_segments(input_segs, remove_segs=None, filter_size=-1):
-    if not isinstance(input_segs, dict):
+def process_segments(segs, remove_segs=None, filter_size=-1):
+    if not isinstance(segs, dict):
         raise ValueError(f"input_segs must a dictionary of segments, got {type(remove_segs)}")
-    res = input_segs
     if filter_size > 0:
-        res = filter_min_size(res, filter_size, False)
+        segs = filter_cons_size(segs, filter_size)
     if remove_segs != None:
         if not isinstance(remove_segs, dict):
             raise ValueError(f"remove_segs must be None or a dictionary of segments, got {type(remove_segs)}")
         if filter_size > 0:
-            remove_segs = filter_min_size(remove_segs, filter_size, True)
-        res = segment_difference(res, remove_segs)
+            remove_segs = filter_cons_size(remove_segs, filter_size)
+        segs = segment_difference(segs, remove_segs)
         if filter_size > 0:
-            res = filter_min_size(res, filter_size, False)
+            segs = filter_cons_size(segs, filter_size)
+    return segs
+
+
+def get_consecutive_segs(segs):
+    if len(segs) == 0:
+        return []
+    res = []
+    last_end = segs[0][1]
+    res.append([segs[0]])
+    for seg in segs[1:]:
+        if seg[0] == last_end:
+            res[-1].append(seg)
+        else:
+            res.append([seg])
+        last_end = seg[1]
     return res

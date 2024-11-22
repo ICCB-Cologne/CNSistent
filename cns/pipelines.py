@@ -335,7 +335,7 @@ def main_segment(
     input_data,
     remove_segs=None,
     split_size=-1,
-    merge_dist=-1,
+    cluster_dist=-1,
     filter_size=-1,
     print_info=False,
 ):
@@ -349,7 +349,7 @@ def main_segment(
         DataFrame containing segments to remove from the selection.
     split_size : int, optional
         Size in base pairs to split segments. Default is -1 (no splitting).
-    merge_dist : int, optional
+    cluster_dist : int, optional
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
@@ -373,9 +373,8 @@ def main_segment(
         input_breaks = segments_to_breaks(input_segs)
         input_data = breaks_to_segments(input_breaks)    
     res = process_segments(input_data, remove_segs, filter_size)
-    if merge_dist > 0:
-        clusers = cluster_segments(res, merge_dist, print_info)
-        res = breaks_to_segments(clusers)
+    if cluster_dist > 0:
+        res = cluster_segments(res, cluster_dist, True, print_info)
     if split_size > 0:
         res = split_segments(res, split_size)
     return res

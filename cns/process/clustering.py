@@ -1,5 +1,6 @@
 import numpy as np
 from numba import jit
+from cns.process.segments import get_consecutive_segs
 from cns.utils.conversions import segments_to_breaks
 from cns.utils.logging import log_info
 
@@ -48,90 +49,65 @@ def _breaks_to_clusters(chrom_breaks):
     return np.array([[val, 1] for val in chrom_breaks], dtype=np.float64)
 
 
-def _break_count(breaks):
-    return sum(len(values) for values in breaks.values())
+def _value_counts(values_dict):
+    return sum(len(values) for values in values_dict.values())
 
 
-def insert_breaks_into_segments(segs, breaks, min_dist=0):
-    res = {}
-    for chrom, chrom_segs in segs.items():
-        if chrom not in breaks:
-            res[chrom] = chrom_segs
-            continue
-        res[chrom] = []
-        for seg in chrom_segs:
-            seg_breaks = []
-            start = seg[0]
-            end = seg[1]
-            name = seg[2] if len(seg) > 2 else None
-            for br in breaks[chrom]:
-                if start + min_dist <= br < end - min_dist:
-                    seg_breaks.append(br)
-            if len(seg_breaks) == 0:
-                new_seg = (start, end, name) if name != None else (start, end)
-                res[chrom].append(new_seg)
-            else:
-                seg_breaks = [start] + sorted(set(seg_breaks)) + [end]
-                for i in range(len(seg_breaks) - 1):
-                    if seg_breaks[i + 1] - seg_breaks[i] > 0:
-                        new_seg = (seg_breaks[i], seg_breaks[i + 1], name) if name != None else (seg_breaks[i], seg_breaks[i + 1])
-                        res[chrom].append(new_seg)
-    return res
-
-
-def _get_breaks_inside_segments(segs, breaks, min_dist = 0):
-    res = { chrom: [] for chrom in breaks }
-    for chrom, chrom_segs in segs.items():
-        if chrom not in breaks:
-            continue
-        for seg in chrom_segs:
-            for br in breaks[chrom]:
-                if seg[0] + min_dist <= br < seg[1] - min_dist:
-                    res[chrom].append(br)
-    return res
-
-
-def clusters_to_breaks(clusters):
+def _clusters_to_breaks(clusters):
     chrom_breaks = []
     for value in clusters:
         chrom_breaks.append(value[0])
     return chrom_breaks
 
 
-def calc_clusters(dict_start, dist):
-    res = {}
-    for chrom, old_breaks in dict_start.items():
-        new_breaks = []
-        if len(old_breaks) > 0:
-            clusters = _breaks_to_clusters(old_breaks)
-            merged = _merge_clusters(clusters, dist) if dist > 0 else clusters
-            new_breaks = clusters_to_breaks(merged)
-        res[chrom] = new_breaks
+def _cluster_breaks_list(breaks, clust_dist, keep_ends = True, print_info=False):
+    if len(breaks) < 2:
+        return breaks
+    if len(breaks) == 2 and keep_ends:
+        return breaks
+    
+    if keep_ends:
+        clusters = _breaks_to_clusters(breaks[1:-1])	
+    else:
+        clusters = _breaks_to_clusters(breaks)
+    merged = _merge_clusters(clusters, clust_dist)
+    new_breaks = _clusters_to_breaks(merged)
+    if keep_ends:
+        new_breaks = [breaks[0]] + new_breaks + [breaks[-1]]
+    return new_breaks
+
+
+def _get_break_list(segs):
+    if len(segs) == 0:
+        return []
+    res = [segs[0][0]]
+    for seg in segs:
+        res.append(seg[1])
     return res
 
 
-def cluster_segments(segments, clust_dist, keep_ends = True, print_info=False):
-    breaks = segments_to_breaks(segments)
-    return cluster_breaks(breaks, clust_dist, keep_ends, print_info)
+def _extend_segs(chrom, breaks, chr_segs):
+    segs = []
+    offset = len(chr_segs)
+    for i in range(len(breaks) - 1):
+        chr_segs.append((breaks[i], breaks[i + 1], f'{chrom}_{offset+i}'))
+    return segs
 
 
-def cluster_breaks(in_breaks, clust_dist, keep_ends = True, print_info=False):    
-    break_count = _break_count(in_breaks)
-    log_info(print_info, f"Reducing {break_count} breakpoints with merge distance {clust_dist} ... ")
+def cluster_segments(segs, clust_dist, keep_ends = True, print_info=False):
+    seg_count = _value_counts(segs)
+    log_info(print_info, f"Merging {seg_count} segments with merge distance {clust_dist} ... ")
+    res = {}
+    for chrom, segs in segs.items():
+        cons = get_consecutive_segs(segs)        
+        chr_segs = []
+        for clustered in cons:
+            seg_breaks = _get_break_list(clustered)
+            breaks = _cluster_breaks_list(seg_breaks, clust_dist, keep_ends, print_info)
+            clustered = _extend_segs(chrom, breaks, chr_segs)       
+        res[chrom] = chr_segs
 
-    if keep_ends:
-        no_ends = { chrom: in_breaks[chrom][1:-1] if len(in_breaks[chrom]) > 2 else [] for chrom in in_breaks }
-        res = calc_clusters(no_ends, clust_dist)
-        print(in_breaks)
-        print(res)
-        for chrom, chrom_breaks in in_breaks.items():
-            if len(chrom_breaks) >= 2:
-                res[chrom] = [chrom_breaks[0]] + res[chrom] + [chrom_breaks[-1]]
-
-    else:
-        res = calc_clusters(in_breaks, clust_dist)
-    new_count = _break_count(res)
-    log_info(print_info, f"Removed to {break_count - new_count} breakpoints by distance merge.")
+    new_count = _value_counts(res)
+    log_info(print_info, f"Removed to {seg_count - new_count} breakpoints by distance merge.")
     log_info(print_info, f"Resulting breakpoints: {new_count}")
-
     return res

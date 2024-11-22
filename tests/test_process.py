@@ -52,7 +52,7 @@ class TestSegments(unittest.TestCase):
         segs = {1: [(0, 10)], 2: [(15, 20)], 3: [(20, 30)]}
         min_size = 6
         exp = {1: [(0, 10)], 2: [], 3: [(20, 30)]}
-        self.assertEqual(filter_min_size(segs, min_size), exp)
+        self.assertEqual(filter_cons_size(segs, min_size), exp)
 
     def test_split_segment(self):
         actual_output = split_segment(1, 11, None, 2, "scale")
@@ -387,29 +387,17 @@ class TestAggregation(unittest.TestCase):
                 self.assertTrue(res.at[i, "start"] >= 100)
                 self.assertTrue(res.at[i, "end"] <= 200)
 
-class TestMerging(unittest.TestCase):
-    def test_clusters_to_breaks(self):
-        clusters = [(50, 1), (99, 1)]
-        breakpoints = clusters_to_breaks(clusters)
-        self.assertEqual(breakpoints, [50, 99])
-
-    def test_created_merged_segs(self):
-        dict_start = {'chr1': [50, 99], 'chr2': [200, 300]}
-        dist = 100
-        result = calc_clusters(dict_start, dist)
-        exp = {'chr1': [74], 'chr2': [200, 300]}
-        self.assertEqual(result, exp)
-
+class TestClustering(unittest.TestCase):
     def test_cluster_breaks(self):
         print()
-        breaks = {'chr1': [0, 50, 149, 200, 299, 300], 'chr2': [100, 200,300]}
+        breaks = {'chr1': [0, 50, 149, 200, 299, 300], 'chr2': [100, 200,300] }
+        segs = breaks_to_segments(breaks)
         dist = 100
-        res = cluster_breaks(breaks, dist, True)
-        print(res)
+        res = cluster_segments(segs, dist, True)
         self.assertEqual(len(res), 2)
-        self.assertEqual(res['chr1'][0], (0))
-        self.assertEqual(res['chr1'][2], (250))
-        self.assertEqual(res['chr2'][0], (100))
+        self.assertEqual(res['chr1'][0][0], 0)
+        self.assertEqual(res['chr1'][2][0], 250)
+        self.assertEqual(res['chr2'][0][0], 100)
 
 
 if __name__ == "__main__":
