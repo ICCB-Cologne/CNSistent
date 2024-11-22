@@ -2,6 +2,7 @@ import numpy as np
 from numba import jit
 from cns.process.segments import get_consecutive_segs
 from cns.utils.conversions import segments_to_breaks
+from cns.utils.conversions import values_count
 from cns.utils.logging import log_info
 
 @jit(nopython=True)
@@ -49,10 +50,6 @@ def _breaks_to_clusters(chrom_breaks):
     return np.array([[val, 1] for val in chrom_breaks], dtype=np.float64)
 
 
-def _value_counts(values_dict):
-    return sum(len(values) for values in values_dict.values())
-
-
 def _clusters_to_breaks(clusters):
     chrom_breaks = []
     for value in clusters:
@@ -73,7 +70,8 @@ def _cluster_breaks_list(breaks, clust_dist, keep_ends = True, print_info=False)
     merged = _merge_clusters(clusters, clust_dist)
     new_breaks = _clusters_to_breaks(merged)
     if keep_ends:
-        new_breaks = [breaks[0]] + new_breaks + [breaks[-1]]
+        new_breaks[0] = breaks[0]
+        new_breaks[-1] = breaks[-1]
     return new_breaks
 
 
@@ -94,12 +92,12 @@ def _extend_segs(chrom, breaks, chr_segs):
     return segs
 
 
-def cluster_segments(segs, clust_dist, keep_ends = True, print_info=False):
-    seg_count = _value_counts(segs)
+def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False):
+    seg_count = values_count(input_segs)
     log_info(print_info, f"Merging {seg_count} segments with merge distance {clust_dist} ... ")
     res = {}
-    for chrom, segs in segs.items():
-        cons = get_consecutive_segs(segs)        
+    for chrom, chrom_segs in input_segs.items():
+        cons = get_consecutive_segs(chrom_segs)        
         chr_segs = []
         for clustered in cons:
             seg_breaks = _get_break_list(clustered)
@@ -107,7 +105,7 @@ def cluster_segments(segs, clust_dist, keep_ends = True, print_info=False):
             clustered = _extend_segs(chrom, breaks, chr_segs)       
         res[chrom] = chr_segs
 
-    new_count = _value_counts(res)
-    log_info(print_info, f"Removed to {seg_count - new_count} breakpoints by distance merge.")
-    log_info(print_info, f"Resulting breakpoints: {new_count}")
+    new_count = values_count(res)
+    log_info(print_info, f"Removed {seg_count - new_count} segments by distance merge.")
+    log_info(print_info, f"Resulting segment count: {new_count}")
     return res

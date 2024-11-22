@@ -99,12 +99,12 @@ def get_chr_sets(cns_df, assembly=hg19):
     return res_dict
 
 
-def dataframe_array_split(df, n_splits):
+def dataframe_array_split(samples_df, n_splits):
     """
     Splits a DataFrame into n_splits parts as equally as possible.
 
     Parameters:
-    - df: The pandas DataFrame to split.
+    - samples_df: The pandas DataFrame to split.
     - n_splits: The number of parts to split the DataFrame into.
 
     Returns:
@@ -113,8 +113,11 @@ def dataframe_array_split(df, n_splits):
     # Ensure n_splits is a positive integer
     n_splits = max(int(n_splits), 1)
 
+    if n_splits == 1:
+        return [samples_df]
+
     # Calculate the number of rows in each split
-    total_rows = len(df)
+    total_rows = len(samples_df)
     rows_per_split = total_rows // n_splits
     remainder = total_rows % n_splits
 
@@ -128,7 +131,7 @@ def dataframe_array_split(df, n_splits):
         rows_in_split = rows_per_split + (1 if i < remainder else 0)
 
         # Slice the DataFrame for this split and append to the list
-        split_df = df.iloc[current_row:current_row + rows_in_split]
+        split_df = samples_df.iloc[current_row:current_row + rows_in_split]
         if rows_in_split > 0:
             splits.append(split_df)
             # Update the current row index

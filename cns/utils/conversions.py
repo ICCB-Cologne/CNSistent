@@ -139,3 +139,7 @@ def bins_to_features(cns_df, cn_columns=None, drop_sex=True):
 	stacked = np.stack(arrays, axis=0)
 
 	return stacked, rows, columns
+
+
+def values_count(values_dict):
+    return sum(len(values) for values in values_dict.values())

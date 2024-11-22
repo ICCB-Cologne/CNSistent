@@ -15,12 +15,10 @@ from cns.utils.selection import dataframe_array_split
 
 def _add_sp_args(action, parser):
     parser.add_argument("data", type=str, help="path to the TSV file with copy number segments."\
-                        " For segment action, a bed file or one of 'whole', 'arms', 'bands' can be provided.", required=True)
+                        " For segment action, a bed file or one of 'whole', 'arms', 'bands' can be provided.")
     parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
     parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
-    parser.add_argument(
-        "--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19"
-    )
+    parser.add_argument("--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19")
     parser.add_argument(
         "--cncols",
         type=str,
@@ -128,12 +126,10 @@ def _parse_args():
         raise ValueError(f"Action {args.action} not recognized.")
 
     if args.action == "segment":
-        if args.merge >= 0 and not args.data:
-            raise ValueError("Merging breakpoints requires the --data option to provide CNS data.")
         if args.split < 0:
             args.split = 0
-        if args.data not in ["whole", "arms", "bands"] and not exists(args.select):
-            raise ValueError(f"Selection {args.select} is not a build-in or a path to a file.")
+        if args.data not in ["whole", "arms", "bands"] and not exists(args.data):
+            raise ValueError(f"Selection {args.data} is not a build-in or a path to a file.")
         if args.remove not in ["", "gaps"] and not exists(args.remove):
             raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
         if args.threads > 1:
@@ -166,8 +162,6 @@ def _action_to_fun(action):
         return main_ploidy
     elif action == "breakage":
         return main_breakage
-    elif action == "segment":
-        return main_segment
     elif action == "aggregate":
         return main_aggregate
     else:
@@ -193,13 +187,6 @@ def _get_blocks(action, input_block, samples_blocks, cols_block, assembly, args)
     if action == "fill":
         add_missing = [True] * block_count
         return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, ver_block)
-    elif action == "segment":
-        remove = regions_select(args.remove, assembly)
-        remove_block = [remove] * block_count
-        split_block = [args.split] * block_count
-        merge_block = [args.merge] * block_count
-        filter_block = [args.filter] * block_count
-        return zip(input_block, remove_block, split_block, merge_block, filter_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
         segs_block = [_get_segs_df(args.segments)] * block_count
         return zip(input_block, samples_blocks, cols_block, segs_block, ass_block, ver_block)
@@ -236,34 +223,48 @@ def _parse_cncols(cncols):
     return cncols
 
 
+def _save_time(action, out_file, runtime, start, threads):
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+        filepath = "../out/times.tsv"
+        write_mode = "a" if exists(filepath) else "w"
+        with open(filepath, write_mode) as f:
+            f.write(f"{timestamp}\t{action}\t{threads}\t{out_file}\t{runtime}\n")
+
+
 def main():
     args = _parse_args()
     action = args.action
     assembly = get_assembly(args.assembly)
     print_info = args.verbose
-    cncols = _parse_cncols(args.cncols)
+    in_cols = _parse_cncols(args.cncols)
     out_file = args.out
 
     # Read the input
     log_info(print_info, f"***** cns {action} *****")
 
+    # Serial action
     if action == "segment":
         if args.data in ["whole", "arms", "bands"]:            
             log_info(print_info, f"Creating {args.data} segments...")
             input_data = regions_select(args.data, assembly)
             cn_columns = None
-        elif args.data[:4] == ".bed":
+        elif args.data[-4:] == ".bed":
             log_info(print_info, f"Loading input file {args.data}...")
             input_data = load_segments(args.data)
             cn_columns = None
         else:
             log_info(print_info, f"Loading CNS input file {args.data}...")
-            input_data = load_cns(args.data, cn_columns=cncols, assembly=assembly, print_info=print_info)
-        samples_blocks = [None]
+            input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
+            cn_columns = get_cn_cols(input_data, in_cols)
+        remove_regs = regions_select(args.remove, assembly)
+        res = main_segment(input_data, remove_regs, args.split, args.merge, args.filter, print_info)
+        save_segments(res, out_file)
+        
+    # Parallel action
     else:
         log_info(print_info, f"Loading CNS input file {args.data}...")
-        input_data = load_cns(args.data, cn_columns=cncols, assembly=assembly, print_info=print_info)
-        cn_columns = get_cn_cols(input_data, cncols)
+        input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
+        cn_columns = get_cn_cols(input_data, in_cols)
         if args.samples == "":
             samples_df = samples_df_from_cns_df(input_data, False)
         else:
@@ -271,38 +272,31 @@ def main():
         samples_df = fill_sex_if_missing(input_data, samples_df)
         samples_blocks = dataframe_array_split(samples_df, args.subsplit)
 
-    # Process blocks
-    for i in range(args.subsplit):
-        log_info(print_info, f"Processing block {i+1}/{args.subsplit}...")
+        # Process blocks
+        for i in range(args.subsplit):
+            log_info(print_info, f"Processing block {i+1}/{args.subsplit}...")
 
-        samples_block = samples_blocks[i]
+            samples_block = samples_blocks[i]
 
-        # Perform the action
-        start = time.time()
-        res_list = _process(action, input_data, samples_block, cn_columns, assembly, args)
-        runtime = time.time() - start
+            # Perform the action
+            start = time.time()
+            res_list = _process(action, input_data, samples_block, cn_columns, assembly, args)
+            runtime = time.time() - start
 
-        if print_info:
-            print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")
-            if args.time:
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
-                filepath = "../out/times.tsv"
-                write_mode = "a" if exists(filepath) else "w"
-                with open(filepath, write_mode) as f:
-                    f.write(f"{timestamp}\t{action}\t{args.threads}\t{out_file}\t{runtime}\n")
+            if print_info:
+                print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")
+                if args.time:
+                    _save_time(action, out_file, runtime, start, args.threads)
 
-        for j in range(len(res_list)):
-            mode = "w" if i == 0 and j == 0 else "a"
-            res = res_list[j]
-            if action == "segment":
-                print(out_file)
-                save_segments(res, out_file)
-            elif action in ["fill", "impute", "aggregate"]:
-                save_cns(res, out_file, change_coords=True, mode=mode)
-            elif action in ["coverage", "ploidy", "breakage"]:
-                save_samples(res, out_file, mode=mode)
-            else:
-                raise ValueError(f"Unknown action {action}")
+            for j in range(len(res_list)):
+                mode = "w" if i == 0 and j == 0 else "a"
+                res = res_list[j]
+                if action in ["fill", "impute", "aggregate"]:
+                    save_cns(res, out_file, change_coords=True, mode=mode)
+                elif action in ["coverage", "ploidy", "breakage"]:
+                    save_samples(res, out_file, mode=mode)
+                else:
+                    raise ValueError(f"Unknown action {action}")
 
     log_info(print_info, "Done.")
 
