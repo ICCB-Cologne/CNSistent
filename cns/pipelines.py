@@ -346,30 +346,30 @@ def main_segment(
     Parameters
     ----------
     cns_df : pandas.DataFrame
-        DataFrame containing CNS data.
-    segs : pandas.DataFrame, optional
-        DataFrame containing segments to use for segmentation.
-    merge_distance : int, optional
-        Distance in base pairs to merge nearby segments. Default is 0.
+        DataFrame containing CNS (Copy Number Segment) data.
+    select_segs : pandas.DataFrame, optional
+        DataFrame containing segments to select for binning. If None, the whole genome is used.
+    remove_segs : pandas.DataFrame, optional
+        DataFrame containing segments to remove from the selection.
     split_size : int, optional
-        Size in base pairs to split segments. Default is 0.
-    cn_columns : list of str, optional
-        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+        Size in base pairs to split segments. Default is -1 (no splitting).
+    merge_dist : int, optional
+        Distance in base pairs to merge nearby segments. Default is -1 (no merging).
+    filter_size : int, optional
+        Minimum size in base pairs to filter segments. Default is -1 (no filtering).
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 
     Returns
     -------
-    pandas.DataFrame
-        DataFrame with segmented CNS data.
-
-    Notes
-    -----
-    This function allows for segmentation of the CNS data by merging or splitting segments based on the provided parameters.
+    list of tuples
+        List of segments after processing.
 
     Examples
     --------
-    >>> segmented_cns = main_segment(cns_df, merge_distance=1000)
+    >>> segmented_cns = main_segment(cns_df, merge_distance=0) # consistent segmentation
     """
     if select_segs == None:
         select_segs = genome_to_segments(assembly)
