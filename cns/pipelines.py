@@ -374,7 +374,8 @@ def main_segment(
         input_data = breaks_to_segments(input_breaks)    
     res = process_segments(input_data, remove_segs, filter_size)
     if merge_dist > 0:
-        res = cluster_breaks(res, merge_dist, print_info)
+        clusers = cluster_segments(res, merge_dist, print_info)
+        res = breaks_to_segments(clusers)
     if split_size > 0:
         res = split_segments(res, split_size)
     return res
@@ -436,8 +437,6 @@ def main_seg_agg(
         DataFrame containing CNS (Copy Number Segment) data.
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
-    select_segs : pandas.DataFrame, optional
-        DataFrame containing segments to select for binning.
     remove_segs : pandas.DataFrame, optional
         DataFrame containing segments to remove from the selection.
     how : str, optional
@@ -458,7 +457,7 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(cns_df, select_segs, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
+    segs = main_segment(cns_df, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df
 

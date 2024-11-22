@@ -52,7 +52,7 @@ def _break_count(breaks):
     return sum(len(values) for values in breaks.values())
 
 
-def _insert_breaks_into_segments(segs, breaks, min_dist=0):
+def insert_breaks_into_segments(segs, breaks, min_dist=0):
     res = {}
     for chrom, chrom_segs in segs.items():
         if chrom not in breaks:
@@ -110,22 +110,26 @@ def calc_clusters(dict_start, dist):
     return res
 
 
-def cluster_segments(segments, clust_dist, print_info=False):
+def cluster_segments(segments, clust_dist, keep_ends = True, print_info=False):
     breaks = segments_to_breaks(segments)
-    return cluster_breaks(breaks, clust_dist, print_info)
+    return cluster_breaks(breaks, clust_dist, keep_ends, print_info)
 
 
-def cluster_breaks(breaks, clust_dist, keep_ends = True, print_info=False):    
-    break_count = _break_count(breaks)
+def cluster_breaks(in_breaks, clust_dist, keep_ends = True, print_info=False):    
+    break_count = _break_count(in_breaks)
     log_info(print_info, f"Reducing {break_count} breakpoints with merge distance {clust_dist} ... ")
 
-    res = calc_clusters(breaks, clust_dist)
     if keep_ends:
-        for chrom, chrom_breaks in breaks.items():
-            if res[chrom][0] != chrom_breaks[0]:
-                res[chrom].insert(0, chrom_breaks[0])
-            if res[chrom][-1] != chrom_breaks[-1]:
-                res[chrom].append(chrom_breaks[-1])
+        no_ends = { chrom: in_breaks[chrom][1:-1] if len(in_breaks[chrom]) > 2 else [] for chrom in in_breaks }
+        res = calc_clusters(no_ends, clust_dist)
+        print(in_breaks)
+        print(res)
+        for chrom, chrom_breaks in in_breaks.items():
+            if len(chrom_breaks) >= 2:
+                res[chrom] = [chrom_breaks[0]] + res[chrom] + [chrom_breaks[-1]]
+
+    else:
+        res = calc_clusters(in_breaks, clust_dist)
     new_count = _break_count(res)
     log_info(print_info, f"Removed to {break_count - new_count} breakpoints by distance merge.")
     log_info(print_info, f"Resulting breakpoints: {new_count}")

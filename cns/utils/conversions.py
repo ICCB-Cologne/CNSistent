@@ -84,7 +84,7 @@ def tuples_to_segments(tuples):
         for i, tuple in enumerate(tuples):
             if tuple[0] not in segs:
                 segs[tuple[0]] = []
-            seg_name = tuple[3] if len(tuple) == 4 else f"seg_{i}"
+            seg_name = tuple[3] if len(tuple) >= 4 else f"seg_{i}"
             segs[tuple[0]].append((tuple[1], tuple[2], seg_name))
     return segs
 

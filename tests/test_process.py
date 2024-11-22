@@ -357,7 +357,7 @@ class TestAggregation(unittest.TestCase):
         })
 
     def test_agg_by_breaks(self):
-        segments = { 'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)] }
+        segments = { 'chr1': [(0, 100, "chr1_0")], 'chr2': [(100, 200, "chr2_0")] }
         breaks = {'chr1': [0, 100], 'chr2': [100, 200]}
         seg_bin = aggregate_by_segments(self.cns, segments, print_info=False)
         break_bin = aggregate_by_breaks(self.cns, breaks, print_info=False)
@@ -400,15 +400,16 @@ class TestMerging(unittest.TestCase):
         exp = {'chr1': [74], 'chr2': [200, 300]}
         self.assertEqual(result, exp)
 
-    def test_cluster_within_segments(self):
+    def test_cluster_breaks(self):
         print()
-        breaks = {'chr1': [50, 149, 200, 299], 'chr2': [200, 300]}
+        breaks = {'chr1': [0, 50, 149, 200, 299, 300], 'chr2': [100, 200,300]}
         dist = 100
-        res = cluster_breaks(segments, dist, True)
+        res = cluster_breaks(breaks, dist, True)
+        print(res)
         self.assertEqual(len(res), 2)
-        self.assertEqual(res['chr1'][0], (0, 100))
-        self.assertEqual(res['chr1'][2], (250, 300))
-        self.assertEqual(res['chr2'][0], (100, 200))
+        self.assertEqual(res['chr1'][0], (0))
+        self.assertEqual(res['chr1'][2], (250))
+        self.assertEqual(res['chr2'][0], (100))
 
 
 if __name__ == "__main__":

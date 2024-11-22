@@ -35,7 +35,7 @@ class TestConversions(unittest.TestCase):
 
     def test_breaks_to_segments(self):
         breakpoints = {'chr1': [0, 50, 100], 'chr2': [0, 125, 150, 176]}
-        exp = {'chr1': [(0, 50, 0), (50, 100, 1)], 'chr2': [(0, 125, 2), (125, 150, 3), (150, 176, 4)]}
+        exp = {'chr1': [(0, 50, 'chr1_0'), (50, 100, 'chr1_1')], 'chr2': [(0, 125, 'chr2_0'), (125, 150, 'chr2_1'), (150, 176, 'chr2_2')]}
         self.assertEqual(breaks_to_segments(breakpoints), exp)
 
     def test_cytobands_to_df(self):
