@@ -33,7 +33,7 @@ def gaps_to_df(gaps):
     return pd.DataFrame(gaps, columns=["chrom", "start", "end", "type", "bridge"])
 
 
-def segs_to_df(segments):
+def segs_to_cns_df(segments):
     seg_list = []
     for chrom in sorted(segments.keys()):  # Sort the keys lexicographically
         for seg in segments[chrom]:
@@ -48,10 +48,11 @@ def segs_to_df(segments):
         return res_df.rename(columns={0: "chrom", 1: "start", 2: "end", 3: "name"})
 
 
-def df_to_segs(segs_df):
+def cns_df_to_segs(segs_df):
     res = {}
     for chrom, group in segs_df.groupby("chrom"):
-        res[chrom] = list(zip(group["start"], group["end"], group["name"]))
+        names = group["name"] if "name" in group.columns else [f"{chrom}_{i}" for i in range(len(group))]
+        res[chrom] = list(zip(group["start"], group["end"], names))
     return res
 
 
@@ -80,25 +81,33 @@ def sortable_to_chrom(sortable, aut_count = 22):
 def tuples_to_segments(tuples):
     segs = {}
     if len(tuples) > 0 and len(tuples[0]) >= 3:
-        for tuple in tuples:
+        for i, tuple in enumerate(tuples):
             if tuple[0] not in segs:
                 segs[tuple[0]] = []
-            if len(tuple) == 3:
-                segs[tuple[0]].append((tuple[1], tuple[2]))
-            else:
-                segs[tuple[0]].append((tuple[1], tuple[2], tuple[3]))
+            seg_name = tuple[3] if len(tuple) == 4 else f"seg_{i}"
+            segs[tuple[0]].append((tuple[1], tuple[2], seg_name))
     return segs
 
 
 def breaks_to_segments(breakpoints):
     segs = {}
-    seg_i = 0
     for chrom, breaks in breakpoints.items():
         segs[chrom] = []
         for i in range(len(breaks) - 1):
-            segs[chrom].append((breaks[i], breaks[i + 1], seg_i))
-            seg_i += 1
+            segs[chrom].append((breaks[i], breaks[i + 1], f"{chrom}_{i}"))
     return segs
+
+
+def segments_to_breaks(segments, keep_ends=True):
+    breaks = { chrom: [] for chrom in segments }
+    for chrom, segs in segments.items():
+        for start, end, name in segs:
+            breaks[chrom].append(start)
+            if keep_ends:
+                breaks[chrom].append(end)
+    for chrom in breaks:
+        breaks[chrom] = sorted(set(breaks[chrom]))
+    return breaks
 
 
 def genome_to_segments(assembly=hg19):

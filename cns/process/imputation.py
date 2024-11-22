@@ -153,7 +153,7 @@ def _are_mergeable(a, b, cn_columns):
     )
 
 
-def merge_neighbours(cns_df, cn_columns=None, print_info=True):
+def merge_cns_df(cns_df, cn_columns=None, print_info=True):
     cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     idx_to_remove = []

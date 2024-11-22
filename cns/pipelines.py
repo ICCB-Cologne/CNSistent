@@ -14,6 +14,7 @@ Functions
 - main_seg_agg: Segments CNS data and aggregates the results.
 """
 
+from .utils.conversions import segments_to_breaks
 from .analyze import *
 from .process import *
 from .utils import *
@@ -65,7 +66,7 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
     if add_missing_chromosomes:
         cns_filled_df = add_missing(cns_filled_df, samples_df, assembly, print_info=print_info)
     cns_cleared_df = remove_outliers(cns_filled_df, assembly, print_info=print_info)
-    res_df = merge_neighbours(cns_cleared_df, cn_columns, print_info=print_info)
+    res_df = merge_cns_df(cns_cleared_df, cn_columns, print_info=print_info)
     return res_df
 
 
@@ -108,7 +109,7 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
         samples_df = samples_df_from_cns_df(cns_df)
     imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
-    res_df = merge_neighbours(filled_df, cn_columns=cn_columns, print_info=print_info)
+    res_df = merge_cns_df(filled_df, cn_columns=cn_columns, print_info=print_info)
     return res_df
 
 
@@ -256,7 +257,7 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
 
     for cn_col in cn_columns:
         cns_subset_df = cns_df[["sample_id", "chrom", "start", "end", cn_col]]
-        segs_df = merge_neighbours(cns_subset_df, cn_col, False)
+        segs_df = merge_cns_df(cns_subset_df, cn_col, False)
         res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
         res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
     return res_df
@@ -331,25 +332,20 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
 
 def main_segment(
-    cns_df,
-    select_segs=None,
+    input_data,
     remove_segs=None,
     split_size=-1,
     merge_dist=-1,
     filter_size=-1,
-    assembly=hg19,
     print_info=False,
 ):
     """
-    Segments CNS data based on specified parameters.
+    Creates a segmentation based on specific segments.
 
     Parameters
-    ----------
-    cns_df : pandas.DataFrame
-        DataFrame containing CNS (Copy Number Segment) data.
-    select_segs : pandas.DataFrame, optional
-        DataFrame containing segments to select for binning. If None, the whole genome is used.
-    remove_segs : pandas.DataFrame, optional
+    input_data : Either a segments dictionary or a CNS DataFrame
+        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it.
+    remove_segs : segments dictionary, optional
         DataFrame containing segments to remove from the selection.
     split_size : int, optional
         Size in base pairs to split segments. Default is -1 (no splitting).
@@ -371,12 +367,14 @@ def main_segment(
     --------
     >>> segmented_cns = main_segment(cns_df, merge_distance=0) # consistent segmentation
     """
-    if select_segs == None:
-        select_segs = genome_to_segments(assembly)
-    res = get_genome_segments(select_segs, remove_segs, filter_size)
-    if merge_dist >= 0:
-        breaks = get_breaks_from_cns_df(cns_df, keep_ends=False, assembly=assembly)
-        res = cluster_within_segments(breaks, res, merge_dist, print_info)
+    # if input data is a DataFrame, convert it to unique segments
+    if isinstance(input_data, pd.DataFrame):        
+        input_segs = cns_df_to_segs(input_data)
+        input_breaks = segments_to_breaks(input_segs)
+        input_data = breaks_to_segments(input_breaks)    
+    res = process_segments(input_data, remove_segs, filter_size)
+    if merge_dist > 0:
+        res = cluster_breaks(res, merge_dist, print_info)
     if split_size > 0:
         res = split_segments(res, split_size)
     return res
@@ -414,14 +412,13 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
     """
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
-        log_warn("NaNs are not considered in aggregation calculations; it is recommended to impute first.")
+        log_warn("NaNs will be converted to 0 for aggregation; it is recommended to impute first.")
     return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
 
 
 def main_seg_agg(
     cns_df,
     cn_columns=None,
-    select_segs=None,
     remove_segs=None,
     how="mean",
     split_size=-1,

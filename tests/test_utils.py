@@ -11,7 +11,7 @@ class TestConversions(unittest.TestCase):
 
     def test_segs_to_df(self):
         segments = {'chr1': [(1, 5)], 'chr2': [(10, 15)]}
-        df = segs_to_df(segments)
+        df = segs_to_cns_df(segments)
         self.assertTrue(isinstance(df, pd.DataFrame))
         self.assertEqual(df.columns.tolist(), ["chrom", "start", "end"])
         self.assertEqual(df.iloc[0].tolist(), ['chr1', 1, 5])
@@ -24,7 +24,7 @@ class TestConversions(unittest.TestCase):
             'name': ['seg1', 'seg2', 'seg3']
         })
         exp = {'chr1': [(0, 5, 'seg1'), (10, 15, 'seg2')], 'chr2': [(20, 25, 'seg3')]}
-        self.assertEqual(df_to_segs(df), exp)
+        self.assertEqual(cns_df_to_segs(df), exp)
 
     def test_genome_to_segments(self):
         assembly = type('Assembly', (object,), {

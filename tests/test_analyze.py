@@ -85,7 +85,7 @@ class TestBreakage(unittest.TestCase):
         })
         pd.set_option('display.max_columns', 10)
 
-        self.prepare_segments = lambda cns_df, cn_col: merge_neighbours(
+        self.prepare_segments = lambda cns_df, cn_col: merge_cns_df(
             cns_df[["sample_id", "chrom", "start", "end", cn_col]], cn_col, False
         )
 

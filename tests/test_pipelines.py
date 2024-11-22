@@ -106,17 +106,17 @@ class TestPipelines(unittest.TestCase):
     def test_main_segment(self):
         select = {'chr1': [(0, 100, "0")], 'chr2': [(50, 150, "1")], 'chr3': [(100, 200, "2"), (250, 300, "3")]}
         remove = {'chr2': [(0, 75, "0")], 'chr3': [(150, 175, "1")], 'chrX': [(0, 100, "3")]}
-        res = main_segment(self.cns, select, remove, assembly=self.assembly)
+        res = main_segment(select, remove)
         self.assertEqual(len(res), 3)
         print(res)
-        res = main_segment(self.cns, select, remove, filter_size=50, assembly=self.assembly)
+        res = main_segment(select, remove, filter_size=50)
         self.assertEqual(len(res), 3)
         print(res)
-        res = main_segment(self.cns, select, remove, merge_dist=25, filter_size=50, assembly=self.assembly)
+        res = main_segment(self.cns, remove, merge_dist=25, filter_size=50)
         print(res)
         self.assertEqual(res["chr1"][0], (0, 50, "0"))
         self.assertEqual(res["chr2"][0], (75, 117, "1")) 
-        res = main_segment(self.cns, select, remove, 25, 25, 50, self.assembly)
+        res = main_segment(self.cns, remove, 25, 25, 50, self.assembly)
         self.assertEqual(res["chr1"][1], (25, 50, "0_1"))
         self.assertEqual(res["chr2"][0], (75, 96, "1_0"))   
 

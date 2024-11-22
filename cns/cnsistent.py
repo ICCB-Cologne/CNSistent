@@ -14,7 +14,8 @@ from cns.utils.selection import dataframe_array_split
 
 
 def _add_sp_args(action, parser):
-    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments")
+    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments."\
+                        " For segment action, a bed file or one of 'whole', 'arms', 'bands' can be provided.", required=True)
     parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
     parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
     parser.add_argument(
@@ -69,13 +70,6 @@ def _add_sp_args(action, parser):
             help="Distance in which regions should be, can be a positive integer or negative for no splitting (whole regions).",
             required=False,
             default=-1,
-        )
-        parser.add_argument(
-            "--select",
-            type=str,
-            help="Selects the regions to create segments based on, can be either 'whole', 'arms', 'bands', or a path to a BED file.",
-            required=False,
-            default="whole",
         )
         parser.add_argument(
             "--remove",
@@ -138,7 +132,7 @@ def _parse_args():
             raise ValueError("Merging breakpoints requires the --data option to provide CNS data.")
         if args.split < 0:
             args.split = 0
-        if args.select not in ["whole", "arms", "bands"] and not exists(args.select):
+        if args.data not in ["whole", "arms", "bands"] and not exists(args.select):
             raise ValueError(f"Selection {args.select} is not a build-in or a path to a file.")
         if args.remove not in ["", "gaps"] and not exists(args.remove):
             raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
@@ -148,6 +142,9 @@ def _parse_args():
         if args.subsplit > 1:
             print("segmentation is not data parallelizable, --subsplit option will be ignored.")
             args.subsplit = 1
+    else:
+        if not exists(args.data):
+           raise ValueError(f"Data file {args.data} not found.")
 
     if args.threads <= 0:
         raise ValueError("The --threads option must be greater than 0.")
@@ -183,8 +180,8 @@ def _get_segs_df(segs_arg):
     return None
 
 
-def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
-    block_count = len(cns_blocks)
+def _get_blocks(action, input_block, samples_blocks, cols_block, assembly, args):
+    block_count = len(input_block)
     # Apply process_block to each pair of blocks
     ass_block = [assembly] * block_count
     ver_block = [False] * block_count
@@ -192,26 +189,24 @@ def _get_blocks(action, cns_blocks, samples_blocks, cols_block, assembly, args):
     cols_block = [cols_block] * block_count
     if action == "impute":
         ext_block = ["extend"] * block_count
-        return zip(cns_blocks, samples_blocks, ext_block, cols_block, ver_block)
+        return zip(input_block, samples_blocks, ext_block, cols_block, ver_block)
     if action == "fill":
         add_missing = [True] * block_count
-        return zip(cns_blocks, samples_blocks, cols_block, ass_block, add_missing, ver_block)
+        return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, ver_block)
     elif action == "segment":
-        select = regions_select(args.select, assembly)
         remove = regions_select(args.remove, assembly)
-        select_block = [select] * block_count
         remove_block = [remove] * block_count
         split_block = [args.split] * block_count
         merge_block = [args.merge] * block_count
         filter_block = [args.filter] * block_count
-        return zip(cns_blocks, select_block, remove_block, split_block, merge_block, filter_block, ass_block, ver_block)
+        return zip(input_block, remove_block, split_block, merge_block, filter_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
         segs_block = [_get_segs_df(args.segments)] * block_count
-        return zip(cns_blocks, samples_blocks, cols_block, segs_block, ass_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "aggregate":
         segs_block = [_get_segs_df(args.segments)] * block_count
         fun_block = [args.how] * block_count
-        return zip(cns_blocks, segs_block, fun_block, cols_block, ver_block)
+        return zip(input_block, segs_block, fun_block, cols_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
 
@@ -245,46 +240,46 @@ def main():
     args = _parse_args()
     action = args.action
     assembly = get_assembly(args.assembly)
-    cns_file_path = args.data
-    samples_path = args.samples
-    out_file = args.out
     print_info = args.verbose
-    subsplit = args.subsplit
     cncols = _parse_cncols(args.cncols)
+    out_file = args.out
 
     # Read the input
     log_info(print_info, f"***** cns {action} *****")
 
-    # For segmentation without cns file we don't use cns files and multiprocessing
-    if action == "segment" and args.merge < 0:
-        select = regions_select(args.select, assembly)
-        remove = regions_select(args.remove, assembly)
-        segs = main_segment(None, select, remove, args.split, args.merge, args.filter, assembly, print_info)
-        save_segments(segs, out_file)
-        log_info(print_info, "Done.")
-        return
-
-    if not exists(cns_file_path):
-        raise ValueError(f"Copy number file {cns_file_path} not found.")
+    if action == "segment":
+        if args.data in ["whole", "arms", "bands"]:            
+            log_info(print_info, f"Creating {args.data} segments...")
+            input_data = regions_select(args.data, assembly)
+            cn_columns = None
+        elif args.data[:4] == ".bed":
+            log_info(print_info, f"Loading input file {args.data}...")
+            input_data = load_segments(args.data)
+            cn_columns = None
+        else:
+            log_info(print_info, f"Loading CNS input file {args.data}...")
+            input_data = load_cns(args.data, cn_columns=cncols, assembly=assembly, print_info=print_info)
+        samples_blocks = [None]
     else:
-        log_info(print_info, f"CNS file at {cns_file_path}...")
-    cns_df = load_cns(cns_file_path, cn_columns=cncols, assembly=assembly, print_info=print_info)
-    cn_columns = get_cn_cols(cns_df, cncols)
-    if samples_path == "":
-        samples_df = samples_df_from_cns_df(cns_df, False)
-    else:
-        samples_df = load_samples(samples_path)
-    samples_df = fill_sex_if_missing(cns_df, samples_df)
-    samples_blocks = dataframe_array_split(samples_df, subsplit)
+        log_info(print_info, f"Loading CNS input file {args.data}...")
+        input_data = load_cns(args.data, cn_columns=cncols, assembly=assembly, print_info=print_info)
+        cn_columns = get_cn_cols(input_data, cncols)
+        if args.samples == "":
+            samples_df = samples_df_from_cns_df(input_data, False)
+        else:
+            samples_df = load_samples(args.samples)
+        samples_df = fill_sex_if_missing(input_data, samples_df)
+        samples_blocks = dataframe_array_split(samples_df, args.subsplit)
 
-    for i in range(subsplit):
-        log_info(print_info, f"Processing block {i+1}/{subsplit}...")
+    # Process blocks
+    for i in range(args.subsplit):
+        log_info(print_info, f"Processing block {i+1}/{args.subsplit}...")
 
         samples_block = samples_blocks[i]
 
         # Perform the action
         start = time.time()
-        res_list = _process(action, cns_df, samples_block, cn_columns, assembly, args)
+        res_list = _process(action, input_data, samples_block, cn_columns, assembly, args)
         runtime = time.time() - start
 
         if print_info:

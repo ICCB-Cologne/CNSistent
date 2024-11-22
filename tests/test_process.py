@@ -4,8 +4,7 @@ import pandas as pd
 import io
 
 from cns.process import *
-from cns.utils.assemblies import hg19, hg38
-from cns.utils.conversions import segs_to_df, tuples_to_segments
+from cns.utils import hg19, hg38, segs_to_cns_df, tuples_to_segments
 
 class TestSegments(unittest.TestCase):        
     def test_do_segments_overlap(self):
@@ -85,15 +84,15 @@ class TestSegments(unittest.TestCase):
         select = regions_select("whole")
         remove = regions_select("gaps")
         self.assertGreater(len(remove), 0)
-        segs = get_genome_segments(select, remove, filter_size)
+        segs = process_segments(select, remove, filter_size)
         self.assertGreater(len(segs["chr1"]), 0)
         self.assertEqual(remove["chr1"][0][1], segs["chr1"][0][0])  # check if the first segment is a gap
 
     def test_arms_gaps(self):
         select = regions_select("whole")
         remove = regions_select("gaps")
-        segs = get_genome_segments(select, remove, 1000000)
-        segs_df = segs_to_df(segs)
+        segs = process_segments(select, remove, 1000000)
+        segs_df = segs_to_cns_df(segs)
         self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
         self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 
@@ -103,11 +102,11 @@ class TestSegments(unittest.TestCase):
 
         filter_size = 1
         expected_result = {1: [(15, 20), (20, 30)]}
-        result = get_genome_segments(select, remove, filter_size)
+        result = process_segments(select, remove, filter_size)
 
         filter_size = 6
         expected_result = {1: [(20, 30)], 2: []}
-        result = get_genome_segments(select, remove, filter_size)
+        result = process_segments(select, remove, filter_size)
 
         self.assertEqual(result, expected_result)
 
@@ -186,7 +185,7 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.at[3, "end"], 100)
 
     def test_merge_neighbours(self):
-        result = merge_neighbours(self.cns_df, print_info=False)
+        result = merge_cns_df(self.cns_df, print_info=False)
         self.assertEqual(result.shape[0], 6)        
         self.assertEqual(result.at[4, "start"], 150)
         self.assertEqual(result.at[4, "end"], 200)
@@ -205,7 +204,7 @@ class TestImputation(unittest.TestCase):
         result = cns_impute(result, self.samples_df, print_info=False)
         print(result)
 
-        result = merge_neighbours(result, print_info=False)
+        result = merge_cns_df(result, print_info=False)
         print(result)
 
         result = fill_nans_with_zeros(result, print_info=False)  
@@ -221,7 +220,7 @@ class TestImputation(unittest.TestCase):
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
         result = cns_impute(result, self.samples_df, method='diploid', print_info=False)
-        result = merge_neighbours(result, print_info=False)
+        result = merge_cns_df(result, print_info=False)
         result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.shape[0], 10)
@@ -334,30 +333,6 @@ class TestBreakpoints(unittest.TestCase):
             self.assertTrue(np.abs(np.sum(diffs)) <= 1)
             self.assertTrue(np.max(np.abs(diffs) <= 1))
 
-    def test_get_breaks(self):
-        cns = pd.DataFrame({
-            'sample_id': ['s1', 's1', 's2', 's2', 's2', 's2'],
-            'chrom': ['chr1', 'chr2', 'chr2', 'chr2', 'chr2', 'chr2'],
-            'start': [0, 0, 50, 125, 150, 175],
-            'end': [100, 150, 100, 150, 175, 200],
-            'major_cn': [1, 2, 3, np.nan, 1, 1],
-            'minor_cn': [1, 2, 1, 0, 0, 0]
-        }) 
-        breaks = get_breaks_from_cns_df(cns, keep_ends=True)
-        self.assertEqual(breaks['chr1'], [0, 100])
-        self.assertEqual(breaks['chr2'], [0, 50, 100, 125, 150, 175, 200])
-        self.assertTrue('chr3' not in breaks)
-        breaks = get_breaks_from_cns_df(cns, keep_ends=False)
-        self.assertEqual(breaks['chr1'], [100])
-        # self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175, 200])
-        assembly = type('Assembly', (object,), {
-            'chr_lens': {'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
-            'chr_names': ['chr1', 'chr2', 'chr3', 'chrX', 'chrY']
-        })
-        breaks = get_breaks_from_cns_df(cns, assembly=assembly, keep_ends=False)
-        self.assertEqual(breaks['chr1'], [])
-        self.assertEqual(breaks['chr2'], [50, 100, 125, 150, 175])
-
 
 class TestAggregation(unittest.TestCase):
     def setUp(self):
@@ -428,9 +403,8 @@ class TestMerging(unittest.TestCase):
     def test_cluster_within_segments(self):
         print()
         breaks = {'chr1': [50, 149, 200, 299], 'chr2': [200, 300]}
-        segments = {'chr1': [(0, 300)], 'chr2': [(100, 200)]}
         dist = 100
-        res = cluster_within_segments(breaks, segments, dist, True)
+        res = cluster_breaks(segments, dist, True)
         self.assertEqual(len(res), 2)
         self.assertEqual(res['chr1'][0], (0, 100))
         self.assertEqual(res['chr1'][2], (250, 300))

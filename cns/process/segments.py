@@ -2,7 +2,7 @@ import numpy as np
 from cns.process.breakpoints import split_into_bins, make_breaks
 from cns.utils.conversions import cytobands_to_df, genome_to_segments, tuples_to_segments
 from cns.utils.assemblies import hg19
-from cns.utils import load_segments
+from cns.utils.files import load_segments
 
 
 def count_segments(segs):
@@ -183,14 +183,18 @@ def regions_select(select, assembly=hg19):
         return load_segments(select)
 
 
-def get_genome_segments(select, remove=None, filter_size=-1):
-    res = select
+def process_segments(input_segs, remove_segs=None, filter_size=-1):
+    if not isinstance(input_segs, dict):
+        raise ValueError(f"input_segs must a dictionary of segments, got {type(remove_segs)}")
+    res = input_segs
     if filter_size > 0:
         res = filter_min_size(res, filter_size, False)
-    if remove != None:
+    if remove_segs != None:
+        if not isinstance(remove_segs, dict):
+            raise ValueError(f"remove_segs must be None or a dictionary of segments, got {type(remove_segs)}")
         if filter_size > 0:
-            remove = filter_min_size(remove, filter_size, True)
-        res = segment_difference(res, remove)
+            remove_segs = filter_min_size(remove_segs, filter_size, True)
+        res = segment_difference(res, remove_segs)
         if filter_size > 0:
             res = filter_min_size(res, filter_size, False)
     return res
