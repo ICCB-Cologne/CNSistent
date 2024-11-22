@@ -17,12 +17,6 @@ The `cnsistent` repository contains data from the PCAWG, TCGA, and TRACERx studi
 5. Process data: ``bash ./scripts/data_process.sh``
 6. Optional: Aggregate processed data: ``bash ./scripts/data_aggregate.sh``
 
-**NOTES:**
-
-* The aggregation step will take several hours and produce ~40GB of data.
-* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the ``data_process.sh`` and ``data_aggregate.sh`` scripts.
-* You can also install the package with ``pip install``, however there is a set of utility functions for loading data in ``cns.data_utils.py``` that will not be accessible then.
-
 Accessing the bundled data
 --------------------------
 
@@ -54,52 +48,14 @@ would produce
     3 SP101724  chr1  6241328  6269449 2         2        RPL22
     4 SP101724  chr1  6845383  7829766 2         2        CAMTA1
 
-Basic tool usage
-----------------
+Alternativelly you can call:
 
-CNSistent reads SCNA profiles as ``.tsv`` files. Have an example file ``data.tsv``:
+* ``main_load`` to only load samples,
+* ``main_load("preprocess")`` to load the raw data,
+* ``main_load("agg_type")`` to load the aggregated bins, if the aggregation has been done, which can be one of: ``["1MB", "2MB", "3MB", "5MB", "10MB", "250KB", "500KB", "whole", "arms", "bands", "COSMIC", "ENSEMBL"]``.
 
-.. code-block:: python
+**Notes**
 
-    sample_id    chrom   start   end     total_cn
-    sample1      chr1    100     200     1       
-    ...
-
-.. note::
-    Column naming is fully describe in the :ref:`input_format` section.
-
-To preprocess the segments:
-
-.. code-block:: bash
-
-    cns fill data.tsv --out filled.tsv
-    cns impute filled.tsv --out imputed.csv
-
-To create statistics:
-
-.. code-block:: bash
-
-    cns coverage data.tsv --out samples.tsv
-    cns ploidy imputed.tsv --samples samples.tsv --out samples.tsv
-    cns signatures imputed.tsv --samples samples.tsv --out samples.tsv
-
-To calculate the mean ploidy per chromosome arm:
-
-.. code-block:: bash
-
-    cns segment arms --out arms.bed
-    cns aggregate imputed.tsv --segments --out a_bins.tsv
-
-To conduct breakpoint clustering with 1 mb distance:
-
-.. code-block:: bash
-
-    cns cluster imputed.tsv --merge 1000000 --out clust.bed
-    cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
-
-To conduct segmentation using 5 mb bins:
-
-.. code-block:: bash
-
-    cns segment whole --step 5000000 --out clust.bed
-    cns aggregate data.tsv  --segments clust.bed --out c_bins.tsv
+* By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the ``data_process.sh`` and ``data_aggregate.sh`` scripts.
+* You can also install the package with ``pip install .``, however there is a set of utility functions for loading data in ``cns.data_utils.py`` that will not be accesible then.
+* Conda is optional, you can also install required packages manually using PIP based on the list in [cnsistent.yml](./cnsistent.yml).

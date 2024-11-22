@@ -7,7 +7,7 @@ CNSistent is a Python tool for processing and analyzing copy number data. It is 
 <a href="./docs/build/html/index.html" style="font-size: 2.5em;">DOCUMENTATION HERE</a>
 
 
-# Example
+# Example of API
 
 The below used files are directly taken from the [TRACERx Zenodo archive](https://zenodo.org/records/7649257).
 
@@ -53,6 +53,58 @@ cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
 ![Raw Data Heatmap](./docs/files/intro_3.png)
 
 The example code is also in `example_API.py`.
+
+# Example from terminal
+
+Example in terminal
+-------------------
+
+
+CNSistent reads SCNA profiles as `.tsv` files. Have an example file `data.tsv`:
+
+```python
+sample_id    chrom   start   end     total_cn
+sample1      chr1    100     200     1       
+...
+```
+
+To preprocess the segments:
+
+```bash
+cns fill data.tsv --out filled.tsv
+cns impute filled.tsv --out imputed.csv
+```
+
+To create statistics:
+
+```bash
+cns coverage data.tsv --out samples.tsv
+cns ploidy imputed.tsv --samples samples.tsv --out samples.tsv
+cns signatures imputed.tsv --samples samples.tsv --out samples.tsv
+```
+
+To calculate the mean ploidy per chromosome arm:
+
+```bash
+cns segment arms --out arms.bed
+cns aggregate imputed.tsv --segments --out a_bins.tsv
+```
+
+To conduct breakpoint clustering with 1 mb distance:
+
+```bash
+cns cluster imputed.tsv --merge 1000000 --out clust.bed
+cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
+```
+
+To conduct segmentation using 5 mb bins:
+
+```bash
+cns segment whole --step 5000000 --out clust.bed
+cns aggregate data.tsv  --segments clust.bed --out c_bins.tsv
+```
+
+Extension of the example is in `example_CLI.py`.
 
 # Repository Data Quickstart
 
@@ -113,8 +165,6 @@ Alternativelly you can call:
 * `main_load` to only load samples,
 * `main_load("preprocess")` to load the raw data,
 * `main_load("agg_type")` to load the aggregated bins, if the aggregation has been done, which can be one of: `["1MB", "2MB", "3MB", "5MB", "10MB", "250KB", "500KB", "whole", "arms", "bands", "COSMIC", "ENSEMBL"]`.
-
-
 
 ## Notes
 

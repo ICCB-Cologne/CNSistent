@@ -18,8 +18,8 @@ CNSistent is a Python tool for processing and analyzing copy number data.
 It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. 
 The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
-Example
--------
+Example of API
+--------------
 
 The below used files are directly taken from the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
 
@@ -82,6 +82,58 @@ Group the CNS data by cancer type, calculate the total CN, and visualize mean li
     :width: 800px
 
 The example code is also in ``example_API.py``.
+
+Example in terminal
+-------------------
+
+CNSistent reads SCNA profiles as ``.tsv`` files. Have an example file ``data.tsv``:
+
+.. code-block:: python
+
+    sample_id    chrom   start   end     total_cn
+    sample1      chr1    100     200     1       
+    ...
+
+.. note::
+    Column naming is fully describe in the :ref:`input_format` section.
+
+To preprocess the segments:
+
+.. code-block:: bash
+
+    cns fill data.tsv --out filled.tsv
+    cns impute filled.tsv --out imputed.csv
+
+To create statistics:
+
+.. code-block:: bash
+
+    cns coverage data.tsv --out samples.tsv
+    cns ploidy imputed.tsv --samples samples.tsv --out samples.tsv
+    cns signatures imputed.tsv --samples samples.tsv --out samples.tsv
+
+To calculate the mean ploidy per chromosome arm:
+
+.. code-block:: bash
+
+    cns segment arms --out arms.bed
+    cns aggregate imputed.tsv --segments --out a_bins.tsv
+
+To conduct breakpoint clustering with 1 mb distance:
+
+.. code-block:: bash
+
+    cns cluster imputed.tsv --merge 1000000 --out clust.bed
+    cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
+
+To conduct segmentation using 5 mb bins:
+
+.. code-block:: bash
+
+    cns segment whole --step 5000000 --out clust.bed
+    cns aggregate data.tsv  --segments clust.bed --out c_bins.tsv
+
+Extention of the example is in ``example_CLI.py``.
 
 .. toctree::
    :maxdepth: 2
