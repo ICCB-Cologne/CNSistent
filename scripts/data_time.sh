@@ -7,7 +7,7 @@ cd "$(dirname "$0")" # Set path to the script's path
 
 mkdir -p $temp_folder
 dataset=PCAWG
-for threads in 1 2 4 8 16 32;
+for threads in 10 2 4 8 16 32;
 do
     echo "Processing $threads thread/s"
     common_args="--threads $threads --verbose --time"

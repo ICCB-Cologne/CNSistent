@@ -96,25 +96,16 @@ def _parse_args():
     # Top-level parser
     parser = argparse.ArgumentParser(description="Impute missing values in CNS data")
     subparsers = parser.add_subparsers(dest="action", help="cns action to perform. One of:")
-
     parser.add_argument("-v", action="version", version="%(prog)s 1.0")
 
     sp_dict = {}
     sp_dict["fill"] = subparsers.add_parser("fill", help=f"Adds Nan regions to the CNS data to match the assembly.")
     sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNS data.")
-    sp_dict["coverage"] = subparsers.add_parser(
-        "coverage", help=f"Calculates coverage for filled (but not imputed) CNS data."
-    )
-    sp_dict["ploidy"] = subparsers.add_parser(
-        "ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored)."
-    )
-    sp_dict["breakage"] = subparsers.add_parser(
-        "breakage", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored)."
-    )
+    sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data." )
+    sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
+    sp_dict["breakage"] = subparsers.add_parser("breakage", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
     sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
-    sp_dict["aggregate"] = subparsers.add_parser(
-        "aggregate", help=f"Aggregate copy numbers across segments to fill provided segments."
-    )
+    sp_dict["aggregate"] = subparsers.add_parser("aggregate", help=f"Aggregate copy numbers across segments to fill provided segments.")
     for action, sp in sp_dict.items():
         _add_sp_args(action=action, parser=sp)
 
@@ -247,17 +238,14 @@ def main():
         if args.data in ["whole", "arms", "bands"]:            
             log_info(print_info, f"Creating {args.data} segments...")
             input_data = regions_select(args.data, assembly)
-            cn_columns = None
         elif args.data[-4:] == ".bed":
             log_info(print_info, f"Loading input file {args.data}...")
             input_data = load_segments(args.data)
-            cn_columns = None
         else:
             log_info(print_info, f"Loading CNS input file {args.data}...")
             input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
-            cn_columns = get_cn_cols(input_data, in_cols)
         remove_regs = regions_select(args.remove, assembly)
-        res = main_segment(input_data, remove_regs, args.split, args.merge, args.filter, print_info)
+        res = main_segment(input_data, remove_regs, args.split, args.merge, args.filter, assembly, print_info)
         save_segments(res, out_file)
         
     # Parallel action

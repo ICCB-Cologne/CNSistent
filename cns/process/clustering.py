@@ -70,8 +70,7 @@ def _cluster_breaks_list(breaks, clust_dist, keep_ends = True, print_info=False)
     merged = _merge_clusters(clusters, clust_dist)
     new_breaks = _clusters_to_breaks(merged)
     if keep_ends:
-        new_breaks[0] = breaks[0]
-        new_breaks[-1] = breaks[-1]
+        new_breaks = [breaks[0]] + new_breaks + [breaks[-1]]
     return new_breaks
 
 
@@ -85,11 +84,9 @@ def _get_break_list(segs):
 
 
 def _extend_segs(chrom, breaks, chr_segs):
-    segs = []
     offset = len(chr_segs)
     for i in range(len(breaks) - 1):
         chr_segs.append((breaks[i], breaks[i + 1], f'{chrom}_{offset+i}'))
-    return segs
 
 
 def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False):
@@ -99,10 +96,13 @@ def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False)
     for chrom, chrom_segs in input_segs.items():
         cons = get_consecutive_segs(chrom_segs)        
         chr_segs = []
-        for clustered in cons:
-            seg_breaks = _get_break_list(clustered)
-            breaks = _cluster_breaks_list(seg_breaks, clust_dist, keep_ends, print_info)
-            clustered = _extend_segs(chrom, breaks, chr_segs)       
+        for neigbours in cons:
+            if clust_dist > neigbours[-1][1] - neigbours[0][0]:
+                chr_segs.append(neigbours[0][0], neigbours[-1][1], f'{chrom}_{len(chr_segs)}')
+            else:
+                seg_breaks = _get_break_list(neigbours)
+                breaks = _cluster_breaks_list(seg_breaks, clust_dist, keep_ends, print_info)
+                _extend_segs(chrom, breaks, chr_segs)       
         res[chrom] = chr_segs
 
     new_count = values_count(res)

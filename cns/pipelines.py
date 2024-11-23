@@ -14,7 +14,6 @@ Functions
 - main_seg_agg: Segments CNS data and aggregates the results.
 """
 
-from .utils.conversions import segments_to_breaks
 from .analyze import *
 from .process import *
 from .utils import *
@@ -57,9 +56,13 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
     --------
     >>> filled_cns = main_fill(cns_df)
     """
+    if not isinstance(cns_df, pd.DataFrame):       
+        raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
+    elif not isinstance(samples_df, pd.DataFrame):
+        raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
     cn_columns = get_cn_cols(cns_df, cn_columns)
     cns_tailed_df = add_tails(cns_df, assembly, print_info=print_info)
     cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
@@ -103,10 +106,15 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
     --------
     >>> imputed_cns = main_impute(cns_df, method="diploid")
     """
+    if not isinstance(cns_df, pd.DataFrame):       
+        raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     cn_columns = get_cn_cols(cns_df, cn_columns)
-    if method == "diploid" and samples_df is None:
-        log_info(print_info, "Diploid imputation requires samples, but none provided, creating samples from CNS data.")
-        samples_df = samples_df_from_cns_df(cns_df)
+    if samples_df is None:
+        if method == "diploid":
+            log_info(print_info, "Diploid imputation method requires samples_df, but none provided, creating samples from CNS data.")
+            samples_df = samples_df_from_cns_df(cns_df)    
+    elif not isinstance(samples_df, pd.DataFrame):
+        raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
     imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
     res_df = merge_cns_df(filled_df, cn_columns=cn_columns, print_info=print_info)
@@ -165,9 +173,9 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
         DataFrame containing sample information. If None, samples are created from `cns_df`.
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
-    segs : pandas.DataFrame, optional
-        DataFrame containing segments to consider for coverage calculation.
-    assembly : object, optional
+    segs : segments dictionary, optional
+        Dictionary of segments used for selective masking. Default is None.
+    assembly : Assembly object, optional
         Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
@@ -185,9 +193,14 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     --------
     >>> coverage_stats = main_coverage(cns_df)
     """
+    if not isinstance(cns_df, pd.DataFrame):       
+        raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
-        samples_df = samples_df_from_cns_df(cns_df)
+        samples_df = samples_df_from_cns_df(cns_df)    
+    elif not isinstance(samples_df, pd.DataFrame):
+        raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
+    
     res_df = samples_df.copy()
     cn_columns = get_cn_cols(cns_df, cn_columns)
 
@@ -222,7 +235,11 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     threshold : float, optional
         Threshold for detecting breakpoints. Default is 0.5.
     cn_columns : list of str, optional
-        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.        
+    segs : segments dictionary, optional
+        Dictionary of segments used for selective masking. Default is None.    
+    assembly : Assembly object, optional
+        Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 
@@ -239,9 +256,14 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     --------
     >>> breakpoints = main_breakage(cns_df, threshold=1.0)
     """
+    if not isinstance(cns_df, pd.DataFrame):       
+        raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
-        samples_df = samples_df_from_cns_df(cns_df)
+        samples_df = samples_df_from_cns_df(cns_df)    
+    elif not isinstance(samples_df, pd.DataFrame):
+        raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
+    
     res_df = samples_df.copy()
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if segs is not None:
@@ -275,8 +297,10 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     samples_df : pandas.DataFrame, optional
         DataFrame containing sample information. If None, samples are created from `cns_df`.
     cn_columns : list of str, optional
-        List of column names for copy number data. If None, columns are inferred from `cns_df`.
-    assembly : object, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.   
+    segs : segments dictionary, optional
+        Dictionary of segments used for selective masking. Default is None.    
+    assembly : Assembly object, optional
         Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
@@ -294,11 +318,17 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     --------
     >>> ploidy_stats = main_ploidy(cns_df)
     """
+    if not isinstance(cns_df, pd.DataFrame):       
+        raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
-        samples_df = samples_df_from_cns_df(cns_df)
+        samples_df = samples_df_from_cns_df(cns_df)    
+    elif not isinstance(samples_df, pd.DataFrame):
+        raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
     res_df = samples_df.copy()
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    
     if segs is not None:
         log_info(print_info, "Aggregating CN data by provided segments.")
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
@@ -332,11 +362,12 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
 
 def main_segment(
-    input_data,
+    input_data="whole",
     remove_segs=None,
     split_size=-1,
     cluster_dist=-1,
     filter_size=-1,
+    assembly=hg19,
     print_info=False,
 ):
     """
@@ -353,7 +384,7 @@ def main_segment(
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
-    assembly : object, optional
+    assembly : Assembly object, optional
         Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
@@ -368,10 +399,15 @@ def main_segment(
     >>> segmented_cns = main_segment(cns_df, merge_distance=0) # consistent segmentation
     """
     # if input data is a DataFrame, convert it to unique segments
-    if isinstance(input_data, pd.DataFrame):        
+    if isinstance(input_data, str) and input_data in ["whole", "arms", "bands"]:            
+        log_info(print_info, f"Creating {input_data} segments...")
+        input_data = regions_select(input_data, assembly)
+    elif isinstance(input_data, pd.DataFrame):        
         input_segs = cns_df_to_segs(input_data)
         input_breaks = segments_to_breaks(input_segs)
-        input_data = breaks_to_segments(input_breaks)    
+        input_data = breaks_to_segments(input_breaks)
+    elif not isinstance(input_data, dict):
+        raise ValueError(f"input_data must be a CNS DataFrame, a segments dictionary or one of of ['whole', 'arms', 'bands'], got {type(input_data)}")
     res = process_segments(input_data, remove_segs, filter_size)
     if cluster_dist > 0:
         res = cluster_segments(res, cluster_dist, True, print_info)
@@ -410,6 +446,8 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
     --------
     >>> aggregated_cns = main_aggregate(cns_df, segs, how="max")
     """
+    if not isinstance(cns_df, pd.DataFrame):       
+        raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
         log_warn("NaNs will be converted to 0 for aggregation; it is recommended to impute first.")
@@ -418,11 +456,12 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
 
 def main_seg_agg(
     cns_df,
+    input_data="whole",
     cn_columns=None,
     remove_segs=None,
     how="mean",
     split_size=-1,
-    merge_dist=-1,
+    cluster_dist=-1,
     filter_size=-1,
     assembly=hg19,
     print_info=False,
@@ -432,6 +471,8 @@ def main_seg_agg(
 
     Parameters
     ----------
+    input_data : a cns_df (possibly the same as cns_df), a segments dictionary or one of of ["whole", "arms", "bands"]
+        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
     cns_df : pandas.DataFrame
         DataFrame containing CNS (Copy Number Segment) data.
     cn_columns : list of str, optional
@@ -442,11 +483,11 @@ def main_seg_agg(
         Aggregation method to use. Default is "mean".
     split_size : int, optional
         Size in base pairs to split segments. Default is -1 (no splitting).
-    merge_dist : int, optional
+    cluster_dist : int, optional
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
-    assembly : object, optional
+    assembly : Assembly object, optional
         Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
@@ -456,7 +497,7 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(cns_df, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
+    segs = main_segment(input_data, remove_segs, split_size, cluster_dist, filter_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df
 
