@@ -4,7 +4,7 @@ import pandas as pd
 import io
 
 from cns.process import *
-from cns.utils import hg19, hg38, segs_to_cns_df, tuples_to_segments
+from cns.utils import hg19, hg38, segments_to_cns_df, tuples_to_segments
 
 class TestSegments(unittest.TestCase):        
     def test_do_segments_overlap(self):
@@ -92,7 +92,7 @@ class TestSegments(unittest.TestCase):
         select = regions_select("whole")
         remove = regions_select("gaps")
         segs = process_segments(select, remove, 1000000)
-        segs_df = segs_to_cns_df(segs)
+        segs_df = segments_to_cns_df(segs)
         self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
         self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 

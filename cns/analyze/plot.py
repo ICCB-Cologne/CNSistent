@@ -11,6 +11,8 @@ from cns.utils import get_cn_cols, hg19
 
 def _get_CN_color(cn, min_cn, max_cn):
     val_range = max_cn - min_cn
+    if np.isnan(cn):
+        return (0.5, 0.5, 0.5)
     if cn == 0:
         return (1, 0, 0)  # Red for zero
     else:
@@ -56,7 +58,7 @@ def plot_bars(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1,
     length = cns_df["end"] - cns_df["start"]
     f_start_pos = _get_start_vector(assembly)
     x = cns_df["start"] + length / 2 + f_start_pos(cns_df["chrom"])
-    ax.bar(x, cns_df[cn_column], width=length, color=color, label=label, alpha=alpha)
+    ax.bar(x, cns_df[cn_column], width=length, color=color, label=label, alpha=alpha, linewidth=size, edgecolor='black')
     return ax
 
 
@@ -68,7 +70,7 @@ def plot_heatmap(ax, cns_df, cn_column, min_cn = 0, max_cn = 16, assembly=hg19):
     ax.set_facecolor("gray")
     labels = []
     for i, ((sample_id), group_df) in enumerate(cns_df.groupby("sample_id")):
-        y = i
+        y = -i
         height = 1
         width = group_df["end"] - group_df["start"]
         left = group_df["start"] + f_start_pos(group_df["chrom"])
@@ -76,7 +78,7 @@ def plot_heatmap(ax, cns_df, cn_column, min_cn = 0, max_cn = 16, assembly=hg19):
         ax.barh(y, width, height, left=left, color=color)
         labels.append(sample_id)
 
-    ax.set_yticks(np.arange(len(labels)))
+    ax.set_yticks(-np.arange(len(labels)))
     ax.set_yticklabels(labels)
 
     ax.autoscale(tight=True)
@@ -136,7 +138,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
         ax = axes[j] if n_columns > 1 else axes
 
         max_cn = cns_df[cn_column].max()
-        plot_chr_bg(ax, assembly=assembly, y_min = 0, y_max=max_cn + 1, alpha=0.2)
+        plot_chr_bg(ax, assembly=assembly, y_min = -1, y_max=max_cn + 1, alpha=0.2)
         for i, (group_key, group_df) in enumerate(groups_df):
             color = colors[i]
             label = group_key
@@ -146,16 +148,12 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
                 cn_column=cn_column,
                 color=color,
                 label=label,
-                size=size,
                 alpha=alpha,
+                size=size,
                 assembly=assembly,
             )
 
-        # if 1 < line_count <= 3:
         ax.legend(loc="upper right")
-        # elif line_count > 3:
-        #     ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
-
         ax.set_ylabel(f"{cn_column}")
         ax.set_xlim(x_min, x_max)
         if j == n_columns - 1:
@@ -174,8 +172,8 @@ def fig_dots(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     return _fig_common(cns_df, plot_dots, cn_columns, colors, size, assembly)
 
 
-def fig_bars(cns_df, cn_columns=None, colors=None, assembly=hg19):
-    return _fig_common(cns_df, plot_bars, cn_columns, colors, 1, assembly)
+def fig_bars(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
+    return _fig_common(cns_df, plot_bars, cn_columns, colors, size, assembly)
  
 
 def _make_layout(width, height, n_columns, vertical):
@@ -290,6 +288,14 @@ def plot_gaps(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2, color=None):
     _plot_rectangles(ax, assembly.gaps, y_min, y_max, assembly, f_color, alpha)
 
 
+def _create_label(num):
+    if num < 1_000:
+        return str(num)
+    elif num < 1_000_000:
+        return f"{num // 1_000}kb"
+    else:
+        return f"{num // 1_000_000}mb"
+
 def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
     positions = list(assembly.chr_lens.items())
     if max_x is None:
@@ -308,6 +314,10 @@ def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
         # Update the x position for the next chromosome
         x_pos += length
 
+    if len(major_tick_pos) < 2:
+        ax.set_xticks([min_x, max_x])
+        ax.set_xticklabels([_create_label(min_x), _create_label(max_x)], rotation=90)
+        return
     ax.set_xticks(major_tick_pos)
     ax.set_xticks(minor_tick_pos, minor=True)
     ax.set_xticklabels([" "] * len(major_tick_pos))

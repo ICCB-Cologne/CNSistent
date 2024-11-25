@@ -273,15 +273,21 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     if cns_df[cn_columns].isna().any().any():
         raise RuntimeError("Cannot calculate breakage with NaN values in CN columns, impute first.")
 
+    total_added = False
     if len(cn_columns) == 2:
         cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
         cn_columns.append("total_cn")
+        total_added = True
 
     for cn_col in cn_columns:
         cns_subset_df = cns_df[["sample_id", "chrom", "start", "end", cn_col]]
         segs_df = merge_cns_df(cns_subset_df, cn_col, False)
         res_df = calc_breaks_per_sample(segs_df, res_df, cn_col, assembly)
         res_df = calc_step_per_sample(segs_df, res_df, cn_col, assembly)
+
+    if total_added:
+        cns_df.drop(columns=["total_cn"], inplace=True)
+
     return res_df
 
 
@@ -403,7 +409,7 @@ def main_segment(
         log_info(print_info, f"Creating {input_data} segments...")
         input_data = regions_select(input_data, assembly)
     elif isinstance(input_data, pd.DataFrame):        
-        input_segs = cns_df_to_segs(input_data)
+        input_segs = cns_df_to_segments(input_data)
         input_breaks = segments_to_breaks(input_segs)
         input_data = breaks_to_segments(input_breaks)
     elif not isinstance(input_data, dict):

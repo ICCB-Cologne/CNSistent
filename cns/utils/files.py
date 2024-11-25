@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from cns.utils.canonization import canonize_cns_df, canonize_sample_id
-from cns.utils.conversions import cns_df_to_segs, segs_to_cns_df
+from cns.utils.conversions import cns_df_to_segments, segments_to_cns_df
 from cns.utils.logging import log_warn, log_info
 from cns.utils.assemblies import hg19
 
@@ -238,7 +238,7 @@ def save_segments(segs, path):
     is_bed = path.lower().endswith(".bed")
     if not is_bed:
         log_warn(f"Segments file {path} is not bed file, the coordinates will be 1-based.")
-    seg_df = segs_to_cns_df(segs)
+    seg_df = segments_to_cns_df(segs)
     if not is_bed:
         seg_df = seg_df.copy()
         seg_df.loc[:, "start"] += 1
@@ -291,4 +291,4 @@ def load_segments(path):
     if len(segs_df.columns) == 3:
         segs_df["name"] = np.arange(len(segs_df))
 
-    return cns_df_to_segs(segs_df)
+    return cns_df_to_segments(segs_df)

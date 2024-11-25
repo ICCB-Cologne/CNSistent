@@ -112,11 +112,13 @@ def aggregate_by_break_type(cns_df, break_type, assembly=hg19, how="mean", cn_co
     return aggregate_by_breaks(cns_df, breaks, how, cn_columns, print_info)
 
 
-def add_total_cn(cns_df, cn_columns=None, remove_cn_columns=False):
+def add_total_cn(cns_df, cn_columns=None, remove_cn_columns=False, inplace=True):
     cn_columns = get_cn_cols(cns_df, cn_columns)
     # remove total_cn from cn_columns if it is there
     if "total_cn" in cn_columns:
         cn_columns.remove("total_cn")
+    if not inplace:
+        cns_df = cns_df.copy()
     cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
     if remove_cn_columns:
         cns_df.drop(columns=cn_columns, inplace=True)

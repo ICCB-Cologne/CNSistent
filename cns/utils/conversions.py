@@ -33,7 +33,7 @@ def gaps_to_df(gaps):
     return pd.DataFrame(gaps, columns=["chrom", "start", "end", "type", "bridge"])
 
 
-def segs_to_cns_df(segments):
+def segments_to_cns_df(segments):
     seg_list = []
     for chrom in sorted(segments.keys()):  # Sort the keys lexicographically
         for seg in segments[chrom]:
@@ -48,7 +48,7 @@ def segs_to_cns_df(segments):
         return res_df.rename(columns={0: "chrom", 1: "start", 2: "end", 3: "name"})
 
 
-def cns_df_to_segs(segs_df):
+def cns_df_to_segments(segs_df):
     res = {}
     for chrom, group in segs_df.groupby("chrom"):
         names = group["name"] if "name" in group.columns else [f"{chrom}_{i}" for i in range(len(group))]
