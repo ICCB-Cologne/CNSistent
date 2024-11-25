@@ -123,7 +123,7 @@ To conduct breakpoint clustering with 1 mb distance:
 
 .. code-block:: bash
 
-    cns cluster imputed.tsv --merge 1000000 --out clust.bed
+    cns segment imputed.tsv --merge 1000000 --out clust.bed
     cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
 
 To conduct segmentation using 5 mb bins:

@@ -16,8 +16,8 @@ if [ "$preprocess" = true ]; then
     ./data_preprocess.py --verbose
 fi
 
-cns segment dummy --remove gaps --out ${out}/gaps_hg19_segs.bed --verbose --assembly hg19
-cns segment dummy --remove gaps --out ${out}/gaps_hg38_segs.bed --verbose --assembly hg38
+cns segment whole --remove gaps --out ${out}/gaps_hg19_segs.bed --verbose --assembly hg19
+cns segment whole --remove gaps --out ${out}/gaps_hg38_segs.bed --verbose --assembly hg38
 
 # TRACERx_met TRACERx_prim PCAWG TCGA_hg19 TCGA_hg38
 for dataset in TRACERx;

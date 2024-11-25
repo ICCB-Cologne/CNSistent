@@ -9,37 +9,40 @@ from cns.utils.logging import log_info, log_warn
 
 
 @njit
-def _mean_func(cns_array):
-    return [np.average(cns_array[:, i], weights=cns_array[:, -1]) for i in range(cns_array.shape[1] - 1)]
+def _mean_func(cns_array, weights):
+    return [np.average(cns_array[:, i], weights=weights) for i in range(cns_array.shape[1])]
 
 
 @njit
-def _max_func(cns_array):
-    return [np.max(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
+def _max_func(cns_array, weights):
+    return [np.max(cns_array[:, i]) for i in range(cns_array.shape[1])]
 
 
 @njit
-def _min_func(cns_array):
-    return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1] - 1)]
+def _min_func(cns_array, weights):
+    return [np.min(cns_array[:, i]) for i in range(cns_array.shape[1])]
 
 
 def _aggregate_regs(sample_id, chrom, values, seg_start, seg_end, seg_name, agg_func):
     row_id = 0
     seg_cns = []
+    weights = []
     cns_cols = values.shape[0] - 2
     while row_id < len(values) and values[row_id, 0] < seg_end:
         if values[row_id, 1] > seg_start:
             row = values[row_id]
             start = max(row[0], seg_start)
             end = min(row[1], seg_end)
-            seg_cns.append(np.concatenate([np.nan_to_num(row[2:], copy=False),  [end - start]]))
+            seg_cns.append(row[2:])
+            weights.append(end - start)
         row_id += 1
     
     if seg_cns == []:
         # insert NaN when no data found
         return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols
-    sel_array = np.array(seg_cns, dtype=np.uint32)
-    cns = agg_func(sel_array)
+    sel_array = np.array(seg_cns)
+    weight_array = np.array(weights, dtype=np.uint32)
+    cns = agg_func(sel_array, weight_array)
     return [sample_id, chrom, seg_start, seg_end] + cns + [seg_name]
 
 
@@ -70,7 +73,6 @@ def _get_agg_func(how):
 
 
 # Add column names
-# TODO: Should propagate segment names even for NaN rows
 def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=True):
     agg_func = _get_agg_func(how)
     cn_columns = get_cn_cols(cns_df, cn_columns)

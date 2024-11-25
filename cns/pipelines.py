@@ -450,7 +450,7 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
-        log_warn("NaNs will be converted to 0 for aggregation; it is recommended to impute first.")
+        log_warn("NaNs found, it is recommended to impute first.")
     return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
 
 

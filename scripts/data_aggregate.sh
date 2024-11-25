@@ -13,21 +13,21 @@ segment=true
 cd "$(dirname "$0")" # Set path to the script's path
 
 if [ $segment = true ]; then
-    for dist in 1000000 500000 250000; do
+    for dist in 1MB 500KB 250KB; do
         python ./data_cluster.py $dist
     done
-    cns segment "dummy" --out "${out}/segs_10MB.bed" --split 10000000 --remove gaps --filter 1000000 
-    cns segment "dummy" --out "${out}/segs_5MB.bed" --split 5000000 --remove gaps --filter 500000
-    cns segment "dummy" --out "${out}/segs_3MB.bed" --split 3000000 --remove gaps --filter 300000  
-    cns segment "dummy" --out "${out}/segs_2MB.bed" --split 2000000 --remove gaps --filter 200000
-    cns segment "dummy" --out "${out}/segs_1MB.bed" --split 1000000 --remove gaps --filter 100000
-    cns segment "dummy" --out "${out}/segs_500KB.bed" --split 500000 --remove gaps --filter 50000
-    cns segment "dummy" --out "${out}/segs_250KB.bed" --split 250000 --remove gaps --filter 25000
-    cns segment "dummy" --select "${data}/COSMIC_consensus_genes.bed" --out "${out}/segs_COSMIC.bed" 
-    cns segment "dummy" --select "${data}/ENSEMBL_coding_genes.bed" --out "${out}/segs_ENSEMBL.bed"
-    cns segment "dummy" --out "${out}/segs_whole.bed"
-    cns segment "dummy" --select "arms" --out "${out}/segs_arms.bed" --remove gaps --filter 1000000
-    cns segment "dummy" --select "bands" --out "${out}/segs_bands.bed" --remove gaps --filter 100000
+    cns segment whole --out "${out}/segs_10MB.bed" --split 10000000 --remove gaps --filter 1000000 
+    cns segment whole --out "${out}/segs_5MB.bed" --split 5000000 --remove gaps --filter 500000
+    cns segment whole --out "${out}/segs_3MB.bed" --split 3000000 --remove gaps --filter 300000  
+    cns segment whole --out "${out}/segs_2MB.bed" --split 2000000 --remove gaps --filter 200000
+    cns segment whole --out "${out}/segs_1MB.bed" --split 1000000 --remove gaps --filter 100000
+    cns segment whole --out "${out}/segs_500KB.bed" --split 500000 --remove gaps --filter 50000
+    cns segment whole --out "${out}/segs_250KB.bed" --split 250000 --remove gaps --filter 25000
+    cns segment "${data}/COSMIC_consensus_genes.bed" --out "${out}/segs_COSMIC.bed" 
+    cns segment "${data}/ENSEMBL_coding_genes.bed" --out "${out}/segs_ENSEMBL.bed"
+    cns segment whole --out "${out}/segs_whole.bed"
+    cns segment "arms" --out "${out}/segs_arms.bed" --remove gaps --filter 1000000
+    cns segment "bands" --out "${out}/segs_bands.bed" --remove gaps --filter 100000
 fi
 
 
@@ -48,7 +48,7 @@ do
     cns aggregate --segments "${out}/segs_250KB.bed" --out "${out}/${dataset}_bin_250KB.tsv" $shared_args
     cns aggregate --segments "${out}/segs_COSMIC.bed" --out "${out}/${dataset}_bin_COSMIC.tsv" --how min $shared_args
     cns aggregate --segments "${out}/segs_ENSEMBL.bed" --out "${out}/${dataset}_bin_ENSEMBL.tsv" --how min $shared_args
-    for dist in 1000000 500000 250000; do
+    for dist in 1MB 500KB 250KB; do
         cns aggregate --segments "${out}/segs_merge_${dist}.bed" --out "${out}/${dataset}_bin_merge_${dist}.tsv" $shared_args 
     done
 done

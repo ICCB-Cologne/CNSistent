@@ -93,7 +93,7 @@ cns aggregate imputed.tsv --segments --out a_bins.tsv
 To conduct breakpoint clustering with 1 mb distance:
 
 ```bash
-cns cluster imputed.tsv --merge 1000000 --out clust.bed
+cns segment imputed.tsv --merge 1000000 --out clust.bed
 cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
 ```
 

@@ -366,14 +366,13 @@ class TestAggregation(unittest.TestCase):
     
     def test_agg_by_segments(self):
         segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}
-        result = aggregate_by_segments(self.cns, segments)
-        self.assertEqual(result.shape[0], 4)
-        self.assertEqual(result.at[0, "start"], 0)
-        self.assertEqual(result.at[0, "end"], 100)
-        self.assertEqual(result.at[0, "major_cn"], 1.5)
-        self.assertEqual(result.at[0, "minor_cn"], 1.0)
-        self.assertEqual(result.at[1, "start"], 100)
-        self.assertFalse(result.isna().any().any())
+        res = aggregate_by_segments(self.cns, segments)
+        self.assertEqual(res.shape[0], 4)
+        self.assertEqual(res.at[0, "start"], 0)
+        self.assertEqual(res.at[0, "end"], 100)
+        self.assertEqual(res.at[0, "major_cn"], 1.5)
+        self.assertEqual(res.at[0, "minor_cn"], 1.0)
+        self.assertEqual(res.at[1, "start"], 100)
     
     def test_agg_none(self):        
         segments = {'chr1': [(0, 100, 0)], 'chr2': [(100, 200, 1)]}

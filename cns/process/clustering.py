@@ -98,7 +98,7 @@ def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False)
         chr_segs = []
         for neigbours in cons:
             if clust_dist > neigbours[-1][1] - neigbours[0][0]:
-                chr_segs.append(neigbours[0][0], neigbours[-1][1], f'{chrom}_{len(chr_segs)}')
+                chr_segs.append((neigbours[0][0], neigbours[-1][1], f'{chrom}_{len(chr_segs)}'))
             else:
                 seg_breaks = _get_break_list(neigbours)
                 breaks = _cluster_breaks_list(seg_breaks, clust_dist, keep_ends, print_info)
