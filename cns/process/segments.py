@@ -190,8 +190,7 @@ def regions_select(select, assembly=hg19):
     elif select == "whole":
         return genome_to_segments(assembly)
     elif select == "gaps":
-        breaks = assembly.gaps
-        return tuples_to_segments(breaks)
+        return tuples_to_segments(assembly.gaps)
     elif select[0:3] == "chr":
         if select not in assembly.aut_names:
             raise ValueError(f"Invalid chromosome {select} for assembly {assembly.name}")

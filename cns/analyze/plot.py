@@ -89,10 +89,10 @@ def _get_columns(cns_df, cn_columns):
     if cn_columns == None:
         cn_columns = get_cn_cols(cns_df)
         if len(cn_columns) == 0:
-            raise ValueError("If cn_columns is not specified, at least one column ending with '_cn' must exist in data")
+            raise ValueError("If cn_columns is not specified, at least one column matching CN column pattern must be present in data (see documentation for details).")
     elif isinstance(cn_columns, str):
         if not cn_columns in cns_df.columns:
-            raise ValueError("specified CN column must in cns_df.columns")
+            raise ValueError(f"specified CN column {cn_columns} must in cns_df.columns, have {list(cns_df.columns)}")
         cn_columns = [cn_columns]
     elif isinstance(cn_columns, Sequence):
         if len(cn_columns) <= 0:
@@ -110,7 +110,7 @@ def _get_colors(colors, line_count):
         if line_count == 1:
             colors = ["blue"]
         else:
-            colors = plt.cm.nipy_spectral(np.linspace(0.05, 0.95, line_count))
+            colors = plt.cm.gist_rainbow(np.linspace(0.0, 1, line_count))
     elif line_count == 1:
         colors = [colors]
     elif isinstance(colors, Sequence):

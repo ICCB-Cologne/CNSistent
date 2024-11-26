@@ -380,6 +380,7 @@ def main_segment(
     Creates a segmentation based on specific segments.
 
     Parameters
+    ----------
     input_data : Either a segments dictionary or a CNS DataFrame
         What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it.
     remove_segs : segments dictionary, optional
@@ -402,7 +403,7 @@ def main_segment(
 
     Examples
     --------
-    >>> segmented_cns = main_segment(cns_df, merge_distance=0) # consistent segmentation
+    >>> segmented_cns = main_segment(cns_df)  # consistent segmentation
     """
     # if input data is a DataFrame, convert it to unique segments
     if isinstance(input_data, str) and input_data in ["whole", "arms", "bands"]:            

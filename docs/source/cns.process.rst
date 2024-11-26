@@ -18,10 +18,10 @@ cns.process.breakpoints module
    :undoc-members:
    :show-inheritance:
 
-cns.process.cluster module
---------------------------
+cns.process.clustering module
+-----------------------------
 
-.. automodule:: cns.process.cluster
+.. automodule:: cns.process.clustering
    :members:
    :undoc-members:
    :show-inheritance:

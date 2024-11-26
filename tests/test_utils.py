@@ -5,16 +5,15 @@ from cns.utils import *
 
 class TestConversions(unittest.TestCase):
     def test_tuples_to_segments(self):
-        gaps = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]
+        segs = [('chr1', 1, 5, 'deletion', False), ('chr2', 10, 15, 'duplication', True)]
         exp =  {'chr1': [(1, 5, 'deletion')], 'chr2': [(10, 15, 'duplication')]}
-        self.assertEqual(tuples_to_segments(gaps), exp)
+        self.assertEqual(tuples_to_segments(segs), exp)
 
-    def test_segs_to_df(self):
-        segments = {'chr1': [(1, 5)], 'chr2': [(10, 15)]}
-        df = segments_to_cns_df(segments)
-        self.assertTrue(isinstance(df, pd.DataFrame))
-        self.assertEqual(df.columns.tolist(), ["chrom", "start", "end"])
-        self.assertEqual(df.iloc[0].tolist(), ['chr1', 1, 5])
+    def test_segments_to_cns_df(self):
+        segs = {'chr1': [(1, 5, 'deletion')], 'chr2': [(10, 15, 'duplication')]}
+        res = segments_to_cns_df(segs, 's1')
+        self.assertEqual(res.columns.tolist(), ["sample_id", "chrom", "start", "end", "name", "cn"])
+        self.assertEqual(res.values.tolist(), [['s1', 'chr1', 1, 5, 'deletion', 2], ['s1', 'chr2', 10, 15, 'duplication', 2]])
 
     def test_df_to_segs(self):
         df = pd.DataFrame({
