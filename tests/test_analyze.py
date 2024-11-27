@@ -158,11 +158,8 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res_df.loc['s1', 'ane_hom_aut'], 1/6)
 
     def test_get_loh_bases(self):
-        print(self.cns)
         res_df = calc_loh_bases(self.samples, self.cns, self.cols, "hom", self.assembly)
         res_df = calc_loh_bases(res_df, self.cns, self.cols, "het", self.assembly)
-        print()
-        print(res_df)
         self.assertEqual(res_df.shape, (4, 7))
         self.assertEqual(res_df.loc['s1', 'loh_het_aut'], 100)
         self.assertEqual(res_df.loc['s4', 'loh_het_aut'], 70)

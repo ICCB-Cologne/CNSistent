@@ -179,7 +179,6 @@ class TestImputation(unittest.TestCase):
 
     def test_add_missing(self):
         result = add_missing(self.cns_df, self.samples_df, self.assembly, print_info=False)
-        print(result)
         self.assertEqual(result.shape[0], 9)
         self.assertEqual(result.at[3, "start"], 0)
         self.assertEqual(result.at[3, "end"], 100)
@@ -199,13 +198,10 @@ class TestImputation(unittest.TestCase):
         result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
-        print(result)
 
         result = cns_impute(result, self.samples_df, print_info=False)
-        print(result)
 
         result = merge_cns_df(result, print_info=False)
-        print(result)
 
         result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.at[4, "end"], 112)
@@ -388,7 +384,6 @@ class TestAggregation(unittest.TestCase):
 
 class TestClustering(unittest.TestCase):
     def test_cluster_breaks(self):
-        print()
         breaks = {'chr1': [0, 50, 149, 200, 299, 300], 'chr2': [100, 200,300] }
         segs = breaks_to_segments(breaks)
         dist = 100

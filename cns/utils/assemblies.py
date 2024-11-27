@@ -1,6 +1,6 @@
 from .cytobands import hg19_cytobands, hg38_cytobands
 from .gaps import hg19_gaps, hg38_gaps
-from .genomes import aut_names, x_name, y_name, human_chr_colors, hg19_chr_lengths, hg19_genome_length, hg19_autosome_length, hg19_chr_starts, hg38_chr_lengths, hg38_genome_length, hg38_autosome_length, hg38_chr_starts
+from .genomes import hg19_chr_lengths, hg38_chr_lengths
 
 class Assembly:
     """
@@ -22,46 +22,35 @@ class Assembly:
         The name of the Y chromosome.
     chr_lens : dict
         The lengths of the chromosomes.
-    chr_starts : dict
-        The start positions of the chromosomes.
-    chr_colors : dict
-        The colors of the chromosomes.
-    gen_len : int
-        The total length of the genome.
-    aut_len : int
-        The total length of the autosomes.
     cytobands : list
         The cytobands of the chromosomes.
     gaps : list
         The gaps in the chromosomes.
     """
 
-    def __init__(self, name, aut_names, x_name, y_name, chr_lens, chr_starts, chr_colors, gen_len, aut_len, cytobands, gaps):
+    def __init__(self, name, chr_lens, x_name = "chrX", y_name = "chrY", cytobands=None, gaps=None):
         self.name = name
-        self.chr_names = aut_names + [x_name, y_name]
-        self.aut_names = aut_names
+        self.chr_names = list(chr_lens.keys())
         self.sex_names = [x_name, y_name]
+        self.aut_names =  [item for item in chr_lens if item not in self.sex_names]
         self.chr_x = x_name
         self.chr_y = y_name
         self.chr_lens = chr_lens
-        self.chr_starts = chr_starts
-        self.chr_colors = chr_colors
-        self.gen_len = gen_len
-        self.aut_len = aut_len
+        self.chr_starts = {}
+        i = 0
+        self.chr_starts = {}
+        for k, v in chr_lens.items():
+            self.chr_starts[k] = i
+            i += v
+        self.gen_len = sum(chr_lens.values())
+        self.aut_len = self.gen_len - chr_lens[x_name] - chr_lens[y_name]
         self.cytobands = cytobands
         self.gaps = gaps
 
 
 hg19 = Assembly(
     name="hg19",
-    aut_names=aut_names,
-    x_name=x_name,
-    y_name=y_name,
     chr_lens=hg19_chr_lengths,
-    chr_starts=hg19_chr_starts,
-    chr_colors=human_chr_colors,
-    gen_len=hg19_genome_length,
-    aut_len=hg19_autosome_length,
     cytobands=hg19_cytobands,
     gaps=hg19_gaps
 )
@@ -71,14 +60,7 @@ An instance of the Assembly class representing the hg19 genomic assembly.
 
 hg38 = Assembly(
     name="hg38",
-    aut_names=aut_names,
-    x_name=x_name,
-    y_name=y_name,
     chr_lens=hg38_chr_lengths,
-    chr_starts=hg38_chr_starts,
-    chr_colors=human_chr_colors,
-    gen_len=hg38_genome_length,
-    aut_len=hg38_autosome_length,
     cytobands=hg38_cytobands,
     gaps=hg38_gaps
 )

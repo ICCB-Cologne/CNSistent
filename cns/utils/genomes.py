@@ -1,36 +1,3 @@
-chr_names = [
-    "chr1",
-    "chr2",
-    "chr3",
-    "chr4",
-    "chr5",
-    "chr6",
-    "chr7",
-    "chr8",
-    "chr9",
-    "chr10",
-    "chr11",
-    "chr12",
-    "chr13",
-    "chr14",
-    "chr15",
-    "chr16",
-    "chr17",
-    "chr18",
-    "chr19",
-    "chr20",
-    "chr21",
-    "chr22",
-    "chrX",
-    "chrY",
-]
-
-aut_names = chr_names[:-2]
-x_name = chr_names[-2]
-xx_names = chr_names[:-1]
-y_name = chr_names[-1]
-xy_names = chr_names
-
 human_chr_colors = {
     "chr1": "red",
     "chr2": "mediumblue",
@@ -86,38 +53,6 @@ hg19_chr_lengths = {
     "chrY": 59_373_566,
 }
 
-hg19_chr_starts = {
-    "chr1": 0,
-    "chr2": 249250621,
-    "chr3": 492449994,
-    "chr4": 690472424,
-    "chr5": 881626700,
-    "chr6": 1062541960,
-    "chr7": 1233657027,
-    "chr8": 1392795690,
-    "chr9": 1539159712,
-    "chr10": 1680373143,
-    "chr11": 1815907890,
-    "chr12": 1950914406,
-    "chr13": 2084766301,
-    "chr14": 2199936179,
-    "chr15": 2307285719,
-    "chr16": 2409817111,
-    "chr17": 2500171864,
-    "chr18": 2581367074,
-    "chr19": 2659444322,
-    "chr20": 2718573305,
-    "chr21": 2781598825,
-    "chr22": 2829728720,
-    "chrX": 2881033286,
-    "chrY": 3036303846,
-}
-
-hg19_genome_xy_length = 3095677412
-hg19_genome_xx_length = 3036303846
-hg19_autosome_length = 2881033286
-hg19_genome_length = hg19_genome_xy_length
-
 # https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh38
 hg38_chr_lengths = {
     "chr1": 248_956_422,
@@ -145,35 +80,3 @@ hg38_chr_lengths = {
     "chrX": 156_040_895,
     "chrY": 57_227_415,
 }
-
-hg38_chr_starts = {
-    "chr1": 0,
-    "chr2": 248956422,
-    "chr3": 491149951,
-    "chr4": 689445510,
-    "chr5": 879660065,
-    "chr6": 1061198324,
-    "chr7": 1232004303,
-    "chr8": 1391350276,
-    "chr9": 1536488912,
-    "chr10": 1674883629,
-    "chr11": 1808681051,
-    "chr12": 1943767673,
-    "chr13": 2077042982,
-    "chr14": 2191407310,
-    "chr15": 2298451028,
-    "chr16": 2400442217,
-    "chr17": 2490780562,
-    "chr18": 2574038003,
-    "chr19": 2654411288,
-    "chr20": 2713028904,
-    "chr21": 2777473071,
-    "chr22": 2824183054,
-    "chrX": 2875001522,
-    "chrY": 3031042417,
-}
-
-hg38_genome_xy_length = 3088269832
-hg38_genome_xx_length = 3031042417
-hg38_autosome_length = 2875001522
-hg38_genome_length = hg38_genome_xy_length
