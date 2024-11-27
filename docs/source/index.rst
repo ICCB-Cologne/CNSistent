@@ -5,7 +5,7 @@
 
 .. _introduction:
 
-.. image:: ../Logo.png
+.. image:: ../files/Logo.png
    :alt: CNSistent Logo
    :width: 800px
    :align: center

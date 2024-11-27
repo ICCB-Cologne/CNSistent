@@ -22,9 +22,3 @@ python:
 # Build documentation using Sphinx
 sphinx:
   configuration: docs/source/conf.py
-
-
-include:
-  - docs/files/
-  - docs/source/
-  - docs/
