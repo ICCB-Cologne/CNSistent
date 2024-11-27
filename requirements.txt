@@ -1,0 +1,6 @@
+python>=3.9
+pandas>=2.2
+numpy
+matplotlib
+numba
+scikit-learn

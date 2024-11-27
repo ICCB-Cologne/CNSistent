@@ -16,12 +16,8 @@ build:
 python:
   install:
     - requirements: docs/requirements.txt
-    - method: pip
-      path: .
+    - requirements: requirements.txt
 
 # Build documentation using Sphinx
 sphinx:
   configuration: docs/source/conf.py
-
-conda:
-  environment: cnsistent.yml
