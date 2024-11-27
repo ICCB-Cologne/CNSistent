@@ -1,10 +1,10 @@
-![Example Data](./docs/Logo.png)
+![Example Data](./docs/source/files/Logo.png)
 
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
 > This repository also contains data from the PCAWG, TCGA, and TRACERx datasets, as well as gene sets from COSMIC and Ensembl, therefore git clone will download around 1GB of data. If you only want to use the library, download via PyPI (TODO)
 
-<a href="./docs/build/html/index.html" style="font-size: 2.5em;">DOCUMENTATION HERE</a>
+<a href="https://cnsistent.readthedocs.io/en/latest/" style="font-size: 2.5em;">DOCUMENTATION HERE</a>
 
 
 # Example of API
@@ -20,7 +20,7 @@ raw_df = cns.load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", c
 cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
 ```
 
-![Raw Data Heatmap](./docs/files/intro_1.png)
+![Raw Data Heatmap](./docs/source/files/intro_1.png)
 
 ## 2. Impute Missing Segments
 Fill in missing segments in the data, impute using the extension method, and display a heatmap for the first 5 rows.
@@ -29,7 +29,7 @@ Fill in missing segments in the data, impute using the extension method, and dis
 imp_df = cns.main_fill_imp(raw_df, print_info=True)
 cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
 ```
-![Imputed Data Heatmap](./docs/files/intro_2.png)
+![Imputed Data Heatmap](./docs/source/files/intro_2.png)
 
 ## 3. Create 3 mb Segments and convert to a feature array
 Aggregate the imputed CNS data into 3 MB segments and convert it into a feature array.
@@ -50,7 +50,7 @@ type_groups = {c: cns.select_cns_by_type(seg_df, sample_df, c, "histology_multi_
 groups_df = cns.stack_groups([cns.group_samples(v, group_name=k) for k, v in type_groups.items()])
 cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
 ```
-![Raw Data Heatmap](./docs/files/intro_3.png)
+![Raw Data Heatmap](./docs/source/files/intro_3.png)
 
 The example code is also in `example_API.py`.
 
