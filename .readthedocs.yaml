@@ -23,6 +23,4 @@ python:
 sphinx:
   configuration: docs/source/conf.py
 
-# Define the build commands
-commands:
-  - sphinx-build -b html docs/source docs/build/html
+
