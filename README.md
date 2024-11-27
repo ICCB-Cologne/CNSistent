@@ -1,131 +1,32 @@
 ![Example Data](./docs/source/files/Logo.png)
 
-<h1><a href="https://cnsistent.readthedocs.io/en/latest/">FULL DOCUMENTATION HERE</a> </h1>
-
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
-> This repository also contains data from the PCAWG, TCGA, and TRACERx datasets, as well as gene sets from COSMIC and Ensembl, therefore git clone will download around 1GB of data. If you only want to use the library, download via PyPI (TODO)
-
-# Example of API
-
-The below used files are directly taken from the [TRACERx Zenodo archive](https://zenodo.org/records/7649257).
-
-## 1. Load CNS Data and Display Heatmap
-Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
-
-```python
-import cns
-raw_df = cns.load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMajor", "nMinor"], sep=",", print_info=True)
-cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
-```
-
-![Raw Data Heatmap](./docs/source/files/intro_1.png)
-
-## 2. Impute Missing Segments
-Fill in missing segments in the data, impute using the extension method, and display a heatmap for the first 5 rows.
-
-```python
-imp_df = cns.main_fill_imp(raw_df, print_info=True)
-cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
-```
-![Imputed Data Heatmap](./docs/source/files/intro_2.png)
-
-## 3. Create 3 mb Segments and convert to a feature array
-Aggregate the imputed CNS data into 3 MB segments and convert it into a feature array.
-
-```python
-seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
-features, rows, columns = cns.bins_to_features(seg_df)
-print("Alleles: {0}, samples: {1}, bins: {2}.".format(*features.shape))
-```
-`Alleles: 2, samples: 403, bins: 960.`
-
-## 4. Group Segments by Cancer Type
-Group the CNS data by cancer type, calculate the total CN, and visualize mean linear profiles.
-
-```python
-sample_df = cns.load_samples("./data/20221109_TRACERx421_all_patient_df.tsv")
-type_groups = {c: cns.select_cns_by_type(seg_df, sample_df, c, "histology_multi_full") for c in ["LUAD", "LUSC"]}
-groups_df = cns.stack_groups([cns.group_samples(v, group_name=k) for k, v in type_groups.items()])
-cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
-```
-![Raw Data Heatmap](./docs/source/files/intro_3.png)
-
-The example code is also in `example_API.py`.
-
-# Example from terminal
-
-Example in terminal
--------------------
+> This repository also contains data from the PCAWG, TCGA, and TRACERx datasets, as well as gene sets from COSMIC and Ensembl, therefore git clone will download around 1GB of data. If you only want to use the library, download via PyPI [TODO].
 
 
-CNSistent reads SCNA profiles as `.tsv` files. Have an example file `data.tsv`:
+<h1><a href="https://cnsistent.readthedocs.io/en/latest/">DOCUMENTATION HERE</a> </h1>
 
-```python
-sample_id    chrom   start   end     total_cn
-sample1      chr1    100     200     1       
-...
-```
-
-To preprocess the segments:
-
-```bash
-cns fill data.tsv --out filled.tsv
-cns impute filled.tsv --out imputed.csv
-```
-
-To create statistics:
-
-```bash
-cns coverage data.tsv --out samples.tsv
-cns ploidy imputed.tsv --samples samples.tsv --out samples.tsv
-cns signatures imputed.tsv --samples samples.tsv --out samples.tsv
-```
-
-To calculate the mean ploidy per chromosome arm:
-
-```bash
-cns segment arms --out arms.bed
-cns aggregate imputed.tsv --segments --out a_bins.tsv
-```
-
-To conduct breakpoint clustering with 1 mb distance:
-
-```bash
-cns segment imputed.tsv --merge 1000000 --out clust.bed
-cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
-```
-
-To conduct segmentation using 5 mb bins:
-
-```bash
-cns segment whole --step 5000000 --out clust.bed
-cns aggregate data.tsv  --segments clust.bed --out c_bins.tsv
-```
-
-Extension of the example is in `example_CLI.py`.
-
-# Repository Data Quickstart
+## Repository Data Quickstart
 
 This repository contains raw data from PCAWG, TCGA, TRACERx, as well as genomic locations. The data needs to be processed first before it can be used.
 
-## Requirements
+### Requirements
 
 * Git LFS
 * Python 3.8+
 * Pip 21.3+
 * (Optional) Conda for environment creation
 
-## Processing
+### Processing
 
 1. Clone the repository: `git clone https://bitbucket.org/schwarzlab/cnsistent`
-2. Create the conda environment: `conda env create -f ./cnsistent.yml`
-3. Activate the environment: `conda activate cns`
-4. Install the package from location: `pip install -e .`
-5. Process data: `bash ./scripts/data_process.sh`
-6. (Optional) Aggregate data: `bash ./scripts/data_aggregate.sh`
+2. Install dependencies (`pip install -r requirements.txt`) or create a Conda environment (`conda env create -f cnsistent.yml`).
+3. Install the package from location: `pip install -e .`
+4. Process data: `bash ./scripts/data_process.sh`
+5. [Optional] Aggregate data: `bash ./scripts/data_aggregate.sh`
 
-## Usage
+### Usage
 
 To load the data use:
 
@@ -165,120 +66,58 @@ Alternativelly you can call:
 * `main_load("preprocess")` to load the raw data,
 * `main_load("agg_type")` to load the aggregated bins, if the aggregation has been done, which can be one of: `["1MB", "2MB", "3MB", "5MB", "10MB", "250KB", "500KB", "whole", "arms", "bands", "COSMIC", "ENSEMBL"]`.
 
-## Notes
+### Notes
 
 * By default, 16 threads are used, if that causes problems (crashes), reduce the number of threads in the `data_process.sh` and `data_aggregate.sh` scripts.
 * The `example_API.py` is split into cells that can be run individually in an IDE.
 * You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
 * Conda is optional, you can also install required packages manually using PIP based on the list in [cnsistent.yml](./cnsistent.yml).
 
-# Repository Structure
-
-### `cnsistent.yml`
-
-Conda environment file for the CNSistent package.
-
-### `example_API.py`
-
-Example code for using the CNSistent package.
-
-### `example_CLI.sh`
-
-Example code for using the CNSistent package from the command line.
-
-## `cns`
+## Repository Structure
+*  `cnsistent.yml`: Conda environment file for the CNSistent package, references `requirements.txt`.
+*  `requirements.txt`: Packages required to run the CNSistent package.
+*  `example_API.py`: Example code for using the CNSistent package. 
+*  `example_CLI.sh`: Example code for using the CNSistent package from the command line.
+*  `pyproject.toml`: Configuration for packaging tools.
+  
+**`cns/`**
 Contains the main code for the CNSistent package.
 
-## `data`
+**`data/`**
 Contains the raw data from PCAWG, TCGA, TRACERx, as well as genomic locations, also a notebook used to obtain them or merge source files.
 
-## `docs`
+**`docs/`**
 Contains the documentation for the CNSistent package. The documentation is built using Sphinx, with the source in the `./docs/source` folder. The documentation can be built using the `make html` command in the `./docs` folder, provided the requirements in `./docs/requirements.txt` are met.
 
-## `notebooks`
+**`notebooks/`**
+Contains notebooks used for data processing and analysis:
+*  `analyze_break_clusters.ipynb`: A notebook used to analyze the breakpoint clustering, based on the distance between merged breakpoints. 
+*  `analyze_CN_clipping.ipynb`: Evaluation of result of clipping the CN segment values, in particular the effects on distribution and proportion that is clipped of. 
+*  `analyze_coverage.ipynb`: Calculates the proportion of the genome that is covered by segments and locations where it applies. 
+*  `analyze_features.ipynb`	: Calculates and plots features across datasets. 
+*  `analyze_lung.ipynb` : Plots the lung cancer data across datasets and cancer types, in particular for chromosome 3 and genes that have been established as important by IG method. 
+*  `analyze_SOX2_overlay.ipynb`: Plots the SOX2 gene overlay on the lung cancer data. 
+*  `analyze_types.ipynb`: Plots the distribution of cancer types and overall CN across datasets. 
+*  `data_obtain.ipynb`: A notebook that has been used to obtain the raw data and potentially merge files where needed. 
+*  `docs_illustrations.ipynb`: A notebook used to create illustrations for the documentation. 
+*  `docs_knee_detection.ipynb`: A demo of the kneepoint detection algorithm. 
+*  `docs_runtime.ipynb`: Calculates the runtime of the data processing across 1-32 threads (log scale). 
 
-Contains notebooks used for data processing and analysis.
-
-### `analyze_break_clusters.ipynb`
-
-A notebook used to analyze the breakpoint clustering, based on the distance between merged breakpoints.
-
-### `analyze_CN_clipping.ipynb`
-
-Evaluation of result of clipping the CN segment values, in particular the effects on distribution and proportion that is clipped of.
-
-### `analyze_coverage.ipynb`
-
-Calculates the proportion of the genome that is covered by segments and locations where it applies.
-
-### `analyze_features.ipynb`	
-
-Calculates and plots features across datasets.
-
-### `analyze_lung.ipynb` 
-
-Plots the lung cancer data across datasets and cancer types, in particular for chromosome 3 and genes that have been established as important by IG method.
-
-### `analyze_SOX2_overlay.ipynb`
-
-Plots the SOX2 gene overlay on the lung cancer data.
-
-### `analyze_types.ipynb`
-
-Plots the distribution of cancer types and overall CN across datasets.
-
-### `data_obtain.ipynb`
-
-A notebook that has been used to obtain the raw data and potentially merge files where needed.
-
-### `docs_illustrations.ipynb`
-
-A notebook used to create illustrations for the documentation.
-
-### `docs_knee_detection.ipynb`
-
-A demo of the kneepoint detection algorithm.
-
-### `docs_runtime.ipynb`
-
-Calculates the runtime of the data processing across 1-32 threads (log scale).
-
-## `scripts`
-
-### `data_process.sh`
-
-Fills and imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy.
-
+**`scripts/`**
+*  `data_process.sh`: Fills and imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy. 
 Depends on `data_preprocess.py` for preprocessing of raw data.
-
-### `data_aggregate.sh`
-
-Creates various segmentations, and aggregates the preprocessed data based on these segmentations.
-
+*  `data_aggregate.sh`: Creates various segmentations, and aggregates the preprocessed data based on these segmentations. 
 Depends on `data_cluster.py` for breakpoint clustering.
+*  `data_time.sh`: Run time tests for the data processing across `1-32` threads (log scale). 
 
-### `data_time.sh`
+**`tests/`**
+*  `in` and `out`: Contains the input and output data for the tests. Output is generated using `example_CLI.sh`.  
+*  `test_cli.sh` : Executes the tests and outputs to `./tests/temp`.  
+*  `test_*`: unittest based tests of the public API. 
 
-Run time tests for the data processing across `1-32` threads (log scale).
+## Reference
 
-## `tests`
-
-### `in` and `out`
-
-Contains the input and output data for the tests. Output is generated using `./example_CLI.sh`. 
-
-### `test_cli.sh` 
-
-Executes the tests and outputs to `./tests/temp`. 
-
-### `test_*`
-
-unittest based tests of the public API.
-
-
-# Reference
-
-## Data
+### Data
 
 The data are obtained and processed using the code in `./data/data_obtain.ipynb`. Sources:
 
@@ -301,11 +140,11 @@ Cite: https://academic.oup.com/nar/article/51/D1/D933/6786199
 Cytoband, Gap data obtained from: https://genome.ucsc.edu
 Cite: https://www.nature.com/articles/35057062
 
-## Please cite
+### Please cite
 
 TBD, pre-print expected 2024.
 
-## The MIT License
+### The MIT License
 
 Copyright © 2023 Dr. Adam Streck, adam.streck@gmail.com
 

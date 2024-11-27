@@ -4,7 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name="CNSistent"
-version="0.4"
+version="0.5"
+dynamic = ["dependencies"]
 authors=[
 	{name="Adam Streck", email="adam.streck@gmail.com"}
 ]
@@ -17,6 +18,9 @@ license={text="MIT"}
 requires-python = ">=3.9"
 keywords = ["bioinformatics", "genomics", "copy number segments", "CNS"]
 
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [project.scripts]
 cns="cns.cnsistent:main"
