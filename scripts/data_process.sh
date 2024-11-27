@@ -3,6 +3,7 @@ threads=30
 
 data="../data"
 out="../out"
+assembly="hg19"
 
 set -x
 
@@ -13,16 +14,15 @@ mkdir -p $out
 cns segment whole --remove gaps --out ${out}/gaps_hg19_segs.bed --verbose --assembly hg19
 cns segment whole --remove gaps --out ${out}/gaps_hg38_segs.bed --verbose --assembly hg38
 
-# TRACERx_met TRACERx_prim PCAWG TCGA_hg19 TCGA_hg38
-for dataset in TRACERx;
+for dataset in TRCAERx PCAWG TCGA_hg19;
 do
     echo "Processing $dataset with assembly $assembly"      
     common_args="--threads $threads --verbose --assembly $assembly"
-    cns fill "${data}/${dataset}_cns_preprocess.tsv" --samples "${data}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
-    cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
-    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_samples_fill.tsv" $common_args        
-    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_preprocess.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
-    cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${data}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
-    cns breakage "${out}/${dataset}_cns_imp.tsv" --samples "${data}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args 
+    cns fill "${data}/${dataset}_cns_raw.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
+    cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
+    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_samples_fill.tsv" $common_args        
+    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
+    cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
+    cns breakage "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args 
 done
 

@@ -29,7 +29,7 @@ data_path = pjoin(get_root_path(), "data")
 docs_path = pjoin(get_root_path(), "docs/files")
 
 
-def load_cns_out(filename, print_info=False):
+def load_cns_file(filename, print_info=False):
     """Load CNS data from the output directory.
 
     Parameters
@@ -44,11 +44,14 @@ def load_cns_out(filename, print_info=False):
     pd.DataFrame
         DataFrame containing CNS data.
     """
-    log_info(print_info, f"Loading CNS data from {filename}")
-    return load_cns(pjoin(out_path, filename))
+    source_folder = data_path if "raw" in filename else out_path
+    path = abspath(pjoin(source_folder, filename))
+    log_info(print_info, f"Loading CNS data  from {path}")
+    cns_df = load_cns(path)
+    return cns_df
 
 
-def load_samples_out(filename, use_filter=False, print_info=False):
+def load_samples_file(filename, use_filter=False, print_info=False):
     """Load sample data from the output directory.
 
     Parameters
@@ -65,8 +68,10 @@ def load_samples_out(filename, use_filter=False, print_info=False):
     pd.DataFrame
         DataFrame containing sample data.
     """
-    log_info(print_info, f"Loading samples from {filename}")
-    samples_df = load_samples(pjoin(out_path, filename))
+    source_folder = data_path if "raw" in filename else out_path
+    path = abspath(pjoin(source_folder, filename))
+    log_info(print_info, f"Loading samples from {path}")
+    samples_df = load_samples(path)
 
     if use_filter:
         # calculate bend for aneuploidy
@@ -78,7 +83,6 @@ def load_samples_out(filename, use_filter=False, print_info=False):
         cover_min_frac = cover_filtered.min()
 
         samples_df = _filter_samples(samples_df, ane_min_frac, cover_min_frac, print_info)
-
 
     return samples_df
 
@@ -156,7 +160,10 @@ def main_load(segment_type=None, dataset="all", use_filter=True, concat=True, pr
 
     samples_dict = {}
     for dataset in datasets:
-        samples = load_samples_out(f"{dataset}_samples.tsv", use_filter, print_info)
+        if segment_type == "raw":
+            samples = load_samples_file(f"{dataset}_samples.tsv", print_info)
+        else:
+            samples = load_samples_file(f"{dataset}_samples.tsv", use_filter, print_info)
         samples["source"] = dataset
         samples_dict[dataset] = samples
     samples_df = pd.concat(samples_dict.values()) if (concat or len(datasets) == 1) else samples_dict
@@ -166,8 +173,8 @@ def main_load(segment_type=None, dataset="all", use_filter=True, concat=True, pr
         log_info(print_info, "No segment type specified. Returning sample data only.")
         return samples_df, None
         
-    file_type = "cns" if segment_type in ["imp", "preprocess", "fill"] else "bin"
-    cns_dict = {dataset: load_cns_out(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets}
+    file_type = "cns" if segment_type in ["imp", "raw", "fill"] else "bin"
+    cns_dict = {dataset: load_samples_file(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets}
     cns_dict = {k: select_CNS_samples(v, samples_dict[k]).reset_index(drop=True) for k, v in cns_dict.items()}
     cns_df = pd.concat(cns_dict.values()) if (concat or len(datasets) == 1) else cns_dict
     log_info(print_info, f"Total CNS segments: {len(cns_df)}")
