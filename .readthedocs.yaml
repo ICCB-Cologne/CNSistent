@@ -1,0 +1,28 @@
+# .readthedocs.yaml
+
+version: 2
+
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  configuration: docs/source/conf.py
+
+# Define the Python version and other build tools
+build:
+  os: ubuntu-20.04
+  tools:
+    python: "3.9"
+
+# Define the dependencies required to build your documentation
+python:
+  install:
+    - requirements: docs/requirements.txt
+    - method: pip
+      path: .
+
+# Build documentation using Sphinx
+sphinx:
+  configuration: docs/source/conf.py
+
+# Define the build commands
+commands:
+  - sphinx-build -b html docs/source docs/build/html
