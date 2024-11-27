@@ -24,3 +24,7 @@ sphinx:
   configuration: docs/source/conf.py
 
 
+include:
+  - docs/files/
+  - docs/source/
+  - docs/
