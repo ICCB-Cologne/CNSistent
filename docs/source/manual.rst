@@ -58,8 +58,13 @@ Note that sex chromosomes are always expected to be named ``chrX`` and ``chrY``.
 
 .. code-block:: python
 
-    Assembly(name, aut_names, x_name, y_name, chr_lens, chr_starts, chr_colors, gen_len, aut_len, cytobands, gaps)
-    
+    Assembly(name, chr_lens, chr_x, chr_y, gaps, cytobands)
+
+* ``chr_lens`` is a dictionary with chromosome names as keys and lengths as values. The ``chr_x`` and ``chr_y`` are
+* ``chr_x``, ``chr_y`` are the string ids for sex chromosomes. "chrX" and "chrY" are used by default.     
+* ``gaps``, ``cytobands`` are segment dictionaries for gaps and cytobands, respectively. 
+These can be null unless you use ``regions_select("bands")`` or ``regions_select("gaps")``.
+
 
 Process
 -------
@@ -67,13 +72,6 @@ Process
 Pipelines
 ~~~~~~~~~
 
-The commands that are available from CMD are executed via a main function for each command, e.g. ``main_impute``.
-
-The file also contains high-level functions for region manipulation, in particular ``get_genome_segments`` has the following procedure:
-
-1. Select regions from the assembly (empty string for the whole assembly), filter those below ``filter_size``.
-2. If ``remove`` is specified, remove regions from the selection, and filter the remaining regions.
-3. If ``bin_size`` is specified, bin the regions into equidistant segments of the given size.
 
 Segment
 ~~~~~~~
@@ -160,17 +158,6 @@ Utils
 
 Utils contain the specification for the hg19, hg38 assemblies, including the gaps and cytobands. In addition, functions for files and data are provided:
 
-Filtering (cutoff)
-~~~~~~~~~~~~~~~~~~
-
-To help with defining cutoff regions for samples, it is possible to use a utility function that finds a knee/elbow point for a dataset.
-
-The primary function is ``find_bends``, which will convert a value (e.g. coverage) into a cumulative distribution between ``min_val`` and ``max_val`` with ``steps`` steps. The function will then find the knee/elbow point in the distribution.
-
-The function will return the point where the slope of the cumulative distribution has the highest convex (knee) or concave (elbow) curvature. To avoid finding local minimum, ``dist`` can be set to consider the angle between the mean of the nearest ``dist`` points. If ``allow_pad`` is set to true, the endpoints are also considered as potential knees/elbows, with the slope at the beginning and the end being 0.
-
-.. image:: ../files/example_knee.png
-    :alt: CN Tracks
 
 Files
 ~~~~~

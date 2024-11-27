@@ -10,18 +10,12 @@ class Assembly:
     ----------
     name : str
         The name of the assembly.
-    aut_names : list
-        The names of the autosomes.
-    chr_names : list
-        The names of all chromosomes.
-    sex_names : list
-        The names of the sex chromosomes.
+    chr_lens : dict
+        The lengths of the chromosomes.
     chr_x : str
         The name of the X chromosome.
     chr_y : str
         The name of the Y chromosome.
-    chr_lens : dict
-        The lengths of the chromosomes.
     cytobands : list
         The cytobands of the chromosomes.
     gaps : list

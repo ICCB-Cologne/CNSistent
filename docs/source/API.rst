@@ -10,3 +10,4 @@ Library usage (API)
    manual
    tutorial
    plotting
+   filtering
