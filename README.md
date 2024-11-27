@@ -74,6 +74,7 @@ Alternativelly you can call:
 * The `example_API.py` is split into cells that can be run individually in an IDE.
 * You can also install the package with `pip install .`, however there is a set of utility functions for loading data in `cns.data_utils.py` that will not be accesible then.
 * Conda is optional, you can also install required packages manually using PIP based on the list in [cnsistent.yml](./cnsistent.yml).
+* Additionally, 5 of the PCAWG medulloblastoma samples have been labeled as female in the source, however they contained CN calls for chromosome Y and we have therefore re-labelled them as male. 
 
 ## Repository Structure
 *  `cnsistent.yml`: Conda environment file for the CNSistent package, references `requirements.txt`.

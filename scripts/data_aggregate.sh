@@ -10,7 +10,6 @@ subsplit=5
 data="../data"
 out="../out"
 segment=true
-cd "$(dirname "$0")" # Set path to the script's path
 
 if [ $segment = true ]; then
     for dist in 1MB 500KB 250KB; do
