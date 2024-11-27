@@ -5,7 +5,7 @@
 
 .. _introduction:
 
-.. image:: ../files/Logo.png
+.. image:: files/Logo.png
    :alt: CNSistent Logo
    :width: 800px
    :align: center
@@ -34,7 +34,7 @@ Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
     raw_df = cns.load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMajor", "nMinor"], sep=",", print_info=True)
     cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
 
-.. image:: ../files/intro_1.png
+.. image:: files/intro_1.png
     :alt: Raw Data Heatmap
     :width: 800px
 
@@ -48,7 +48,7 @@ Fill in missing segments in the data, impute using the extension method, and dis
     imp_df = cns.main_fill_imp(raw_df, print_info=True)
     cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
 
-.. image:: ../files/intro_2.png
+.. image:: files/intro_2.png
     :alt: Imputed Data Heatmap
     :width: 800px
 
@@ -77,7 +77,7 @@ Group the CNS data by cancer type, calculate the total CN, and visualize mean li
     groups_df = cns.stack_groups([cns.group_samples(v, group_name=k) for k, v in type_groups.items()])
     cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
 
-.. image:: ../files/intro_3.png
+.. image:: files/intro_3.png
     :alt: Grouped Data Heatmap
     :width: 800px
 

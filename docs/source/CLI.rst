@@ -47,7 +47,7 @@ E.g.:
 
 .. _cns_raw_image:
 
-.. figure:: ../files/cns_raw.png
+.. figure:: files/cns_raw.png
     :width: 640px
 
     Raw copy number data for each sample and allele.
@@ -152,7 +152,7 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 3. If a whole chromosome is missing, or declared as NaN, its assigned to 0 for its whole length.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major CN values must match to be merged.
 
-.. image:: ../files/cns_imputed.png
+.. image:: files/cns_imputed.png
    :width: 640px
 
 .. _coverage_cmd:
@@ -270,7 +270,7 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
 4. If ``--split`` is provided, the data is binned into segments of the given size. The segments are created by aggregating the CN values of the selected segments.
 
 
-.. figure:: ../files/cns_segmented.png
+.. figure:: files/cns_segmented.png
    :width: 640px
 
    5 mb segmentation of the imputed example segments with gaps removed.
@@ -297,7 +297,7 @@ Additional arguments:
     cns aggregate cns.tsv --segments segments.bed
     
 
-.. figure:: ../files/cns_aggregated.png
+.. figure:: files/cns_aggregated.png
     :width: 640px
 
     Aggregated CN values for the example segments.

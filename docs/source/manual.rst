@@ -132,18 +132,18 @@ There are two main plot types:
 
 * joint plots: ``fig_line, fig_dots, fig_bars`` - these display joint CN data from aggregates. Line plot is the primary plot, compared to a normal line plot, segments are connected only if they overlap. Dots are more practical for small regions, e.g. genes. Bars are useful for coarse data, e.g. arms.
 
-.. image:: ../files/lines.png
+.. image:: files/lines.png
     :alt: Lines Plot
 
-.. image:: ../files/dots.png
+.. image:: files/dots.png
     :alt: Dots Plot
 
-.. image:: ../files/bars.png
+.. image:: files/bars.png
     :alt: Bars Plot
 
 * individual plots: ``fig_CN_tracks`` - this plot inserts all bins into a heatmap per sample, being more practical for dense data or equalized representation. Unlike the joint plots, the position on the genome is not considered and there are no gaps, so the sizes of chromosomes and the position therein are only for orientation.
 
-.. image:: ../files/tracks.png
+.. image:: files/tracks.png
     :alt: CN Tracks
 
 For the figures, the first parameter is always the ``CNS_df``, or a list thereof in the case of joint plots. Following optional parameters:
