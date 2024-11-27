@@ -22,3 +22,6 @@ python:
 # Build documentation using Sphinx
 sphinx:
   configuration: docs/source/conf.py
+
+conda:
+  environment: cnsistent.yml
