@@ -77,6 +77,9 @@ Alternativelly you can call:
 * Additionally, 5 of the PCAWG medulloblastoma samples have been labeled as female in the source, however they contained CN calls for chromosome Y and we have therefore re-labelled them as male. 
 
 ## Repository Structure
+  
+**`.`**
+
 *  `cnsistent.yml`: Conda environment file for the CNSistent package, references `requirements.txt`.
 *  `requirements.txt`: Packages required to run the CNSistent package.
 *  `example_API.py`: Example code for using the CNSistent package. 
@@ -84,16 +87,21 @@ Alternativelly you can call:
 *  `pyproject.toml`: Configuration for packaging tools.
   
 **`cns/`**
+
 Contains the main code for the CNSistent package.
 
 **`data/`**
+
 Contains the raw data from PCAWG, TCGA, TRACERx, as well as genomic locations, also a notebook used to obtain them or merge source files.
 
 **`docs/`**
+
 Contains the documentation for the CNSistent package. The documentation is built using Sphinx, with the source in the `./docs/source` folder. The documentation can be built using the `make html` command in the `./docs` folder, provided the requirements in `./docs/requirements.txt` are met.
 
 **`notebooks/`**
+
 Contains notebooks used for data processing and analysis:
+
 *  `analyze_break_clusters.ipynb`: A notebook used to analyze the breakpoint clustering, based on the distance between merged breakpoints. 
 *  `analyze_CN_clipping.ipynb`: Evaluation of result of clipping the CN segment values, in particular the effects on distribution and proportion that is clipped of. 
 *  `analyze_coverage.ipynb`: Calculates the proportion of the genome that is covered by segments and locations where it applies. 
@@ -107,12 +115,14 @@ Contains notebooks used for data processing and analysis:
 *  `docs_runtime.ipynb`: Calculates the runtime of the data processing across 1-32 threads (log scale). 
 
 **`scripts/`**
+
 *  `data_process.sh`: Fills and imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy. 
 *  `data_aggregate.sh`: Creates various segmentations, and aggregates the preprocessed data based on these segmentations. 
 Depends on `data_cluster.py` for breakpoint clustering.
 *  `data_time.sh`: Run time tests for the data processing across `1-32` threads (log scale). 
 
 **`tests/`**
+
 *  `in` and `out`: Contains the input and output data for the tests. Output is generated using `example_CLI.sh`.  
 *  `test_cli.sh` : Executes the tests and outputs to `./tests/temp`.  
 *  `test_*`: unittest based tests of the public API. 
