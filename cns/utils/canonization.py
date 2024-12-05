@@ -153,6 +153,13 @@ def canonize_positions(cns_df, print_info=False):
     return cns_df
 
 
+def canonize_name(cns_df, print_info=False):
+    name_col = _find_column(cns_df, ['name'])
+    if name_col is not None and name_col != "name":
+        cns_df.rename(columns={name_col: "name"}, inplace=True)
+        log_info(print_info, f"Renamed column {name_col} to name.")
+    return cns_df
+
 def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
     # convert columns to strings
     cns_df.columns = cns_df.columns.astype(str)
@@ -161,6 +168,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     cns_df = canonize_sample_id(cns_df, print_info)
     cns_df = canonize_chroms(cns_df, assembly, print_info)
     cns_df = canonize_positions(cns_df, print_info)
+    cns_df = canonize_name(cns_df, print_info)
 
     cn_columns = get_cn_cols(cns_df, cn_columns)  
     log_info(print_info, f"Using CN columns: {cn_columns}")
@@ -175,7 +183,11 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     else:
         cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns, print_info)
 
-    cns_df = cns_df[["sample_id", "chrom", "start", "end"] + cn_columns]
+    select_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
+    if "name" in cns_df.columns:
+        select_cols.append("name")
+
+    cns_df = cns_df[select_cols]
     # set dtypes
     col_types = {"sample_id": str, "chrom": str, "start": int, "end": int}
     for cn_col in cn_columns:

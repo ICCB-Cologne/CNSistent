@@ -75,11 +75,11 @@ def load_samples_file(filename, use_filter=False, print_info=False):
 
     if use_filter:
         # calculate bend for aneuploidy
-        ane_bends = find_bends(samples_df["ane_het_aut"], max_val=0.01)
+        ane_bends = find_bends(samples_df["ane_any_aut"], max_val=0.01)
         ane_min_frac = ane_bends[0][ane_bends[2]] if ane_bends[2] > 0 else 0.01
 
         # calculate the z-score for coverage
-        cover_filtered = z_score_filter(samples_df["cover_het_aut"])
+        cover_filtered = z_score_filter(samples_df["cover_any_aut"])
         cover_min_frac = cover_filtered.min()
 
         samples_df = _filter_samples(samples_df, ane_min_frac, cover_min_frac, print_info)
@@ -128,11 +128,11 @@ def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_i
     """
     log_info(print_info, f"Total samples: {len(samples_df)}")
     
-    cn_neutral = samples_df.query(f"ane_het_aut < {ane_min_frac}").index
+    cn_neutral = samples_df.query(f"ane_any_aut < {ane_min_frac}").index
     log_info(print_info, f"{len(cn_neutral)} samples are CN neutral (below {ane_min_frac:.5f})")
 
     # Find samples with low coverage (below 95% in autosomes)
-    low_coverage = samples_df.query(f"cover_het_aut < {cover_min_frac}").index
+    low_coverage = samples_df.query(f"cover_any_aut < {cover_min_frac}").index
     log_info(print_info, f"{len(low_coverage)} samples have low coverage (below {cover_min_frac:.5f})")
 
     if "TCGA_type" in samples_df.columns:

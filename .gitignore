@@ -7,8 +7,8 @@ pycns.out.tsv
 pycns.egg-info
 *.pdf
 .pytest_cache/
-docs/*.log
-docs/*.aux
+*.log
+*.aux
 docs/build/
 copy_files.ps1
 test.tsv

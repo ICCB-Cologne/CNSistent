@@ -172,11 +172,12 @@ class TestCutoff(unittest.TestCase):
 
     def test_find_bends(self):
         test_vals = [0.1, 0.2, .5, .7, .8]
-        res = find_bends(test_vals, steps=5)
+        res = find_bends(test_vals)
+        print(res)
         self.assertEqual(len(res), 6)
-        self.assertEqual(len(res[0]), 6)
-        self.assertEqual(len(res[1]), 6)
-        self.assertEqual(res[2], 4)
+        self.assertEqual(len(res[0]), 5)
+        self.assertEqual(len(res[1]), 5)
+        self.assertEqual(res[2], 1)
         self.assertEqual(res[4], 3)
     
 

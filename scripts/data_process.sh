@@ -14,7 +14,7 @@ mkdir -p $out
 cns segment whole --remove gaps --out ${out}/gaps_hg19_segs.bed --verbose --assembly hg19
 cns segment whole --remove gaps --out ${out}/gaps_hg38_segs.bed --verbose --assembly hg38
 
-for dataset in TRCAERx PCAWG TCGA_hg19;
+for dataset in TRACERx PCAWG TCGA_hg19;
 do
     echo "Processing $dataset with assembly $assembly"      
     common_args="--threads $threads --verbose --assembly $assembly"

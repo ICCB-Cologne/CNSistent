@@ -36,22 +36,22 @@ class TestCoverage(unittest.TestCase):
 
     def test_get_covered_bases(self):
         res = get_covered_bases(self.cns, self.samples, True)
-        self.assertEqual(res.loc['s1', 'cover_any_ aut'], 100)
+        self.assertEqual(res.loc['s1', 'cover_any_aut'], 100)
 
     def test_get_base_frac(self):
         samples_df = get_covered_bases(self.cns, self.samples, True)
         norm_sizes = get_norm_sizes(None, self.assembly)
-        res = normalize_feature(samples_df, "cover_het", norm_sizes)
-        self.assertEqual(res.loc['s1', 'cover_any_ aut'], 1/3)
-        self.assertEqual(res.loc['s2', 'cover_any_ sex'], 1)
-        self.assertEqual(res.loc['s4', 'cover_any_ all'], 1/4)
+        res = normalize_feature(samples_df, "cover_any", norm_sizes)
+        self.assertEqual(res.loc['s1', 'cover_any_aut'], 1/3)
+        self.assertEqual(res.loc['s2', 'cover_any_sex'], 1)
+        self.assertEqual(res.loc['s4', 'cover_any_all'], 1/4)
 
     def test_calculate_coverage(self):
         res = main_coverage(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res['cover_any_ sex']['s1'], 1/2)
-        self.assertEqual(res['cover_any_ all']['s1'], 2/5)
-        self.assertEqual(res['cover_both_ aut']['s2'], 0)
-        self.assertEqual(res['cover_any_ aut']['s2'], 1/3)
+        self.assertEqual(res['cover_any_sex']['s1'], 1/2)
+        self.assertEqual(res['cover_any_all']['s1'], 2/5)
+        self.assertEqual(res['cover_both_aut']['s2'], 0)
+        self.assertEqual(res['cover_any_aut']['s2'], 1/3)
         self.assertEqual(res['chrom_count']['s2'], 2)
         self.assertEqual(res['chrom_missing']['s3'].size, 3)
 
@@ -149,21 +149,21 @@ class TestAneuploidy(unittest.TestCase):
         res_df = calc_ane_bases(res_df, self.cns, self.cols, "any", self.assembly)
         norm_sizes = get_norm_sizes(None, self.assembly)
         self.assertEqual(res_df.shape, (4, 7))
-        self.assertEqual(res_df.loc['s4', 'ane_any_ aut'], 170)
-        self.assertEqual(res_df.loc['s2', 'ane_any_ sex'], 100)
-        self.assertEqual(res_df.loc['s2', 'ane_any_ all'], 200)
-        res_df = normalize_feature(res_df, "ane_het", norm_sizes)
-        self.assertEqual(res_df.loc['s2', 'ane_any_ sex'], 1/2)
-        res_df = normalize_feature(res_df, "ane_hom", norm_sizes)
-        self.assertEqual(res_df.loc['s1', 'ane_both_ aut'], 1/6)
+        self.assertEqual(res_df.loc['s4', 'ane_any_aut'], 170)
+        self.assertEqual(res_df.loc['s2', 'ane_any_sex'], 100)
+        self.assertEqual(res_df.loc['s2', 'ane_any_all'], 200)
+        res_df = normalize_feature(res_df, "ane_any", norm_sizes)
+        self.assertEqual(res_df.loc['s2', 'ane_any_sex'], 1/2)
+        res_df = normalize_feature(res_df, "ane_both", norm_sizes)
+        self.assertEqual(res_df.loc['s1', 'ane_both_aut'], 1/6)
 
     def test_get_loh_bases(self):
         res_df = calc_loh_bases(self.samples, self.cns, self.cols, "both", self.assembly)
         res_df = calc_loh_bases(res_df, self.cns, self.cols, "any", self.assembly)
         self.assertEqual(res_df.shape, (4, 7))
-        self.assertEqual(res_df.loc['s1', 'loh_any_ aut'], 100)
-        self.assertEqual(res_df.loc['s4', 'loh_any_ aut'], 70)
-        self.assertEqual(res_df.loc['s4', 'loh_both_ all'], 1)
+        self.assertEqual(res_df.loc['s1', 'loh_any_aut'], 100)
+        self.assertEqual(res_df.loc['s4', 'loh_any_aut'], 70)
+        self.assertEqual(res_df.loc['s4', 'loh_both_all'], 1)
         
     def test_imb_score(self):
         res = calc_imb_bases(self.cns, self.samples, self.cols, 0, self.assembly)
