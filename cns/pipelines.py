@@ -346,16 +346,16 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
         cns_df = cns_df[cns_df[cn_columns].notna().all(axis=1)]
 
     log_info(print_info, "Calculating LOH for each sample.")
-    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "hom", assembly)
-    res_df = normalize_feature(res_df, "loh_hom", norm_sizes)
-    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "het", assembly)
-    res_df = normalize_feature(res_df, "loh_het", norm_sizes)
+    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "both", assembly)
+    res_df = normalize_feature(res_df, "loh_both", norm_sizes)
+    res_df = calc_loh_bases(res_df, cns_df, cn_columns, "any", assembly)
+    res_df = normalize_feature(res_df, "loh_any", norm_sizes)
     log_info(print_info, "Calculating aneuploidy for each sample.")
-    res_df = calc_ane_bases(res_df, cns_df, cn_columns, "het", assembly)
-    res_df = normalize_feature(res_df, "ane_het", norm_sizes)
+    res_df = calc_ane_bases(res_df, cns_df, cn_columns, "any", assembly)
+    res_df = normalize_feature(res_df, "ane_any", norm_sizes)
     if len(cn_columns) == 2:
-        res_df = calc_ane_bases(res_df, cns_df, cn_columns, "hom", assembly)
-        res_df = normalize_feature(res_df, "ane_hom", norm_sizes)
+        res_df = calc_ane_bases(res_df, cns_df, cn_columns, "both", assembly)
+        res_df = normalize_feature(res_df, "ane_both", norm_sizes)
         log_info(print_info, "Calculating imbalance for each sample.")
         for col_i in range(2):
             res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)

@@ -23,12 +23,12 @@ def _check_total(chrom, val, sex, feature, allele_spec, chr_x, chr_y):
             if chrom == chr_x or chrom == chr_y:
                 return val == 0
             else:
-                return val < 2 if allele_spec == "het" else val == 0
+                return val < 2 if allele_spec == "any" else val == 0
         else:
             if chrom == chr_y:
                 return False
             else:    
-                return val < 2 if allele_spec == "het" else val == 0
+                return val < 2 if allele_spec == "any" else val == 0
             
 
 def _check_alleles(chrom, val_0, val_1, sex, feature, allele_spec, chr_x, chr_y):
@@ -47,9 +47,9 @@ def _check_alleles(chrom, val_0, val_1, sex, feature, allele_spec, chr_x, chr_y)
             exp_0 = exp_1 = 1
     
     if feature == "ane":
-        return (exp_0 != val_0 or exp_1 != val_1) if allele_spec == "het" else (exp_0 != val_0 and exp_1 != val_1)
+        return (exp_0 != val_0 or exp_1 != val_1) if allele_spec == "any" else (exp_0 != val_0 and exp_1 != val_1)
     else:  # check_type == "loh"
-        return (val_0 < exp_0 or val_1 < exp_1) if allele_spec == "het" else (val_0 < exp_0 and val_1 < exp_1)
+        return (val_0 < exp_0 or val_1 < exp_1) if allele_spec == "any" else (val_0 < exp_0 and val_1 < exp_1)
     
 
 def _get_feature_per_seg(cns_df, samples_df, cn_columns, feature, allele_spec, assembly=hg19):

@@ -5,9 +5,9 @@ from cns.utils.selection import only_aut, only_sex
 from cns.utils.assemblies import hg19
 
 
-def get_covered_bases(nan_bases_df, samples_df, het):
+def get_covered_bases(nan_bases_df, samples_df, either_allele):
     res_df = samples_df.copy()
-    label = "het" if het else "hom"
+    label = "any" if either_allele else "both"
     aut_df = only_aut(nan_bases_df)
     aut_df_len = calc_lengths(aut_df)
     sex_df = only_sex(nan_bases_df)

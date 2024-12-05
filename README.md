@@ -39,7 +39,7 @@ samples_df, cns_df = main_load("imp")
 This will load the imputed and filtered data for all datasets. 
 
 The ``samples_df`` and ``cns_df`` are Pandas dataframes. 
-The former contains information about each samples as well as its statistics (e.g. ``ane_hom_all`` for homozygous aneuploidy across all chromosomes).
+The former contains information about each samples as well as its statistics (e.g. ``ane_both_ all`` for homozygous aneuploidy across all chromosomes).
 The latter contains the copy number segments for each sample in the form of ``sample_id``, ``chrom``, ``start``, ``end``, ``major_cn``, ``minor_cn``, ``name`` where ``name`` identifies each segment. 
 For example to load CNs for the COSMIC genes, data you can use the same function:
 

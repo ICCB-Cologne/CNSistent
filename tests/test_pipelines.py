@@ -57,32 +57,32 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(res.shape, (4, 9))
         self.assertEqual(res.loc['s1', 'chrom_missing'][-1], "chrX")
         self.assertEqual(res.loc['s1', 'chrom_count'], 1)
-        # for all rows, cov_hom_aut is lower than cov_het_aut
-        self.assertTrue(np.all(res['cover_hom_aut'] <= res['cover_het_aut']))        
-        self.assertEqual(res.loc['s1', 'cover_het_sex'], 0)
-        self.assertEqual(res.loc['s2', 'cover_het_sex'], 0.5)
-        self.assertEqual(res.loc['s4', 'cover_het_aut'], 0.3)
+        # for all rows, cov_both_aut is lower than cov_any_aut
+        self.assertTrue(np.all(res['cover_both_aut'] <= res['cover_any_aut']))        
+        self.assertEqual(res.loc['s1', 'cover_any_sex'], 0)
+        self.assertEqual(res.loc['s2', 'cover_any_sex'], 0.5)
+        self.assertEqual(res.loc['s4', 'cover_any_aut'], 0.3)
 
     def test_main_coverage_segs(self):
         res = main_coverage(self.cns, self.samples, segs=self.segs, assembly=self.assembly)         
-        self.assertEqual(res.loc['s2', 'cover_hom_aut'], 0)    
-        self.assertEqual(res.loc['s2', 'cover_het_aut'], 50/350)
+        self.assertEqual(res.loc['s2', 'cover_both_aut'], 0)    
+        self.assertEqual(res.loc['s2', 'cover_any_aut'], 50/350)
     
     def test_main_ploidy(self):
         res_df = main_ploidy(self.cns, self.samples, assembly=self.assembly)
         self.assertEqual(res_df.shape, (4, 21))
-        self.assertTrue(np.all(res_df['ane_hom_aut'] <= res_df['ane_het_aut']))   
-        self.assertEqual(res_df.loc['s1', 'ane_het_sex'], 0)
-        self.assertEqual(res_df.loc['s2', 'ane_het_sex'], 1/2)
-        self.assertEqual(res_df.loc['s4', 'ane_het_sex'], 0)
-        self.assertEqual(res_df.loc['s2', 'loh_het_all'], 1/8)
+        self.assertTrue(np.all(res_df['ane_both_aut'] <= res_df['ane_any_aut']))   
+        self.assertEqual(res_df.loc['s1', 'ane_any_sex'], 0)
+        self.assertEqual(res_df.loc['s2', 'ane_any_sex'], 1/2)
+        self.assertEqual(res_df.loc['s4', 'ane_any_sex'], 0)
+        self.assertEqual(res_df.loc['s2', 'loh_any_all'], 1/8)
         self.assertEqual(res_df.loc['s2', 'imb_major_cn_aut'], 1/6)        
         self.assertEqual(res_df.loc['s4', 'imb_major_cn_sex'], 0)
 
     def test_main_ploidy_segs(self):
         res = main_ploidy(self.cns, self.samples, segs=self.segs, assembly=self.assembly)
-        self.assertEqual(res.loc['s2', 'ane_het_aut'], 0) # check that NaN and out of scope are not considered
-        self.assertEqual(res.loc['s4', 'loh_hom_aut'], 1/350)
+        self.assertEqual(res.loc['s2', 'ane_any_aut'], 0) # check that NaN and out of scope are not considered
+        self.assertEqual(res.loc['s4', 'loh_both_aut'], 1/350)
     
     def test_main_breakage(self):
         with self.assertRaises(Exception):
