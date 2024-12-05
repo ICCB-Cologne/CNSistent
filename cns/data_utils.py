@@ -75,8 +75,8 @@ def load_samples_file(filename, use_filter=False, print_info=False):
 
     if use_filter:
         # calculate bend for aneuploidy
-        ane_bends = find_bends(samples_df["ane_het_aut"])
-        ane_min_frac = ane_bends[0][ane_bends[2]]
+        ane_bends = find_bends(samples_df["ane_het_aut"], max_val=0.01)
+        ane_min_frac = ane_bends[0][ane_bends[2]] if ane_bends[2] > 0 else 0.01
 
         # calculate the z-score for coverage
         cover_filtered = z_score_filter(samples_df["cover_het_aut"])
