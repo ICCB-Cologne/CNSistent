@@ -149,9 +149,31 @@ def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_i
     return filtered_df.copy()
 
 
-def main_load(segment_type=None, dataset="all", use_filter=True, concat=True, print_info=False):
+def main_load(segment_type, dataset="all", use_filter=True, concat=True, print_info=False):
     """
-    TODO: Add docstring
+    Loads and filters samples from the specified dataset along with the imputed CNS data.
+
+    Parameters
+    ----------
+    bins : str, optional
+        Bin size for loading binned data. If None, no CNS data is loaded. Options include: 
+        ["1MB", "2MB", "3MB", "5MB", "10MB", "250KB", "500KB", "whole", "arms", "bands", "COSMIC", "ENSEMBL"].
+    dataset : str, optional
+        Dataset to load. Options include: "PCAWG", "TCGA", "TRACERx", or "all". Default is "all".
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    tuple
+        A tuple containing two pandas DataFrames:
+        - samples_df: DataFrame containing sample information and statistics.
+        - cns_df: DataFrame containing the CNS data or binned data.
+
+    Examples
+    --------
+    >>> samples_df, cns_df = main_load("imp")
+    >>> samples_df, cns_df = main_load("3MB", "PCAWG")
     """
     if dataset == "all":
         datasets = ["PCAWG", "TRACERx", "TCGA_hg19"]

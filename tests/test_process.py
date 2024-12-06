@@ -381,6 +381,7 @@ class TestAggregation(unittest.TestCase):
             elif res.at[i, "chrom"] == "chr2":
                 self.assertTrue(res.at[i, "start"] >= 100)
                 self.assertTrue(res.at[i, "end"] <= 200)
+                
 
 class TestClustering(unittest.TestCase):
     def test_cluster_breaks(self):

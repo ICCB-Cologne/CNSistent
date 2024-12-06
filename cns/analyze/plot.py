@@ -110,7 +110,7 @@ def _get_colors(colors, line_count):
         if line_count == 1:
             colors = ["blue"]
         else:
-            colors = plt.cm.gist_rainbow(np.linspace(0.0, 1, line_count))
+            colors = plt.cm.hsv(np.linspace(0.0, 1, line_count+1))
     elif line_count == 1:
         colors = [colors]
     elif isinstance(colors, Sequence):
@@ -268,11 +268,11 @@ def _plot_rectangles(ax, items, y_min, y_max, assembly, color_func, alpha):
     ax.set_xlim(0, assembly.gen_len)
 
 
-def plot_chr_bg(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2, colored=False):
+def plot_chr_bg(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2):
     def color_func(item):
         chrom = item[0]
         is_even = item[1] % 2 == 0
-        return assembly.chr_colors[chrom] if colored else ("darkgray" if is_even else "lightgray")
+        return "darkgray" if is_even else "lightgray"
 
     items = [(chrom, i, i + length) for i, (chrom, length) in enumerate(assembly.chr_lens.items())]
     _plot_rectangles(ax, items, y_min, y_max, assembly, color_func, alpha=alpha)

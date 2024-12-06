@@ -176,6 +176,9 @@ class TestData(unittest.TestCase):
     def test_coverage(self):
         # cns_cov_df = main_coverage(self.cns_df)
         # print(cns_cov_df)
-        chr19_gaps = {"chr19": tuples_to_segments(hg19_gaps)["chr19"]}
-        cns_cov_gap_df = main_coverage(self.cns_df, segs=chr19_gaps)
-        # TODO
+        cns_cov_gap_df = main_coverage(self.cns_df, segs={ 'chr19': [(1000000, 5000000, "seg1")] })
+        self.assertEqual(cns_cov_gap_df.loc['s1', 'cover_any_aut'], 1)
+        self.assertEqual(cns_cov_gap_df.loc['s1', 'cover_both_aut'], 0.5)
+        self.assertEqual(cns_cov_gap_df.loc['s1', 'cover_any_sex'], 0)	
+        self.assertEqual(cns_cov_gap_df.loc['s2', 'cover_any_all'], 1)
+        self.assertEqual(cns_cov_gap_df.loc['s2', 'cover_both_all'], 0.0)
