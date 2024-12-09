@@ -90,6 +90,25 @@ def _extend_segs(chrom, breaks, chr_segs):
 
 
 def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False):
+    """
+    Clusters segments based on the specified clustering distance.
+
+    Parameters
+    ----------
+    input_segs : dict
+        Dictionary of input segments with chromosome names as keys and list of segments as values.
+    clust_dist : int
+        Clustering distance to use for merging segments.
+    keep_ends : bool, optional
+        If True, keeps the ends of the segments. Default is True.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    dict
+        Dictionary of clustered segments with chromosome names as keys and list of segments as values.
+    """
     seg_count = values_count(input_segs)
     log_info(print_info, f"Merging {seg_count} segments with merge distance {clust_dist} ... ")
     res = {}

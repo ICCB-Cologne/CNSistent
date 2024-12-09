@@ -35,6 +35,33 @@ def _get_start_vector(assembly):
 
 
 def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1, assembly=hg19):
+    """
+    Plots consecutive segments as lines on the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the lines.
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for copy number data.
+    color : str, optional
+        Color of the lines. Default is "green".
+    label : str, optional
+        Label for the lines. Default is None.
+    alpha : float, optional
+        Alpha value for the lines. Default is 1.
+    size : float, optional
+        Line width. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted lines.
+    """
     f_start_pos = _get_start_vector(assembly)
     is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
     # plot consecutive segments
@@ -47,6 +74,33 @@ def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1
 
 
 def plot_dots(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1, assembly=hg19):
+    """
+    Plots dots representing segments on the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the dots.
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for copy number data.
+    color : str, optional
+        Color of the dots. Default is "green".
+    label : str, optional
+        Label for the dots. Default is None.
+    alpha : float, optional
+        Alpha value for the dots. Default is 1.
+    size : float, optional
+        Size of the dots. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted dots.
+    """
     length = cns_df["end"] - cns_df["start"]
     f_start_pos = _get_start_vector(assembly)
     x = cns_df["start"] + length / 2 + f_start_pos(cns_df["chrom"])
@@ -55,6 +109,33 @@ def plot_dots(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1,
 
 
 def plot_bars(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1, assembly=hg19):
+    """
+    Plots bars representing segments on the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the bars.
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for copy number data.
+    color : str, optional
+        Color of the bars. Default is "green".
+    label : str, optional
+        Label for the bars. Default is None.
+    alpha : float, optional
+        Alpha value for the bars. Default is 1.
+    size : float, optional
+        Line width of the bars. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted bars.
+    """
     length = cns_df["end"] - cns_df["start"]
     f_start_pos = _get_start_vector(assembly)
     x = cns_df["start"] + length / 2 + f_start_pos(cns_df["chrom"])
@@ -63,6 +144,29 @@ def plot_bars(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1,
 
 
 def plot_heatmap(ax, cns_df, cn_column, min_cn = 0, max_cn = 16, assembly=hg19):
+    """
+    Plots a heatmap of the Copy Number (CN) data.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the heatmap.
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for copy number data.
+    min_cn : float, optional
+        Minimum copy number value for the color gradient. Default is 0.
+    max_cn : int, optional
+        Maximum copy number value for the color gradient. Default is 16.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted heatmap.
+    """
     f_start_pos = _get_start_vector(assembly)
     # lowest value strictly greater than 0
     f_col = _get_CN_color_vector(min_cn, max_cn)
@@ -165,14 +269,83 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
 
 
 def fig_lines(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
+    """
+    Creates a line plot for each of the CN columns.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    colors : list of str, optional
+        List of colors to use for the plots. If None, colors are generated automatically.
+    size : int, optional
+        Size of the plot. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The created figure.
+    list of matplotlib.axes.Axes
+        List of axes in the figure.
+    """
     return _fig_common(cns_df, plot_lines, cn_columns, colors, size, assembly)
 
 
 def fig_dots(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
+    """
+    Creates a dot plot for each of the CN columns.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    colors : list of str, optional
+        List of colors to use for the plots. If None, colors are generated automatically.
+    size : int, optional
+        Size of the plot. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The created figure.
+    list of matplotlib.axes.Axes
+        List of axes in the figure.
+    """
     return _fig_common(cns_df, plot_dots, cn_columns, colors, size, assembly)
 
 
 def fig_bars(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
+    """
+    Creates a bar plot for each of the CN columns.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    colors : list of str, optional
+        List of colors to use for the plots. If None, colors are generated automatically.
+    size : int, optional
+        Size of the plot. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The created figure.
+    list of matplotlib.axes.Axes
+        List of axes in the figure.
+    """
     return _fig_common(cns_df, plot_bars, cn_columns, colors, size, assembly)
  
 
@@ -191,6 +364,29 @@ def _make_layout(width, height, n_columns, vertical):
 
 
 def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = None, assembly=hg19):
+    """
+    Creates a heatmap plot for each of the CN columns.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    colors : list of str, optional
+        List of colors to use for the plots. If None, colors are generated automatically.
+    size : int, optional
+        Size of the plot. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The created figure.
+    list of matplotlib.axes.Axes
+        List of axes in the figure.
+    """
     cn_columns = _get_columns(cns_df, cn_columns)
 
     sample_count = len(cns_df["sample_id"].unique())
@@ -241,6 +437,21 @@ def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = Non
 
 
 def x_limits(cns_df, assembly=hg19):
+    """
+    Calculates the x-axis limits for the plot based on the CNS data and genome assembly.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the minimum and maximum x-axis limits.
+    """
     offset = _get_start_vector(assembly)(cns_df["chrom"])
     min_x = (cns_df["start"] + offset).min()
     max_x = (cns_df["end"] + offset).max()
@@ -248,6 +459,22 @@ def x_limits(cns_df, assembly=hg19):
 
 
 def y_limits(cns_df, column):
+    """
+    Get the limits for the y-axis based on the CNS data and the column.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    column : str
+        Column name for the y-axis data.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the minimum and maximum y-axis limits.
+
+    """
     min_y = cns_df[column].min()
     max_y = cns_df[column].max()
     return min_y, max_y
@@ -269,6 +496,27 @@ def _plot_rectangles(ax, items, y_min, y_max, assembly, color_func, alpha):
 
 
 def plot_chr_bg(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2):
+    """
+    Plots the chromosome background on the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the chromosome background.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+    y_min : float, optional
+        Minimum y-axis value. Default is 0.
+    y_max : float, optional
+        Maximum y-axis value. Default is 1.
+    alpha : float, optional
+        Alpha value for the background. Default is 0.2.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted chromosome background.
+    """
     def color_func(item):
         chrom = item[0]
         is_even = item[1] % 2 == 0
@@ -279,6 +527,25 @@ def plot_chr_bg(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2):
 
 
 def plot_cytobands(ax, y_min=0, y_max=2, assembly=hg19, alpha=0.2, color=None):
+    """
+    Plots cytobands on the background of the ax.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the cytobands.
+    bounds : tuple, optional
+        Bounds for the plot (x_min, y_min, x_max, y_max). If None, it is inferred from the data.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+    alpha : float, optional
+        Alpha value for the cytobands. Default is 0.2.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted cytobands.
+    """
     f_color = lambda item: color if color is not None else cytoband_color[item[4]]
     _plot_rectangles(ax, assembly.cytobands, y_min, y_max, assembly, f_color, alpha)
 
@@ -297,6 +564,25 @@ def _create_label(num):
         return f"{num // 1_000_000}mb"
 
 def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
+    """
+    Plots the x-axis ticks for the chromosomes.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the x-axis ticks.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+    x_min : float, optional
+        Minimum x-axis value. If None, it is inferred from the data.
+    x_max : float, optional
+        Maximum x-axis value. If None, it is inferred from the data.
+
+    Returns
+    -------
+    list of float
+        List of x-axis tick positions.
+    """
     positions = list(assembly.chr_lens.items())
     if max_x is None:
         max_x = assembly.aut_len
@@ -330,26 +616,93 @@ def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
 
 
 def add_cytoband_legend(ax):
+    """
+    Adds a legend for cytobands to the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes to which the legend is added.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the added legend.
+    """
     legend_elements = [mpatches.Patch(color=color, label=gie_stain) for gie_stain, color in cytoband_color.items()]
     ax.legend(handles=legend_elements, bbox_to_anchor=(1, 1), loc="upper left")
 
 
 def add_gap_legend(ax):
+    """
+    Adds a legend for gaps to the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes to which the legend is added.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the added legend.
+    """
     legend_elements = [mpatches.Patch(color=color, label=gap_type) for gap_type, color in gap_color.items()]
     ax.legend(handles=legend_elements, bbox_to_anchor=(1, 1), loc="upper left")
 
 
 def no_y_ticks(ax):
+    """
+    Removes y-axis ticks from the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes from which to remove the y-axis ticks.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the y-axis ticks removed.
+    """
     ax.set_yticks([])
     ax.set_yticklabels([])
 
 
 def no_x_ticks(ax):
+    """
+    Removes x-axis ticks from the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes from which to remove the x-axis ticks.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the x-axis ticks removed.
+    """
     ax.set_xticks([])
     ax.set_xticklabels([])
 
 
 def plot_x_lines(ax, assembly=hg19, positions=None, width=1, alpha=0.5):
+    """
+    Plots vertical lines at chromosome boundaries on the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes on which to plot the vertical lines.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the plotted vertical lines.
+    """
     positions = list(accumulate(assembly.chr_lens.values()))
     for pos in positions:
         ax.axvline(

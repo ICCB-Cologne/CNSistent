@@ -3,6 +3,23 @@ from cns.utils.assemblies import hg19
 
 
 def normalize_feature(samples, feature, norm_sizes):
+    """
+    Normalizes a feature in the samples DataFrame based on the provided normalization sizes.
+
+    Parameters
+    ----------
+    samples : pandas.DataFrame
+        DataFrame containing sample information.
+    feature : str
+        Name of the feature to normalize.
+    norm_sizes : dict
+        Dictionary containing normalization sizes for autosomes, sex chromosomes, and all chromosomes.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the normalized feature.
+    """
     res_df = samples.copy()
     if norm_sizes["aut"] == 0:
         raise ValueError("Total autosome size is 0 - check the input segments.")
@@ -34,6 +51,21 @@ def _calc_group_sizes(segs_df, assembly=hg19):
 
 
 def get_norm_sizes(segs, assembly=hg19):
+    """
+    Calculates normalization sizes for autosomes, sex chromosomes, and all chromosomes.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    dict
+        Dictionary containing normalization sizes for autosomes, sex chromosomes, and all chromosomes.
+    """
     sizes = (
         {
             "aut": assembly.aut_len,

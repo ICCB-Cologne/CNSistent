@@ -82,16 +82,79 @@ def _count_bases_with_feature(res_df, cns_df, cn_columns, feature, allele_spec, 
 
 
 def calc_loh_bases(samples_df, cns_df, cn_columns, allele_spec, assembly=hg19):
+    """
+    Calculates the length of Loss of Heterozygosity (LOH) bases for each sample.
+
+    Parameters
+    ----------
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str
+        List of column names for copy number data.
+    allele_spec : str
+        Allele specification, either "any" or "both".
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the length of LOH bases for each sample.
+    """
     res_df = samples_df.copy()
     return _count_bases_with_feature(res_df, cns_df, cn_columns, "loh", allele_spec, assembly)
 
 
 def calc_ane_bases(samples_df, cns_df, cn_columns, allele_spec, assembly=hg19):
+    """
+    Calculates the length of aneuploidy bases for each sample.
+
+    Parameters
+    ----------
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str
+        List of column names for copy number data.
+    allele_spec : str
+        Allele specification, either "any" or "both".
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the length of aneuploidy bases for each sample.
+    """
     res_df = samples_df.copy()
     return _count_bases_with_feature(res_df, cns_df, cn_columns, "ane", allele_spec, assembly)
 
 
 def calc_imb_bases(cns_df, samples_df, cn_columns, col_index=0, assembly=hg19):
+    """
+    Calculates the length of imbalance bases for each sample.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    cn_columns : list of str
+        List of column names for copy number data.
+    col_index : int, optional
+        Index of the column to use for imbalance calculation. Default is 0.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the length of imbalance bases for each sample.
+    """
     res = samples_df.copy()
     if len(cn_columns) != 2:
         raise ValueError("There must be two CN columns to calculate imbalance score")
@@ -105,19 +168,34 @@ def calc_imb_bases(cns_df, samples_df, cn_columns, col_index=0, assembly=hg19):
 
 
 @njit
-def calc_ploidy_per_sample(start, end, cn_values):
+def _calc_ploidy_per_sample(start, end, cn_values):
     lengths = end - start
     ploidy = (cn_values * lengths).sum() / lengths.sum()
     return ploidy
 
 
 def calc_ploidy_per_column(cns_df, cn_column):
+    """
+    Calculates the ploidy for each sample based on a specified CN column.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for copy number data.
+
+    Returns
+    -------
+    pandas.Series
+        Series with the ploidy value for each sample.
+    """
     grouped = cns_df.groupby('sample_id')
     res = {}
     for sample_id, group_df in grouped:
         start = group_df["start"].values
         end = group_df["end"].values
         cn_values = group_df[cn_column].values
-        ploidy = calc_ploidy_per_sample(start, end, cn_values)
+        ploidy = _calc_ploidy_per_sample(start, end, cn_values)
         res[sample_id] = ploidy
     return pd.Series(res)

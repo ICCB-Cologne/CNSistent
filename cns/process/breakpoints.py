@@ -5,6 +5,23 @@ from cns.utils.conversions import cytobands_to_df
 
 
 def split_into_bins(reg_len, step_size, strategy="after"):
+    """
+    Splits a region into bins of specified size using a given strategy.
+
+    Parameters
+    ----------
+    reg_len : int
+        Length of the region to split.
+    step_size : int
+        Size of each bin.
+    strategy : str, optional
+        Strategy to use for splitting. Options are "scale", "pad", "after". Default is "after".
+
+    Returns
+    -------
+    list of int
+        List of bin boundaries.
+    """
     if (step_size < 1) or (reg_len < step_size):
         return [0, reg_len]
     padding = reg_len % step_size
@@ -60,6 +77,26 @@ def _calc_cytoband_breaks(assembly=hg19):
 
 # Create breakpoints
 def make_breaks(break_type, strategy='scale', assembly=hg19):
+    """
+    Creates breakpoints based on the specified break type.
+
+    Parameters
+    ----------
+    break_type : str
+        Type of break to use for creating breakpoints. Options are "arms", "bands", "whole", or a step size (e.g., "1MB").
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    dict
+        Dictionary with chromosome names as keys and list of breaks as values.
+
+    Raises
+    ------
+    ValueError
+        If the break type is not recognized.
+    """
     if break_type == "arms":
         return _calc_arm_breaks(assembly)
     elif break_type == "cytobands":

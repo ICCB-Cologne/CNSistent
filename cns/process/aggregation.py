@@ -74,6 +74,27 @@ def _get_agg_func(how):
 
 # Add column names
 def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=True):
+    """
+    Aggregates CNS data by specified segments.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    segments : pandas.DataFrame
+        DataFrame containing segments to use for aggregation.
+    how : str, optional
+        Aggregation method to use. Default is "mean".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with aggregated CNS data.
+    """
     agg_func = _get_agg_func(how)
     cn_columns = get_cn_cols(cns_df, cn_columns)
     sel_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
@@ -103,16 +124,79 @@ def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=
 
 
 def aggregate_by_breaks(cns_df, breaks, how="mean", cn_columns=None, print_info=True):
+    """
+    Aggregates CNS data by specified breaks.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    breaks : list of tuples
+        List of breakpoints to use for aggregation.
+    how : str, optional
+        Aggregation method to use. Default is "mean".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with aggregated CNS data.
+    """
     segments = breaks_to_segments(breaks)
     return aggregate_by_segments(cns_df, segments, how, cn_columns, print_info)
 
 
 def aggregate_by_break_type(cns_df, break_type, assembly=hg19, how="mean", cn_columns=None, print_info=True):
+    """
+    Aggregates CNS data by break type.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    break_type : str
+        Type of break to use for aggregation.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+    how : str, optional
+        Aggregation method to use. Default is "mean".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with aggregated CNS data.
+    """
     breaks = make_breaks(break_type, assembly=assembly)
     return aggregate_by_breaks(cns_df, breaks, how, cn_columns, print_info)
 
 
 def add_total_cn(cns_df, cn_columns=None, remove_cn_columns=False, inplace=True):
+    """
+    Adds a total copy number (CN) column to the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    remove_cn_columns : bool, optional
+        If True, removes the individual CN columns after adding the total CN column. Default is False.
+    inplace : bool, optional
+        If True, modifies the original DataFrame. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the added total CN column.
+    """
     cn_columns = get_cn_cols(cns_df, cn_columns)
     # remove total_cn from cn_columns if it is there
     if "total_cn" in cn_columns:
@@ -126,6 +210,25 @@ def add_total_cn(cns_df, cn_columns=None, remove_cn_columns=False, inplace=True)
 
 
 def group_samples(cns_df, cn_columns=None, how="mean", group_name="grouped"): 
+    """
+    Groups CNS data by samples and aggregates the results.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    how : str, optional
+        Aggregation method to use. Options are "mean", "max", "min". Default is "mean".
+    group_name : str, optional
+        Name for the grouped samples. Default is "grouped".
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with grouped and aggregated CNS data.
+    """
     if len(cns_df) == 0:
         log_warn("No data to group.")
         return cns_df   
@@ -146,6 +249,21 @@ def group_samples(cns_df, cn_columns=None, how="mean", group_name="grouped"):
 
 
 def stack_groups(cns_dfs, labels=None):
+    """
+    Stacks multiple CNS DataFrames into a single DataFrame.
+
+    Parameters
+    ----------
+    cns_dfs : list of pandas.DataFrame
+        List of CNS DataFrames to stack.
+    labels : list of str, optional
+        List of labels for the stacked DataFrames. If specified, the length of labels must be equal to the number of DataFrames.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stacked DataFrame.
+    """
     if not isinstance(cns_dfs, list):
         cns_dfs = [cns_dfs]
     if labels is not None:

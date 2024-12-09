@@ -6,10 +6,38 @@ from cns.utils.files import load_segments
 
 
 def count_segments(segs):
+    """
+    Counts the total number of segments in the input dictionary.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+
+    Returns
+    -------
+    int
+        Total number of segments.
+    """
     return sum([len(chr_segs) for chr_segs in segs.values()])
 
 
 def do_segments_overlap(segs, is_sorted=False):
+    """
+    Checks if any segments overlap in the input dictionary.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    is_sorted : bool, optional
+        If True, assumes the segments are already sorted. Default is False.
+
+    Returns
+    -------
+    bool
+        True if any segments overlap, False otherwise.
+    """
     for chr, chr_segs in segs.items():
         if not is_sorted:
             chr_segs.sort(key=lambda x: (x[0]))
@@ -23,6 +51,21 @@ def do_segments_overlap(segs, is_sorted=False):
 
 
 def find_overlaps(segs, is_sorted=False):
+    """
+    Finds overlapping segments in the input dictionary.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    is_sorted : bool, optional
+        If True, assumes the segments are already sorted. Default is False.
+
+    Returns
+    -------
+    dict
+        Dictionary of overlapping segments with chromosome names as keys and list of overlapping segments as values.
+    """
     overlaps = {}
     for chr, chr_segs in segs.items():
         if not is_sorted:
@@ -44,6 +87,21 @@ def find_overlaps(segs, is_sorted=False):
 
 
 def merge_segments(segs, is_sorted=False):
+    """
+    Merges overlapping segments in the input dictionary.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    is_sorted : bool, optional
+        If True, assumes the segments are already sorted. Default is False.
+
+    Returns
+    -------
+    dict
+        Dictionary of merged segments with chromosome names as keys and list of merged segments as values.
+    """
     merged = {}
     for chr, chr_segs in segs.items():
         if len(chr_segs) == 0:
@@ -70,6 +128,21 @@ def merge_segments(segs, is_sorted=False):
 
 
 def segment_union(segs_a, segs_b):
+    """
+    Computes the union of two sets of segments.
+
+    Parameters
+    ----------
+    segs1 : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    segs2 : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+
+    Returns
+    -------
+    dict
+        Dictionary of segments representing the union of the input segments.
+    """
     # Combine and sort the segments first by group, then by start time
     keys = set(segs_a.keys()).union(set(segs_b.keys()))
     new_segs = {}
@@ -81,6 +154,21 @@ def segment_union(segs_a, segs_b):
 
 
 def segment_difference(segs_a, segs_b, sorted=False):
+    """
+    Computes the difference between two sets of segments.
+
+    Parameters
+    ----------
+    segs1 : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    segs2 : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+
+    Returns
+    -------
+    dict
+        Dictionary of segments representing the difference between the input segments.
+    """
     diffs = {}
     for chr, chr_segs_a in segs_a.items():
         if chr not in segs_b:
@@ -133,7 +221,21 @@ def segment_difference(segs_a, segs_b, sorted=False):
 
 
 def filter_cons_size(chr_segs, min_size):
-    # TODO DOCUMENT
+    """
+    Filters segments based on a minimum size, keeping only consecutive segments.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    min_size : int
+        Minimum size of segments to keep.
+
+    Returns
+    -------
+    dict
+        Dictionary of filtered segments.
+    """
     res = {}
     for chrom, seg_group in chr_segs.items():
         cons_groups = get_consecutive_segs(seg_group)
@@ -145,13 +247,44 @@ def filter_cons_size(chr_segs, min_size):
 
 
 def filter_min_size(chr_segs, min_size, merge_first=False):
-    # TODO DOCUMENT
+    """
+    Filters segments based on a minimum size.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    min_size : int
+        Minimum size of segments to keep.
+
+    Returns
+    -------
+    dict
+        Dictionary of filtered segments.
+    """
     if merge_first:
         chr_segs = merge_segments(chr_segs)
     return {chr: [seg for seg in chr_segs if seg[1] - seg[0] >= min_size] for chr, chr_segs in chr_segs.items()}
 
 
 def split_segment(seg_start, seg_end, seg_name, step_size, strategy="scale"):
+    """
+    Splits a segment into smaller segments of specified size.
+
+    Parameters
+    ----------
+    start : int
+        Start position of the segment.
+    end : int
+        End position of the segment.
+    step_size : int
+        Size of each smaller segment.
+
+    Returns
+    -------
+    list of tuples
+        List of smaller segments.
+    """
     length = seg_end - seg_start
     breaks = split_into_bins(length, step_size, strategy)
     breaks = (np.array(breaks) + seg_start).tolist()
@@ -163,6 +296,21 @@ def split_segment(seg_start, seg_end, seg_name, step_size, strategy="scale"):
 
 
 def split_segments(segments, step_size, strategy="scale"):
+    """
+    Splits segments into smaller segments of specified size.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    step_size : int
+        Size of each smaller segment.
+
+    Returns
+    -------
+    dict
+        Dictionary of smaller segments.
+    """
     res = {}
     for chr, chr_segs in segments.items():
         res[chr] = []
@@ -173,6 +321,21 @@ def split_segments(segments, step_size, strategy="scale"):
 
 
 def regions_select(select, assembly=hg19):
+    """
+    Selects segments that overlap with specified regions.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    regions : dict
+        Dictionary of regions with chromosome names as keys and list of regions as values.
+
+    Returns
+    -------
+    dict
+        Dictionary of selected segments.
+    """
     if select == "":
         return {}
     if select == "arms":
@@ -200,6 +363,23 @@ def regions_select(select, assembly=hg19):
 
 
 def process_segments(segs, remove_segs=None, filter_size=-1):
+    """
+    Processes segments by removing specified segments and filtering by size.
+
+    Parameters
+    ----------
+    input_data : dict
+        Dictionary of input segments with chromosome names as keys and list of segments as values.
+    remove_segs : dict, optional
+        Dictionary of segments to remove with chromosome names as keys and list of segments as values. Default is None.
+    filter_size : int, optional
+        Minimum size of segments to keep. Default is -1 (no filtering).
+
+    Returns
+    -------
+    dict
+        Dictionary of processed segments.
+    """
     if not isinstance(segs, dict):
         raise ValueError(f"input_segs must a dictionary of segments, got {type(remove_segs)}")
     if filter_size > 0:
@@ -216,6 +396,19 @@ def process_segments(segs, remove_segs=None, filter_size=-1):
 
 
 def get_consecutive_segs(segs):
+    """
+    Groups consecutive segments for each chromosome.
+
+    Parameters
+    ----------
+    chrom_segs : list of tuples
+        List of segments for a chromosome.
+
+    Returns
+    -------
+    list of lists
+        List of lists of consecutive segments.
+    """
     if len(segs) == 0:
         return []
     res = []

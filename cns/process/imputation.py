@@ -11,6 +11,23 @@ def get_nan_segs(cns_df):
 
 
 def add_tails(cns_df, assembly=hg19, print_info=True):
+    """
+    Adds tails to the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    chr_lens : dict
+        Dictionary of chromosome lengths.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with tails added.
+    """
     chr_lens = assembly.chr_lens
     grouped = cns_df.groupby(["sample_id", "chrom"]).agg({"start": "min", "end": "max"})
     grouped = grouped.rename(columns={"start": "min_start", "end": "max_end"})
@@ -50,6 +67,21 @@ def add_tails(cns_df, assembly=hg19, print_info=True):
 
 
 def fill_gaps(cns_df, print_info=True):
+    """
+    Fills gaps in the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with gaps filled.
+    """
     # Iterate over the rows
     new_rows = []
     for i in range(len(cns_df) - 1):
@@ -86,6 +118,25 @@ def fill_gaps(cns_df, print_info=True):
 
 # Add fully missing chromosomes
 def add_missing(cns_df, samples_df=None, assembly=hg19, print_info=True):
+    """
+    Adds missing chromosomes to the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    chr_lens : dict
+        Dictionary of chromosome lengths.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with missing chromosomes added.
+    """
     res_df = cns_df.set_index("sample_id")
 
     new_entries = []
@@ -121,6 +172,23 @@ def add_missing(cns_df, samples_df=None, assembly=hg19, print_info=True):
 
 
 def remove_outliers(cns_df, assembly=hg19, print_info=True):
+    """
+    Removes outliers from the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    chr_lens : dict
+        Dictionary of chromosome lengths.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with outliers removed.
+    """
     res_df = cns_df.copy()
     chr_lens = assembly.chr_lens
     idx_to_remove = []
@@ -154,6 +222,23 @@ def _are_mergeable(a, b, cn_columns):
 
 
 def merge_cns_df(cns_df, cn_columns=None, print_info=True):
+    """
+    Merges consecutive CNS segments with the same copy number values.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with merged CNS segments.
+    """
     cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     idx_to_remove = []
@@ -299,7 +384,28 @@ def _impute_diploid(cns_df, samples_df, cn_columns, print_info=True):
     return cns_df
 
 
-def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=True):    
+def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=True):
+    """
+    Imputes missing values in the CNS data.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    method : str, optional
+        Imputation method to use. Options are "extend" or "diploid". Default is "extend".
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with imputed copy number values.
+    """    
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if method ==  'extend':
         return _impute_extend(cns_df, cn_columns, print_info)
@@ -312,7 +418,24 @@ def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=
         raise Exception(msg)
 
 
-def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):    
+def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):
+    """
+    Fills NaN values in the CNS data with zeros.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is False.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with NaN values filled with zeros.
+    """   
     cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     log_info(print_info, f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")

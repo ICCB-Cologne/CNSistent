@@ -6,6 +6,19 @@ import pandas as pd
 
 # count segments per chromosome and subtract 1
 def calc_breaks_per_chr(cns_df):
+    """
+    Calculates the number of breakpoints per chromosome for each sample.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the number of breakpoints per chromosome for each sample.
+    """
     def con_match_count(group):
         shifted_group = group.shift(-1)
         return (group['end'] == shifted_group['start']).sum()
@@ -13,6 +26,25 @@ def calc_breaks_per_chr(cns_df):
 
 
 def calc_breaks_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
+    """
+    Calculates the number of breakpoints per sample.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    cn_col : str
+        Column name for copy number data.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the number of breakpoints per sample.
+    """
     res = samples_df.copy()
     breaks_per_chr = calc_breaks_per_chr(cns_df)
     chrom_types = get_chr_sets(cns_df, assembly)
@@ -30,6 +62,21 @@ def calc_breaks_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
 
 
 def calc_step_per_chr(cns_df, cn_col):
+    """
+    Calculates the step size per chromosome for each sample.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_col : str
+        Column name for copy number data.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the step size per chromosome for each sample.
+    """
     def sum_abs_diff(group):
         shifted_group = group.shift(-1)
         consecutive = group['end'] == shifted_group['start']
@@ -43,6 +90,25 @@ def calc_step_per_chr(cns_df, cn_col):
 
 
 def calc_step_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
+    """
+    Calculates the step size per sample.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    samples_df : pandas.DataFrame
+        DataFrame containing sample information.
+    cn_col : str
+        Column name for copy number data.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the step size per sample.
+    """
     res = samples_df.copy()
     step_per_chr = calc_step_per_chr(cns_df, cn_col)
     chrom_types = get_chr_sets(cns_df, assembly)
