@@ -279,6 +279,8 @@ def split_segment(seg_start, seg_end, seg_name, step_size, strategy="scale"):
         End position of the segment.
     step_size : int
         Size of each smaller segment.
+    strategy : str, optional
+        Strategy to use for splitting. Options are "scale", "pad", "after". Default is "after".
 
     Returns
     -------
@@ -301,10 +303,12 @@ def split_segments(segments, step_size, strategy="scale"):
 
     Parameters
     ----------
-    segs : dict
+    segments : dict
         Dictionary of segments with chromosome names as keys and list of segments as values.
     step_size : int
         Size of each smaller segment.
+    strategy : str, optional
+        Strategy to use for splitting. Options are "scale", "pad", "after". Default is "after".
 
     Returns
     -------
@@ -322,19 +326,32 @@ def split_segments(segments, step_size, strategy="scale"):
 
 def regions_select(select, assembly=hg19):
     """
-    Selects segments that overlap with specified regions.
+    Selects and returns specific genomic regions based on the selection criteria.
 
     Parameters
     ----------
-    segs : dict
-        Dictionary of segments with chromosome names as keys and list of segments as values.
-    regions : dict
-        Dictionary of regions with chromosome names as keys and list of regions as values.
+    select : str
+        The selection criteria for the regions. Options include:
+        - "": Returns an empty dictionary.
+        - "arms": Returns chromosome arms.
+        - "bands": Returns cytogenetic bands.
+        - "whole": Returns whole genome segments.
+        - "gaps": Returns gap regions.
+        - "chrX": Returns the whole chromosome X (replace X with the chromosome number or name).
+        - <file_path>: Returns regions from a file.
+    assembly : object, optional
+        The genome assembly to use. Default is hg19.
 
     Returns
     -------
     dict
-        Dictionary of selected segments.
+        A dictionary with chromosome names as keys and lists of tuples representing the regions as values.
+        Each tuple contains (start, end, name).
+
+    Raises
+    ------
+    ValueError
+        If an invalid chromosome is specified in the select parameter.
     """
     if select == "":
         return {}
@@ -401,7 +418,7 @@ def get_consecutive_segs(segs):
 
     Parameters
     ----------
-    chrom_segs : list of tuples
+    segs : list of tuples
         List of segments for a chromosome.
 
     Returns

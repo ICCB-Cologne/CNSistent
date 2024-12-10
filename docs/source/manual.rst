@@ -4,7 +4,12 @@ Manual
 Data Types
 ----------
 
-There are five main data formats used within CNSistent.
+There are five main data formats used within CNSistent. 
+The SCNA data are stored in ``cns_df``.
+Sample metadata are stored in  ``samples_df``. 
+BAM files are converted into ``segments`` and mapped per chromosome.
+Internally, ``breakpoints`` are used for collecting per chromosomes breakpoints.
+For reference, the ``Assembly`` class is used to provide information about the genome.
 
 ``cns_df``
 ``````````
@@ -60,35 +65,45 @@ Note that sex chromosomes are always expected to be named ``chrX`` and ``chrY``.
 
     Assembly(name, chr_lens, chr_x, chr_y, gaps, cytobands)
 
+
 * ``chr_lens`` is a dictionary with chromosome names as keys and lengths as values. The ``chr_x`` and ``chr_y`` are
 * ``chr_x``, ``chr_y`` are the string ids for sex chromosomes. "chrX" and "chrY" are used by default.     
 * ``gaps``, ``cytobands`` are segment dictionaries for gaps and cytobands, respectively. 
+
 These can be null unless you use ``regions_select("bands")`` or ``regions_select("gaps")``.
 
 
-Process
--------
-
 Pipelines
-~~~~~~~~~
+----------
 
+Pipelines are used internally to map the command line commands and arguments to functions, and thus correspond to :ref:`CLI`.
+Each command has a corresponding pipeline. 
+In addition, two combined pipelines are provided as shorthands.
 
-Segment
-~~~~~~~
+* ``main_fill_imp``: Will fill the missing regions and impute the missing values.
+* ``main_seg_agg``: Will create and apply segmentation.
 
-Functions for working with segments. Segments are dictionaries of tuples ``{chr: [(start, end), ...], ...}``, where the start is inclusive, and the end is exclusive.
+See the :doc:`tutorial <tutorial>` for examples of how to use the pipelines.
+
+Segmentation
+------------
+
+CNSistent operates over segments. Segments are dictionaries of tuples ``{chr: [(start, end, name), ...], ...}``, where the start is inclusive, and the end is exclusive.
 
 Note that you can pass longer tuples, but the result will discard the 4th and further elements.
 
-Notable functions:
+The following functions can be used to manipulate segments:
 
-* ``merge_segments``: Will merge overlapping segments, merging is possible if ``end==start`` for two consecutive segments on the same chromosome. Note that if the segments are not sorted, you need to set ``sort=True`` to sort them first.
 * ``split_segments``: Will split into equidistant chunks based on specified size (useful for binning).
+* ``merge_segments``: Will merge overlapping segments, merging is possible if ``end==start`` for two consecutive segments on the same chromosome. Note that if the segments are not sorted, you need to set ``sort=True`` to sort them first.
+* ``segment_union``: Will merge segments from two lists of segments.
+* ``get_consecutive_segs``: Having a list of segments, creates lists of consecutive segments. 
 * ``segment_difference``: Will remove regions from a list of segments found in another list of segments.
+* ``regions_select``: A versatile function for creation of segments, see :ref:`regions_select`.
 * ``filter_min_size``: Will remove segments strictly smaller than the specified size.
 
 Imputation
-~~~~~~~~~~
+``````````
 
 Functions for adding missing segments and values in the CNS data. The process is to first add missing regions with NaN values and then impute the missing values.
 
@@ -96,13 +111,8 @@ There are separate functions to fill the telomeres, fill the gaps, and add missi
 
 If guessing values in imputation is not desired, the ``fill_nans_with_zeros`` function can be used to simply fill with 0 instead.
 
-Breakpoints
-~~~~~~~~~~~
-
-Creating of breakpoints (see Breakpoint data type above). The function ``make_breaks`` will create de-novo breakpoints of a certain size, whereas ``get_breaks`` will return the breakpoints for a given ``CNS_df``.
-
 Aggregation
-~~~~~~~~~~~
+```````````
 
 Aggregation will produce segments of a certain size, aggregating the copy number values of the segment chunks into a single segment.
 
@@ -111,16 +121,16 @@ There are the following aggregate functions: ``mean``, ``min``, ``max``, and ``n
 Aggregation can be done either using explicit segments, explicit breakpoints, or a breakpoint type (e.g. ``arms``, ``1000000``).
 
 Analyze
--------
+```````
 
 The analyze module calculates statistics for the CNS data.
 
 * ``coverage``: Calculates the proportion of genome with assigned (not NaN) CN values.
 * ``ploidy``: Calculates the proportion of genome with aneuploid CN values (different from 2 or 1 for male sex chromosomes).
-* ``breakage``: Calculates the signatures related statistics - currently it only calculates breakpoints per sample/chromosome.
+* ``breakage``: Calculates the signatures related statistics ` currently it only calculates breakpoints per sample/chromosome.
 
-Display
--------
+Plotting
+--------
 
 Display functions are in three categories:
 
@@ -160,7 +170,7 @@ Utils contain the specification for the hg19, hg38 assemblies, including the gap
 
 
 Files
-~~~~~
+`````
 
 * ``load_cns/save_cns``: Load/Save CNS data from a TSV file, with optional header and sample_id. By default, this moves from 1-based to 0-based coordinates.
 * ``load_regions/save_regions``: Load/Save regions from a TSV file, reading only the ``chrom, start, end`` columns. By default, this moves from 1-based to 0-based coordinates.
@@ -168,17 +178,17 @@ Files
 * ``get_cn_columns``: Get the CN columns from a CNS DataFrame (start or end with ``CN`` or ``cn``).
 
 Selection
-~~~~~~~~~
+`````````
 
 Functions to select samples set from CNS df (head, tail, random), to filter chromosomes (autosomes, sex chromosomes...) and samples/CNS by type.
 
 Conversions
-~~~~~~~~~~~
+```````````
 
 Converts between CNS df, breakpoints, and segments.
 
 Data Utils
-----------
+``````````
 
 * Functions to load the datasets (PCAWG, TCGA, TRACERx) and gene sets (Ensembl, COSMIC).
 * Default filtering to remove samples from the datasets (low coverage, diploid, blacklisted, ...)
