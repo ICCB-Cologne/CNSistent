@@ -21,7 +21,7 @@ The tool is designed to be easy to use, and to provide a comprehensive set of an
 Example of API
 --------------
 
-The below used files are directly taken from the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
+Files used below sourced directly from the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
 
 1. Load CNS Data and Display Heatmap
 ````````````````````````````````````
