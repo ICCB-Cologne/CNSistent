@@ -368,7 +368,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
 
 def main_segment(
-    input_data="whole",
+    segment_source="whole",
     remove_segs=None,
     split_size=-1,
     cluster_dist=-1,
@@ -381,7 +381,7 @@ def main_segment(
 
     Parameters
     ----------
-    input_data : Either a segments dictionary or a CNS DataFrame
+    segment_source : Either a segments dictionary or a CNS DataFrame
         What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it.
     remove_segs : segments dictionary, optional
         DataFrame containing segments to remove from the selection.
@@ -406,16 +406,16 @@ def main_segment(
     >>> segmented_cns = main_segment(cns_df)  # consistent segmentation
     """
     # if input data is a DataFrame, convert it to unique segments
-    if isinstance(input_data, str) and input_data in ["whole", "arms", "bands"]:            
-        log_info(print_info, f"Creating {input_data} segments...")
-        input_data = regions_select(input_data, assembly)
-    elif isinstance(input_data, pd.DataFrame):        
-        input_segs = cns_df_to_segments(input_data)
+    if isinstance(segment_source, str) and segment_source in ["whole", "arms", "bands"]:            
+        log_info(print_info, f"Creating {segment_source} segments...")
+        segment_source = regions_select(segment_source, assembly)
+    elif isinstance(segment_source, pd.DataFrame):        
+        input_segs = cns_df_to_segments(segment_source)
         input_breaks = segments_to_breaks(input_segs)
-        input_data = breaks_to_segments(input_breaks)
-    elif not isinstance(input_data, dict):
-        raise ValueError(f"input_data must be a CNS DataFrame, a segments dictionary or one of of ['whole', 'arms', 'bands'], got {type(input_data)}")
-    res = process_segments(input_data, remove_segs, filter_size)
+        segment_source = breaks_to_segments(input_breaks)
+    elif not isinstance(segment_source, dict):
+        raise ValueError(f"input_data must be a CNS DataFrame, a segments dictionary or one of of ['whole', 'arms', 'bands'], got {type(segment_source)}")
+    res = process_segments(segment_source, remove_segs, filter_size)
     if cluster_dist > 0:
         res = cluster_segments(res, cluster_dist, True, print_info)
     if split_size > 0:
@@ -463,7 +463,7 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
 
 def main_seg_agg(
     cns_df,
-    input_data="whole",
+    segment_source="whole",
     cn_columns=None,
     remove_segs=None,
     how="mean",
@@ -478,10 +478,10 @@ def main_seg_agg(
 
     Parameters
     ----------
-    input_data : a cns_df (possibly the same as cns_df), a segments dictionary or one of of ["whole", "arms", "bands"]
-        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
     cns_df : pandas.DataFrame
         DataFrame containing CNS (Copy Number Segment) data.
+    segment_source : a cns_df (possibly the same as cns_df), a segments dictionary or one of of ["whole", "arms", "bands"]
+        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
     remove_segs : pandas.DataFrame, optional
@@ -504,7 +504,7 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(input_data, remove_segs, split_size, cluster_dist, filter_size, assembly, print_info)
+    segs = main_segment(segment_source, remove_segs, split_size, cluster_dist, filter_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df
 
