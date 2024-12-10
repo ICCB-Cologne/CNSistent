@@ -41,6 +41,16 @@ def sample_random(samples_df, n=5, seed=0):
 
 
 def only_aut(cns_df, assembly=hg19, inplace=False):
+    """Filter DataFrame for autosomes.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        assembly: Reference assembly defining sex chromosomes
+        inplace: If True, modify DataFrame in place, otherwise make a copy 
+        
+    Returns:
+        pd.DataFrame: DataFrame with only autosomes.
+    """
     if inplace:
         if not cns_df.index.is_unique:
             cns_df.reset_index(drop=True, inplace=True)
@@ -50,6 +60,16 @@ def only_aut(cns_df, assembly=hg19, inplace=False):
 
 
 def only_sex(cns_df, assembly=hg19, inplace=False):
+    """Filter DataFrame for sex chromosomes.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        assembly: Reference assembly defining sex chromosomes
+        inplace: If True, modify DataFrame in place, otherwise make a copy 
+        
+    Returns:
+        pd.DataFrame: DataFrame with only sex chromosome entries
+    """
     if inplace:
         if not cns_df.index.is_unique:
             cns_df.reset_index(drop=True, inplace=True)
@@ -59,6 +79,16 @@ def only_sex(cns_df, assembly=hg19, inplace=False):
 
 
 def drop_Y(cns_df, assembly=hg19, inplace=False):
+    """Remove Y chromosome data from DataFrame.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        assembly: Reference assembly defining Y chromosome
+        inplace: If True, modify DataFrame in place, otherwise make a copy 
+        
+    Returns:
+        pd.DataFrame: DataFrame without Y chromosome data
+    """
     if inplace:
         cns_df.drop(cns_df[cns_df['chrom'] == assembly.chr_y].index, inplace=True)
         return cns_df
@@ -66,26 +96,75 @@ def drop_Y(cns_df, assembly=hg19, inplace=False):
 
 
 def select_CNS_samples(cns_df, samples_df):
+    """Select specific samples from copy number DataFrame.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        samples_df (pd.DataFrame): DataFrame containing sample IDs
+        
+    Returns:
+        pd.DataFrame: DataFrame containing only specified samples
+    """
     return cns_df.query("sample_id in @samples_df.index")
 
 
-def select_cns_by_type(cns_df, samples, type_val, type_col="type"):
+def select_cns_by_type(cns_df, samples_df, type_val, type_col="type"):
+    """Select copy number segments by their type.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        samples_df (pd.DataFrame): DataFrame containing sample IDs
+        type_val (str): Type value(s) to select
+        type_col (str): Column name containing type information
+        
+    Returns:
+        pd.DataFrame: DataFrame filtered by specified type(s)
+    
+    Raises:
+        KeyError: If type_col not found in DataFrame
+    """
     query = f"{type_col} == '{type_val}'"
-    ids = samples.query(query).index
+    ids = samples_df.query(query).index
     cns_ids = cns_df["sample_id"].unique()
     intersect = np.intersect1d(ids, cns_ids)
     select_cns = cns_df.set_index("sample_id").loc[intersect].reset_index()
     return select_cns
 
 
-def cn_not_nan(cns_df, cn_columns, het):
+def cn_not_nan(cns_df, cn_columns, any_col):
+    """Filters copy number DataFrame for non-NaN values.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        cn_columns (list): Column names to check for NaN values
+        any_col (bool): If True, keep rows with any non-NaN values,
+                   if False, keep rows with all non-NaN values
+    
+    Returns:
+        pd.DataFrame: Filtered DataFrame with non-NaN values
+    """
     nan_vals = cns_df[cn_columns].isna()
-    nan_filter = ~nan_vals.all(axis=1) if het else ~nan_vals.any(axis=1)
+    nan_filter = ~nan_vals.all(axis=1) if any_col else ~nan_vals.any(axis=1)
     non_nan_df = cns_df.loc[nan_filter]
     return non_nan_df
 
 
 def get_chr_sets(cns_df, assembly=hg19):
+    """Groups chromosomes into autosomal and sex chromosome sets.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame with 'chrom' column
+        assembly: Reference assembly defining chromosome types
+    
+    Returns:
+        dict: Dictionary with keys:
+            'aut': list of autosomal chromosomes
+            'sex': list of sex chromosomes (if present)
+            'all': combined list (if sex chromosomes present)
+            
+    Raises:
+        ValueError: If no autosomal chromosomes found
+    """
     chroms = cns_df["chrom"].unique().tolist()
     aut_selection = [chrom for chrom in chroms if chrom in assembly.aut_names]
     if len(aut_selection) == 0:

@@ -5,11 +5,6 @@ from cns.utils.logging import log_info
 from cns.utils.assemblies import hg19
 
 
-def get_nan_segs(cns_df):
-    nans = cns_df[cns_df.isna().any(axis=1)].copy()
-    return nans
-
-
 def add_tails(cns_df, assembly=hg19, print_info=True):
     """
     Adds tails to the CNS data.
@@ -18,8 +13,8 @@ def add_tails(cns_df, assembly=hg19, print_info=True):
     ----------
     cns_df : pandas.DataFrame
         DataFrame containing CNS data.
-    chr_lens : dict
-        Dictionary of chromosome lengths.
+    assembly : Assembly object
+        Assembly object containing chromosome length information.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 
@@ -179,8 +174,8 @@ def remove_outliers(cns_df, assembly=hg19, print_info=True):
     ----------
     cns_df : pandas.DataFrame
         DataFrame containing CNS data.
-    chr_lens : dict
-        Dictionary of chromosome lengths.
+    assembly : Assembly object
+        Assembly object containing chromosome length information.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 

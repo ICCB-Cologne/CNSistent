@@ -23,6 +23,18 @@ def _requires_rename(cn_columns):
 
 # Either obtains CN columns from the DataFrame or checks if the provided columns are valid
 def get_cn_cols(cns_df, cn_cols=None):
+    """Gets or validates copy number columns from DataFrame.
+    
+    Args:
+        cns_df (pd.DataFrame): DataFrame containing copy number data
+        cn_cols (str|list, optional): Column name(s) to validate. If None, discovers CN columns
+    
+    Returns:
+        list: Valid copy number column names
+        
+    Raises:
+        ValueError: If specified columns not found or invalid number of columns
+    """
     if cn_cols is None:
         cn_cols = [col for col in cns_df.columns if _is_cn_column(col)]
     # check if cn_cols is a string
@@ -45,6 +57,18 @@ def get_cn_cols(cns_df, cn_cols=None):
 
 
 def rename_cn_cols(cns_df, cn_columns=None, print_info=False):
+    """
+    Renames copy number columns in the DataFrame.
+
+    Parameters:
+    cns_df (pd.DataFrame): The DataFrame containing copy number data.
+    cn_columns (list): List of column names to be renamed.
+    print_info (bool): Flag to indicate whether to print information.
+
+    Returns:
+    pd.DataFrame: The DataFrame with renamed columns.
+    list: The updated list of column names.
+    """
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if not _requires_rename(cn_columns):
         return cns_df, list(cn_columns)
@@ -83,6 +107,15 @@ def _find_column(cns_df, patterns):
 
 
 def canonize_sample_id(df, print_info=False):
+    """Ensures DataFrame has standardized sample_id column.
+    
+    Args:
+        df (pd.DataFrame): DataFrame to canonize
+        print_info (bool): Whether to print info messages
+        
+    Returns:
+        pd.DataFrame: DataFrame with canonized sample_id column
+    """
     # if the column sample_id does not exist, rename the first column to sample_id
     if "sample_id" not in df.columns:
         sample_col = _find_column(df, ['sample', 'id', 'sampleId', 'sample_id', 'sample-id', 'sample_name', 'sampleName', 'sample-name'])	
@@ -97,6 +130,19 @@ def canonize_sample_id(df, print_info=False):
 
 
 def canonize_chroms(cns_df, assembly=hg19, print_info=False):
+    """Standardizes chromosome names and validates against assembly.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        assembly: Reference assembly defining valid chromosomes
+        print_info (bool): Whether to print info messages
+        
+    Returns:
+        pd.DataFrame: DataFrame with canonized chromosome names
+        
+    Raises:
+        ValueError: If no valid chromosomes found
+    """
         # if the column chrom does not exist, rename the second column to chrom
     if "chrom" not in cns_df.columns:
         chrom_col = _find_column(cns_df, ['chrom', 'chr', 'chromosome'])
@@ -130,6 +176,16 @@ def canonize_chroms(cns_df, assembly=hg19, print_info=False):
 
 
 def canonize_positions(cns_df, print_info=False):
+    """Ensures standard start/end position columns.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        print_info (bool): Whether to print info messages
+        
+    Returns:
+        pd.DataFrame: DataFrame with canonized position columns
+    """
+
         # if the column start does not exist, rename the third column to start
     if "start" not in cns_df.columns:
         start_col = _find_column(cns_df, ['start', 'begin', 'chromstart', 'chrom-start', 'chrom_start', 'startpos', 'start-pos', 'start_pos'])
@@ -154,6 +210,15 @@ def canonize_positions(cns_df, print_info=False):
 
 
 def canonize_name(cns_df, print_info=False):
+    """Standardizes optional name column if present.
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame
+        print_info (bool): Whether to print info messages
+        
+    Returns:
+        pd.DataFrame: DataFrame with canonized name column
+    """
     name_col = _find_column(cns_df, ['name'])
     if name_col is not None and name_col != "name":
         cns_df.rename(columns={name_col: "name"}, inplace=True)
@@ -161,6 +226,28 @@ def canonize_name(cns_df, print_info=False):
     return cns_df
 
 def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
+    """Canonizes copy number DataFrame by standardizing all columns.
+    
+    Applies standard canonization steps in order:
+    1. Sample ID column
+    2. Chromosome names and validation
+    3. Position columns (start/end)
+    4. Copy number columns
+    5. Optional name column
+    
+    Args:
+        cns_df (pd.DataFrame): Copy number DataFrame to canonize
+        assembly: Reference assembly for chromosome validation
+        cn_cols (str|list, optional): Copy number column(s) to validate
+        print_info (bool): Whether to print info messages
+        
+    Returns:
+        pd.DataFrame: Canonized copy number DataFrame
+        list: Names of canonized copy number columns
+        
+    Raises:
+        ValueError: If required columns missing or invalid
+    """
     # convert columns to strings
     cns_df.columns = cns_df.columns.astype(str)
     cn_columns = get_cn_cols(cns_df, cn_columns)

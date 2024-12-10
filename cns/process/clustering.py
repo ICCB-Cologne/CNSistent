@@ -1,7 +1,6 @@
 import numpy as np
 from numba import jit
 from cns.process.segments import get_consecutive_segs
-from cns.utils.conversions import segments_to_breaks
 from cns.utils.conversions import values_count
 from cns.utils.logging import log_info
 

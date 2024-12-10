@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from cns.utils.assemblies import hg19
 from cns.utils.conversions import cytobands_to_df
 

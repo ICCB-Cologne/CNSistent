@@ -161,10 +161,6 @@ class TestImputation(unittest.TestCase):
             'sex': ['xx', 'xy']
         }, index=['s1', 's2'])
 
-    def test_get_nan_regs(self):
-        result = get_nan_segs(self.cns_df)
-        self.assertEqual(result.shape[0], 1)
-
     def test_add_tails(self):
         result = add_tails(self.cns_df, self.assembly, print_info=True)
         self.assertEqual(result.shape[0], 9)
