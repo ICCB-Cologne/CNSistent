@@ -99,7 +99,7 @@ The following functions can be used to manipulate segments:
 * ``segment_union``: Will merge segments from two lists of segments.
 * ``get_consecutive_segs``: Having a list of segments, creates lists of consecutive segments. 
 * ``segment_difference``: Will remove regions from a list of segments found in another list of segments.
-* ``regions_select``: A versatile function for creation of segments, see :ref:`regions_select`.
+* ``regions_select``: A versatile function for creation of segments, see :meth:`regions_select <cns.process.segments.regions_select>`.
 * ``filter_min_size``: Will remove segments strictly smaller than the specified size.
 
 Imputation
@@ -135,33 +135,19 @@ Plotting
 Display functions are in three categories:
 
 * ``fig``: A Whole figure with labels.
-* ``plot``: Only plots an individual axis.
-* ``labels``: Either labels or backgrounds for individual axes.
+* ``plot``: Takes an axis and plots on it.
+* ``labels``: Takes an axis and adds background / ticks.
 
-There are two main plot types:
 
-* joint plots: ``fig_line, fig_dots, fig_bars`` - these display joint CN data from aggregates. Line plot is the primary plot, compared to a normal line plot, segments are connected only if they overlap. Dots are more practical for small regions, e.g. genes. Bars are useful for coarse data, e.g. arms.
+For the figures, the first parameter is always the ``CNS_df``, or a list thereof in the case of joint plots. 
+There is one feature (line, dots...) **per sample_id** and one plot **per cn_column**.
 
-.. image:: files/lines.png
-    :alt: Lines Plot
-
-.. image:: files/dots.png
-    :alt: Dots Plot
-
-.. image:: files/bars.png
-    :alt: Bars Plot
-
-* individual plots: ``fig_CN_tracks`` - this plot inserts all bins into a heatmap per sample, being more practical for dense data or equalized representation. Unlike the joint plots, the position on the genome is not considered and there are no gaps, so the sizes of chromosomes and the position therein are only for orientation.
-
-.. image:: files/tracks.png
-    :alt: CN Tracks
-
-For the figures, the first parameter is always the ``CNS_df``, or a list thereof in the case of joint plots. Following optional parameters:
-* column: a string describing the column to plot or a list thereof. If none is specified, all columns matching the CN column pattern are used.
+Following optional parameters:
+* cn_columns: a string describing the column to plot or a list thereof. If none is specified, all columns matching the CN column pattern are used.
 * chrom: a string describing the chromosome to plot. If none is specified, all chromosomes are used.
-* label: string describing the CNS_df or a list thereof. If none is specified, no label is output.
-* width: width of the figure in inches, is calculated automatically if not specified.
-* max_cn: The CN tracks values are cropped to avoid outliers collapsing the color scale. If not specified, ``10`` is used.
+* size: Size of the feature of the plot - line/boundary width or dot size.
+
+Examples can be found in the :doc:`plotting notebook <plotting>`.
 
 Utils
 -----

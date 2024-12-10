@@ -281,7 +281,7 @@ def fig_lines(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     colors : list of str, optional
         List of colors to use for the plots. If None, colors are generated automatically.
     size : int, optional
-        Size of the plot. Default is 1.
+        Size of the feature of the plot - line/boundary width or dot size. Default is 1.
     assembly : object, optional
         Genome assembly to use. Default is hg19.
 
@@ -365,27 +365,38 @@ def _make_layout(width, height, n_columns, vertical):
 
 def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = None, assembly=hg19):
     """
-    Creates a heatmap plot for each of the CN columns.
+    Creates a heatmap figure from copy number segment (CNS) data.
 
     Parameters
     ----------
     cns_df : pandas.DataFrame
-        DataFrame containing CNS data.
+        DataFrame containing CNS data with columns for sample_id, chromosome positions,
+        and copy number values.
     cn_columns : list of str, optional
-        List of column names for copy number data. If None, columns are inferred from cns_df.
-    colors : list of str, optional
-        List of colors to use for the plots. If None, colors are generated automatically.
-    size : int, optional
-        Size of the plot. Default is 1.
-    assembly : object, optional
-        Genome assembly to use. Default is hg19.
+        List of column names containing copy number values. If None, columns are
+        inferred from the DataFrame.
+    min_cn : int, optional
+        Minimum copy number value for the color scale. Default is 0.
+    max_cn : int, optional
+        Maximum copy number value for the color scale. Default is 10.
+    vertical : bool, optional
+        Whether to stack plots vertically. If None, orientation is determined by
+        the aspect ratio. Default is None.
+    assembly : Assembly object, optional
+        Genome assembly object defining chromosome sizes. Default is hg19.
 
     Returns
     -------
-    matplotlib.figure.Figure
-        The created figure.
-    list of matplotlib.axes.Axes
-        List of axes in the figure.
+    tuple
+        A tuple containing:
+        - matplotlib.figure.Figure: The created figure
+        - numpy.ndarray: Array of matplotlib.axes.Axes objects
+    
+    Notes
+    -----
+    The figure size is automatically determined based on the genome size and 
+    number of samples. The layout (vertical vs horizontal) is determined by
+    the aspect ratio unless explicitly specified.
     """
     cn_columns = _get_columns(cns_df, cn_columns)
 
@@ -397,7 +408,7 @@ def fig_heatmap(cns_df, cn_columns=None, min_cn = 0, max_cn = 10, vertical = Non
     vertical = vertical if vertical != None else width > height
     fig, axes = _make_layout(width, height, n_columns, vertical)
     
-    min_cn = cns_df[cn_columns][cns_df[cn_columns] > 0].min().min()
+    min_cn = max(cns_df[cn_columns][cns_df[cn_columns] > 0].min().min(), min_cn)
     max_cn = min(cns_df[cn_columns].max().max(), max_cn)
 
     for j, cn_column in enumerate(cn_columns):
