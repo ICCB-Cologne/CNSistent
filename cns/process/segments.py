@@ -324,6 +324,18 @@ def split_segments(segments, step_size, strategy="scale"):
     return res
 
 
+def _get_centromeres(assembly):
+    cent_range = { chrom: (10**9, -1 ) for chrom in assembly.chr_lens.keys() }
+    for band in assembly.cytobands:
+        chrom = band[0]
+        start = band[1]
+        end = band[2]
+        if "acen" in band[4]:
+            cent_range[chrom] = (min(cent_range[chrom][0], start), max(cent_range[chrom][1], end))
+    return cent_range
+
+
+
 def regions_select(select, assembly=hg19):
     """
     Selects and returns specific genomic regions based on the selection criteria.
@@ -337,6 +349,7 @@ def regions_select(select, assembly=hg19):
         - "bands": Returns cytogenetic bands.
         - "whole": Returns whole genome segments.
         - "gaps": Returns gap regions.
+        - "centromeres": Returns centromeric regions.
         - "chrX": Returns the whole chromosome X (replace X with the chromosome number or name).
         - <file_path>: Returns regions from a file.
     assembly : object, optional
@@ -371,6 +384,8 @@ def regions_select(select, assembly=hg19):
         return genome_to_segments(assembly)
     elif select == "gaps":
         return tuples_to_segments(assembly.gaps)
+    elif select == "centromeres":
+        return _get_centromeres(assembly)
     elif select[0:3] == "chr":
         if select not in assembly.aut_names:
             raise ValueError(f"Invalid chromosome {select} for assembly {assembly.name}")

@@ -381,8 +381,8 @@ def main_segment(
 
     Parameters
     ----------
-    segment_source : Either a segments dictionary or a CNS DataFrame
-        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it.
+    segment_source : a cns_df, or a segments dictionary, or one of of ["whole", "arms", "bands", "centromeres"]
+        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
     remove_segs : segments dictionary, optional
         DataFrame containing segments to remove from the selection.
     split_size : int, optional
@@ -480,11 +480,11 @@ def main_seg_agg(
     ----------
     cns_df : pandas.DataFrame
         DataFrame containing CNS (Copy Number Segment) data.
-    segment_source : a cns_df (possibly the same as cns_df), a segments dictionary or one of of ["whole", "arms", "bands"]
+    segment_source : a cns_df (possibly the same as cns_df), a segments dictionary or one of of ["whole", "arms", "bands", "centromeres"]
         What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
-    remove_segs : pandas.DataFrame, optional
+    remove_segs : segments dictionary, optional
         DataFrame containing segments to remove from the selection.
     how : str, optional
         Aggregation method to use. Default is "mean".
