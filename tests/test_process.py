@@ -96,6 +96,11 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
         self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 
+    def test_cent_regions(self):
+        regions = regions_select("centromeres")
+        self.assertEqual(len(regions), 24)
+        self.assertEqual(regions["chr1"][0][0], 121500000)
+
     def test_get_genome_segments(self):
         select = {1: [(0, 10), (20, 30)], 2: [(0, 5)]}
         remove = {1: [(5, 15)]}
