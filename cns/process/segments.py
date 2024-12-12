@@ -332,7 +332,8 @@ def _get_centromeres(assembly):
         end = band[2]
         if "acen" in band[4]:
             cent_range[chrom] = (min(cent_range[chrom][0], start), max(cent_range[chrom][1], end))
-    return cent_range
+    cents = { chrom: [(cent_range[chrom][0], cent_range[chrom][1], f"{chrom}_cen")] for chrom in cent_range.keys() }
+    return cents
 
 
 

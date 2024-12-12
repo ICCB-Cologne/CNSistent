@@ -272,7 +272,7 @@ def main():
             runtime = time.time() - start
 
             if print_info:
-                print(f"Finished in {runtime:.3f} seconds. Writing to {out_file}...")
+                print(f"Finished in {runtime:.3f} seconds. Writing to {out_file} ...")
                 if args.time:
                     _save_time(action, out_file, runtime, start, args.threads)
 
