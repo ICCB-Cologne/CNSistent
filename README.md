@@ -1,11 +1,9 @@
-![Example Data](./docs/source/files/Logo.png)
-
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
 > This repository also contains data from the PCAWG, TCGA, and TRACERx datasets, as well as gene sets from COSMIC and Ensembl, therefore git clone will download around 1GB of data. If you only want to use the library, download via PyPI [TODO].
 
 
-# <a href="https://cnsistent.readthedocs.io/en/latest/">DOCUMENTATION HERE</a>
+# <a href="https://cnsistent.readthedocs.io/en/latest/">READ THE DOCS HERE</a>
 
 ## Repository Data Quickstart
 

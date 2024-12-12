@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name="CNSistent"
-version="0.5"
+version="0.6.1"
 dynamic = ["dependencies"]
 authors=[
 	{name="Adam Streck", email="adam.streck@gmail.com"}
@@ -26,5 +26,5 @@ dependencies = {file = ["requirements.txt"]}
 cns="cns.cnsistent:main"
 
 [tool.hatch.build.targets.wheel]
-include = ["cns/cnsistent.py", "cns/**/*.py", "README.md", "docs/**"]
-exclude = ["cns/data_utils.py"]
+include = ["cns/cnsistent.py", "cns/**/*.py"]
+exclude = ["cns/data_utils.py", "data/**", "notebooks/**", "scripts/**", "tests/**", "docs/**", "example_API.py", "example_CLI.sh", ".readthedocs.yaml", "cnsistent.yml", "scratch.py"]

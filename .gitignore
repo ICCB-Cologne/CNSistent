@@ -3,6 +3,7 @@ __pycache__/
 temp/
 out/
 img/
+dist/
 pycns.out.tsv
 pycns.egg-info
 *.pdf
