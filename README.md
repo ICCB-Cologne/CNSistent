@@ -1,9 +1,8 @@
 ![CNSistent Logo](https://cnsistent.readthedocs.io/en/latest/_images/Logo.png)
 
 
-<p align="center">
-  <a href="https://cnsistent.readthedocs.io/en/latest/"><strong><span style="font-size: 300%;">~ READ THE DOCS HERE ~</span></strong></a>
-</p>
+# <center>[**~ READ THE DOCS HERE ~**](https://cnsistent.readthedocs.io/en/latest/)</center>
+
 
 CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources. The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
 
