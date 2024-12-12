@@ -1,5 +1,0 @@
-pandas>=2.2
-numpy
-matplotlib
-numba
-scikit-learn

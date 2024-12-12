@@ -3,27 +3,29 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name="CNSistent"
-version="0.6.1"
-dynamic = ["dependencies"]
-authors=[
-	{name="Adam Streck", email="adam.streck@gmail.com"}
+name = "CNSistent"
+version = "0.6.2"
+authors = [
+    {name = "Adam Streck", email = "adam.streck@gmail.com"}
 ]
-maintainers=[
-	{name="Adam Streck", email="adam.streck@gmail.com"}
+maintainers = [
+    {name = "Adam Streck", email = "adam.streck@gmail.com"}
 ]
-description="Tools for imputation, segmentation, analysis, and plotting of Copy Number Segments (CNS)."
-readme="README.md"
-license={text="MIT"}
+description = "Tools for imputation, segmentation, analysis, and plotting of Copy Number Segments (CNS)."
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.9"
 keywords = ["bioinformatics", "genomics", "copy number segments", "CNS"]
-
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+dependencies = [
+    "pandas>=2.2",
+    "numpy",
+    "matplotlib",
+    "numba",
+    "scikit-learn"
+]
 
 [project.scripts]
-cns="cns.cnsistent:main"
+cns = "cns.cnsistent:main"
 
 [tool.hatch.build.targets.wheel]
 include = ["cns/cnsistent.py", "cns/**/*.py"]
