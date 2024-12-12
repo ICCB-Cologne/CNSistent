@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "CNSistent"
-version = "0.6.2"
+version = "0.6.4"
 authors = [
     {name = "Adam Streck", email = "adam.streck@gmail.com"}
 ]
