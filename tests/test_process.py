@@ -397,15 +397,16 @@ class TestClustering(unittest.TestCase):
         self.assertEqual(res['chr2'][0][0], 100)
 
     def test_cluster_segs(self):
-        breakpoints = {"clust": [0, 5, 7, 8, 16, 20]}
+        breakpoints = {"clust": [0, 5, 7, 10, 14, 20]}
         segments = breaks_to_segments(breakpoints)
         clust1 = cluster_segments(segments, 5, True)["clust"]
         # Check bounds preservation
         self.assertEqual(clust1[0][0], 0)
         self.assertEqual(clust1[-1][1], 20)
         clust2 = cluster_segments(segments, 5, False)["clust"]
-        self.assertEqual(len(clust2), 2)
+        self.assertEqual(len(clust2), 3)
         self.assertEqual(clust2[0], (2, 8, 'clust_0'))
+        self.assertEqual(clust2[2], (14, 20, 'clust_2'))
 
 
 

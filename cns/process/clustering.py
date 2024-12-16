@@ -6,38 +6,32 @@ from cns.utils.logging import log_info
 
 @jit(nopython=True)
 def _merge_clusters(clusters, threshold):
-    merged = True
-    while merged:
-        merged = False
-        i = 0
-        while i < len(clusters)-1:
-            # Calculate the centroid of the current cluster
-            start_i = clusters[i, 2]
-            if start_i < 0:
-                i += 1
-                continue
-
-            # Look ahead to merge with any close clusters
-            for j in range(i+1, len(clusters)):
-                # Calculate the centroid of the next cluster
-                start_j = clusters[j, 2]
-                if start_j < 0:
-                    continue
-                
-                # Check if the distance between centroids is below the threshold
-                if abs(start_i - start_j) <= threshold:
-                    # Merge clusters i and j
-                    new_count = clusters[i, 1] + clusters[j, 1]
-                    new_center = (clusters[i, 0] * clusters[i, 1] + clusters[j, 0] * clusters[j, 1]) / new_count
-                    clusters[i, 0] = new_center
-                    clusters[i, 1] = new_count
-                    # Remove the merged cluster
-                    clusters[j, :] = -1
-                    merged = True
-                    # After merging, break to restart the process (to consider new distances)
-                    break
-                
+    i = 0
+    while i < len(clusters)-1:
+        # Calculate the centroid of the current cluster
+        start_i = clusters[i, 2]
+        if start_i < 0:
             i += 1
+            continue
+
+        # Look ahead to merge with any close clusters
+        for j in range(i+1, len(clusters)):
+            # Calculate the centroid of the next cluster
+            start_j = clusters[j, 2]
+            if start_j < 0:
+                continue
+            
+            # Check if the distance between centroids is below the threshold
+            if abs(start_i - start_j) <= threshold:
+                # Merge clusters i and j
+                new_count = clusters[i, 1] + clusters[j, 1]
+                new_center = (clusters[i, 0] * clusters[i, 1] + clusters[j, 0] * clusters[j, 1]) / new_count
+                clusters[i, 0] = new_center
+                clusters[i, 1] = new_count
+                # Remove the merged cluster
+                clusters[j, :] = -1
+            
+        i += 1
 
     filtered = clusters[clusters[:, 0] >= 0]
     rounded = np.round(filtered).astype(np.int64)
