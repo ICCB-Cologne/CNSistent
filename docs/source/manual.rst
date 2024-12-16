@@ -118,7 +118,7 @@ The breakpoints are then merged using a greedy algorithm on a predefined region 
 Starting from the leftmost breakpoint, all breakpoints within the merge distance m are accumulated and a new breakpoint is created as their average. 
 This is then repeated from the leftmost not yet merged breakpoint, until the end of the region is reached.
 
-Clustering can either preserve endpoints (and only merge internal breakpoints), or also merge the endpoints.
+Clustering can either preserve endpoints (and only merge internal breakpoints), or also merge the endpoints. Example on list ``[0, 5, 7, 10, 16, 20]`` with merge distance ``5``:
 
 .. image:: files/clust_orig.png
    :alt: Original clustering data
@@ -134,6 +134,8 @@ Clustering can either preserve endpoints (and only merge internal breakpoints), 
    :alt: Clustering with preserved endpoints
    :align: center
    :width: 800px
+
+> When using aggregation with clustering, the endpoints are always preserved.
 
 Aggregation
 ```````````

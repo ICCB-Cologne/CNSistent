@@ -26,7 +26,7 @@ def get_root_path():
 img_path = pjoin(get_root_path(), "img")
 out_path = pjoin(get_root_path(), "out")
 data_path = pjoin(get_root_path(), "data")
-docs_path = pjoin(get_root_path(), "docs/files")
+docs_path = pjoin(get_root_path(), "docs/source/files")
 
 
 def load_cns_file(filename, print_info=False):
