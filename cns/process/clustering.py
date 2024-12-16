@@ -12,28 +12,27 @@ def _merge_clusters(clusters, threshold):
         i = 0
         while i < len(clusters)-1:
             # Calculate the centroid of the current cluster
-            centroid_i = clusters[i, 0]
-            if centroid_i < 0:
+            start_i = clusters[i, 2]
+            if start_i < 0:
                 i += 1
                 continue
 
             # Look ahead to merge with any close clusters
             for j in range(i+1, len(clusters)):
                 # Calculate the centroid of the next cluster
-                centroid_j = clusters[j, 0]
-                if centroid_j < 0:
+                start_j = clusters[j, 2]
+                if start_j < 0:
                     continue
                 
                 # Check if the distance between centroids is below the threshold
-                if abs(centroid_i - centroid_j) < threshold:
+                if abs(start_i - start_j) <= threshold:
                     # Merge clusters i and j
                     new_count = clusters[i, 1] + clusters[j, 1]
                     new_center = (clusters[i, 0] * clusters[i, 1] + clusters[j, 0] * clusters[j, 1]) / new_count
                     clusters[i, 0] = new_center
                     clusters[i, 1] = new_count
                     # Remove the merged cluster
-                    clusters[j, 0] = -1
-                    clusters[j, 1] = -1
+                    clusters[j, :] = -1
                     merged = True
                     # After merging, break to restart the process (to consider new distances)
                     break
@@ -46,7 +45,7 @@ def _merge_clusters(clusters, threshold):
 
 
 def _breaks_to_clusters(chrom_breaks):
-    return np.array([[val, 1] for val in chrom_breaks], dtype=np.float64)
+    return np.array([[val, 1, val] for val in chrom_breaks], dtype=np.float64)
 
 
 def _clusters_to_breaks(clusters):

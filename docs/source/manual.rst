@@ -111,6 +111,30 @@ There are separate functions to fill the telomeres, fill the gaps, and add missi
 
 If guessing values in imputation is not desired, the ``fill_nans_with_zeros`` function can be used to simply fill with 0 instead.
 
+Clustering
+``````````
+Clustering merges neigbouring breakpoints.
+The breakpoints are then merged using a greedy algorithm on a predefined region (usually a whole chromosome). 
+Starting from the leftmost breakpoint, all breakpoints within the merge distance m are accumulated and a new breakpoint is created as their average. 
+This is then repeated from the leftmost not yet merged breakpoint, until the end of the region is reached.
+
+Clustering can either preserve endpoints (and only merge internal breakpoints), or also merge the endpoints.
+
+.. image:: files/clust_orig.png
+   :alt: Original clustering data
+   :align: center
+   :width: 800px
+
+.. image:: files/clust_ends_merged.png
+   :alt: Clustering with merged endpoints
+   :align: center
+   :width: 800px
+
+.. image:: files/clust_ends_preserved.png
+   :alt: Clustering with preserved endpoints
+   :align: center
+   :width: 800px
+
 Aggregation
 ```````````
 
