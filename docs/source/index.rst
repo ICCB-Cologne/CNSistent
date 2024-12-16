@@ -10,16 +10,31 @@
    :width: 800px
    :align: center
 
+|
 
 Introduction
 ============
 
-CNSistent is a Python tool for processing and analyzing copy number data. 
-It is designed to work with data from a variety of sources, including TCGA, PCAWG, TRACERx, and COSMIC. 
+CNSistent is a Python tool for processing and analyzing copy number data. It is designed to work with data from a variety of sources. 
 The tool is designed to be easy to use, and to provide a comprehensive set of analyses and visualizations.
+CNSistent can be used as a Python package, or downloaded together with the respective data (PCAWG, TRACERx, TCGA, genomic locations):
 
-Example of API
---------------
+Installation links
+------------------
+|PyPI version| |Documentation Status|
+
+#. `Full Bitbucket repository with ~1GB of data. <https://bitbucket.org/schwarzlab/cnsistent/src/main/REPOSITORY.md>`_
+#. `PIP package only. <https://pypi.org/project/cnsistent/>`_
+
+
+.. |PyPI version| image:: https://badge.fury.io/py/CNSistent.svg
+   :target: https://badge.fury.io/py/CNSistent
+
+.. |Documentation Status| image:: https://readthedocs.org/projects/cnsistent/badge/?version=latest
+   :target: https://cnsistent.readthedocs.io/en/latest/?badge=latest
+
+Example of the API
+------------------
 
 Files used below sourced directly from the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
 
@@ -144,3 +159,7 @@ Extention of the example is in `example_CLI.py <https://bitbucket.org/schwarzlab
    CLI
    API
    reference
+
+
+`LICENSE <https://bitbucket.org/schwarzlab/cnsistent/src/main/LICENSE.txt>`_
+----------------------------------------------------------------------------
