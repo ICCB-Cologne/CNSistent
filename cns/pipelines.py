@@ -291,7 +291,6 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     return res_df
 
 
-# NaNs are no
 def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
     """
     Calculates ploidy statistics for CNS data.
