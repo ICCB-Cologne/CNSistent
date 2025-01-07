@@ -596,7 +596,7 @@ def plot_x_ticks(ax, assembly=hg19, min_x=0, max_x=None):
     """
     positions = list(assembly.chr_lens.items())
     if max_x is None:
-        max_x = assembly.aut_len
+        max_x = assembly.gen_len
 
     x_pos = 0
     major_tick_pos = []
