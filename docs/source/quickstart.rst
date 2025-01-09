@@ -24,7 +24,7 @@ The above produced data can be accessed using the ``cns.data_utils`` module. For
 
 .. code-block:: python
 
-    from cns.data_utils import main_lod
+    from cns.data_utils import main_load
     samples_df, cns_df = main_load("imp")
 
 The ``samples_df`` and ``cns_df`` are Pandas dataframes. 
