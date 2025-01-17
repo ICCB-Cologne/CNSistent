@@ -49,4 +49,4 @@ Cytoband, Gap data obtained from: https://genome.ucsc.edu
 Cite: https://www.nature.com/articles/35057062
 
 
-### [MIT Lincese](https://bitbucket.org/schwarzlab/cnsistent/src/main/LICENSE.txt)
+### [MIT License](https://bitbucket.org/schwarzlab/cnsistent/src/main/LICENSE.txt)
