@@ -155,11 +155,15 @@ def main_load(segment_type, dataset="all", use_filter=True, concat=True, print_i
 
     Parameters
     ----------
-    bins : str, optional
+    segment_type : str, optional
         Bin size for loading binned data. If None, no CNS data is loaded. Options include: 
         ["1MB", "2MB", "3MB", "5MB", "10MB", "250KB", "500KB", "whole", "arms", "bands", "COSMIC", "ENSEMBL"].
     dataset : str, optional
         Dataset to load. Options include: "PCAWG", "TCGA", "TRACERx", or "all". Default is "all".
+    use_filter : bool, optional
+        If True, filters samples based on coverage and aneuploidy. Default is True.
+    concat : bool, optional
+        If True, concatenates samples and CNS data from multiple datasets, otherwise a named dictionary is returned. Default is True.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 
@@ -169,6 +173,7 @@ def main_load(segment_type, dataset="all", use_filter=True, concat=True, print_i
         A tuple containing two pandas DataFrames:
         - samples_df: DataFrame containing sample information and statistics.
         - cns_df: DataFrame containing the CNS data or binned data.
+        If concat is False, the DataFrames are returned as a dictionary thereof.
 
     Examples
     --------
