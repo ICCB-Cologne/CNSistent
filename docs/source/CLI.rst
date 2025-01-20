@@ -178,15 +178,15 @@ The following statistics are calculated and stored in a *samples* file:
 * ``sex``: ``xy`` for male, ``xx`` for female. If this information is not specified, ``xy`` is used if and only if ``chrY`` is present in the sample.
 * ``chrom_count``: the number of autosomes that had any CN values assigned
 * ``chrom_missing``: the list of chromosomes that have no CN values assigned
-* ``coverage_{het,hot}_{aut,sex,all}``: proportion of the genome that has a CN value assigned, 
-    * ``het`` for heterozygous (one allele is sufficient), 
-    * ``hom`` for homozygous (both alleles are required), 
+* ``coverage_{any,all}_{aut,sex,all}``: proportion of the genome that has a CN value assigned, 
+    * ``any`` for either allele (one allele is sufficient), 
+    * ``all`` for both alleles (both alleles are required), 
 
 .. csv-table:: Coverage statistics for the samples in the example.
 
     **feature**, **s1**, **s2**
-    coverage (het), 0.966139, 0.928091
-    coverage (hom), 0.285566, 0.0
+    coverage (any), 0.966139, 0.928091
+    coverage (all), 0.285566, 0.0
 
 .. _ploidy_cmd:
 
@@ -205,17 +205,17 @@ Additional arguments:
 
 The following statistics are calculated and stored in a *samples* file:
 
-* ``loh_{het,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN=0 for an allele (``het``) or both alleles (``hom``). 
-* ``ane_{het,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN different from 1 for an allele (``het``) or both alleles (``hom``). In one column format ``het`` can't be established.
+* ``loh_{any,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN=0 for an allele (``any``) or both alleles (``all``). 
+* ``ane_{any,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN different from 1 for an allele (``any``) or both alleles (``all``). In one column format ``any`` can't be established.
 * ``imb_{CN1,CN2}_{aut,sex,all}``: proportion of the chromosome set where one allele has strictly higher CN. In one column format this is not calculated.
 
 .. csv-table::  Ploidy statistics for the samples in the example.
 
     **feature**,**s1**,**s2**
-    aneuploidy (hom),0.0,1.0
-    aneuploidy (het),0.767977,1.0
-    LOH (hom),0.0,0.560374
-    LOH (het),0.0,1.0
+    aneuploidy (all),0.0,1.0
+    aneuploidy (any),0.767977,1.0
+    LOH (all),0.0,0.560374
+    LOH (any),0.0,1.0
     imbalance (CN1),0.767977,0.439626
     imbalance (CN2),0.0,0.0
 
