@@ -27,7 +27,7 @@ def _aggregate_regs(sample_id, chrom, values, seg_start, seg_end, seg_name, agg_
     row_id = 0
     seg_cns = []
     weights = []
-    cns_cols = values.shape[0] - 2
+    cns_cols_count = values.shape[1] - 2
     while row_id < len(values) and values[row_id, 0] < seg_end:
         if values[row_id, 1] > seg_start:
             row = values[row_id]
@@ -39,7 +39,7 @@ def _aggregate_regs(sample_id, chrom, values, seg_start, seg_end, seg_name, agg_
     
     if seg_cns == []:
         # insert NaN when no data found
-        return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols
+        return [sample_id, chrom, seg_start, seg_end] + [np.nan] * cns_cols_count + [seg_name]
     sel_array = np.array(seg_cns)
     weight_array = np.array(weights, dtype=np.uint32)
     cns = agg_func(sel_array, weight_array)
