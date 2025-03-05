@@ -112,27 +112,29 @@ def genome_to_segments(assembly=hg19):
 
 
 def bins_to_features(cns_df, cn_columns=None, drop_sex=True):
-	cn_columns = get_cn_cols(cns_df, cn_columns)
-	sel_df = only_aut(cns_df, inplace=False) if drop_sex else cns_df
-	groups = sel_df.groupby("sample_id")
-	columns = next(iter(groups))[1][['chrom', 'start', 'end']]
-	rows = list(groups.groups.keys())
+    cn_columns = get_cn_cols(cns_df, cn_columns)
+    sel_df = only_aut(cns_df, inplace=False) if drop_sex else cns_df
+    groups = sel_df.groupby("sample_id")
+    columns_df = next(iter(groups))[1][['chrom', 'start', 'end', 'name']].set_index('name')
+    rows_list = list(groups.groups.keys())
 
-	# Calculate the cumulative count for each group without assigning it to the DataFrame
-	cumcount = groups.cumcount()
+    # Calculate the cumulative count for each group without assigning it to the DataFrame
+    cumcount = groups.cumcount()
 
-	if len(cumcount) != len(columns) * len(rows):
-		raise ValueError("The number of cumulative counts does not match the number of rows and columns. Make sure that each sample has the same number of bins.")
+    if len(cumcount) != len(columns_df) * len(rows_list):
+        raise ValueError("The number of cumulative counts does not match the number of rows and columns. Make sure that each sample has the same number of bins.")
 
-	arrays = []
-	for cn_col in cn_columns:
-		# Use the cumulative count directly in the pivot operation
-		array = sel_df.pivot_table(index="sample_id", columns=cumcount, values=cn_col)
-		arrays.append(array)
+    arrays = []
+    for cn_col in cn_columns:
+        # Use the cumulative count directly in the pivot operation
+        array = sel_df.pivot_table(index="sample_id", columns=cumcount, values=cn_col)
+        arrays.append(array)
 
-	stacked = np.stack(arrays, axis=0)
+    stacked = np.stack(arrays, axis=0)
+    # Transpose from (channels, samples, features) to (samples, channels, features)
+    stacked = np.transpose(stacked, (1, 0, 2))
 
-	return stacked, rows, columns
+    return stacked, rows_list, columns_df
 
 
 def values_count(values_dict):

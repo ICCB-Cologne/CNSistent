@@ -17,7 +17,7 @@ cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
 # %%
 seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
 features, rows, columns = cns.bins_to_features(seg_df)
-print("Alleles: {0}, samples: {1}, bins: {2}.".format(*features.shape))
+print("Samples: {0}, Alleles: {1}, Bins: {2}.".format(*features.shape))
 
 # Group segments by cancer type, sum the CNs and create mean linear profile
 # %%

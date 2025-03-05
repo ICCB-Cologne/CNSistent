@@ -76,7 +76,7 @@ Aggregate the imputed CNS data into 3 MB segments and convert it into a feature 
 
    seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
    features, rows, columns = cns.bins_to_features(seg_df)
-   print("Alleles: {0}, samples: {1}, bins: {2}.".format(*features.shape))
+   print("Samples: {0}, Alleles: {1}, Bins: {2}.".format(*features.shape))
 
 ``Alleles: 2, samples: 403, bins: 960.``
 
