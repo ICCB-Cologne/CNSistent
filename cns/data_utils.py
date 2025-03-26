@@ -149,7 +149,7 @@ def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_i
     return filtered_df.copy()
 
 
-def main_load(segment_type, dataset="all", use_filter=True, concat=True, print_info=False):
+def main_load(segment_type: str, dataset="all", use_filter=True, concat=True, print_info=False):
     """
     Loads and filters samples from the specified dataset along with the imputed CNS data.
 
