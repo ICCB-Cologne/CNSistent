@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from numba import njit
 from cns.process.breakpoints import make_breaks
-from cns.utils.conversions import breaks_to_segments
+from cns.utils.conversions import breaks_to_segments, calc_mid, calc_cum_mid
 from cns.utils.canonization import get_cn_cols
 from cns.utils.assemblies import hg19
 from cns.utils.logging import log_info, log_warn
@@ -206,6 +206,53 @@ def add_total_cn(cns_df, cn_columns=None, remove_cn_columns=False, inplace=True)
     cns_df["total_cn"] = cns_df[cn_columns].sum(axis=1)
     if remove_cn_columns:
         cns_df.drop(columns=cn_columns, inplace=True)
+    return cns_df
+
+
+def add_mid(cns_df, inplace=True):
+    """
+    Adds a 'mid' column to the CNS data representing the middle point of each segment.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data with 'start' and 'end' columns.
+    inplace : bool, optional
+        If True, modifies the original DataFrame. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the added 'mid' column.
+    """
+    if not inplace:
+        cns_df = cns_df.copy()
+    cns_df["mid"] = calc_mid(cns_df)
+    return cns_df
+
+
+def add_cum_mid(cns_df, assembly=hg19, inplace=True):
+    """
+    Adds a 'cum_mid' column to the CNS data representing the cumulative middle position 
+    across chromosomes based on the specified genome assembly.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data with 'chrom', 'start', and 'end' columns.
+    assembly : object, optional
+        Genome assembly to use for chromosome lengths. Default is hg19.
+    inplace : bool, optional
+        If True, modifies the original DataFrame. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with the added 'cum_mid' column.
+    """
+    if not inplace:
+        cns_df = cns_df.copy()
+    cns_df["cum_mid"] = calc_cum_mid(cns_df, assembly)
     return cns_df
 
 
