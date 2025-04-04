@@ -4,6 +4,7 @@ temp/
 out/
 img/
 dist/
+local/
 pycns.out.tsv
 pycns.egg-info
 *.pdf
