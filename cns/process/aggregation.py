@@ -319,3 +319,54 @@ def stack_groups(cns_dfs, labels=None):
         for i, df in enumerate(cns_dfs):
             df["sample_id"] = labels[i]
     return pd.concat(cns_dfs)
+
+
+def mean_value_per_seg(cns_df, segs, score_col):
+    """
+    Calculate weighted scores for segments based on overlap with copy number segments.
+    
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing copy number segments
+    segs : dict
+        Dictionary mapping chromosome names to lists of segments (start, end, name)
+    score_col : str
+        Column name containing the scores to aggregate
+        
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with scores for each segment
+    """
+    scores = []
+    
+    # Group the data by chromosome once
+    cns_by_chrom = {chrom: df.reset_index(drop=True) for chrom, df in cns_df.groupby("chrom")}
+    
+    for chrom, segs_list in segs.items():
+        if chrom not in cns_by_chrom:
+            continue
+            
+        chr_df = cns_by_chrom[chrom]
+        
+        for s_start, s_end, s_name in segs_list:
+            seg_len = s_end - s_start
+            
+            # Find overlapping segments more efficiently
+            overlaps = chr_df[(chr_df["end"] > s_start) & (chr_df["start"] < s_end)]
+            
+            if len(overlaps) == 0:
+                scores.append([chrom, s_start, s_end, s_name, 0])
+                continue
+                
+            # Calculate weighted score in one step
+            overlap_sizes = (
+                np.minimum(overlaps["end"], s_end) - 
+                np.maximum(overlaps["start"], s_start)
+            )
+            weighted_score = np.sum(overlap_sizes * overlaps[score_col]) / seg_len
+            
+            scores.append([chrom, s_start, s_end, s_name, weighted_score])
+            
+    return pd.DataFrame(scores, columns=["chrom", "start", "end", "name", score_col])

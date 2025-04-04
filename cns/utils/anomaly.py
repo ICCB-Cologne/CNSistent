@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def count_below_lim(vals, min_val=0, max_val=1, steps=1000):
@@ -219,3 +220,61 @@ def z_score_filter(vals, min_val=-3, max_val=3):
     zscore = (vals - vals.mean()) / vals.std()
     return vals[(zscore >= min_val) & (zscore <= max_val)]
     
+
+def calc_angles_cons(cns_df, cn_col):
+    """
+    Calculate angles between consecutive segments within a continuous group.
+    
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing copy number segments
+    cn_col : str
+        Column name containing copy number values
+        
+    Returns
+    -------
+    numpy.ndarray
+        Array of angles between consecutive segments in radians
+    """
+    if (len(cns_df) < 2):
+        return np.zeros(len(cns_df))
+    starts = cns_df["start"].values
+    ends = cns_df["end"].values
+    lengths = ends - starts
+    mean_length = lengths.mean()
+    vals = cns_df[cn_col].values
+    mids = (starts + lengths // 2)
+    slopes = np.diff(vals) / np.diff(mids) * mean_length
+    slopes_vec = np.vectorize(calculate_signed_angle)
+    angles = slopes_vec(slopes[1:], slopes[:-1])
+    angles = np.insert(angles, 0, 0)
+    angles = np.append(angles, 0)
+    return angles
+
+
+def calc_angles(cns_df, cn_col):
+    """
+    Calculate angles between segments across the entire dataset,
+    handling discontinuities appropriately.
+    
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing copy number segments
+    cn_col : str
+        Column name containing copy number values
+        
+    Returns
+    -------
+    pandas.Series
+        Series of angles indexed by the original DataFrame indices
+    """
+    is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
+    result = pd.Series(index=cns_df.index)
+    
+    for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
+        angle_values = calc_angles_cons(group_df, cn_col)
+        result.loc[group_df.index] = angle_values
+    
+    return result
