@@ -221,7 +221,7 @@ def z_score_filter(vals, min_val=-3, max_val=3):
     return vals[(zscore >= min_val) & (zscore <= max_val)]
     
 
-def calc_angles_cons(cns_df, cn_col):
+def calc_angles_cons(cns_df, cn_col, norm_factor=1):
     """
     Calculate angles between consecutive segments within a continuous group.
     
@@ -245,7 +245,7 @@ def calc_angles_cons(cns_df, cn_col):
     mean_length = lengths.mean()
     vals = cns_df[cn_col].values
     mids = (starts + lengths // 2)
-    slopes = np.diff(vals) / np.diff(mids) * mean_length
+    slopes = np.diff(vals) / np.diff(mids) * mean_length / norm_factor
     slopes_vec = np.vectorize(calculate_signed_angle)
     angles = slopes_vec(slopes[1:], slopes[:-1])
     angles = np.insert(angles, 0, 0)
@@ -253,7 +253,7 @@ def calc_angles_cons(cns_df, cn_col):
     return angles
 
 
-def calc_angles(cns_df, cn_col):
+def calc_angles(cns_df, cn_col, norm_factor=1):
     """
     Calculate angles between segments across the entire dataset,
     handling discontinuities appropriately.
@@ -274,7 +274,7 @@ def calc_angles(cns_df, cn_col):
     result = pd.Series(index=cns_df.index)
     
     for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
-        angle_values = calc_angles_cons(group_df, cn_col)
+        angle_values = calc_angles_cons(group_df, cn_col, norm_factor=norm_factor)
         result.loc[group_df.index] = angle_values
     
     return result

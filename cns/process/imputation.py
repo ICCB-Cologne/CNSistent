@@ -256,6 +256,7 @@ def _is_same_contig(df, id, chrom, j):
     return df.at[j, "sample_id"] == id and df.at[j, "chrom"] == chrom
 
 
+# TODO: Should only consider 1-coulumn or 2-column CN data
 def _impute_extend(cns_df, cn_columns, print_info=True):
     """
     For each column with NaN, find the previous and next existing value and fill up to midpoint. 
@@ -436,5 +437,5 @@ def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):
     log_info(print_info, f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")
     # Fully missing chromosomes filled with 0
     for col in cn_columns:
-        res_df[col] = res_df[col].fillna(0.0).infer_objects(copy=False).astype(int)
+        res_df[col] = res_df[col].fillna(0.0).infer_objects(copy=False)
     return res_df
