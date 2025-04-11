@@ -182,3 +182,26 @@ class TestData(unittest.TestCase):
         self.assertEqual(cns_cov_gap_df.loc['s1', 'cover_any_sex'], 0)	
         self.assertEqual(cns_cov_gap_df.loc['s2', 'cover_any_all'], 1)
         self.assertEqual(cns_cov_gap_df.loc['s2', 'cover_both_all'], 0.0)
+
+    def test_ploidy(self):
+        cns_ploidy_df = main_ploidy(self.cns_df, add_missing_chromosomes=False)
+        self.assertEqual(cns_ploidy_df.shape, (2, 21))
+        self.assertEqual(cns_ploidy_df.loc['s1', 'ane_any_aut'], 0.5)
+
+    # def test_imputation(self):
+    #     cns = """
+    #     sample_id chrom   start     end  major_cn  minor_cn             name
+    #     grouped  chr1       0   69090       NaN       NaN              NaN
+    #     grouped  chr1   69090   70008  1.854562  0.746076  ENSG00000186092
+    #     grouped  chr1   70008  134900       NaN       NaN              NaN
+    #     grouped  chr1  134900  139379  1.854562  0.746076  ENSG00000237683
+    #     grouped  chr1  139379  367639       NaN       NaN              NaN
+    #     grouped  chr1  367639  368634  1.854562  0.746076  ENSG00000235249
+    #     grouped  chr1  368634  621058       NaN       NaN              NaN
+    #     grouped  chr1  621058  622053  1.854562  0.746076  ENSG00000185097
+    #     grouped  chr1  622053  738531       NaN       NaN              NaN
+    #     grouped  chr1  738531  739137  1.854562  0.746076  ENSG00000269831
+    #     """
+    #     cns_df = pd.read_csv(io.StringIO(cns.strip()), sep='\s+', engine='python')
+    #     imp_df = cns_impute(cns_df, None, cn_columns=["major_cn", "minor_cn"])
+    #     print(imp_df)

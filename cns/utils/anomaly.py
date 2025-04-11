@@ -75,7 +75,7 @@ def calculate_signed_angle(s1, s2):
     angle_degrees : float
         Signed angle in degrees.
     """
-    angle_radians = np.arctan((s2 - s1) / (1 + s1 * s2))
+    angle_radians =  np.arctan(s1) - np.arctan(s2)
     
     # Convert the angle to degrees
     angle_degrees = np.degrees(angle_radians)
@@ -237,7 +237,7 @@ def calc_angles_cons(cns_df, cn_col, norm_factor=1):
     numpy.ndarray
         Array of angles between consecutive segments in radians
     """
-    if (len(cns_df) < 2):
+    if (len(cns_df) <= 2):
         return np.zeros(len(cns_df))
     starts = cns_df["start"].values
     ends = cns_df["end"].values
@@ -245,9 +245,12 @@ def calc_angles_cons(cns_df, cn_col, norm_factor=1):
     mean_length = lengths.mean()
     vals = cns_df[cn_col].values
     mids = (starts + lengths // 2)
-    slopes = np.diff(vals) / np.diff(mids) * mean_length / norm_factor
+    vals_diff = np.diff(vals)
+    mids_diff = np.diff(mids)
+    norm_mids = mids_diff / mean_length
+    slopes = vals_diff / norm_mids / norm_factor
     slopes_vec = np.vectorize(calculate_signed_angle)
-    angles = slopes_vec(slopes[1:], slopes[:-1])
+    angles = slopes_vec(slopes[:-1], slopes[1:])
     angles = np.insert(angles, 0, 0)
     angles = np.append(angles, 0)
     return angles
@@ -272,6 +275,11 @@ def calc_angles(cns_df, cn_col, norm_factor=1):
     """
     is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
     result = pd.Series(index=cns_df.index)
+
+    height = cns_df[cn_col].max() - cns_df[cn_col].min()
+    width = len(cns_df)
+    norm_factor *= height / width  
+    print(f'Norm factor: {norm_factor}')
     
     for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
         angle_values = calc_angles_cons(group_df, cn_col, norm_factor=norm_factor)
