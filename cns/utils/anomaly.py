@@ -75,39 +75,12 @@ def calculate_signed_angle(s1, s2):
     angle_degrees : float
         Signed angle in degrees.
     """
-    angle_radians =  np.arctan(s1) - np.arctan(s2)
+    angle_radians = np.arctan(s2) - np.arctan(s1)
     
     # Convert the angle to degrees
     angle_degrees = np.degrees(angle_radians)
     
     return angle_degrees
-
-
-def _get_direction(y):
-    """
-    Determines the direction of a monotonic curve.
-
-    Parameters
-    ----------
-    y : array-like
-        Array of y-values.
-
-    Returns
-    -------
-    int
-        1 if the curve is non-decreasing, -1 if the curve is non-increasing.
-
-    Raises
-    ------
-    ValueError
-        If the curve is non-monotonic.
-    """
-    if  np.all(np.diff(y) >= 0):
-        return 1
-    elif np.all(np.diff(y) < 0):
-        return -1
-    else:
-        raise ValueError('Trying to find a knee in a curve that is non-monotonic')
 
 
 def find_knee(x, y, knee=True):
@@ -132,33 +105,33 @@ def find_knee(x, y, knee=True):
     """
     if len(x) < 2:
         return -1, np.nan
-    y_range = y[-1] - y[0]
-    x_range = x[-1] - x[0]
+    y_range = np.abs(np.min(y) - np.max(y))
+    x_range = np.abs(np.min(x) - np.max(x))
     if y_range == 0:
         return -1, np.nan
-    y = (np.array(y) - y[0]) / y_range 
-    x = (np.array(x) - x[0]) / x_range
-    orientation = _get_direction(y)
-    orientation *= (-1 if knee else 1)
+    
+    # normalize y and x to the range of 0 to 1
+    y = (np.array(y)) / y_range 
+    x = (np.array(x)) / x_range
 
     # calculate the difference between slopes on the left and right side of each point 
-    angles = []
-    slopes = []    
+    angles = [0]
     for i in range(1, len(x) - 1):
-        left = (y[i]) / (x[i])
-        right = (1 - y[i]) / (1 - x[i])
+        left = (y[i] - y[0]) / (x[i] - x[0])
+        right = (y[-1] - y[i]) / (x[-1] - x[i])
         angle = calculate_signed_angle(left, right)
-        val = max(angle * orientation, 0)
-        slopes.append((left, right, val))
-        angles.append(val)
+        angles.append(angle)
+    angles.append(0)
+
+    print(angles)
 
     # find the index and value of the max element in ddy_abs
-    max_index = np.argmax(angles)
-    max_value = angles[max_index]
+    max_angle_i = np.argmin(angles) if knee else np.argmax(angles)
+    max_angle_v = angles[max_angle_i]
 
     # for i, (l, r, v) in enumerate(slopes):
     #     print(f'{i+1}: {l:.2f} {r:.2f} {v:.2f}')
-    return max_index + 1, max_value
+    return max_angle_i, max_angle_v
 
 
 def find_bends(vals, min_val=0, max_val=1):    
@@ -284,5 +257,6 @@ def calc_angles(cns_df, cn_col, norm_factor=1):
     for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
         angle_values = calc_angles_cons(group_df, cn_col, norm_factor=norm_factor)
         result.loc[group_df.index] = angle_values
+        break
     
     return result
