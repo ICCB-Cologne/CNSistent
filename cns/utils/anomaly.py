@@ -123,8 +123,6 @@ def find_knee(x, y, knee=True):
         angles.append(angle)
     angles.append(0)
 
-    print(angles)
-
     # find the index and value of the max element in ddy_abs
     max_angle_i = np.argmin(angles) if knee else np.argmax(angles)
     max_angle_v = angles[max_angle_i]
@@ -194,22 +192,7 @@ def z_score_filter(vals, min_val=-3, max_val=3):
     return vals[(zscore >= min_val) & (zscore <= max_val)]
     
 
-def calc_angles_cons(cns_df, cn_col, norm_factor=1):
-    """
-    Calculate angles between consecutive segments within a continuous group.
-    
-    Parameters
-    ----------
-    cns_df : pandas.DataFrame
-        DataFrame containing copy number segments
-    cn_col : str
-        Column name containing copy number values
-        
-    Returns
-    -------
-    numpy.ndarray
-        Array of angles between consecutive segments in radians
-    """
+def calc_angles_cons(cns_df, cn_col):
     if (len(cns_df) <= 2):
         return np.zeros(len(cns_df))
     starts = cns_df["start"].values
@@ -219,14 +202,12 @@ def calc_angles_cons(cns_df, cn_col, norm_factor=1):
     vals = cns_df[cn_col].values
     mids = (starts + lengths // 2)
     vals_diff = np.diff(vals)
-    mids_diff = np.diff(mids)
-    norm_mids = mids_diff / mean_length
-    slopes = vals_diff / norm_mids / norm_factor
-    slopes_vec = np.vectorize(calculate_signed_angle)
-    angles = slopes_vec(slopes[:-1], slopes[1:])
-    angles = np.insert(angles, 0, 0)
-    angles = np.append(angles, 0)
-    return angles
+    mids_diff = np.diff(mids) / mean_length
+    norm_diffs = vals_diff / mids_diff
+    diff2 = np.diff(norm_diffs)
+    diff2 = np.insert(diff2, 0, 0)
+    diff2 = np.append(diff2, 0)
+    return diff2
 
 
 def calc_angles(cns_df, cn_col, norm_factor=1):
@@ -249,14 +230,8 @@ def calc_angles(cns_df, cn_col, norm_factor=1):
     is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
     result = pd.Series(index=cns_df.index)
 
-    height = cns_df[cn_col].max() - cns_df[cn_col].min()
-    width = len(cns_df)
-    norm_factor *= height / width  
-    print(f'Norm factor: {norm_factor}')
-    
     for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
-        angle_values = calc_angles_cons(group_df, cn_col, norm_factor=norm_factor)
+        angle_values = calc_angles_cons(group_df, cn_col)
         result.loc[group_df.index] = angle_values
-        break
     
     return result
