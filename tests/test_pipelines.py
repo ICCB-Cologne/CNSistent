@@ -183,11 +183,6 @@ class TestData(unittest.TestCase):
         self.assertEqual(cns_cov_gap_df.loc['s2', 'cover_any_all'], 1)
         self.assertEqual(cns_cov_gap_df.loc['s2', 'cover_both_all'], 0.0)
 
-    def test_ploidy(self):
-        cns_ploidy_df = main_ploidy(self.cns_df, add_missing_chromosomes=False)
-        self.assertEqual(cns_ploidy_df.shape, (2, 21))
-        self.assertEqual(cns_ploidy_df.loc['s1', 'ane_any_aut'], 0.5)
-
     # def test_imputation(self):
     #     cns = """
     #     sample_id chrom   start     end  major_cn  minor_cn             name

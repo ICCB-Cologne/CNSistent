@@ -127,7 +127,7 @@ def merge_segments(segs, is_sorted=False):
     return merged
 
 
-def segment_union(segs_a, segs_b):
+def segment_union(segs_a, segs_b, merge=True):
     """
     Computes the union of two sets of segments.
 
@@ -149,8 +149,9 @@ def segment_union(segs_a, segs_b):
     for key in keys:
         new_segs[key] = segs_a.get(key, []) + segs_b.get(key, [])
         new_segs[key].sort(key=lambda x: (x[0]))
-    merged = merge_segments(new_segs)
-    return merged
+    if merge:
+        new_segs = merge_segments(new_segs)
+    return new_segs
 
 
 def segment_difference(segs_a, segs_b, sorted=False):

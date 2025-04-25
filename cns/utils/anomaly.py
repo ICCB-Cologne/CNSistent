@@ -210,7 +210,7 @@ def calc_angles_cons(cns_df, cn_col):
     return diff2
 
 
-def calc_angles(cns_df, cn_col, norm_factor=1):
+def calc_angles(cns_df, cn_col):
     """
     Calculate angles between segments across the entire dataset,
     handling discontinuities appropriately.
