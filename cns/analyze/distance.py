@@ -25,19 +25,30 @@ def calc_wass_distance(sample_A, sample_B, cn_column):
     if sample_A.shape[0] == 0 or sample_B.shape[0] == 0:
         raise ValueError("Both samples must have data to calculate Wasserstein distance.")
     
-    if sample_A.shape[1] != sample_B.shape[1]:
-        raise ValueError("Both samples must have the same number of columns.")
+    # Get common chromosomes
+    chroms_A = set(sample_A['chrom'].unique())
+    chroms_B = set(sample_B['chrom'].unique())
+    common_chroms = chroms_A.intersection(chroms_B)
     
-    groups_A = sample_A.groupby('chrom')
-    groups_B = sample_B.groupby('chrom')
+    if not common_chroms:
+        raise ValueError("No common chromosomes found between samples")
+    
+    # Pre-compute groups for better performance
+    groups_A = dict(list(sample_A.groupby('chrom')))
+    groups_B = dict(list(sample_B.groupby('chrom')))
     
     # Dictionary to store results
-    distances = 0
+    distances = {}
     
-    for chrom, group_A in groups_A:
-        # Filter data for current chromosome
-        group_B = groups_B.get_group(chrom)
-        val_count = len(group_A)
+    for chrom in common_chroms:
+        group_A = groups_A[chrom]
+        group_B = groups_B[chrom]
+        
+        val_count = max(len(group_A), len(group_B))  # Use the larger count for better resolution
+        if val_count == 0:
+            distances[chrom] = 0
+            continue
+
         vals_A = group_A[cn_column].values
         vals_B = group_B[cn_column].values
 

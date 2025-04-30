@@ -114,8 +114,8 @@ def select_cns_by_type(cns_df, samples_df, type_val, type_col="type"):
     Args:
         cns_df (pd.DataFrame): Copy number DataFrame
         samples_df (pd.DataFrame): DataFrame containing sample IDs
-        type_val (str): Type value(s) to select
-        type_col (str): Column name containing type information
+        type_val (str): Type value to select
+        type_col (str): Column name containing type information (default: "type")   
         
     Returns:
         pd.DataFrame: DataFrame filtered by specified type(s)
