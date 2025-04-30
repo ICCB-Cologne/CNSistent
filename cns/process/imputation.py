@@ -195,7 +195,7 @@ def remove_outliers(cns_df, assembly=hg19, print_info=True):
             else:
                 res_df.at[index, "start"] = 0
         if row.end > chr_lens[row.chrom]:
-            if row.start > chr_lens[row.chrom]:
+            if row.start >= chr_lens[row.chrom]:
                 idx_to_remove.append(i)
                 log_info(print_info, f"Removed outlier:\n{row}")
             else:

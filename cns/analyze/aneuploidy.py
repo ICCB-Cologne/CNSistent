@@ -4,7 +4,7 @@ from cns.utils.assemblies import hg19
 from cns.utils.conversions import calc_lengths
 from cns.utils.selection import get_chr_sets
 from numba import njit
-
+    
 
 def _check_total(chrom, val, sex, feature, allele_spec, chr_x, chr_y):
     if feature == "ane":
@@ -199,3 +199,42 @@ def calc_ploidy_per_column(cns_df, cn_column):
         ploidy = _calc_ploidy_per_sample(start, end, cn_values)
         res[sample_id] = ploidy
     return pd.Series(res)
+
+
+def calc_chrom_var(df, cn_column):
+    """
+    Calculates the variance of a specified column grouped by chromosome.
+    
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for which to calculate the variance.
+
+    Returns
+    -------
+    pandas.Series
+        Series with the variance of the specified column for each chromosome.
+    """
+    return df.groupby("chrom")[cn_column].var()
+
+
+def calc_chrom_mean(df, cn_column):
+    """
+    Calculates the mean of a specified column grouped by chromosome.
+    
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_column : str
+        Column name for which to calculate the mean.
+
+    Returns
+    -------
+    pandas.Series
+        Series with the mean of the specified column for each chromosome.
+    """
+    return df.groupby("chrom")[cn_column].mean()
+

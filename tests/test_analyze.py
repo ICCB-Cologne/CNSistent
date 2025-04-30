@@ -4,7 +4,7 @@ import pandas as pd
 
 from cns.analyze import *
 from cns.process import *
-from cns.pipelines import main_coverage
+from cns.pipelines import main_coverage, main_fill_imp
 
 class TestCoverage(unittest.TestCase):
     def setUp(self):
@@ -171,3 +171,26 @@ class TestAneuploidy(unittest.TestCase):
         self.assertEqual(res.loc['s1', 'imb_major_cn_aut'], 100)
         self.assertEqual(res.loc['s2', 'imb_major_cn_sex'], 0)
         self.assertEqual(res.loc['s4', 'imb_major_cn_all'], 169)
+
+class TestDistance(unittest.TestCase):
+    def setUp(self):
+        self.cns = {
+            'sample_id': ['s1', 's1', 's2', 's2'],
+            'major_cn': [1, 1, 0, 2],
+            'minor_cn': [0, 1, 1, 0],
+            'chrom': ['chr1', 'chr1', 'chr1', 'chr1'],	
+            'start': [0, 100, 0, 100],
+            'end': [100, 200, 100, 200],
+        }
+    
+    def test_WD(self):
+        cns_df = pd.DataFrame(self.cns)
+        sample_A = cns_df[cns_df['sample_id'] == 's1']
+        sample_B = cns_df[cns_df['sample_id'] == 's2']
+        
+        # Calculate Wasserstein distance
+        res = calc_wass_distance(sample_A, sample_B, 'major_cn')        
+        print(res)
+        
+        res = calc_wass_distance(sample_A, sample_B, 'minor_cn')
+        print(res) 
