@@ -61,4 +61,5 @@ def calc_distances(cns_df, print_progress=False):
                 dist = calc_wass_distance(cns1, cns2)
                 dists.append(dist)
             arr[i1, i2] = np.mean(dists)
+            arr[i2, i1] = np.mean(dists)
     return pd.DataFrame(arr, index=ids, columns=ids)

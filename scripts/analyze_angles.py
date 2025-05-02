@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # set color_map to tab10
-color_map = plt.cm.get_cmap('tab10').colors[:10]
+color_map = plt.get_cmap('tab10').colors[:10]
 plt.rcParams.update({'font.size': 12})
 
 cns_dfs = {}
@@ -19,7 +19,8 @@ ensembl = cdu.load_ENSEMBL()
 cancer_type = "LUSC"
 val_count = 5
 
-for i, cancer_type in enumerate(["all"] + samples_df["type"].unique().tolist()):
+top_types = samples_df["type"].value_counts().index.tolist()[:6]
+for i, cancer_type in enumerate(["all"] + top_types):
 	print(i, cancer_type)
 	fig, axs = plt.subplots(len(cns_dfs), 1, figsize=(14, 14))
 	for i, (grouping, cns_df) in enumerate(cns_dfs.items()):
