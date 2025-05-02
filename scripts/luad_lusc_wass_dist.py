@@ -4,14 +4,19 @@ import cns.data_utils as cdu
 import cns
 import time
 
-print("Loading data...")
+seg_size = "1MB"
+print(f"Loading data for {seg_size} segments...")
+samples_df, cns_df = cdu.main_load(seg_size)
+subs_df = pd.concat([cns.select_cns_by_type(cns_df, samples_df, "LUAD"), cns.select_cns_by_type(cns_df, samples_df, "LUSC")])
+subs_df = cns.only_aut(cns.add_total_cn(subs_df))
+print("Total samples:", len(subs_df["sample_id"].unique()))
+# subs_df = cns.cns_head(subs_df, 100)
 
-samples_df, cns_df = cdu.main_load("10MB")
-subs_df = cns.only_aut(cns.add_total_cn(cns_df))
-subs_df = cns.cns_head(subs_df, 50)
-
-print("Calculating distances...")
+cn_column = "total_cn"
+print(f"Calculating distances for {cn_column}...")
 start = time.time()
-arr = cns.calc_distances(subs_df, True)
+arr = cns.calc_distances(subs_df, cn_column, print_progress=True)
 print(f"Elapsed time: {time.time() - start:.2f} seconds")
-arr.to_csv(cdu.pjoin(cdu.out_path, "LUAD_LUSC_wass_dist_2.tsv"), sep="\t", index=True, header=True)
+out_path = cdu.pjoin(cdu.out_path, "LUAD_LUSC_wass_dist.tsv")
+print(f"Saving distances to {out_path}...")
+arr.to_csv(out_path, sep="\t", index=True, header=True)
