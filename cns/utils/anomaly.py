@@ -193,7 +193,7 @@ def z_score_filter(vals, min_val=-3, max_val=3):
     
 
 def calc_angles_cons(cns_df, cn_col):
-    if (len(cns_df) <= 2):
+    if (len(cns_df) < 1):
         return np.zeros(len(cns_df))
     starts = cns_df["start"].values
     ends = cns_df["end"].values
@@ -202,15 +202,16 @@ def calc_angles_cons(cns_df, cn_col):
     vals = cns_df[cn_col].values
     mids = (starts + lengths // 2)
     vals_diff = np.diff(vals)
-    mids_diff = np.diff(mids) / mean_length
+    mids_diff = np.diff(mids) / mean_length    
+    if np.any(mids_diff <= 0):
+        raise ValueError("Segments must be strictly ordered.")
     norm_diffs = vals_diff / mids_diff
+    norm_diffs = np.concatenate(([0], norm_diffs, [0]))
     diff2 = np.diff(norm_diffs)
-    diff2 = np.insert(diff2, 0, 0)
-    diff2 = np.append(diff2, 0)
     return diff2
 
 
-def calc_angles(cns_df, cn_col):
+def calc_angles(cns_df, cn_col, group_by='sample'):
     """
     Calculate angles between segments across the entire dataset,
     handling discontinuities appropriately.
@@ -227,11 +228,24 @@ def calc_angles(cns_df, cn_col):
     pandas.Series
         Series of angles indexed by the original DataFrame indices
     """
-    is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
     result = pd.Series(index=cns_df.index)
-
-    for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
-        angle_values = calc_angles_cons(group_df, cn_col)
-        result.loc[group_df.index] = angle_values
+    if group_by == 'cons':
+        is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0 
+        is_consecutive = is_consecutive | (cns_df["chrom"] != cns_df["chrom"].shift(1))
+        is_consecutive |= (cns_df["sample_id"] != cns_df["sample_id"].shift(1))
+    elif group_by == 'chrom':
+        is_consecutive = cns_df["chrom"] != cns_df["chrom"].shift(1)
+        is_consecutive |= (cns_df["sample_id"] != cns_df["sample_id"].shift(1))
+    elif group_by == 'sample':        
+        is_consecutive = cns_df["sample_id"] != cns_df["sample_id"].shift(1)
+    else:
+        raise ValueError("group_by must be one of 'cons', 'chrom', or 'sample', found")
     
+    for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
+        if group_by == 'sample':
+            angle_values = group_df[cn_col].mean() - group_df[cn_col].values
+        else:
+            angle_values = calc_angles_cons(group_df, cn_col)
+        result.loc[group_df.index] = angle_values
+
     return result
