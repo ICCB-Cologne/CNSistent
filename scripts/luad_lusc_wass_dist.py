@@ -15,7 +15,7 @@ print("Total samples:", len(subs_df["sample_id"].unique()))
 cn_column = "total_cn"
 print(f"Calculating distances for {cn_column}...")
 start = time.time()
-arr = cns.calc_distances(subs_df, cn_column, print_progress=True)
+arr = cns.calc_wass_distances(subs_df, cn_column, print_progress=True)
 print(f"Elapsed time: {time.time() - start:.2f} seconds")
 out_path = cdu.pjoin(cdu.out_path, "top_6_wass_dist.tsv")
 print(f"Saving distances to {out_path}...")

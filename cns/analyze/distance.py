@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def calc_distances(cns_df, cn_column, norm_vals = True, norm_length = True, print_progress=False):
+def calc_wass_distances(cns_df, cn_column, norm_vals = True, norm_length = True, print_progress=False):
     if cn_column not in cns_df.columns:
         raise ValueError(f"Column '{cn_column}' not found in DataFrame.")
 

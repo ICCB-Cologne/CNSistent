@@ -264,7 +264,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
             plot_x_ticks(ax, assembly, x_min, x_max)   
             ax.set_xlabel("position on the linear genome")
     
-    plt.tight_layout()
+    fig.tight_layout()
     return fig, axes
 
 
