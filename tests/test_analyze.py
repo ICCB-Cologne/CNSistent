@@ -181,6 +181,7 @@ class TestDistance(unittest.TestCase):
             'chrom': ['chr1', 'chr1', 'chr1', 'chr1'],	
             'start': [0, 100, 0, 100],
             'end': [100, 200, 100, 200],
+            'name': ["seg_1", "seg_2", "seg_1", "seg_2"]
         }
     
     def test_WD(self):
@@ -196,5 +197,9 @@ class TestDistance(unittest.TestCase):
         print(res) 
 
 
-    def test_norm_dist(self):
-        pass
+    def test_sample_dist(self):
+        cns_df = pd.DataFrame(self.cns)
+        res = calc_distances(cns_df, 'major_cn')
+        print(res)
+        self.assertEqual(res.loc['s1', 's1'], 0)
+        self.assertEqual(res.loc['s2', 's1'], 1)
