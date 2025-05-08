@@ -185,12 +185,16 @@ class TestDistance(unittest.TestCase):
     
     def test_WD(self):
         cns_df = pd.DataFrame(self.cns)
-        sample_A = cns_df[cns_df['sample_id'] == 's1']
-        sample_B = cns_df[cns_df['sample_id'] == 's2']
         
+        # TODO: needs to verify against 
+
         # Calculate Wasserstein distance
-        res = calc_wass_distance(sample_A, sample_B, 'major_cn')        
+        res = calc_wass_distances(cns_df, 'major_cn')        
         print(res)
         
-        res = calc_wass_distance(sample_A, sample_B, 'minor_cn')
+        res = calc_wass_distances(cns_df, 'minor_cn')
         print(res) 
+
+
+    def test_norm_dist(self):
+        pass

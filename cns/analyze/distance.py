@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def calc_wass_distances(cns_df, cn_column, norm_vals = True, norm_length = True, print_progress=False):
+def calc_wass_distances(cns_df, cn_column, norm_length = True, print_progress=False):
     if cn_column not in cns_df.columns:
         raise ValueError(f"Column '{cn_column}' not found in DataFrame.")
 
@@ -20,12 +20,10 @@ def calc_wass_distances(cns_df, cn_column, norm_vals = True, norm_length = True,
         pivot = chrom_df.pivot(index="sample_id", columns="start", values=cn_column)
         cumsum_arr = np.cumsum(np.nan_to_num(pivot.values, nan=0), axis=1) # each segment "adds" itself
         cumsum_arr = np.concatenate([np.zeros((cumsum_arr.shape[0], 1)), cumsum_arr], axis=1) # lead with zeros 
-        if norm_vals:
-            row_sums = cumsum_arr[:, -1]
-            row_sums[row_sums == 0] = 1 # avoid division by zero, will retain zero in location
-            chrom_arrays[chrom] = cumsum_arr / row_sums[:, None]
-        else:
-            chrom_arrays[chrom] = cumsum_arr
+        # normalize
+        row_sums = cumsum_arr[:, -1]
+        row_sums[row_sums == 0] = 1 # avoid division by zero, will retain zero in location
+        chrom_arrays[chrom] = cumsum_arr / row_sums[:, None]
 
     # For each chromosome, compute its n_ids x n_ids distance matrix
     if print_progress:
