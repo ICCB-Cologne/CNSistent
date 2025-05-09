@@ -247,3 +247,24 @@ def load_COSMIC():
 
 def load_ENSEMBL():
     return load_segments(pjoin(data_path, "ENSEMBL_coding_genes.bed"))
+
+
+def samples_above_threshold(samples_df, threshold=50):
+    """
+    Returns the original values from samples_df where 'type' occurs at least `threshold` times and is not 'Other'.
+
+    Parameters
+    ----------
+    samples_df : pd.DataFrame
+        DataFrame containing a 'type' column.
+    threshold : int, optional
+        Minimum number of occurrences for a type to be included.
+
+    Returns
+    -------
+    pd.Series
+        Series of 'type' values from the original DataFrame that meet the criteria.
+    """
+    valid_types = samples_df["type"].value_counts()
+    valid_types = valid_types[(valid_types >= threshold) & (valid_types.index != "Other")].index
+    return samples_df.loc[samples_df["type"].isin(valid_types)]
