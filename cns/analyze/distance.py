@@ -82,3 +82,27 @@ def calc_distances(cns_df, cn_column):
             dist[i, j] = np.abs(values[i] - values[j]).sum()
     # Return as a DataFrame for easier downstream use
     return pd.DataFrame(dist, index=sample_ids, columns=sample_ids)
+
+
+def calc_chrom_distances(cns_df, cn_column):
+    """
+    Calculate the pairwise L1 (Manhattan) distance matrix between two samples based on a specified column.
+    Provide a value for each chromosome.
+       Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        Input DataFrame containing at least 'sample_id', 'name', and the specified column.
+    cn_column : str
+        The name of the column in `cns_df` to use for distance calculation.
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame containing the pairwise L1 distances between samples, with sample IDs as both index and columns.  
+    """
+    if cns_df.sample_id.nunique() != 2:
+        raise ValueError("This function only works for two samples.")
+    groups = cns_df.groupby("chrom")
+    res = {}
+    for chrom, group in groups:
+        res[chrom] = calc_distances(group, cn_column).iloc[0,1]
+    return pd.Series(res)
