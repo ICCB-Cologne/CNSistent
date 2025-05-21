@@ -90,9 +90,9 @@ def find_knee(x, y, knee=True):
     Parameters
     ----------
     x : array-like
-        Array of x-values.
+        array if indices.
     y : array-like
-        Array of y-values.
+        Array of values at the indices.
     knee : bool, optional
         If True, finds the knee. If False, finds the elbow. Default is True.
 
@@ -132,7 +132,7 @@ def find_knee(x, y, knee=True):
     return max_angle_i, max_angle_v
 
 
-def find_bends(vals, min_val=0, max_val=1):    
+def find_bends(vals, min_val=None, max_val=None):    
     """
     Finds the knee and elbow in a cumulative distribution of values.
 
@@ -160,6 +160,10 @@ def find_bends(vals, min_val=0, max_val=1):
     elbow_value : float
         Value of the elbow.
     """
+    if min_val is None:
+        min_val = np.min(vals)
+    if max_val is None:
+        max_val = np.max(vals)
     X, Y = count_cum_val(vals, min_val=min_val, max_val=max_val)
     knee_index, knee_value = find_knee(X, Y, knee=True)
     elbow_index, elbow_value = find_knee(X, Y, knee=False)
@@ -208,7 +212,7 @@ def calc_angles_cons(cns_df, cn_col):
     norm_diffs = vals_diff / mids_diff
     norm_diffs = np.concatenate(([0], norm_diffs, [0]))
     diff2 = np.diff(norm_diffs)
-    return diff2
+    return -diff2 # the score is diffed in the opposite direction to the defition, hence the negative sign
 
 
 def calc_angles(cns_df, cn_col, group_by='sample'):
