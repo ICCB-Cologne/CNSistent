@@ -247,7 +247,7 @@ def calc_angles(cns_df, cn_col, group_by='sample'):
     
     for i, group_df in cns_df.groupby(is_consecutive.cumsum()):
         if group_by == 'sample':
-            angle_values = group_df[cn_col].mean() - group_df[cn_col].values
+            angle_values = group_df[cn_col].values - group_df[cn_col].mean()
         else:
             angle_values = calc_angles_cons(group_df, cn_col)
         result.loc[group_df.index] = angle_values

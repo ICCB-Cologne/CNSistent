@@ -83,6 +83,9 @@ def load_samples_file(filename, use_filter=False, print_info=False):
         cover_min_frac = cover_filtered.min()
 
         samples_df = _filter_samples(samples_df, ane_min_frac, cover_min_frac, print_info)
+    else:
+        if "TCGA_type" in samples_df.columns:
+            samples_df["type"] = samples_df["TCGA_type"]    
 
     return samples_df
 
