@@ -133,6 +133,9 @@ def bins_to_features(cns_df, cn_columns=None, drop_sex=True):
     stacked = np.stack(arrays, axis=0)
     # Transpose from (channels, samples, features) to (samples, channels, features)
     stacked = np.transpose(stacked, (1, 0, 2))
+    # if there is only one channel, remove the channel dimension
+    if stacked.shape[1] == 1:
+        stacked = stacked.squeeze(1)
 
     return stacked, rows_list, columns_df
 
