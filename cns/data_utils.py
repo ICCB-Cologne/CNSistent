@@ -191,7 +191,7 @@ def main_load(segment_type: str, dataset="all", use_filter=True, concat=True, pr
     samples_dict = {}
     for dataset in datasets:
         if segment_type == "raw":
-            samples = load_samples_file(f"{dataset}_samples.tsv", print_info)
+            samples = load_samples_file(f"{dataset}_samples_raw.tsv", print_info)
         else:
             samples = load_samples_file(f"{dataset}_samples.tsv", use_filter, print_info)
         samples["source"] = dataset
