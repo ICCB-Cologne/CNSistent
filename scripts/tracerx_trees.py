@@ -6,7 +6,7 @@ import os
 import cns
 
 # Get the patient ids in TRACERx
-sample_df, _ = cdu.main_load("arms", dataset="TRACERx")
+sample_df, _ = cdu.main_load(None, dataset="TRACERx")
 sample_ids = sample_df.index.unique()
 # Patient ids are the first segment of sample_ids with the form CRUK0000_XXXXX
 # The second segment refers to 
