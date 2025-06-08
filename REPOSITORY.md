@@ -94,27 +94,30 @@ Contains the documentation for the CNSistent package. The documentation is built
 
 Contains notebooks used for data processing and analysis:
 
+* `analyze
 *  `analyze_break_clusters.ipynb`: A notebook used to analyze the breakpoint clustering, based on the distance between merged breakpoints. 
 *  `analyze_CN_clipping.ipynb`: Evaluation of result of clipping the CN segment values, in particular the effects on distribution and proportion that is clipped of. 
 *  `analyze_coverage.ipynb`: Calculates the proportion of the genome that is covered by segments and locations where it applies. 
+*  `analyze_distances.ipynb`: Evaluation of normalized manhatton distances between samples.
 *  `analyze_features.ipynb`	: Calculates and plots features across datasets. 
 *  `analyze_lung.ipynb` : Plots the lung cancer data across datasets and cancer types, in particular for chromosome 3 and genes that have been established as important by IG method. 
-*  `analyze_SOX2_overlay.ipynb`: Plots the SOX2 gene overlay on the lung cancer data. 
+*  `analyze_peaks.ipynb`: A notebook used to analyze the peaks score in the copy number data.
 *  `analyze_types.ipynb`: Plots the distribution of cancer types and overall CN across datasets. 
-*  `data_obtain.ipynb`: A notebook that has been used to obtain the raw data and potentially merge files where needed. 
 *  `docs_illustrations.ipynb`: A notebook used to create illustrations for the documentation. 
 *  `docs_knee_detection.ipynb`: A demo of the kneepoint detection algorithm. 
 *  `docs_runtime.ipynb`: Calculates the runtime of the data processing across 1-32 threads (log scale). 
+*  `simulate_SOX2_overlay.ipynb`: Plots the SOX2 gene overlay on the lung cancer data. 
 
 **`scripts/`**
-
 *  `data_process.sh`: Fills and imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy. 
 *  `data_aggregate.sh`: Creates various segmentations, and aggregates the preprocessed data based on these segmentations. 
 Depends on `data_cluster.py` for breakpoint clustering.
 *  `data_time.sh`: Run time tests for the data processing across `1-32` threads (log scale). 
+*  `generate_peaks.sh`: Generates peak scores across segmentations for variout datasets.
 
 **`tests/`**
 
 *  `in` and `out`: Contains the input and output data for the tests. Output is generated using `example_CLI.sh`.  
-*  `test_cli.sh` : Executes the tests and outputs to `./tests/temp`.  
+*  `test_CLI.sh` : Executes the tests and outputs to `./tests/temp`.  
+*  `test_time.sh`: Runs the time tests for the data processing across `1-32` threads (log scale).
 *  `test_*`: unittest based tests of the public API. 
