@@ -1,6 +1,4 @@
 # %%
-%load_ext autoreload
-%autoreload 2
 import cns
 
 # Load CNS data a display first 5 rows
