@@ -21,6 +21,7 @@ def _requires_rename(cn_columns):
 
     return False
 
+
 # Either obtains CN columns from the DataFrame or checks if the provided columns are valid
 def get_cn_cols(cns_df, cn_cols=None):
     """Gets or validates copy number columns from DataFrame.

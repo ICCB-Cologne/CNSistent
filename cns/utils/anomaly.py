@@ -197,6 +197,27 @@ def z_score_filter(vals, min_val=-3, max_val=3):
     
 
 def calc_angles_cons(cns_df, cn_col):
+    """
+    Calculate normalized angle differences (second derivative) of copy number values across genomic segments.
+    This function computes a score for each segment in the input DataFrame, reflecting the change in copy number
+    relative to the segment's position and length. The score is based on the normalized first and second differences
+    of the copy number values, adjusted by segment midpoints and mean segment length.
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing at least 'start', 'end', and the specified copy number column.
+    cn_col : str
+        Name of the column in `cns_df` containing copy number values.
+    Returns
+    -------
+    np.ndarray
+        Array of normalized angle difference scores for each segment.
+    Raises
+    ------
+    ValueError
+        If the segments are not strictly ordered by their midpoints.
+    """
+
     if (len(cns_df) < 1):
         return np.zeros(len(cns_df))
     starts = cns_df["start"].values

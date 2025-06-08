@@ -184,19 +184,6 @@ class TestDistance(unittest.TestCase):
             'name': ["seg_1", "seg_2", "seg_1", "seg_2"]
         }
     
-    def test_WD(self):
-        cns_df = pd.DataFrame(self.cns)
-        
-        # TODO: needs to verify against 
-
-        # Calculate Wasserstein distance
-        res = calc_wass_distances(cns_df, 'major_cn')        
-        print(res)
-        
-        res = calc_wass_distances(cns_df, 'minor_cn')
-        print(res) 
-
-
     def test_sample_dist(self):
         cns_df = pd.DataFrame(self.cns)
         res = calc_distances(cns_df, 'major_cn')

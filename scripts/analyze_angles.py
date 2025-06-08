@@ -1,9 +1,11 @@
 import cns
+
+# This script analyzes copy number segment data, computes angle-based scores, visualizes results, and saves gene-level statistics.
 import cns.data_utils as cdu
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# set color_map to tab10
+
 color_map = list(plt.cm.get_cmap('tab10').colors[:10]) + [(0,0,0)]
 plt.rcParams.update({'font.size': 12})
 
@@ -16,8 +18,7 @@ for grouping in ["whole", "arms", "20MB", "10MB", "5MB", "3MB", "2MB", "1MB", "5
 cosmic = cdu.load_COSMIC()
 cosmic_df = cns.segments_to_cns_df(cosmic)[["chrom", "start", "end", "name"]].rename(columns={"name": "gene"})
 ensembl = cdu.load_ENSEMBL()
-cancer_type = "LUSC"
-val_count = 5
+val_count = 3
 
 def get_gouping_type(bins):
 	if bins == "whole":
@@ -48,8 +49,8 @@ for i, cancer_type in enumerate(["all"] + top_types):
 
 		group_df = group_df.sort_values(by="score")
 		group_df = cns.add_cum_mid(group_df)
-		# axs[i].scatter(group_df["cum_mid"].head(val_count), group_df["total_cn"].head(val_count), color="k", alpha=0.75, s=25, label=f"Top {val_count} peaks", marker="+")
-		# axs[i].scatter(group_df["cum_mid"].tail(val_count), group_df["total_cn"].tail(val_count), color="k", alpha=0.75, s=25, label=f"Top {val_count} valleys", marker="X")
+		axs[i].scatter(group_df["cum_mid"].head(val_count), group_df["total_cn"].head(val_count), color="k", alpha=0.75, s=25, label=f"Top {val_count} peaks", marker="+")
+		axs[i].scatter(group_df["cum_mid"].tail(val_count), group_df["total_cn"].tail(val_count), color="k", alpha=0.75, s=25, label=f"Top {val_count} valleys", marker="X")
 		axs[j].set_ylim(0, 8)
 		axs[j].set_ylabel("Total CN")
 		axs[j].legend(loc="upper right")
