@@ -187,6 +187,23 @@ class TestDistance(unittest.TestCase):
     def test_sample_dist(self):
         cns_df = pd.DataFrame(self.cns)
         res = calc_distances(cns_df, 'major_cn')
-        print(res)
         self.assertEqual(res.loc['s1', 's1'], 0)
         self.assertEqual(res.loc['s2', 's1'], 1)
+        res = calc_distances(cns_df, 'major_cn', 'euclidean')
+        self.assertEqual(res.loc['s1', 's1'], 0)
+        self.assertEqual(res.loc['s2', 's1'], np.sqrt(2)/2)
+        res = calc_distances(cns_df, 'major_cn', 'wasserstein')
+        self.assertEqual(res.loc['s1', 's1'], 0)
+        self.assertEqual(res.loc['s2', 's1'], 0.5)
+
+        res = calc_distances(cns_df, 'minor_cn')
+        self.assertEqual(res.loc['s1', 's1'], 0)
+        self.assertEqual(res.loc['s2', 's1'], 2)
+        res = calc_distances(cns_df, 'minor_cn', 'euclidean')
+        self.assertEqual(res.loc['s1', 's1'], 0)
+        self.assertEqual(res.loc['s2', 's1'], np.sqrt(2))
+        res = calc_distances(cns_df, 'minor_cn', 'wasserstein')
+        self.assertEqual(res.loc['s1', 's1'], 0)
+        self.assertEqual(res.loc['s2', 's1'], 1)
+
+    
