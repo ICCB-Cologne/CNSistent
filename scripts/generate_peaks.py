@@ -65,7 +65,7 @@ for i, cancer_type in enumerate(["all"] + top_types):
 		sel_df = cns.select_cns_by_type(cns_df, samples_df, cancer_type) if cancer_type != "all" else cns_df
 		sel_df = cns.group_samples(cns.only_aut(cns.add_total_cn(sel_df)))
 		sel_df["sample_id"] = f"mean {cancer_type} CN"
-		sel_df["score"] = cns.calc_angles(sel_df, "total_cn")	
+		sel_df["score"] = cns.calc_angles(sel_df, "total_cn", get_gouping_type(grouping))	
 		score_means.append(cns.mean_value_per_seg(sel_df, ensembl, "score"))
 
 	mean_dfs = {}
