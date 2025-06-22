@@ -132,7 +132,7 @@ To calculate the mean ploidy per chromosome arm:
 .. code-block:: bash
 
     cns segment arms --out arms.bed
-    cns aggregate imputed.tsv --segments --out a_bins.tsv
+    cns aggregate imputed.tsv --segments arms.bed --out a_bins.tsv
 
 To conduct breakpoint clustering with 1 mb distance:
 
