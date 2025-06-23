@@ -92,11 +92,24 @@ def _add_sp_args(action, parser):
         )
 
 
+def _get_version():
+    try:
+        with open("pyproject.toml", "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith("version"):
+                    # Handles: version = "1.2.3"
+                    return line.split("=")[1].strip().strip('"').strip("'")
+    except Exception:
+        return "unknown"
+
+
 def _parse_args():
     # Top-level parser
     parser = argparse.ArgumentParser(description="Impute missing values in CNS data")
     subparsers = parser.add_subparsers(dest="action", help="cns action to perform. One of:")
-    parser.add_argument("-v", action="version", version="%(prog)s 1.0")
+    # Parse version from pyproject.toml
+
+    parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {_get_version()}")
 
     sp_dict = {}
     sp_dict["fill"] = subparsers.add_parser("fill", help=f"Adds Nan regions to the CNS data to match the assembly.")
