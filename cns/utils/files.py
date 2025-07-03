@@ -6,6 +6,7 @@ from cns.utils.canonization import canonize_cns_df, canonize_sample_id
 from cns.utils.conversions import cns_df_to_segments, segments_to_cns_df
 from cns.utils.logging import log_warn, log_info
 from cns.utils.assemblies import hg19
+from io import StringIO
 
 
 def _get_separator(path):
@@ -59,7 +60,7 @@ def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, as
     return cns_df
 
 
-def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
+def save_cns(cns_df, path, sep=None, sort=False, change_coords=True, mode="w"):
     """
     Saves a CNS DataFrame to a file. Coordinates are 1-based on output by default.
 
@@ -271,7 +272,11 @@ def load_segments(path):
     path = abspath(path)
     if not exists(path):
         raise ValueError(f"File {path} not found.")
-    segs_df = pd.read_csv(path, sep="\t", header=(None if is_bed else 0))
+    
+    # Read file, ignore lines that do not start with 'chr'
+    with open(path, "r") as f:
+        lines = [line for line in f if line.lstrip().startswith("chr")]
+    segs_df = pd.read_csv(StringIO("".join(lines)), sep="\t", header=(None if is_bed else 0))
     # check that columns "chrom", "start" and "end" exist, more colums may be present
     if not is_bed:
         if not all([col in segs_df.columns for col in ["chrom", "start", "end"]]):
