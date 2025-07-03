@@ -80,11 +80,12 @@ def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
     -------
     None
     """
+    sep = sep if sep is not None else _get_separator(path)
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:
         cns_df.loc[:, "start"] += 1
-    cns_df.to_csv(path, sep="\t", index=False, mode=mode, header=mode=="w")
+    cns_df.to_csv(path, sep=sep, index=False, mode=mode, header=mode=="w")
     if change_coords:
         cns_df.loc[:, "start"] -= 1
 
