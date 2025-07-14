@@ -22,19 +22,23 @@ cns segment whole --out "${out}/segs_100KB.bed" --split 100000 --remove gaps --f
 cns segment "${data}/COSMIC_consensus_genes.bed" --out "${out}/segs_COSMIC.bed" 
 cns segment "${data}/ENSEMBL_coding_genes.bed" --out "${out}/segs_ENSEMBL.bed"
 cns segment whole --out "${out}/segs_whole.bed"
+cns segment "arms" --out "${out}/segs_arms_full.bed"
 cns segment "arms" --out "${out}/segs_arms.bed" --remove gaps --filter 1000000
 cns segment "bands" --out "${out}/segs_bands.bed" --remove gaps --filter 100000
 for dist in 1MB 500KB 250KB; do
     python ./data_cluster.py $dist
 done
 
+
 # TRACERx PCAWG TCGA_hg19
 for dataset in TRACERx PCAWG TCGA_hg19; 
 do    
     echo "Processing $dataset"
     shared_args="${out}/${dataset}_cns_imp.tsv --samples ${out}/${dataset}_samples.tsv  --verbose --threads $threads --subsplit $subsplit"
+    
     cns aggregate --segments "${out}/segs_whole.bed" --out "${out}/${dataset}_bin_whole.tsv" $shared_args
     cns aggregate --segments "${out}/segs_arms.bed" --out "${out}/${dataset}_bin_arms.tsv" $shared_args
+    cns aggregate --segments "${out}/segs_arms_full.bed" --out "${out}/${dataset}_bin_arms_full.tsv" $shared_args
     cns aggregate --segments "${out}/segs_bands.bed" --out "${out}/${dataset}_bin_bands.tsv" $shared_args
     cns aggregate --segments "${out}/segs_20MB.bed" --out "${out}/${dataset}_bin_20MB.tsv" $shared_args
     cns aggregate --segments "${out}/segs_10MB.bed" --out "${out}/${dataset}_bin_10MB.tsv" $shared_args
