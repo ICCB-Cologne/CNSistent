@@ -52,4 +52,4 @@ Cite: https://www.nature.com/articles/35057062
 ### Licenses
 
 The code is available under the [MIT License](https://bitbucket.org/schwarzlab/cnsistent/src/main/LICENSE.txt).
-The data and text files in the `data` and `docs` folders are available under the [CC0 license](https://creativecommons.org/public-domain/cc0/). 
+The data and text files in the `data` and `docs` folders are available under the [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/deed.en). 
