@@ -36,7 +36,9 @@ def _get_start_vector(assembly):
 
 def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1, assembly=hg19):
     """
-    Plots consecutive segments as lines on the given axis.
+    Plots consecutive segments as lines on the given axis - centers of each segment are used as endpoints of each line.
+
+    NOTE: A single segment will not be plotted, at least two segments must exist.
 
     Parameters
     ----------
@@ -69,6 +71,21 @@ def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1
         length = group_df["end"] - group_df["start"]
         x = group_df["start"] + length / 2 + f_start_pos(group_df["chrom"])
         ax.plot(x, group_df[cn_column], c=color, linewidth=size, label=label, alpha=alpha)
+        label = None  # only use label for the first segment
+    return ax
+
+
+def plot_steps(ax, cns_df, cn_column, color="green", label=None, alpha=1, size=1, assembly=hg19):
+    f_start_pos = _get_start_vector(assembly)
+    is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
+    # plot consecutive segments
+    for _, group_df in cns_df.groupby(is_consecutive.cumsum()):
+        # Zip start and end into pairs, then flatten to [start1, end1, start2, end2]
+        x_pairs = list(zip(group_df["start"] + f_start_pos(group_df["chrom"]), group_df["end"] + f_start_pos(group_df["chrom"])))
+        x = [val for pair in x_pairs for val in pair]
+        y = [val for val in group_df[cn_column] for _ in (0, 1)]
+
+        ax.plot(x, y, c=color, linewidth=size, label=label, alpha=alpha)
         label = None  # only use label for the first segment
     return ax
 
@@ -348,6 +365,34 @@ def fig_bars(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     """
     return _fig_common(cns_df, plot_bars, cn_columns, colors, size, assembly)
  
+
+def fig_steps(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
+    """
+    Creates a step plot for each of the CN columns.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data.
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from cns_df.
+    colors : list of str, optional
+        List of colors to use for the plots. If None, colors are generated automatically.
+    size : int, optional
+        Size of the plot. Default is 1.
+    assembly : object, optional
+        Genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The created figure.
+    list of matplotlib.axes.Axes
+        List of axes in the figure.
+    """
+    return _fig_common(cns_df, plot_steps, cn_columns, colors, size, assembly)
+ 
+
 
 def _make_layout(width, height, n_columns, vertical):
     if vertical:
