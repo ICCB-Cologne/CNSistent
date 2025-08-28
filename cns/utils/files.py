@@ -18,7 +18,7 @@ def _get_separator(path):
         raise ValueError(f"Unknown file format for file {path}, cannot determine separator.")
 
 
-def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, assembly=hg19, print_info=False):
+def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, order_columns=True, assembly=hg19, print_info=False):
     """
     Loads a CNS file into a pandas DataFrame.
     Loading includes canonization process, where the positions column names are standardized "sample_id", "chrom", "start", "end".
@@ -38,6 +38,8 @@ def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, as
         If True, sorts the DataFrame by sample_id, chrom, and start.
     change_coords : bool, optional
         If True, changes the coordinates to 0-based.
+    order_columns : bool, optional
+        If True and there are two columns, the individual will be ordered as major/minor instead of their exising order and renamed to major_cn/minor_cn
     assembly : object, optional
         Genome assembly to use. Default is hg19.
     print_info : bool, optional
@@ -52,7 +54,7 @@ def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, as
         raise ValueError(f"File {path} not found.")
     sep = sep if sep is not None else _get_separator(path)
     cns_df = pd.read_csv(path, sep=sep, low_memory=False)
-    cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
+    cns_df = canonize_cns_df(cns_df, cn_columns, order_columns, assembly, print_info)
     if change_coords:
         cns_df.loc[:, "start"] -= 1
     if sort:
