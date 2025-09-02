@@ -80,7 +80,7 @@ Pipelines are used internally to map the command line commands and arguments to 
 Each command has a corresponding pipeline. 
 In addition, two combined pipelines are provided as shorthands.
 
-* ``main_impute``: Will fill the missing regions and impute the missing values.
+* ``main_impute``: Will align the missing regions and infer the missing values.
 * ``main_seg_agg``: Will create and apply segmentation.
 
 See the :doc:`tutorial <tutorial>` for examples of how to use the pipelines.

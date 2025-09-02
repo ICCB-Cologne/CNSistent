@@ -1,11 +1,11 @@
 """
-This module provides functions for processing Copy Number Segment (CNS) data. It includes functions to fill gaps, impute missing values, aggregate data, calculate coverage, and more.
+This module provides functions for processing Copy Number Segment (CNS) data. It includes functions to fill gaps, infer missing values, aggregate data, calculate coverage, and more.
 
 Functions
 ---------
 - main_align: Fills gaps in the CNS data and adds missing chromosomes.
-- main_infer: Imputes missing values in the CNS data.
-- main_impute: Fills gaps, adds missing chromosomes, and imputes missing values in the CNS data.
+- main_infer: Infers missing values in the CNS data.
+- main_impute: Fills gaps, adds missing chromosomes, and infers missing values in the CNS data.
 - main_breakage: Identifies breakpoints in CNS data.
 - main_coverage: Calculates coverage statistics for CNS data.
 - main_ploidy: Calculates ploidy statistics for CNS data.
@@ -54,7 +54,7 @@ def main_align(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_miss
 
     Examples
     --------
-    >>> filled_cns = main_align(cns_df)
+    >>> aligned_cns = main_align(cns_df)
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -65,10 +65,10 @@ def main_align(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_miss
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
     cn_columns = get_cn_cols(cns_df, cn_columns)
     cns_tailed_df = add_tails(cns_df, assembly, print_info=print_info)
-    cns_filled_df = fill_gaps(cns_tailed_df, print_info=print_info)
+    cns_aligned_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
-        cns_filled_df = add_missing(cns_filled_df, samples_df, assembly, print_info=print_info)
-    cns_cleared_df = remove_outliers(cns_filled_df, assembly, print_info=print_info)
+        cns_aligned_df = add_missing(cns_aligned_df, samples_df, assembly, print_info=print_info)
+    cns_cleared_df = remove_outliers(cns_aligned_df, assembly, print_info=print_info)
     res_df = merge_cns_df(cns_cleared_df, cn_columns, print_info=print_info)
     return res_df
 
@@ -77,7 +77,7 @@ def main_infer(cns_df, samples_df=None, method="extend", cn_columns=None, print_
     """
     Infers values to replace the NaNs in the CNS data. 
 
-    NOTE: Only replaces NaNs! Usually requires main_fill to be ran first.
+    NOTE: Only replaces NaNs! Usually requires main_align to be ran first.
 
     Parameters
     ----------
@@ -106,7 +106,7 @@ def main_infer(cns_df, samples_df=None, method="extend", cn_columns=None, print_
 
     Examples
     --------
-    >>> imputed_cns = main_infer(cns_df, method="diploid")
+    >>> inferred_cns = main_infer(cns_df, method="diploid")
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -117,9 +117,9 @@ def main_infer(cns_df, samples_df=None, method="extend", cn_columns=None, print_
             samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
-    imputed_df = cns_infer(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
-    filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
-    res_df = merge_cns_df(filled_df, cn_columns=cn_columns, print_info=print_info)
+    inferred_df = cns_infer(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
+    complete_df = fill_nans_with_zeros(inferred_df, cn_columns=cn_columns, print_info=print_info)
+    res_df = merge_cns_df(complete_df, cn_columns=cn_columns, print_info=print_info)
     return res_df
 
 
@@ -133,7 +133,7 @@ def main_impute(
     print_info=False,
 ):
     """
-    Fills gaps in the CNS data, adds missing chromosomes, and imputes missing values.
+    Fills gaps in the CNS data, adds missing chromosomes, and infers missing values.
 
     Parameters
     ----------
@@ -155,7 +155,7 @@ def main_impute(
     Returns
     -------
     pandas.DataFrame
-        DataFrame with filled gaps, added missing chromosomes, and imputed values.
+        DataFrame with filled gaps, added missing chromosomes, and inferd values.
     """
     res_df = main_align(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
     res_df = main_infer(res_df, samples_df, method, cn_columns, print_info)
@@ -271,7 +271,7 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
 
     # check if non of the cn_columns are NaN
     if cns_df[cn_columns].isna().any().any():
-        raise RuntimeError("Cannot calculate breakage with NaN values in CN columns, impute first.")
+        raise RuntimeError("Cannot calculate breakage with NaN values in CN columns, infer values first.")
 
     total_added = False
     if len(cn_columns) == 2:
@@ -341,7 +341,7 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     norm_sizes = get_norm_sizes(segs, assembly)
 
     if cns_df[cn_columns].isna().any().any():
-        log_warn("NaNs are not considered in ploidy calculations, it is recommended to impute first.")
+        log_warn("NaNs are not considered in ploidy calculations, it is recommended to infer values first.")
         cns_df = cns_df[cns_df[cn_columns].notna().all(axis=1)]
 
     log_info(print_info, "Calculating LOH for each sample.")
@@ -456,7 +456,7 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if how not in ["", "none"] and cns_df[cn_columns].isna().any().any():
-        log_warn("NaNs found, it is recommended to impute first.")
+        log_warn("NaNs found, it is recommended to infer values first.")
     return aggregate_by_segments(cns_df, segs, how, cn_columns, print_info)
 
 

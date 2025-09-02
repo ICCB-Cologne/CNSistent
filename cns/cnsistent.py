@@ -133,11 +133,11 @@ def _parse_args():
     sp_dict["align"] = subparsers.add_parser("align", help=f"Adds Nan regions to the CNS data to match the assembly.")
     sp_dict["infer"] = subparsers.add_parser("infer", help=f"Infers values for NaNs in the CNS data.")
     sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNS data. (combines align and infer)")
-    sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data." )
+    sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for aligned (but not imputed) CNS data." )
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
     sp_dict["breakage"] = subparsers.add_parser("breakage", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
     sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
-    sp_dict["aggregate"] = subparsers.add_parser("aggregate", help=f"Aggregate copy numbers across segments to fill provided segments.")
+    sp_dict["aggregate"] = subparsers.add_parser("aggregate", help=f"Aggregate copy numbers across segments to match provided segments.")
     for action, sp in sp_dict.items():
         _add_sp_args(action=action, parser=sp)
 

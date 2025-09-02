@@ -116,14 +116,14 @@ To preprocess the segments:
 
 .. code-block:: bash
 
-    cns fill data.tsv --out filled.tsv
-    cns impute filled.tsv --out imputed.csv
+    cns align data.tsv --out aligned.tsv
+    cns infer aligned.tsv --out imputed.csv
 
 To create statistics:
 
 .. code-block:: bash
 
-    cns coverage data.tsv --out samples.tsv
+    cns coverage aligned.tsv --out samples.tsv
     cns ploidy imputed.tsv --samples samples.tsv --out samples.tsv
     cns signatures imputed.tsv --samples samples.tsv --out samples.tsv
 

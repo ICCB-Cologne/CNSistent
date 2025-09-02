@@ -14,7 +14,7 @@ mkdir -p ./tests/out
 cns align ./tests/in/test_cns_double.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_cns_align.tsv --verbose
 
 # %%
-# Infer the filled regions in the CNS data
+# Infer the aligned regions in the CNS data
 cns infer ./tests/out/test_cns_align.tsv --out ./tests/out/test_cns_imp.tsv --verbose
 
 # %%
@@ -22,16 +22,16 @@ cns infer ./tests/out/test_cns_align.tsv --out ./tests/out/test_cns_imp.tsv --ve
 cns impute ./tests/in/test_cns_single.tsv --out ./tests/out/test_cns_single_imp.tsv --verbose
 
 # %%
-# Calculate portion of the filled regions in the CNS data
+# Calculate portion of the aligned regions in the CNS data
 cns coverage ./tests/out/test_cns_align.tsv --out ./tests/out/test_sample_cover.tsv --verbose
 cns coverage ./tests/in/test_cns_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
 # %%
-# Calculate the aneuploidy of the filled-in CNS data
+# Calculate the aneuploidy of the aligned-in CNS data
 cns ploidy ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_sample_ploidy.tsv --verbose
 cns ploidy ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 
-# Calculate the aneuploidy of the filled-in CNS data
+# Calculate the aneuploidy of the aligned-in CNS data
 cns breakage ./tests/out/test_cns_imp.tsv --samples ./tests/in/test_samples.tsv --out ./tests/out/test_sample_breakage.tsv --verbose
 cns breakage ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_sample_single.tsv --out ./tests/out/test_sample_single.tsv --verbose
 

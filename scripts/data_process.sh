@@ -18,10 +18,10 @@ for dataset in TRACERx PCAWG TCGA_hg19;
 do
     echo "Processing $dataset with assembly $assembly"      
     common_args="--threads $threads --verbose --assembly $assembly"
-    cns fill "${data}/${dataset}_cns_raw.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_cns_fill.tsv" $common_args
-    cns impute "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
-    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_samples_fill.tsv" $common_args        
-    cns coverage "${out}/${dataset}_cns_fill.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
+    cns align "${data}/${dataset}_cns_raw.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_cns_align.tsv" $common_args
+    cns infer "${out}/${dataset}_cns_align.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_cns_imp.tsv" $common_args
+    cns coverage "${out}/${dataset}_cns_align.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_samples_align.tsv" $common_args        
+    cns coverage "${out}/${dataset}_cns_align.tsv" --samples "${data}/${dataset}_samples_raw.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
     cns ploidy "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args --segments "${out}/gaps_${assembly}_segs.bed"
     cns breakage "${out}/${dataset}_cns_imp.tsv" --samples "${out}/${dataset}_samples.tsv" --out "${out}/${dataset}_samples.tsv" $common_args 
 done

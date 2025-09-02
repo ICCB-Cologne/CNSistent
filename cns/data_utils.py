@@ -203,7 +203,7 @@ def main_load(segment_type: str, dataset="all", use_filter=True, concat=True, pr
         log_info(print_info, "No segment type specified. Returning sample data only.")
         return samples_df, None
         
-    file_type = "cns" if segment_type in ["imp", "raw", "fill"] else "bin"
+    file_type = "cns" if segment_type in ["imp", "raw", "align"] else "bin"
     cns_dict = {dataset: load_cns_file(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets}
     cns_dict = {k: select_CNS_samples(v, samples_dict[k]).reset_index(drop=True) for k, v in cns_dict.items()}
     cns_df = pd.concat(cns_dict.values()) if (concat or len(datasets) == 1) else cns_dict

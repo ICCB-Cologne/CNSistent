@@ -9,9 +9,10 @@ The command line interface uses the following pattern:
 
 The following commands are available (see details below):
 
-* :ref:`fill_cmd`: Adds missing segments to the CNS data to match the assembly (fills gaps with NaNs).
-* :ref:`impute_cmd`: Imputes missing values in the CNS data.
-* :ref:`coverage_cmd`: Calculates coverage for filled (but not imputed) CNS data.
+* :ref:`align_cmd`: Adds missing segments to the CNS data to match the assembly (fills gaps with NaNs).
+* :ref:`infer_cmd`: Infers values for NaNs in the CNS data.
+* :ref:`impute_cmd`: Imputes missing values in the CNS data - combination of align and infer.
+* :ref:`coverage_cmd`: Calculates coverage for aligned (but not imputed) CNS data.
 * :ref:`ploidy_cmd`: Calculates aneuploidy for CNS data (NaNs are ignored).
 * :ref:`breakage_cmd`: Creates a clustering of breakpoints.
 * :ref:`segment_cmd`: Create a consistent segmentation.
@@ -128,22 +129,22 @@ Common arugments
 * ``--verbose``: print progress information.
 * ``--timeit``: times the calculation and writes to 
 
-.. _fill_cmd:
+.. _align_cmd:
 
-``fill``
+``align``
 ````````
 
-Fills any gaps in *CNS* file with Nan values. The following steps are performed:
+Aligns all the segments so that each samples spans the whole reference. The following steps are performed:
 
 1. Added NaN segments to the telomeres.
 2. Fill gaps in the data with NaN values.
 3. Add missing chromosomes, if they are missing compared to the reference.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major must match.
 
-.. _impute_cmd:
+.. _infer_cmd:
 
-``impute``
-``````````
+``infer``
+````````
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
@@ -151,6 +152,12 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 2. Split the gaps and to each side, assign the values of the closes neighbouring region that is not NaN, in the direction from the center towards the side (see example below).
 3. If a whole chromosome is missing, or declared as NaN, its assigned to 0 for its whole length.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major CN values must match to be merged.
+
+.. _impute_cmd:
+
+``impute``
+``````````
+Combines the ``align`` and ``infer`` commands to create an *CNS* file.
 
 .. image:: files/cns_imputed.png
    :width: 640px
@@ -163,7 +170,7 @@ Calculates the coverage of the *CNS* file. The coverage is calculated as the fra
 
 .. note::
 
-    Coverage should be run on a filled, but **not** imputed dataset.
+    Coverage should be run on a aligned, but **not** inferred dataset.
 
 .. note::
 
