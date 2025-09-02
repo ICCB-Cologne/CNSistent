@@ -356,6 +356,7 @@ def main_segment(
     split_size=-1,
     merge_dist=-1,
     filter_size=-1,
+    assembly=hg19,
     print_info=False,
 ):
     """
@@ -384,9 +385,8 @@ def main_segment(
         Dictionary of segments after processing.
 
     """
-
     if select_segs is None:
-        select_segs = genome_to_segments(hg19)
+        select_segs = genome_to_segments(assembly)
     elif not isinstance(select_segs, dict):
         raise ValueError(f"input_segs must a dictionary of segments, got {type(remove_segs)}")
     if filter_size > 0:
@@ -453,6 +453,7 @@ def main_seg_agg(
     cluster_dist=-1,
     filter_size=-1,
     cn_columns=None,
+    assembly=hg19,
     print_info=False,
 ):
     """
@@ -486,6 +487,6 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(select_segs, remove_segs, split_size, cluster_dist, filter_size, print_info)
+    segs = main_segment(select_segs, remove_segs, split_size, cluster_dist, filter_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df

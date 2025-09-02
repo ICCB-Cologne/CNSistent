@@ -7,7 +7,6 @@ from os.path import exists
 
 from cns.utils.files import obtain_segments
 from cns.utils.selection import dataframe_array_split
-from cns.utils import get_assembly, get_cn_cols, log_info
 from cns.utils.files import *
 from cns.pipelines import *
 from cns.utils.selection import dataframe_array_split

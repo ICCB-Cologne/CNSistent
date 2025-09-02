@@ -252,11 +252,11 @@ def merge_cns_df(cns_df, cn_columns=None, print_info=True):
     return res_df
 
 
+# TODO: Potentially should check for continuity in filling of gaps
 def _is_same_contig(df, id, chrom, j):
     return df.at[j, "sample_id"] == id and df.at[j, "chrom"] == chrom
 
-
-# TODO: Should only consider 1-coulumn or 2-column CN data
+ 
 def _impute_extend(cns_df, cn_columns, print_info=True):
     """
     For each column with NaN, find the previous and next existing value and fill up to midpoint. 
