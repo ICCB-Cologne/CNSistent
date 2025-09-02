@@ -18,7 +18,7 @@ def _get_separator(path):
         raise ValueError(f"Unknown file format for file {path}, cannot determine separator.")
 
 
-def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, order_columns=True, assembly=hg19, print_info=False):
+def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, order_columns=False, assembly=hg19, print_info=False):
     """
     Loads a CNS file into a pandas DataFrame.
     Loading includes canonization process, where the positions column names are standardized "sample_id", "chrom", "start", "end".

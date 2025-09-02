@@ -4,7 +4,7 @@ import pandas as pd
 
 from cns.analyze import *
 from cns.process import *
-from cns.pipelines import main_coverage, main_fill_imp
+from cns.pipelines import main_coverage, main_impute
 
 class TestCoverage(unittest.TestCase):
     def setUp(self):

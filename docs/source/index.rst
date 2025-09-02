@@ -60,7 +60,7 @@ Fill in missing segments in the data, impute using the extension method, and dis
 
 .. code-block:: python
 
-    imp_df = cns.main_fill_imp(raw_df, print_info=True)
+    imp_df = cns.main_impute(raw_df, print_info=True)
     cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
 
 .. image:: files/intro_2.png

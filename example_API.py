@@ -8,7 +8,7 @@ cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
 
 # Add missing segments, display first 5 rows
 # %%
-imp_df = cns.main_fill_imp(raw_df, print_info=True)
+imp_df = cns.main_impute(raw_df, print_info=True)
 cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
 
 # Create 3 mb segments, convert to a 3D feature array

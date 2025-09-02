@@ -3,9 +3,9 @@ This module provides functions for processing Copy Number Segment (CNS) data. It
 
 Functions
 ---------
-- main_fill: Fills gaps in the CNS data and adds missing chromosomes.
-- main_impute: Imputes missing values in the CNS data.
-- main_fill_imp: Fills gaps, adds missing chromosomes, and imputes missing values in the CNS data.
+- main_align: Fills gaps in the CNS data and adds missing chromosomes.
+- main_infer: Imputes missing values in the CNS data.
+- main_impute: Fills gaps, adds missing chromosomes, and imputes missing values in the CNS data.
 - main_breakage: Identifies breakpoints in CNS data.
 - main_coverage: Calculates coverage statistics for CNS data.
 - main_ploidy: Calculates ploidy statistics for CNS data.
@@ -19,9 +19,9 @@ from .process import *
 from .utils import *
 
 
-def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
+def main_align(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
     """
-    Fills gaps in the CNS data and adds missing chromosomes.
+    Aligns all samples with the reference assembly. Adds missing segments, chromosomes, and cuts off the ends if needed.
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
 
     Examples
     --------
-    >>> filled_cns = main_fill(cns_df)
+    >>> filled_cns = main_align(cns_df)
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -73,9 +73,11 @@ def main_fill(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missi
     return res_df
 
 
-def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print_info=False):
+def main_infer(cns_df, samples_df=None, method="extend", cn_columns=None, print_info=False):
     """
-    Imputes missing values in the CNS data.
+    Infers values to replace the NaNs in the CNS data. 
+
+    NOTE: Only replaces NaNs! Usually requires main_fill to be ran first.
 
     Parameters
     ----------
@@ -84,7 +86,7 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
     samples_df : pandas.DataFrame, optional
         DataFrame containing sample information. Required if `method` is "diploid".
     method : str, optional
-        Imputation method to use. Options are "extend" or "diploid". Default is "extend".
+        Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
     print_info : bool, optional
@@ -98,30 +100,30 @@ def main_impute(cns_df, samples_df=None, method="extend", cn_columns=None, print
     Notes
     -----
     This function performs the following steps:
-    1. Imputes missing values based on the specified method.
+    1. Infers missing values based on the specified method.
     2. Fills any remaining NaNs with zeros.
     3. Merges neighboring segments with the same copy number.
 
     Examples
     --------
-    >>> imputed_cns = main_impute(cns_df, method="diploid")
+    >>> imputed_cns = main_infer(cns_df, method="diploid")
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if samples_df is None:
         if method == "diploid":
-            log_info(print_info, "Diploid imputation method requires samples_df, but none provided, creating samples from CNS data.")
+            log_info(print_info, "Diploid inference method requires samples_df, but none provided, creating samples from CNS data.")
             samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
-    imputed_df = cns_impute(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
+    imputed_df = cns_infer(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     filled_df = fill_nans_with_zeros(imputed_df, cn_columns=cn_columns, print_info=print_info)
     res_df = merge_cns_df(filled_df, cn_columns=cn_columns, print_info=print_info)
     return res_df
 
 
-def main_fill_imp(
+def main_impute(
     cns_df,
     samples_df=None,
     cn_columns=None,
@@ -146,7 +148,7 @@ def main_fill_imp(
     add_missing_chromosomes : bool, optional
         If True, adds missing chromosomes to the data. Default is True.
     method : str, optional
-        Imputation method to use. Options are "extend" or "diploid". Default is "extend".
+        Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 
@@ -155,8 +157,8 @@ def main_fill_imp(
     pandas.DataFrame
         DataFrame with filled gaps, added missing chromosomes, and imputed values.
     """
-    res_df = main_fill(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
-    res_df = main_impute(res_df, samples_df, method, cn_columns, print_info)
+    res_df = main_align(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
+    res_df = main_infer(res_df, samples_df, method, cn_columns, print_info)
     return res_df
 
 

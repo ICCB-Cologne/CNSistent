@@ -14,7 +14,7 @@ class TestPipelines(unittest.TestCase):
             'start': [0, 50, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [50, 100, 150, 300, 400, 500, 50, 99, 100, 100, 120, 130],
             'major_cn': [1, 2, 1, 3, 4, 5, 2, 1, 0, 2, 1, 1],
-            'minor_cn': [0, 2, np.NaN, 0, 4, 3, 1, 0, 0, 1, 0, 1],
+            'minor_cn': [0, 2, np.nan, 0, 4, 3, 1, 0, 0, 1, 0, 1],
         })       
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
@@ -34,8 +34,8 @@ class TestPipelines(unittest.TestCase):
         self.aut_segs ={'chr1': [(0, 100, "0")]}
         pd.set_option('display.max_columns', 10)
 
-    def test_main_fill(self):
-        res = main_fill(self.cns, self.samples, assembly=self.assembly)
+    def test_main_align(self):
+        res = main_align(self.cns, self.samples, assembly=self.assembly)
         # assert that length sum is equal to aut_len for each sample
         auts = only_aut(res, self.assembly)
         self.assertTrue(np.allclose(calc_lengths(auts).groupby(auts["sample_id"]).sum(),self.assembly.aut_len))
@@ -44,8 +44,8 @@ class TestPipelines(unittest.TestCase):
         self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
 
     def test_main_impute(self):
-        res = main_fill(self.cns, self.samples, assembly=self.assembly)
-        res = main_impute(res, self.samples)
+        res = main_align(self.cns, self.samples, assembly=self.assembly)
+        res = main_infer(res, self.samples)
         auts = only_aut(res, self.assembly)
         self.assertTrue(np.allclose(calc_lengths(auts).groupby(auts["sample_id"]).sum(), self.assembly.aut_len))
         # assert that chrY exists in chrom column where index is s4 and not in s3
@@ -159,7 +159,7 @@ class TestData(unittest.TestCase):
         pd.set_option('display.max_columns', 10)
 
     def test_sequence(self):
-        cns_fill_df = main_fill(self.cns_df, add_missing_chromosomes=False)
+        cns_fill_df = main_align(self.cns_df, add_missing_chromosomes=False)
         lens = cns_fill_df["end"] - cns_fill_df["start"]
         self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length        
         non_nan = cns_fill_df.dropna()
@@ -167,8 +167,8 @@ class TestData(unittest.TestCase):
         self.assertGreater(hg19.chr_lens["chr19"], lens.sum() / 2)
 
     def test_impute(self):        
-        cns_fill_df = main_fill(self.cns_df, add_missing_chromosomes=False)
-        cns_imp_df = main_impute(cns_fill_df)
+        cns_fill_df = main_align(self.cns_df, add_missing_chromosomes=False)
+        cns_imp_df = main_infer(cns_fill_df)
         non_nan = cns_imp_df.dropna()
         lens = non_nan["end"] - non_nan["start"]
         self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length

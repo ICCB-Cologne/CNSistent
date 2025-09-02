@@ -201,7 +201,7 @@ class TestImputation(unittest.TestCase):
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
 
-        result = cns_impute(result, self.samples_df, print_info=False)
+        result = cns_infer(result, self.samples_df, print_info=False)
 
         result = merge_cns_df(result, print_info=False)
 
@@ -217,7 +217,7 @@ class TestImputation(unittest.TestCase):
         result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
-        result = cns_impute(result, self.samples_df, method='diploid', print_info=False)
+        result = cns_infer(result, self.samples_df, method='diploid', print_info=False)
         result = merge_cns_df(result, print_info=False)
         result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.major_cn.isnull().sum(), 0)

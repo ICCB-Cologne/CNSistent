@@ -380,9 +380,9 @@ def _impute_diploid(cns_df, samples_df, cn_columns, print_info=True):
     return cns_df
 
 
-def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=True):
+def cns_infer(cns_df, samples_df, method='extend', cn_columns=None, print_info=True):
     """
-    Imputes missing values in the CNS data.
+    Infers NaN values in the CNS data.
 
     Parameters
     ----------
@@ -391,7 +391,7 @@ def cns_impute(cns_df, samples_df, method='extend', cn_columns=None, print_info=
     samples_df : pandas.DataFrame
         DataFrame containing sample information.
     method : str, optional
-        Imputation method to use. Options are "extend" or "diploid". Default is "extend".
+        Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from cns_df.
     print_info : bool, optional

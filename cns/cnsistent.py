@@ -37,6 +37,24 @@ def _add_sp_args(action, parser):
     parser.add_argument("--verbose", help="print progress to console", action="store_true")
     parser.add_argument("--time", help="save runtime info", action="store_true")
 
+    if action in ["infer", "impute"]:
+        parser.add_argument(
+            "--method",
+            type=str,
+            help='Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".',
+            required=False,
+            default="extend"
+        )
+
+    if action in ["align", "impute"]:
+        parser.add_argument(
+            "--add-missing-chroms",
+            type=bool,
+            help="If True, adds missing chromosomes to the data. Default is True.",
+            required=False,
+            default=True
+        )
+
     if action in ["coverage", "ploidy", "breakage"]:
         parser.add_argument(
             "--segments",
@@ -112,8 +130,9 @@ def _parse_args():
     parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {_get_version()}")
 
     sp_dict = {}
-    sp_dict["fill"] = subparsers.add_parser("fill", help=f"Adds Nan regions to the CNS data to match the assembly.")
-    sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNS data.")
+    sp_dict["align"] = subparsers.add_parser("align", help=f"Adds Nan regions to the CNS data to match the assembly.")
+    sp_dict["infer"] = subparsers.add_parser("infer", help=f"Infers values for NaNs in the CNS data.")
+    sp_dict["impute"] = subparsers.add_parser("impute", help=f"Imputes missing values in the CNS data. (combines align and infer)")
     sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for filled (but not imputed) CNS data." )
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
     sp_dict["breakage"] = subparsers.add_parser("breakage", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
@@ -156,8 +175,10 @@ def _parse_args():
 
 
 def _action_to_fun(action):
-    if action == "fill":
-        return main_fill
+    if action == "align":
+        return main_align
+    elif action == "infer":
+        return main_infer
     elif action == "impute":
         return main_impute
     elif action == "coverage":
@@ -185,12 +206,16 @@ def _get_blocks(action, input_block, samples_blocks, cols_block, assembly, args)
     ver_block = [False] * block_count
     ver_block[-1] = args.verbose
     cols_block = [cols_block] * block_count
-    if action == "impute":
-        ext_block = ["extend"] * block_count
-        return zip(input_block, samples_blocks, ext_block, cols_block, ver_block)
-    if action == "fill":
-        add_missing = [True] * block_count
+    if action == "infer":        
+        method_block = [args.method] * block_count
+        return zip(input_block, samples_blocks, method_block, cols_block, ver_block)
+    if action == "align":
+        add_missing = [args.add_missing_chroms] * block_count
         return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, ver_block)
+    if action == "impute":
+        method_block = [args.method] * block_count
+        add_missing = [args.add_missing_chroms] * block_count
+        return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, method_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
         segs_block = [_get_segs_df(args.segments)] * block_count
         return zip(input_block, samples_blocks, cols_block, segs_block, ass_block, ver_block)
@@ -292,7 +317,7 @@ def main():
             for j in range(len(res_list)):
                 mode = "w" if i == 0 and j == 0 else "a"
                 res = res_list[j]
-                if action in ["fill", "impute", "aggregate"]:
+                if action in ["align", "infer", "impute", "aggregate"]:
                     save_cns(res, out_file, change_coords=True, mode=mode)
                 elif action in ["coverage", "ploidy", "breakage"]:
                     save_samples(res, out_file, mode=mode)
