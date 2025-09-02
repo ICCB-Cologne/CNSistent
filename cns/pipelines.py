@@ -52,9 +52,6 @@ def main_align(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_miss
     4. Removes outlier segments.
     5. Merges neighboring segments with the same copy number.
 
-    Examples
-    --------
-    >>> aligned_cns = main_align(cns_df)
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -104,9 +101,6 @@ def main_infer(cns_df, samples_df=None, method="extend", cn_columns=None, print_
     2. Fills any remaining NaNs with zeros.
     3. Merges neighboring segments with the same copy number.
 
-    Examples
-    --------
-    >>> inferred_cns = main_infer(cns_df, method="diploid")
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -191,9 +185,6 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     -----
     The function calculates coverage metrics such as the fraction of the genome covered by CNS data.
 
-    Examples
-    --------
-    >>> coverage_stats = main_coverage(cns_df)
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -252,9 +243,6 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     -----
     This function detects breakpoints in the CNS data based on changes in copy number values.
 
-    Examples
-    --------
-    >>> breakpoints = main_breakage(cns_df, threshold=1.0)
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -318,10 +306,6 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     Notes
     -----
     This function calculates ploidy metrics such as the fraction of the genome that is aneuploid.
-
-    Examples
-    --------
-    >>> ploidy_stats = main_ploidy(cns_df)
     """
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
@@ -367,12 +351,11 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
 
 
 def main_segment(
-    segment_source="whole",
+    select_segs=None,
     remove_segs=None,
     split_size=-1,
-    cluster_dist=-1,
+    merge_dist=-1,
     filter_size=-1,
-    assembly=hg19,
     print_info=False,
 ):
     """
@@ -380,13 +363,13 @@ def main_segment(
 
     Parameters
     ----------
-    segment_source : a cns_df, or a segments dictionary, or one of of ["whole", "arms", "bands", "centromeres"]
-        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
-    remove_segs : segments dictionary, optional
-        DataFrame containing segments to remove from the selection.
+    select_segs : 
+        Segments to select for computation. By default covers the whole assembly.
+    remove_segs : segment dictionary, optional
+        Segments to remove from the selection. Be default nothing is removed.
     split_size : int, optional
         Size in base pairs to split segments. Default is -1 (no splitting).
-    cluster_dist : int, optional
+    merge_dist : int, optional
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
@@ -397,29 +380,30 @@ def main_segment(
 
     Returns
     -------
-    list of tuples
-        List of segments after processing.
+    dictionary of segments
+        Dictionary of segments after processing.
 
-    Examples
-    --------
-    >>> segmented_cns = main_segment(cns_df)  # consistent segmentation
     """
-    # if input data is a DataFrame, convert it to unique segments
-    if isinstance(segment_source, str) and segment_source in ["whole", "arms", "bands"]:            
-        log_info(print_info, f"Creating {segment_source} segments...")
-        segment_source = regions_select(segment_source, assembly)
-    elif isinstance(segment_source, pd.DataFrame):        
-        input_segs = cns_df_to_segments(segment_source)
-        input_breaks = segments_to_breaks(input_segs)
-        segment_source = breaks_to_segments(input_breaks)
-    elif not isinstance(segment_source, dict):
-        raise ValueError(f"input_data must be a CNS DataFrame, a segments dictionary or one of of ['whole', 'arms', 'bands'], got {type(segment_source)}")
-    res = process_segments(segment_source, remove_segs, filter_size)
-    if cluster_dist > 0:
-        res = cluster_segments(res, cluster_dist, True, print_info)
+
+    if select_segs is None:
+        select_segs = genome_to_segments(hg19)
+    elif not isinstance(select_segs, dict):
+        raise ValueError(f"input_segs must a dictionary of segments, got {type(remove_segs)}")
+    if filter_size > 0:
+        select_segs = filter_cons_size(select_segs, filter_size)
+    if remove_segs != None:
+        if not isinstance(remove_segs, dict):
+            raise ValueError(f"remove_segs must be None or a dictionary of segments, got {type(remove_segs)}")
+        if filter_size > 0:
+            remove_segs = filter_cons_size(remove_segs, filter_size)
+        select_segs = segment_difference(select_segs, remove_segs)
+        if filter_size > 0:
+            select_segs = filter_cons_size(select_segs, filter_size)
+    if merge_dist > 0:
+        select_segs = cluster_segments(select_segs, merge_dist, True, print_info)
     if split_size > 0:
-        res = split_segments(res, split_size)
-    return res
+        select_segs = split_segments(select_segs, split_size)
+    return select_segs
 
 
 def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
@@ -462,13 +446,13 @@ def main_aggregate(cns_df, segs, how="mean", cn_columns=None, print_info=False):
 
 def main_seg_agg(
     cns_df,
-    segment_source="whole",
-    cn_columns=None,
+    select_segs=None,
     remove_segs=None,
     how="mean",
     split_size=-1,
     cluster_dist=-1,
     filter_size=-1,
+    cn_columns=None,
     assembly=hg19,
     print_info=False,
 ):
@@ -479,12 +463,10 @@ def main_seg_agg(
     ----------
     cns_df : pandas.DataFrame
         DataFrame containing CNS (Copy Number Segment) data.
-    segment_source : a cns_df (possibly the same as cns_df), a segments dictionary or one of of ["whole", "arms", "bands", "centromeres"]
-        What to create the segmentation based on. If a CNS DataFrame is provided, unique segments are inferred from it. If a built-in type is provided, segments are created based on the type.
-    cn_columns : list of str, optional
-        List of column names for copy number data. If None, columns are inferred from `cns_df`.
+    select_segs : segment dictionary, optional
+        Segments to select for computation. By default covers the whole assembly.
     remove_segs : segments dictionary, optional
-        DataFrame containing segments to remove from the selection.
+        Segments to remove from the selection.
     how : str, optional
         Aggregation method to use. Default is "mean".
     split_size : int, optional
@@ -493,6 +475,8 @@ def main_seg_agg(
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
+    cn_columns : list of str, optional
+        List of column names for copy number data. If None, columns are inferred from `cns_df`.
     assembly : Assembly object, optional
         Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
@@ -503,8 +487,6 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(segment_source, remove_segs, split_size, cluster_dist, filter_size, assembly, print_info)
+    segs = main_segment(select_segs, remove_segs, split_size, cluster_dist, filter_size, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df
-
-

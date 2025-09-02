@@ -14,8 +14,8 @@ if __name__ == "__main__":
 
 	samples_df, cns_df = cdu.main_load("imp")
 
-	remove = cns.regions_select("gaps")
-	clustered = cns.main_segment(cns_df, remove, cluster_dist=dist_int, filter_size=dist_int//10, print_info=True)
+	remove = cns.make_segments("gaps")
+	clustered = cns.main_segment(cns_df, remove, merge_dist=dist_int, filter_size=dist_int//10, print_info=True)
 	file = os.path.join(cdu.out_path, f'segs_merge_{args.dist}.bed')
 	print("Saving to file:", file)
 	cns.save_segments(clustered, file)

@@ -5,8 +5,8 @@ import time
 import argparse
 from os.path import exists
 
+from cns.utils.files import obtain_segments
 from cns.utils.selection import dataframe_array_split
-from cns.process import regions_select
 from cns.utils import get_assembly, get_cn_cols, log_info
 from cns.utils.files import *
 from cns.pipelines import *
@@ -14,8 +14,7 @@ from cns.utils.selection import dataframe_array_split
 
 
 def _add_sp_args(action, parser):
-    parser.add_argument("data", type=str, help="path to the TSV file with copy number segments."\
-                        " For segment action, a bed file or one of 'whole', 'arms', 'bands' can be provided.")
+    parser.add_argument("data", type=str, help="path to a TSV file with copy number segments, potentially with multiple samples.")
     parser.add_argument("--samples", type=str, help="path to the samples file", required=False, default="")
     parser.add_argument("--out", type=str, help="output file path", required=False, default="./cns.out.tsv")
     parser.add_argument("--assembly", type=str, help="assembly to use. One of: hg19, hg38.", required=False, default="hg19")
@@ -55,31 +54,16 @@ def _add_sp_args(action, parser):
             default=True
         )
 
-    if action in ["coverage", "ploidy", "breakage"]:
+    if action in ["coverage", "ploidy", "breakage", "aggregate"]:
         parser.add_argument(
             "--segments",
             type=str,
-            help="A path to a segmentation file defining the segments to compute on.",
+            help="Either a path to a segmentation file or a predefined segment type (e.g., 'whole', 'arms', 'bands').",
             required=False,
-            default=None,
+            default="whole",
         )
 
-    if action == "aggregate":
-        parser.add_argument(
-            "--segments",
-            type=str,
-            help="A path to a segmentation file defining the segments to compute on.",
-            required=True,
-        )
-        parser.add_argument(
-            "--how",
-            type=str,
-            help="The aggregation function, one of ['min', 'max', 'mean']",
-            required=False,
-            default="mean",
-        )
-
-    if action == "segment":
+    if action in ["coverage", "ploidy", "breakage", "aggregate", "segment"]:
         parser.add_argument(
             "--split",
             type=int,
@@ -107,6 +91,16 @@ def _add_sp_args(action, parser):
             help="Maximum distance between breakpoint clusters for breakpoint merging. If negative, no breakpoints are merged.",
             required=False,
             default=-1,
+        )
+
+        
+    if action == "aggregate":
+        parser.add_argument(
+            "--how",
+            type=str,
+            help="The aggregation function, one of ['min', 'max', 'mean']",
+            required=False,
+            default="mean",
         )
 
 
@@ -155,6 +149,10 @@ def _parse_args():
             raise ValueError(f"Selection {args.data} is not a build-in or a path to a file.")
         if args.remove not in ["", "gaps"] and not exists(args.remove):
             raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
+        if args.how not in ["min", "max", "mean"]:
+            raise ValueError(f"Aggregation method {args.how} is not recognized.")
+
+    if args.action == "segment":
         if args.threads > 1:
             print("segmentation is not data parallelizable, --threads option will be ignored.")
             args.threads = 1
@@ -193,13 +191,7 @@ def _action_to_fun(action):
         raise ValueError(f"Action {action} not recognized.")
 
 
-def _get_segs_df(segs_arg):
-    if segs_arg != "" and segs_arg != None:
-        return load_segments(segs_arg)
-    return None
-
-
-def _get_blocks(action, input_block, samples_blocks, cols_block, assembly, args):
+def _get_blocks(action, input_block, samples_blocks, cols_block, segs_block, assembly, args):
     block_count = len(input_block)
     # Apply process_block to each pair of blocks
     ass_block = [assembly] * block_count
@@ -211,28 +203,31 @@ def _get_blocks(action, input_block, samples_blocks, cols_block, assembly, args)
         return zip(input_block, samples_blocks, method_block, cols_block, ver_block)
     if action == "align":
         add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, ver_block)
+        return zip(input_block, samples_blocks, add_missing, ver_block)
     if action == "impute":
         method_block = [args.method] * block_count
         add_missing = [args.add_missing_chroms] * block_count
         return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, method_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
-        segs_block = [_get_segs_df(args.segments)] * block_count
+        if segs_block is None:
+            raise ValueError("Segmentation blocks must be provided for this action.")
         return zip(input_block, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "aggregate":
-        segs_block = [_get_segs_df(args.segments)] * block_count
+        if segs_block is None:
+            raise ValueError("Segmentation blocks must be provided for this action.")
         fun_block = [args.how] * block_count
         return zip(input_block, segs_block, fun_block, cols_block, ver_block)
     else:
         raise ValueError(f"Unknown action {action}")
 
 
-def _process(action, cns_df, samples_df, cn_cols, assembly, args):
+def _process(action, cns_df, samples_df, cn_cols, select_segs, assembly, args):
     main_fun = _action_to_fun(action)
     threads = abs(args.threads)
     samples_blocks = dataframe_array_split(samples_df, threads)
     cns_blocks = [cns_df.query("sample_id in @block.index").reset_index(drop=True) for block in samples_blocks]
-    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, assembly, args)
+    segs_blocks = [select_segs] * len(cns_blocks) if select_segs is not None else None
+    zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, segs_blocks, assembly, args)
     if threads == 1:
         return [main_fun(*list(*zip_blocks))]
     else:
@@ -268,61 +263,59 @@ def main():
     in_cols = _parse_cncols(args.cncols)
     out_file = args.out
 
-    # Read the input
     log_info(print_info, f"***** cns {action} *****")
 
-    # Serial action
-    if action == "segment":
-        if args.data in ["whole", "arms", "bands"]:            
-            log_info(print_info, f"Creating {args.data} segments...")
-            input_data = regions_select(args.data, assembly)
-        elif args.data[-4:] == ".bed":
-            log_info(print_info, f"Loading input file {args.data}...")
-            input_data = load_segments(args.data)
-        else:
-            log_info(print_info, f"Loading CNS input file {args.data}...")
-            input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
-        remove_regs = regions_select(args.remove, assembly)
-        res = main_segment(input_data, remove_regs, args.split, args.merge, args.filter, assembly, print_info)
-        save_segments(res, out_file)
-        
-    # Parallel action
+    # Process segmetns
+    select_segs = None
+    if action in ["segment", "aggregate", "impute", "coverage", "ploidy"]:
+        if action == "segment":
+            args.segments = args.data
+
+        input_segs = obtain_segments(args.segments, in_cols, assembly, print_info)        
+        remove_regs = obtain_segments(args.remove, in_cols, assembly, print_info)   
+        select_segs = main_segment(input_segs, remove_regs, args.split, args.merge, args.filter, print_info)
+     
+        # Only save the segments and EXIT
+        if action == "segment":
+            save_segments(select_segs, out_file)
+            return 
+
+    log_info(print_info, f"Loading CNS input file {args.data}...")
+    input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
+    cn_columns = get_cn_cols(input_data, in_cols)
+    if args.samples == "":
+        samples_df = samples_df_from_cns_df(input_data, False)
     else:
-        log_info(print_info, f"Loading CNS input file {args.data}...")
-        input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
-        cn_columns = get_cn_cols(input_data, in_cols)
-        if args.samples == "":
-            samples_df = samples_df_from_cns_df(input_data, False)
-        else:
-            samples_df = load_samples(args.samples)
-        samples_df = fill_sex_if_missing(input_data, samples_df)
-        samples_blocks = dataframe_array_split(samples_df, args.subsplit)
+        samples_df = load_samples(args.samples)
+    samples_df = fill_sex_if_missing(input_data, samples_df)
+    samples_blocks = dataframe_array_split(samples_df, args.subsplit)
 
-        # Process blocks
-        for i in range(args.subsplit):
-            log_info(print_info, f"Processing block {i+1}/{args.subsplit}...")
+    # Process blocks
+    for i in range(args.subsplit):
+        log_info(print_info, f"Processing block {i+1}/{args.subsplit}...")
 
-            samples_block = samples_blocks[i]
+        samples_block = samples_blocks[i]
 
-            # Perform the action
-            start = time.time()
-            res_list = _process(action, input_data, samples_block, cn_columns, assembly, args)
-            runtime = time.time() - start
+        # Perform the action
+        start = time.time()
+        
+        res_list = _process(action, input_data, samples_block, cn_columns, select_segs, assembly, args)
+        runtime = time.time() - start
 
-            if print_info:
-                print(f"Finished in {runtime:.3f} seconds. Writing to {out_file} ...")
-                if args.time:
-                    _save_time(action, out_file, runtime, start, args.threads)
+        if print_info:
+            print(f"Finished in {runtime:.3f} seconds. Writing to {out_file} ...")
+            if args.time:
+                _save_time(action, out_file, runtime, start, args.threads)
 
-            for j in range(len(res_list)):
-                mode = "w" if i == 0 and j == 0 else "a"
-                res = res_list[j]
-                if action in ["align", "infer", "impute", "aggregate"]:
-                    save_cns(res, out_file, change_coords=True, mode=mode)
-                elif action in ["coverage", "ploidy", "breakage"]:
-                    save_samples(res, out_file, mode=mode)
-                else:
-                    raise ValueError(f"Unknown action {action}")
+        for j in range(len(res_list)):
+            mode = "w" if i == 0 and j == 0 else "a"
+            res = res_list[j]
+            if action in ["align", "infer", "impute", "aggregate"]:
+                save_cns(res, out_file, change_coords=True, mode=mode)
+            elif action in ["coverage", "ploidy", "breakage"]:
+                save_samples(res, out_file, mode=mode)
+            else:
+                raise ValueError(f"Unknown action {action}")
 
     log_info(print_info, "Done.")
 

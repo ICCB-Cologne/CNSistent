@@ -108,13 +108,14 @@ class TestPipelines(unittest.TestCase):
         self.assertEqual(len(res), 3)
         res = main_segment(select, remove, filter_size=50)
         self.assertEqual(len(res), 3)
-        res = main_segment(select, remove, cluster_dist=25, filter_size=50)
+        res = main_segment(select, remove, merge_dist=25, filter_size=50)
         self.assertEqual(res["chr1"][0], (0, 100, "chr1_0"))
         self.assertEqual(res["chr2"][0], (75, 150, "chr2_0")) 
 
     def test_main_segment_cns(self):
         remove = {'chr2': [(0, 75, "0")], 'chr3': [(150, 175, "1")], 'chrX': [(0, 100, "3")]}
-        res = main_segment(self.cns, remove, 25, 25, 50, self.assembly)
+        cns_segs = cns_df_to_segments(self.cns, make_unique=True)
+        res = main_segment(cns_segs, remove, 25, 25, 50)
         self.assertEqual(res["chr1"][1], (25, 50, "chr1_0_1"))
         self.assertEqual(res["chr2"][0], (75, 110, "chr2_0_0"))   
 

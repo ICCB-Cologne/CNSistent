@@ -1,12 +1,14 @@
 from os.path import abspath, exists
 import numpy as np
 import pandas as pd
+from io import StringIO
 
+from cns.process.segments import make_segments
+from cns.utils.logging import log_info
 from cns.utils.canonization import canonize_cns_df, canonize_sample_id
-from cns.utils.conversions import cns_df_to_segments, segments_to_cns_df
+from cns.utils.conversions import cns_df_to_segments, segments_to_cns_df, segments_to_breaks, breaks_to_segments
 from cns.utils.logging import log_warn, log_info
 from cns.utils.assemblies import hg19
-from io import StringIO
 
 
 def _get_separator(path):
@@ -286,3 +288,18 @@ def load_segments(path):
         segs_df["name"] = np.arange(len(segs_df))
 
     return cns_df_to_segments(segs_df)
+
+
+def obtain_segments(segs_source, in_cols = None, assembly = hg19, print_info = False):
+    if segs_source[-4:] == ".bed":
+        log_info(print_info, f"Loading input file {segs_source}...")
+        return load_segments(segs_source)
+    elif segs_source[-4:] == ".tsv":
+        log_info(print_info, f"Loading CNS input file {segs_source}...")
+        input_cns = load_cns(segs_source, cn_columns=in_cols, assembly=assembly, print_info=print_info)
+        input_segs = cns_df_to_segments(input_cns)
+        input_breaks = segments_to_breaks(input_segs)
+        return breaks_to_segments(input_breaks)
+    else:
+        log_info(print_info, f"Creating {segs_source} segments...")
+        return make_segments(segs_source, assembly)

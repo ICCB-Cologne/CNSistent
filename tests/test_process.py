@@ -5,6 +5,7 @@ import io
 
 from cns.process import *
 from cns.utils import hg19, hg38, segments_to_cns_df, tuples_to_segments
+from cns.pipelines import main_segment
 
 class TestSegments(unittest.TestCase):        
     def test_do_segments_overlap(self):
@@ -64,40 +65,40 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
 
     def test_regions_select(self):        
-        res = regions_select("whole")
+        res = make_segments("whole")
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 1)
         self.assertEqual(res["chr1"][0][0], 0)
         self.assertEqual(res["chr1"][0][2], "chr1")
 
-        res = regions_select("arms")
+        res = make_segments("arms")
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 2)
         self.assertEqual(res["chr1"][0][2], "chr1p")
 
-        res = regions_select("bands")
+        res = make_segments("bands")
         self.assertEqual(len(res), 24)
         self.assertEqual(res["chr1"][0][2], "p36.33")
         self.assertEqual(res["chr10"][-1][1], hg19.chr_lens["chr10"])
 
         filter_size = 0
-        select = regions_select("whole")
-        remove = regions_select("gaps")
+        select = make_segments("whole")
+        remove = make_segments("gaps")
         self.assertGreater(len(remove), 0)
-        segs = process_segments(select, remove, filter_size)
+        segs = main_segment(select, remove, filter_size)
         self.assertGreater(len(segs["chr1"]), 0)
         self.assertEqual(remove["chr1"][0][1], segs["chr1"][0][0])  # check if the first segment is a gap
 
     def test_arms_gaps(self):
-        select = regions_select("whole")
-        remove = regions_select("gaps")
-        segs = process_segments(select, remove, 1000000)
+        select = make_segments("whole")
+        remove = make_segments("gaps")
+        segs = main_segment(select, remove, filter_size=1000000)
         segs_df = segments_to_cns_df(segs)
         self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
         self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 
     def test_cent_regions(self):
-        regions = regions_select("centromeres")
+        regions = make_segments("centromeres")
         print(regions)
         self.assertEqual(len(regions), 24)
         self.assertEqual(regions["chr1"][0][0], 121500000)
@@ -108,11 +109,11 @@ class TestSegments(unittest.TestCase):
 
         filter_size = 1
         expected_result = {1: [(15, 20), (20, 30)]}
-        result = process_segments(select, remove, filter_size)
+        result = main_segment(select, remove, filter_size=filter_size)
 
         filter_size = 6
         expected_result = {1: [(20, 30)], 2: []}
-        result = process_segments(select, remove, filter_size)
+        result = main_segment(select, remove, filter_size=filter_size)
 
         self.assertEqual(result, expected_result)
 
