@@ -62,7 +62,7 @@ def _add_sp_args(action, parser):
             default="whole",
         )
 
-    if action in ["coverage", "ploidy", "breakage", "aggregate", "segment"]:
+    if action in ["segment"]:
         parser.add_argument(
             "--split",
             type=int,
@@ -142,16 +142,6 @@ def _parse_args():
         raise ValueError(f"Action {args.action} not recognized.")
 
     if args.action == "segment":
-        if args.split < 0:
-            args.split = 0
-        if args.data not in ["whole", "arms", "bands"] and not exists(args.data):
-            raise ValueError(f"Selection {args.data} is not a build-in or a path to a file.")
-        if args.remove not in ["", "gaps"] and not exists(args.remove):
-            raise ValueError(f"Removal {args.remove} is not a build-in or a path to a file.")
-        if args.how not in ["min", "max", "mean"]:
-            raise ValueError(f"Aggregation method {args.how} is not recognized.")
-
-    if args.action == "segment":
         if args.threads > 1:
             print("segmentation is not data parallelizable, --threads option will be ignored.")
             args.threads = 1
@@ -190,23 +180,23 @@ def _action_to_fun(action):
         raise ValueError(f"Action {action} not recognized.")
 
 
-def _get_blocks(action, input_block, samples_blocks, cols_block, segs_block, assembly, args):
+def _get_blocks(action, input_block, samples_blocks, cn_cols, segs_block, assembly, args):
     block_count = len(input_block)
     # Apply process_block to each pair of blocks
     ass_block = [assembly] * block_count
     ver_block = [False] * block_count
     ver_block[-1] = args.verbose
-    cols_block = [cols_block] * block_count
+    cols_block = [cn_cols] * block_count
     if action == "infer":        
         method_block = [args.method] * block_count
         return zip(input_block, samples_blocks, method_block, cols_block, ver_block)
     if action == "align":
         add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, add_missing, ver_block)
+        return zip(input_block, samples_blocks, cols_block, add_missing, ass_block, ver_block)
     if action == "impute":
         method_block = [args.method] * block_count
         add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, cols_block, ass_block, add_missing, method_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, method_block, add_missing, ass_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
         if segs_block is None:
             raise ValueError("Segmentation blocks must be provided for this action.")
@@ -264,20 +254,13 @@ def main():
 
     log_info(print_info, f"***** cns {action} *****")
 
-    # Process segmetns
-    select_segs = None
-    if action in ["segment", "aggregate", "impute", "coverage", "ploidy"]:
-        if action == "segment":
-            args.segments = args.data
-
-        input_segs = obtain_segments(args.segments, in_cols, assembly, print_info)        
+    # Process segments
+    if action in ["segment"]:
+        input_segs = obtain_segments(args.data, in_cols, assembly, print_info)        
         remove_regs = obtain_segments(args.remove, in_cols, assembly, print_info)   
-        select_segs = main_segment(input_segs, remove_regs, args.split, args.merge, args.filter, print_info)
-     
-        # Only save the segments and EXIT
-        if action == "segment":
-            save_segments(select_segs, out_file)
-            return 
+        res_segs = main_segment(input_segs, remove_regs, args.split, args.merge, args.filter, print_info)
+        save_segments(res_segs, out_file)
+        return
 
     log_info(print_info, f"Loading CNS input file {args.data}...")
     input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
@@ -288,6 +271,7 @@ def main():
         samples_df = load_samples(args.samples)
     samples_df = fill_sex_if_missing(input_data, samples_df)
     samples_blocks = dataframe_array_split(samples_df, args.subsplit)
+    select_segs = obtain_segments(args.segments, in_cols, assembly, print_info) if "segments" in args else None
 
     # Process blocks
     for i in range(args.subsplit):

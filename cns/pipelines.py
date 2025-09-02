@@ -19,7 +19,7 @@ from .process import *
 from .utils import *
 
 
-def main_align(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_missing_chromosomes=True, print_info=False):
+def main_align(cns_df, samples_df=None, cn_columns=None, add_missing_chromosomes=True, assembly=hg19, print_info=False):
     """
     Aligns all samples with the reference assembly. Adds missing segments, chromosomes, and cuts off the ends if needed.
 
@@ -61,11 +61,11 @@ def main_align(cns_df, samples_df=None, cn_columns=None, assembly=hg19, add_miss
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
     cn_columns = get_cn_cols(cns_df, cn_columns)
-    cns_tailed_df = add_tails(cns_df, assembly, print_info=print_info)
+    cns_tailed_df = add_tails(cns_df, assembly=assembly, print_info=print_info)
     cns_aligned_df = fill_gaps(cns_tailed_df, print_info=print_info)
     if add_missing_chromosomes:
-        cns_aligned_df = add_missing(cns_aligned_df, samples_df, assembly, print_info=print_info)
-    cns_cleared_df = remove_outliers(cns_aligned_df, assembly, print_info=print_info)
+        cns_aligned_df = add_missing(cns_aligned_df, samples_df, assembly=assembly, print_info=print_info)
+    cns_cleared_df = remove_outliers(cns_aligned_df, assembly=assembly, print_info=print_info)
     res_df = merge_cns_df(cns_cleared_df, cn_columns, print_info=print_info)
     return res_df
 
@@ -121,9 +121,9 @@ def main_impute(
     cns_df,
     samples_df=None,
     cn_columns=None,
-    assembly=hg19,
-    add_missing_chromosomes=True,
     method="extend",
+    add_missing_chromosomes=True,
+    assembly=hg19,
     print_info=False,
 ):
     """
@@ -151,7 +151,7 @@ def main_impute(
     pandas.DataFrame
         DataFrame with filled gaps, added missing chromosomes, and inferd values.
     """
-    res_df = main_align(cns_df, samples_df, cn_columns, assembly, add_missing_chromosomes, print_info)
+    res_df = main_align(cns_df, samples_df, cn_columns, add_missing_chromosomes, assembly, print_info)
     res_df = main_infer(res_df, samples_df, method, cn_columns, print_info)
     return res_df
 
@@ -355,7 +355,9 @@ def main_segment(
     remove_segs=None,
     split_size=-1,
     merge_dist=-1,
+    keep_ends=True,
     filter_size=-1,
+    align_to_assembly=False,
     assembly=hg19,
     print_info=False,
 ):
@@ -371,9 +373,13 @@ def main_segment(
     split_size : int, optional
         Size in base pairs to split segments. Default is -1 (no splitting).
     merge_dist : int, optional
-        Distance in base pairs to merge nearby segments. Default is -1 (no merging).
+        Distance in base pairs to merge nearby segments. Default is -1 (no merging). If 0, merges all touching segments.
+    keep_ends : bool, optional
+        If True, clustering (merge_dist > 0) will not cluster start and end breakpoint of each chromosomes.
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
+    align_to_assembly : bool, optional
+        If True, aligns segments to the assembly. Default is False.
     assembly : Assembly object, optional
         Genome assembly to use. Default is `hg19`.
     print_info : bool, optional
@@ -400,9 +406,13 @@ def main_segment(
         if filter_size > 0:
             select_segs = filter_cons_size(select_segs, filter_size)
     if merge_dist > 0:
-        select_segs = cluster_segments(select_segs, merge_dist, True, print_info)
+        select_segs = cluster_segments(select_segs, merge_dist, keep_ends, print_info)
+    if merge_dist == 0:
+        select_segs = merge_segments(select_segs)
     if split_size > 0:
         select_segs = split_segments(select_segs, split_size)
+    if align_to_assembly:
+        select_segs = align_segs_to_assembly(select_segs, sorted=True, assembly=assembly)
     return select_segs
 
 

@@ -419,3 +419,35 @@ def get_consecutive_segs(segs):
             res.append([seg])
         last_end = seg[1]
     return res
+
+
+def align_segs_to_assembly(segs, sorted=False, assembly=hg19):
+    """
+    Aligns segments to the reference assembly by adding missing segments and adjusting boundaries.
+
+    Parameters
+    ----------
+    segs : dict
+        A dictionary with chromosome names as keys and lists of segments as values.
+    sorted : bool, optional
+        If True, sorts the segments for each chromosome. Default is False.
+    assembly : object, optional
+        The genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    dict
+        A dictionary with chromosome names as keys and lists of segments as values.
+    """
+    segs = segs.copy()
+    for chr, end in assembly.chr_lens.items():
+        if chr not in segs or len(segs[chr]) == 0:
+            segs[chr] = [(0, end)]
+        else:
+            if not sorted:
+                segs[chr].sort(key=lambda x: (x[0]))
+            if segs[chr][0][0] > 0:
+                segs[chr] = [(0, segs[chr][0][0], f"{chr}_start")] + segs[chr]
+            if segs[chr][-1][1] < end:
+                segs[chr].append((segs[chr][-1][1], end, f"{chr}_end"))
+    return segs

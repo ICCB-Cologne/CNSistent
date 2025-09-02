@@ -95,13 +95,12 @@ def breaks_to_segments(breakpoints):
     return segs
 
 
-def segments_to_breaks(segments, keep_ends=True):
+def segments_to_breaks(segments):
     breaks = { chrom: [] for chrom in segments }
     for chrom, segs in segments.items():
-        for start, end, name in segs:
+        for start, end, _ in segs:
             breaks[chrom].append(start)
-            if keep_ends:
-                breaks[chrom].append(end)
+            breaks[chrom].append(end)
     for chrom in breaks:
         breaks[chrom] = sorted(set(breaks[chrom]))
     return breaks

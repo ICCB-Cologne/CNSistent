@@ -7,7 +7,23 @@ from cns.process import *
 from cns.utils import hg19, hg38, segments_to_cns_df, tuples_to_segments
 from cns.pipelines import main_segment
 
-class TestSegments(unittest.TestCase):        
+class TestSegments(unittest.TestCase):    
+    def setUp(self):
+        self.assembly = type('Assembly', (object,), {
+            'aut_names': ['chr1', 'chr2', 'chr3'],
+            'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
+            'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
+            'aut_len': 300,
+            'sex_names': ['chrX', 'chrY'],
+            'chr_names': ['chr1', 'chr2', 'chr3'],
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
+        })
+        self.samples_df = pd.DataFrame({
+            'sex': ['xx', 'xy']
+        }, index=['s1', 's2'])
+    
+    
     def test_do_segments_overlap(self):
         segs_a = {1: [(0, 5), (4, 8)], 2: [(10, 15)]}
         segs_b = {1: [(5, 10)], 2: [(14, 20)], 3: [(25, 30)]}
@@ -142,6 +158,24 @@ BCORL1	chrX	129115083	129192058"""
         self.assertEqual(res["chr1"][0][0], 2200000) # cut by the other segment
         res = split_segments(gene_segs, 100000)
         self.assertGreater(len(res["chr2"]), len(gene_segs["chr2"]))
+
+    def test_align_segs_to_assembly(self):
+        segs = {
+            "chr1": [(0, 50, "gene1"), (50, 100, "gene2")],
+            "chr2": [(50, 150, "gene3")],
+            "chr3": []
+        }
+        aligned = align_segs_to_assembly(segs, assembly=self.assembly)
+        self.assertEqual(len(aligned["chr1"]), 2)
+        self.assertEqual(len(aligned["chr2"]), 3)
+        self.assertEqual(len(aligned["chr3"]), 1)
+        self.assertEqual(aligned["chr1"][0][0], 0)
+        self.assertEqual(aligned["chr1"][-1][1], 100)
+        self.assertEqual(aligned["chr2"][0][0], 0)
+        self.assertEqual(aligned["chr2"][-1][1], 200)
+        self.assertEqual(aligned["chr3"][0][0], 0)
+        self.assertEqual(aligned["chr3"][-1][1], 300)
+        self.assertEqual(len(segs["chr2"]), 1)
 
 # TODO: Add sex chromosome checks
 class TestImputation(unittest.TestCase):
