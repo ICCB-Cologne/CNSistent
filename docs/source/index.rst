@@ -36,7 +36,7 @@ Installation links
 Example of the API
 ------------------
 
-Files used below sourced directly from the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
+Files used below were sourced adapted the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
 
 1. Load CNS Data and Display Heatmap
 ````````````````````````````````````
@@ -46,7 +46,7 @@ Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
 .. code-block:: python
 
     import cns
-    raw_df = cns.load_cns("./data/20220803_TxPri_mphase_by_sample_df.reduced.csv", cn_columns=["nMajor", "nMinor"], sep=",", print_info=True)
+    raw_df = cns.load_cns("./data/TRACERx_cns_raw.tsv")
     cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
 
 .. image:: files/intro_1.png
@@ -60,7 +60,7 @@ Fill in missing segments in the data, impute using the extension method, and dis
 
 .. code-block:: python
 
-    imp_df = cns.main_impute(raw_df, print_info=True)
+    imp_df = cns.main_impute(raw_df)
     cns.fig_heatmap(cns.cns_head(imp_df, 5), max_cn=6)
 
 .. image:: files/intro_2.png
@@ -74,9 +74,11 @@ Aggregate the imputed CNS data into 3 MB segments and convert it into a feature 
 
 .. code-block:: python
 
-   seg_df = cns.main_seg_agg(imp_df, split_size=3_000_000, print_info=True)
-   features, rows, columns = cns.bins_to_features(seg_df)
-   print("Samples: {0}, Alleles: {1}, Bins: {2}.".format(*features.shape))
+    segs = cns.main_segment(split_size=3_000_000)
+    seg_df = cns.main_aggregate(imp_df, segs)
+    features, rows, columns = cns.bins_to_features(seg_df)
+    print("Samples: {0}, Alleles: {1}, Bins: {2}.".format(*features.shape))
+
 
 ``Alleles: 2, samples: 403, bins: 960.``
 
@@ -87,8 +89,8 @@ Group the CNS data by cancer type, calculate the total CN, and visualize mean li
 
 .. code-block:: python
 
-    sample_df = cns.load_samples("./data/20221109_TRACERx421_all_patient_df.tsv")
-    type_groups = {c: cns.select_cns_by_type(seg_df, sample_df, c, "histology_multi_full") for c in ["LUAD", "LUSC"]}
+    sample_df = cns.load_samples("./data/TRACERx_samples_raw.tsv")
+    type_groups = {c: cns.select_cns_by_type(seg_df, sample_df, c, "type") for c in ["LUAD", "LUSC"]}
     groups_df = cns.stack_groups([cns.group_samples(v, group_name=k) for k, v in type_groups.items()])
     cns.fig_lines(cns.add_total_cn(groups_df), cn_columns="total_cn")
 
@@ -130,21 +132,21 @@ To calculate the mean ploidy per chromosome arm:
 
 .. code-block:: bash
 
-    cns segment arms --out arms.bed
+    segment arms --out arms.bed
     cns aggregate imputed.tsv --segments arms.bed --out a_bins.tsv
 
 To conduct breakpoint clustering with 1 mb distance:
 
 .. code-block:: bash
 
-    cns segment imputed.tsv --merge 1000000 --out clust.bed
+    segment imputed.tsv --merge 1000000 --out clust.bed
     cns aggregate imputed.tsv  --segments clust.bed --out c_bins.tsv
 
 To conduct segmentation using 5 mb bins:
 
 .. code-block:: bash
 
-    cns segment whole --step 5000000 --out clust.bed
+    segment whole --step 5000000 --out clust.bed
     cns aggregate data.tsv  --segments clust.bed --out c_bins.tsv
 
 Extention of the example is in `example_CLI.py <https://bitbucket.org/schwarzlab/cnsistent/src/main/example_CLI.py>`_.

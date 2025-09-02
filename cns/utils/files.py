@@ -4,9 +4,10 @@ import pandas as pd
 from io import StringIO
 
 from cns.process.segments import make_segments
+from cns.process.segments import cns_df_to_segments
 from cns.utils.logging import log_info
 from cns.utils.canonization import canonize_cns_df, canonize_sample_id
-from cns.utils.conversions import cns_df_to_segments, segments_to_cns_df, segments_to_breaks, breaks_to_segments
+from cns.utils.conversions import segments_to_cns_df
 from cns.utils.logging import log_warn, log_info
 from cns.utils.assemblies import hg19
 
@@ -297,9 +298,7 @@ def obtain_segments(segs_source, in_cols = None, assembly = hg19, print_info = F
     elif segs_source[-4:] == ".tsv":
         log_info(print_info, f"Loading CNS input file {segs_source}...")
         input_cns = load_cns(segs_source, cn_columns=in_cols, assembly=assembly, print_info=print_info)
-        input_segs = cns_df_to_segments(input_cns)
-        input_breaks = segments_to_breaks(input_segs)
-        return breaks_to_segments(input_breaks)
+        return cns_df_to_segments(input_cns, process="unify")
     else:
         log_info(print_info, f"Creating {segs_source} segments...")
         return make_segments(segs_source, assembly)

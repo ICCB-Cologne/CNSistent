@@ -42,17 +42,6 @@ def segments_to_cns_df(segments, sample_id="segment"):
     return res_df
 
 
-def cns_df_to_segments(segs_df, make_unique=False):
-    res = {}
-    for chrom, group in segs_df.groupby("chrom"):
-        names = group["name"] if "name" in group.columns else [f"{chrom}_{i}" for i in range(len(group))]
-        res[chrom] = list(zip(group["start"], group["end"], names))
-    if make_unique:
-        input_breaks = segments_to_breaks(res)
-        res = breaks_to_segments(input_breaks)
-    return res
-
-
 def chrom_to_sortable(chrom, aut_count = 22):
     if chrom == "chrX":
         return aut_count + 1  # Make 'chrX' sort last

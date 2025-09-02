@@ -26,6 +26,7 @@ dependencies = [
 
 [project.scripts]
 cns = "cns.cnsistent:main"
+segment = "cns.segment:main"
 
 [tool.hatch.build.targets.wheel]
 include = ["cns/cnsistent.py", "cns/**/*.py"]

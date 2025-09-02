@@ -3,6 +3,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
+from cns.process.segments import cns_df_to_segments
+from cns.process.segments import cns_df_to_segments
 from cns.utils import *
 from cns import *
 
@@ -114,7 +116,7 @@ class TestPipelines(unittest.TestCase):
 
     def test_main_segment_cns(self):
         remove = {'chr2': [(0, 75, "0")], 'chr3': [(150, 175, "1")], 'chrX': [(0, 100, "3")]}
-        cns_segs = cns_df_to_segments(self.cns, make_unique=True)
+        cns_segs = cns_df_to_segments(self.cns, process="unify")
         res = main_segment(cns_segs, remove, 25, 25, 50)
         self.assertEqual(res["chr1"][1], (25, 50, "chr1_0_1"))
         self.assertEqual(res["chr2"][0], (75, 110, "chr2_0_0"))   

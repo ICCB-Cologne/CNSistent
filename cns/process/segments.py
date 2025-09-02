@@ -1,7 +1,7 @@
 import numpy as np
 from cns.utils.assemblies import hg19
 from cns.process.breakpoints import split_into_bins, make_breaks
-from cns.utils.conversions import cytobands_to_df, genome_to_segments, tuples_to_segments
+from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to_segments, segments_to_breaks, tuples_to_segments
 
 
 def count_segments(segs):
@@ -450,4 +450,18 @@ def align_segs_to_assembly(segs, sorted=False, assembly=hg19):
                 segs[chr] = [(0, segs[chr][0][0], f"{chr}_start")] + segs[chr]
             if segs[chr][-1][1] < end:
                 segs[chr].append((segs[chr][-1][1], end, f"{chr}_end"))
+    return segs
+
+
+def cns_df_to_segments(segs_df, process=None):
+
+    segs = {}
+    for chrom, group in segs_df.groupby("chrom"):
+        names = group["name"] if "name" in group.columns else [f"{chrom}_{i}" for i in range(len(group))]
+        segs[chrom] = list(zip(group["start"], group["end"], names))
+    if process == "merge":
+        return merge_segments(segs)
+    elif process == "unify":
+        input_breaks = segments_to_breaks(segs)
+        return breaks_to_segments(input_breaks)
     return segs

@@ -1,5 +1,7 @@
 import unittest
 import pandas as pd
+from cns.process.segments import cns_df_to_segments
+from cns.process.segments import cns_df_to_segments
 from cns.utils import *
 
 

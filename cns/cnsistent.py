@@ -5,7 +5,8 @@ import time
 import argparse
 from os.path import exists
 
-from cns.utils.files import obtain_segments
+from cns.utils.misc import save_time
+from cns.utils.misc import parse_cncols
 from cns.utils.selection import dataframe_array_split
 from cns.utils.files import *
 from cns.pipelines import *
@@ -57,41 +58,9 @@ def _add_sp_args(action, parser):
         parser.add_argument(
             "--segments",
             type=str,
-            help="Either a path to a segmentation file or a predefined segment type (e.g., 'whole', 'arms', 'bands').",
+            help="A file with segments that create a mask over the CNS file. Preferably a .bed file.",
             required=False,
-            default="whole",
         )
-
-    if action in ["segment"]:
-        parser.add_argument(
-            "--split",
-            type=int,
-            help="Distance in which regions should be, can be a positive integer or negative for no splitting (whole regions).",
-            required=False,
-            default=-1,
-        )
-        parser.add_argument(
-            "--remove",
-            type=str,
-            help="Removed the regions after selection, before segmentation, can be either 'gaps', path to a BED file, or empty.",
-            required=False,
-            default="",
-        )
-        parser.add_argument(
-            "--filter",
-            type=int,
-            help="If set, regions smaller than the given size are excluded from selection and gaps. If negative, no filtering is done.",
-            required=False,
-            default=-1,
-        )
-        parser.add_argument(
-            "--merge",
-            type=int,
-            help="Maximum distance between breakpoint clusters for breakpoint merging. If negative, no breakpoints are merged.",
-            required=False,
-            default=-1,
-        )
-
         
     if action == "aggregate":
         parser.add_argument(
@@ -129,7 +98,6 @@ def _parse_args():
     sp_dict["coverage"] = subparsers.add_parser("coverage", help=f"Calculates coverage for aligned (but not imputed) CNS data." )
     sp_dict["ploidy"] = subparsers.add_parser("ploidy", help=f"Conducts breakpoint analysis for CNS data (NaNs are ignored).")
     sp_dict["breakage"] = subparsers.add_parser("breakage", help=f"Extracts basal CN signatures from CNS data (NaNs are ignored).")
-    sp_dict["segment"] = subparsers.add_parser("segment", help=f"Calculates segmentation regions for CNS data.")
     sp_dict["aggregate"] = subparsers.add_parser("aggregate", help=f"Aggregate copy numbers across segments to match provided segments.")
     for action, sp in sp_dict.items():
         _add_sp_args(action=action, parser=sp)
@@ -141,16 +109,8 @@ def _parse_args():
     if args.action not in sp_dict:
         raise ValueError(f"Action {args.action} not recognized.")
 
-    if args.action == "segment":
-        if args.threads > 1:
-            print("segmentation is not data parallelizable, --threads option will be ignored.")
-            args.threads = 1
-        if args.subsplit > 1:
-            print("segmentation is not data parallelizable, --subsplit option will be ignored.")
-            args.subsplit = 1
-    else:
-        if not exists(args.data):
-           raise ValueError(f"Data file {args.data} not found.")
+    if not exists(args.data):
+       raise ValueError(f"Data file {args.data} not found.")
 
     if args.threads <= 0:
         raise ValueError("The --threads option must be greater than 0.")
@@ -198,8 +158,6 @@ def _get_blocks(action, input_block, samples_blocks, cn_cols, segs_block, assemb
         add_missing = [args.add_missing_chroms] * block_count
         return zip(input_block, samples_blocks, cols_block, method_block, add_missing, ass_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
-        if segs_block is None:
-            raise ValueError("Segmentation blocks must be provided for this action.")
         return zip(input_block, samples_blocks, cols_block, segs_block, ass_block, ver_block)
     elif action == "aggregate":
         if segs_block is None:
@@ -215,7 +173,7 @@ def _process(action, cns_df, samples_df, cn_cols, select_segs, assembly, args):
     threads = abs(args.threads)
     samples_blocks = dataframe_array_split(samples_df, threads)
     cns_blocks = [cns_df.query("sample_id in @block.index").reset_index(drop=True) for block in samples_blocks]
-    segs_blocks = [select_segs] * len(cns_blocks) if select_segs is not None else None
+    segs_blocks = [select_segs] * len(cns_blocks)
     zip_blocks = _get_blocks(action, cns_blocks, samples_blocks, cn_cols, segs_blocks, assembly, args)
     if threads == 1:
         return [main_fun(*list(*zip_blocks))]
@@ -228,40 +186,15 @@ def _process(action, cns_df, samples_df, cn_cols, select_segs, assembly, args):
         return res_blocs
 
 
-def _parse_cncols(cncols):
-    if cncols != None:
-        cncols = cncols.split(",")
-        if len(cncols) > 2:
-            raise ValueError("Only one or two columns can be specified.")
-    return cncols
-
-
-def _save_time(action, out_file, runtime, start, threads):
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
-        filepath = "../out/times.tsv"
-        write_mode = "a" if exists(filepath) else "w"
-        with open(filepath, write_mode) as f:
-            f.write(f"{timestamp}\t{action}\t{threads}\t{out_file}\t{runtime}\n")
-
-
 def main():
     args = _parse_args()
     action = args.action
     assembly = get_assembly(args.assembly)
     print_info = args.verbose
-    in_cols = _parse_cncols(args.cncols)
+    in_cols = parse_cncols(args.cncols)
     out_file = args.out
 
     log_info(print_info, f"***** cns {action} *****")
-
-    # Process segments
-    if action in ["segment"]:
-        input_segs = obtain_segments(args.data, in_cols, assembly, print_info)        
-        remove_regs = obtain_segments(args.remove, in_cols, assembly, print_info)   
-        res_segs = main_segment(input_segs, remove_regs, args.split, args.merge, args.filter, print_info)
-        save_segments(res_segs, out_file)
-        return
-
     log_info(print_info, f"Loading CNS input file {args.data}...")
     input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
     cn_columns = get_cn_cols(input_data, in_cols)
@@ -271,7 +204,7 @@ def main():
         samples_df = load_samples(args.samples)
     samples_df = fill_sex_if_missing(input_data, samples_df)
     samples_blocks = dataframe_array_split(samples_df, args.subsplit)
-    select_segs = obtain_segments(args.segments, in_cols, assembly, print_info) if "segments" in args else None
+    select_segs = load_segments(args.segments) if "segments" in args and args.segments is not None else None
 
     # Process blocks
     for i in range(args.subsplit):
@@ -288,7 +221,7 @@ def main():
         if print_info:
             print(f"Finished in {runtime:.3f} seconds. Writing to {out_file} ...")
             if args.time:
-                _save_time(action, out_file, runtime, start, args.threads)
+                save_time(action, out_file, runtime, start, args.threads)
 
         for j in range(len(res_list)):
             mode = "w" if i == 0 and j == 0 else "a"

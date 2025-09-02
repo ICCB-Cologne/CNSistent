@@ -37,13 +37,13 @@ cns breakage ./tests/out/test_cns_single_imp.tsv --samples ./tests/out/test_samp
 
 # %%
 # Try different segmentations
-cns segment ./tests/out/test_cns_align.tsv --merge 100000 --out ./tests/out/mcs_regions.bed --verbose 
-cns segment arms --out ./tests/out/test_segs_arms.bed --verbose
-cns segment bands --out ./tests/out/test_segs_bands.bed --verbose
-cns segment ./tests/out/test_cns_align.tsv --split 1000000 --out ./tests/out/test_segs_1MB.bed --verbose
-cns segment ./tests/out/test_cns_align.tsv --split 1000000 --out ./tests/out/test_segs_1MB_gaps.bed --remove gaps --filter 500000 --verbose
-cns segment arms --out ./tests/out/test_segs_arms_gaps.bed --remove gaps --filter 100000
-cns segment ./data/COSMIC_consensus_genes.bed --out ./tests/out/test_COSMIC_gaps.bed --remove gaps --filter 100000
+segment ./tests/out/test_cns_align.tsv --merge 100000 --out ./tests/out/mcs_regions.bed --verbose 
+segment arms --out ./tests/out/test_segs_arms.bed --verbose
+segment bands --out ./tests/out/test_segs_bands.bed --verbose
+segment ./tests/out/test_cns_align.tsv --split 1000000 --out ./tests/out/test_segs_1MB.bed --verbose
+segment ./tests/out/test_cns_align.tsv --split 1000000 --out ./tests/out/test_segs_1MB_gaps.bed --remove gaps --filter 500000 --verbose
+segment arms --out ./tests/out/test_segs_arms_gaps.bed --remove gaps --filter 100000
+segment ./data/COSMIC_consensus_genes.bed --out ./tests/out/test_COSMIC_gaps.bed --remove gaps --filter 100000
 
 # %%
 # Calculate consisten segmentation 

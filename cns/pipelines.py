@@ -460,7 +460,7 @@ def main_seg_agg(
     remove_segs=None,
     how="mean",
     split_size=-1,
-    cluster_dist=-1,
+    merge_dist=-1,
     filter_size=-1,
     cn_columns=None,
     assembly=hg19,
@@ -481,7 +481,7 @@ def main_seg_agg(
         Aggregation method to use. Default is "mean".
     split_size : int, optional
         Size in base pairs to split segments. Default is -1 (no splitting).
-    cluster_dist : int, optional
+    merge_dist : int, optional
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
@@ -497,6 +497,6 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(select_segs, remove_segs, split_size, cluster_dist, filter_size, assembly, print_info)
+    segs = main_segment(select_segs, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df
