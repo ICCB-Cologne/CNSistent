@@ -34,7 +34,7 @@ def _get_start_vector(assembly):
     return np.vectorize(lambda chrom: _get_start(chrom, assembly), otypes=[np.uint32])
 
 
-def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size=1.0, assembly=hg19):
+def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size=1, assembly=hg19):
     """
     Plots consecutive segments as lines on the given axis - centers of each segment are used as endpoints of each line.
 
@@ -75,7 +75,7 @@ def plot_lines(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size
     return ax
 
 
-def plot_steps(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size=1.0, assembly=hg19):
+def plot_steps(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size=1, assembly=hg19):
     f_start_pos = _get_start_vector(assembly)
     is_consecutive = cns_df["start"] - cns_df["end"].shift(1) != 0
     # plot consecutive segments
@@ -90,7 +90,7 @@ def plot_steps(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size
     return ax
 
 
-def plot_dots(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size=1.0, assembly=hg19):
+def plot_dots(ax, cns_df, cn_column, color="green", label=None, alpha=1.0, size=1, assembly=hg19):
     """
     Plots dots representing segments on the given axis.
 
@@ -242,7 +242,7 @@ def _get_colors(colors, line_count):
     return colors
 
 
-def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1.0, assembly=hg19):
+def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=hg19):
     cn_columns = _get_columns(cns_df, cn_columns)
     groups_df = cns_df.groupby("sample_id")
     line_count = len(groups_df)
@@ -285,7 +285,7 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1.0, assembly
     return fig, axes
 
 
-def fig_lines(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
+def fig_lines(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     """
     Creates a line plot for each of the CN columns.
 
@@ -312,7 +312,7 @@ def fig_lines(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
     return _fig_common(cns_df, plot_lines, cn_columns, colors, size, assembly)
 
 
-def fig_dots(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
+def fig_dots(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     """
     Creates a dot plot for each of the CN columns.
 
@@ -339,7 +339,7 @@ def fig_dots(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
     return _fig_common(cns_df, plot_dots, cn_columns, colors, size, assembly)
 
 
-def fig_bars(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
+def fig_bars(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     """
     Creates a bar plot for each of the CN columns.
 
@@ -366,7 +366,7 @@ def fig_bars(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
     return _fig_common(cns_df, plot_bars, cn_columns, colors, size, assembly)
  
 
-def fig_steps(cns_df, cn_columns=None, colors=None, size=1.0, assembly=hg19):
+def fig_steps(cns_df, cn_columns=None, colors=None, size=1, assembly=hg19):
     """
     Creates a step plot for each of the CN columns.
 

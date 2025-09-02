@@ -453,7 +453,6 @@ def main_seg_agg(
     cluster_dist=-1,
     filter_size=-1,
     cn_columns=None,
-    assembly=hg19,
     print_info=False,
 ):
     """
