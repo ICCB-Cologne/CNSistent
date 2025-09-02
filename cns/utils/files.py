@@ -169,7 +169,7 @@ def fill_sex_if_missing(cns_df, samples_df):
     """
     res_df = samples_df.copy()
     # Set found_sex to True for each sample if there is chrY, otherwise set it to False
-    found_sex = cns_df.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
+    found_sex = cns_df.groupby("sample_id")["chrom"].apply(lambda chroms: "chrY" in chroms.values)
     found_sex = found_sex.map({True: "xy", False: "xx"})
     if "sex" in res_df.columns:
         res_df["found_sex"] = found_sex
@@ -181,21 +181,6 @@ def fill_sex_if_missing(cns_df, samples_df):
         res_df.drop(columns=["found_sex"], inplace=True)      
     # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
     res_df.loc[~res_df["sex"].isin(["xy", "xx"]), "sex"] = found_sex
-    return res_df
-
-
-def _find_y_column(cns_df, samples_df, cn_columns):
-    res_df = samples_df.copy()
-    res_df["y_col"] = "NA"
-    for sample_id, group_df in cns_df.groupby("sample_id"):
-        chr_y = group_df.query("chrom == 'chrY'")
-        if len(chr_y) > 0:
-            if (chr_y[cn_columns[1]] == 0).all():
-                res_df.loc[sample_id, "y_col"] = cn_columns[0]
-            elif (chr_y[cn_columns[0]] == 0).all():
-                res_df.loc[sample_id, "y_col"] = cn_columns[1]
-            else:
-                log_warn(f"Sample {sample_id} has non-zero chrY CNs for both haplotypes.") 
     return res_df
 
 
