@@ -180,7 +180,8 @@ def fill_sex_if_missing(cns_df, samples_df):
                     "This may result in an incorrect proportions of sex-chromosome features.")          
         res_df.drop(columns=["found_sex"], inplace=True)      
     # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
-    res_df.loc[~res_df["sex"].isin(["xy", "xx"]), "sex"] = found_sex
+    mask = ~res_df["sex"].isin(["xy", "xx"])
+    res_df.loc[mask, "sex"] = found_sex[res_df.index[mask]].values
     return res_df
 
 
