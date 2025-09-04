@@ -454,7 +454,21 @@ def align_segs_to_assembly(segs, sorted=False, assembly=hg19):
 
 
 def cns_df_to_segments(segs_df, process=None):
+    """
+    Converts a DataFrame of segments to a dictionary of segments by chromosome.
 
+    Parameters
+    ----------
+    segs_df : pd.DataFrame
+        A DataFrame containing segment information with columns "chrom", "start", "end", and optionally "name".
+    process : str, optional
+        The processing step to apply to the segments. Can be "merge" or "unify" or None.
+
+    Returns
+    -------
+    dict
+        A dictionary with chromosome names as keys and lists of segments as values.
+    """
     segs = {}
     for chrom, group in segs_df.groupby("chrom"):
         names = group["name"] if "name" in group.columns else [f"{chrom}_{i}" for i in range(len(group))]
@@ -464,4 +478,6 @@ def cns_df_to_segments(segs_df, process=None):
     elif process == "unify":
         input_breaks = segments_to_breaks(segs)
         return breaks_to_segments(input_breaks)
+    elif process is not None:
+        raise ValueError(f"Unknown segment processing method '{process}'")
     return segs

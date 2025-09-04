@@ -8,7 +8,7 @@ from os.path import exists
 
 def save_time(action, out_file, runtime, start, threads):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
-        filepath = "../out/times.tsv"
+        filepath = "../docs/times.tsv"
         write_mode = "a" if exists(filepath) else "w"
         with open(filepath, write_mode) as f:
             f.write(f"{timestamp}\t{action}\t{threads}\t{out_file}\t{runtime}\n")
