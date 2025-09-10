@@ -247,12 +247,12 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
     groups_df = cns_df.groupby("sample_id")
     line_count = len(groups_df)
     colors = _get_colors(colors, line_count)
-    alpha = (1 / line_count) ** (1 / 3) if f_plot == plot_lines else 1 / line_count
+    alpha = (1 / line_count) ** (1 / 3) if f_plot == plot_lines or f_plot == plot_steps else 1 / line_count
 
     n_columns = len(cn_columns)
     x_min, x_max = x_limits(cns_df, assembly)
     width = max(4, (x_max - x_min) / 200_000_000)
-    height = 4*n_columns
+    height = 4 * n_columns
     fig, axes = plt.subplots(n_columns, 1, figsize=(width, height), sharex=True)
 
     for j, cn_column in enumerate(cn_columns):
