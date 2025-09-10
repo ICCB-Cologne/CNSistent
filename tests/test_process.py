@@ -375,7 +375,7 @@ class TestAggregation(unittest.TestCase):
             'start': [0, 50, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [50, 100, 150, 300, 400, 500, 50, 99, 100, 100, 120, 130],
             'major_cn': [1, 2, 1, 3, 4, 5, 2, 1, 0, 2, 1, 1],
-            'minor_cn': [0, 2, np.NaN, 0, 4, 3, 1, 0, 0, 1, 0, 1],
+            'minor_cn': [0, 2, np.nan, 0, 4, 3, 1, 0, 0, 1, 0, 1],
         })       
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
