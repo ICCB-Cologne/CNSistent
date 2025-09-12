@@ -54,7 +54,7 @@ def _add_sp_args(action, parser):
             default=True
         )
 
-    if action in ["coverage", "ploidy", "breakage", "aggregate"]:
+    if action in ["align", "impute", "infer", "coverage", "ploidy", "breakage", "aggregate"]:
         parser.add_argument(
             "--segments",
             type=str,
@@ -143,22 +143,22 @@ def _action_to_fun(action):
 def _get_blocks(action, input_block, samples_blocks, cn_cols, segs_block, assembly, args):
     block_count = len(input_block)
     # Apply process_block to each pair of blocks
-    ass_block = [assembly] * block_count
+    assembly_block = [assembly] * block_count
     ver_block = [False] * block_count
     ver_block[-1] = args.verbose
     cols_block = [cn_cols] * block_count
     if action == "infer":        
         method_block = [args.method] * block_count
-        return zip(input_block, samples_blocks, method_block, cols_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block, method_block, ver_block)
     if action == "align":
         add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, cols_block, add_missing, ass_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block, add_missing, assembly_block, ver_block)
     if action == "impute":
         method_block = [args.method] * block_count
         add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, cols_block, method_block, add_missing, ass_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block,method_block, add_missing, assembly_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
-        return zip(input_block, samples_blocks, cols_block, segs_block, ass_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block, assembly_block, ver_block)
     elif action == "aggregate":
         if segs_block is None:
             raise ValueError("Segmentation blocks must be provided for this action.")

@@ -128,8 +128,8 @@ class TestCanonization(unittest.TestCase):
         pd.testing.assert_frame_equal(cns_df, self.cns_df, check_dtype=False)
 
         cns_df = self.cns_df.rename(columns={"major_cn": "cn_a", "minor_cn": "cn_b", "chrom": "Chr", "start": "Start", "end": "End", "sample_id": ""})
-        cns_df["sumCn"] = cns_df["cn_a"] + cns_df["cn_b"]
-        cns_df = canonize_cns_df(cns_df, cn_columns=["sumCn"], print_info=False)
+        cns_df["total_cn"] = cns_df["cn_a"] + cns_df["cn_b"]
+        cns_df = canonize_cns_df(cns_df, input_cn_columns=["total_cn"], print_info=False)
         self.assertEqual(cns_df.columns.tolist(), ["sample_id", "chrom", "start", "end", "total_cn"])
         self.assertEqual(cns_df.shape, (8, 5))
 

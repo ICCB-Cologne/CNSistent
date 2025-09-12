@@ -19,7 +19,7 @@ from .process import *
 from .utils import *
 
 
-def main_align(cns_df, samples_df=None, cn_columns=None, add_missing_chromosomes=True, assembly=hg19, print_info=False):
+def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, add_missing_chromosomes=True, assembly=hg19, print_info=False):
     """
     Aligns all samples with the reference assembly. Adds missing segments, chromosomes, and cuts off the ends if needed.
 
@@ -70,7 +70,7 @@ def main_align(cns_df, samples_df=None, cn_columns=None, add_missing_chromosomes
     return res_df
 
 
-def main_infer(cns_df, samples_df=None, method="extend", cn_columns=None, print_info=False):
+def main_infer(cns_df, samples_df=None, cn_columns=None, segs=None, method="extend", print_info=False):
     """
     Infers values to replace the NaNs in the CNS data. 
 
@@ -121,6 +121,7 @@ def main_impute(
     cns_df,
     samples_df=None,
     cn_columns=None,
+    segs=None,
     method="extend",
     add_missing_chromosomes=True,
     assembly=hg19,
@@ -151,8 +152,8 @@ def main_impute(
     pandas.DataFrame
         DataFrame with filled gaps, added missing chromosomes, and inferd values.
     """
-    res_df = main_align(cns_df, samples_df, cn_columns, add_missing_chromosomes, assembly, print_info)
-    res_df = main_infer(res_df, samples_df, method, cn_columns, print_info)
+    res_df = main_align(cns_df, samples_df, cn_columns, segs, add_missing_chromosomes, assembly, print_info)
+    res_df = main_infer(res_df, samples_df, cn_columns, segs, method, print_info)
     return res_df
 
 
