@@ -255,7 +255,6 @@ def merge_cns_df(cns_df, cn_columns=None, print_info=True):
     return res_df
 
 
-# TODO: Potentially should check for continuity in filling of gaps
 def _is_same_contig(df, id, chrom, j):
     return df.at[j, "sample_id"] == id and df.at[j, "chrom"] == chrom
 
@@ -281,13 +280,13 @@ def _impute_extend(cns_df, cn_columns, print_info=True):
                     continue
                 prev_idx = i - 1
                 next_idx = i + 1
-                while prev_idx >= 0 and np.isnan(cns_df.at[prev_idx, col]) and _is_same_contig(cns_df, id, chrom, prev_idx):
+                while prev_idx >= 0 and np.isnan(cns_df.at[prev_idx, col]) and _is_same_contig(cns_df, id, chrom, prev_idx) and cns_df.at[prev_idx, "end"] == cns_df.at[prev_idx + 1, "start"]:
                     prev_idx -= 1
-                if prev_idx < 0 or np.isnan(cns_df.at[prev_idx, col]) or not _is_same_contig(cns_df, id, chrom, prev_idx):
+                if prev_idx < 0 or np.isnan(cns_df.at[prev_idx, col]) or not _is_same_contig(cns_df, id, chrom, prev_idx) or cns_df.at[prev_idx, "end"] != cns_df.at[prev_idx + 1, "start"]:
                     prev_idx = -1
-                while next_idx < len(cns_df) and np.isnan(cns_df.at[next_idx, col]) and _is_same_contig(cns_df, id, chrom, next_idx):
+                while next_idx < len(cns_df) and np.isnan(cns_df.at[next_idx, col]) and _is_same_contig(cns_df, id, chrom, next_idx) and cns_df.at[next_idx - 1, "end"] == cns_df.at[next_idx, "start"]:
                     next_idx += 1
-                if next_idx >= len(cns_df) or np.isnan(cns_df.at[next_idx, col]) or not _is_same_contig(cns_df, id, chrom, next_idx):
+                if next_idx >= len(cns_df) or np.isnan(cns_df.at[next_idx, col]) or not _is_same_contig(cns_df, id, chrom, next_idx) or cns_df.at[next_idx - 1, "end"] != cns_df.at[next_idx, "start"]:
                     next_idx = -1
                 if prev_idx == -1 and next_idx == -1:
                     new_vals[col] = 0

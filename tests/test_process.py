@@ -235,11 +235,8 @@ class TestImputation(unittest.TestCase):
         result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
-
         result = cns_infer(result, self.samples_df, print_info=False)
-
         result = merge_cns_df(result, print_info=False)
-
         result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.at[4, "end"], 112)
         self.assertEqual(result.at[5, "end"], 125)
@@ -258,6 +255,19 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.shape[0], 10)
         self.assertEqual(result.at[3, "minor_cn"], 1)
+
+    def test_infer_segs(self):
+        cns_df = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's1', 's1'],
+            'chrom': ['chr1', 'chr1', 'chr1', 'chr1'],
+            'start': [0, 100, 200, 300],
+            'end': [100, 150, 300, 400],
+            'major_cn': [1, np.nan, 3, 2],
+            'minor_cn': [1, 2, 1, 0]
+        }) 
+        res_df = cns_infer(cns_df, self.samples_df)
+        self.assertEqual(res_df.at[1, "major_cn"], 1.0) # should ignore the following 3
+
 
 class TestBreakpoints(unittest.TestCase):
     def setUp(self):
