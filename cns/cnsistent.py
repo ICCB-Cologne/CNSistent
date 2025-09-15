@@ -7,7 +7,6 @@ from os.path import exists
 
 from cns.utils.misc import parse_cncols, save_time
 from cns.utils.selection import dataframe_array_split
-from cns.utils.files import *
 from cns.pipelines import *
 
 
@@ -55,7 +54,7 @@ def _add_sp_args(action, parser):
         parser.add_argument(
             "--how",
             type=str,
-            help="The aggregation function, one of ['min', 'max', 'mean']",
+            help="The aggregation function, one of ['min', 'max', 'mean', 'none']",
             required=False,
             default="mean",
         )
@@ -95,6 +94,7 @@ def _parse_args():
     if args.action is None:
         parser.print_help()
         exit(1)
+        
     if args.action not in sp_dict:
         raise ValueError(f"Action {args.action} not recognized.")
 
@@ -143,7 +143,7 @@ def _get_blocks(action, input_block, samples_blocks, cn_cols, segs_block, assemb
         return zip(input_block, samples_blocks, cols_block, segs_block, assembly_block, ver_block)
     if action == "impute":
         method_block = [args.method] * block_count
-        return zip(input_block, samples_blocks, cols_block, segs_block,method_block, assembly_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block, method_block, assembly_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
         return zip(input_block, samples_blocks, cols_block, segs_block, assembly_block, ver_block)
     elif action == "aggregate":

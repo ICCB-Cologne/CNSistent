@@ -65,7 +65,7 @@ def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg1
     cns_cleared_df = remove_outliers(cns_aligned_df, assembly=assembly, print_info=print_info)
     res_df = merge_cns_df(cns_cleared_df, cn_columns, print_info=print_info)
     if segs is not None:
-        res_df = aggregate_by_segments(res_df, segs, "none", cn_columns, print_info)
+        res_df = aggregate_by_segments(res_df, segs, "none", cn_columns, print_info=print_info)
     return res_df
 
 
@@ -110,6 +110,8 @@ def main_infer(cns_df, samples_df=None, cn_columns=None, segs=None, method="exte
             samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
+    if segs is not None:
+        cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info=print_info)
     inferred_df = cns_infer(cns_df, samples_df, method, cn_columns=cn_columns, print_info=print_info)
     complete_df = fill_nans_with_zeros(inferred_df, cn_columns=cn_columns, print_info=print_info)
     res_df = merge_cns_df(complete_df, cn_columns=cn_columns, print_info=print_info)
