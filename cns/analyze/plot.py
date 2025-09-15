@@ -230,8 +230,13 @@ def _get_colors(colors, line_count):
     if colors == None:
         if line_count == 1:
             colors = ["blue"]
+        elif line_count <= 10:
+            colors = plt.cm.tab10(np.arange(0, line_count / 10, 1 / 10))
+        elif line_count <= 20:
+            colors = plt.cm.tab20(np.arange(0, line_count / 20, 1 / 20))
         else:
             colors = plt.cm.hsv(np.linspace(0.0, 1, line_count+1))
+
     elif line_count == 1:
         colors = [colors]
     elif isinstance(colors, Sequence):
