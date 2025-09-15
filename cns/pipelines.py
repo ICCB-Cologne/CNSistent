@@ -309,6 +309,8 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     cn_columns = get_cn_cols(cns_df, cn_columns)
+    cns_df["start"] = cns_df["start"].astype(np.int64)
+    cns_df["end"] = cns_df["end"].astype(np.int64)
 
     if samples_df is None:
         log_info(print_info, "No samples provided, creating samples from CNS data.")
