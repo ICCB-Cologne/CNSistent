@@ -36,7 +36,7 @@ Installation links
 Example of the API
 ------------------
 
-Files used below were sourced adapted the `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
+Files used below were adapted from `TRACERx Zenodo archive <https://zenodo.org/records/7649257>`_.
 
 1. Load CNS Data and Display Heatmap
 ````````````````````````````````````

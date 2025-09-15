@@ -3,6 +3,8 @@
 Tool usage (CLI)
 ================
 
+There are two main commands in CNSistent: `cns` and `segment`. The `segment` command is used to create segmentations, while the `cns` command is used to process CNS data, based on segments.
+
 The command line interface uses the following pattern:
 
 ``cns [command] cns_file_path [options]``
@@ -15,10 +17,15 @@ The following commands are available (see details below):
 * :ref:`coverage_cmd`: Calculates coverage for aligned (but not imputed) CNS data.
 * :ref:`ploidy_cmd`: Calculates aneuploidy for CNS data (NaNs are ignored).
 * :ref:`breakage_cmd`: Creates a clustering of breakpoints.
-* :ref:`segment_cmd`: Create a consistent segmentation.
 * :ref:`aggregate_cmd`: Creates bins for CNS data.
 
 The ``cns_file_path`` must point to a CNS file as described in the following section.
+
+The segment command uses the following pattern:
+
+``segment [options]``
+
+The output of the `segment` command is a BED file with the segments, which can be used as input to the `cns` command using the ``--segments`` argument.
 
 .. _cli_data:
 
@@ -120,7 +127,8 @@ Commands
 Common arugments
 ````````````````
 
-* ``--samples``: path to the samples file.
+* ``--samples``: path to the samples (TSV) file.
+* ``--segments``: path to the segments (BED) file.
 * ``--out``: path to the output file. Default is ``cns.out.tsv``.
 * ``--assembly``: assembly version to use. Default is ``hg19``.
 * ``--cncols``: If the CN columns do not conform to the naming as above, or if there are more columns, one or two columns can be specified, comma separated, no whitespace e.g. ``cn1,cn2``.
@@ -132,7 +140,7 @@ Common arugments
 .. _align_cmd:
 
 ``align``
-````````
+`````````
 
 Aligns all the segments so that each samples spans the whole reference. The following steps are performed:
 
@@ -153,11 +161,24 @@ Replaces any NaNs in the *CNS* file with the values of the closest neighbouring 
 3. If a whole chromosome is missing, or declared as NaN, its assigned to 0 for its whole length.
 4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major CN values must match to be merged.
 
+
+Additional arguments:
+
+* ``--method``: ``extend, diploid, zero``. The method to use for imputation. Default is ``extend``.
+    * ``extend``: extends the closest non-NaN value to the telomeres and gaps.
+    * ``diploid``: assigns the expected diploid value (1 for each allele on autosomes and female X chromosomes, 1/0 for male X and Y chromosomes).
+    * ``zero``: assigns 0 to all NaN values.
+
 .. _impute_cmd:
 
 ``impute``
 ``````````
 Combines the ``align`` and ``infer`` commands to create an *CNS* file.
+
+
+Additional arguments:
+
+* ``--method``: ``extend, diploid, zero``. Same as for the ``infer`` command. Default is ``extend``.
 
 .. image:: files/cns_imputed.png
    :width: 640px
@@ -175,10 +196,6 @@ Calculates the coverage of the *CNS* file. The coverage is calculated as the fra
 .. note::
 
     For all sample statistics, the values are calculated for autosomes, sex chromosomes, and the total genome, with the values being suffixed with ``_aut``, ``_sex``, ``_tot``, respectively. If sex chromosomes are missing from data altogether, only ``_aut`` values are calculated.
-
-Additional arguments:
-
-* ``--segments``: a BED file with the segments where to calculate the coverage.    
 
 The following statistics are calculated and stored in a *samples* file:
 
@@ -206,10 +223,6 @@ Calculates the portions of the genome that are aneuploid, or for absent in case 
 
     ploidy should be run on an imputed dataset.
 
-Additional arguments:
-
-    * ``--segments``: a BED file with the segments where to calculate the coverage. 
-
 The following statistics are calculated and stored in a *samples* file:
 
 * ``loh_{any,hot}_{aut,sex,all}``: proportion of the chromosome set that has CN=0 for an allele (``any``) or both alleles (``all``). 
@@ -233,11 +246,7 @@ The following statistics are calculated and stored in a *samples* file:
 
 Calculates the number of breaks and the step size between the breaks for the samples.
 
-Additional arguments:
-
-    * ``--segments``: a BED file with the segments where to calculate the coverage. 
-
- The following statistics are calculated:
+The following statistics are calculated:
 
 * ``breaks_{CN1,CN2,total_cn}_{aut,sex,all}``: the number of breaks in the CN values for the allele.
 * ``step_{CN1,CN2,total_cn}_{aut,sex,all}``: the average step size between the breaks in the CN values for the allele.
@@ -251,6 +260,33 @@ Additional arguments:
     step (CN2), 0, 0
     breaks (total), 1, 1
     step (total), 2, 2
+
+
+.. _aggregate_cmd:
+
+``aggregate``
+`````````````
+
+Aggregates CN values across segments, creating a consistent segmentation for each sample based on a provided BED file. The ``--segments`` argument must be provided for aggregation.
+
+.. note::
+
+    BED file is 0 indexed!
+
+Additional arguments:
+
+* ``--how``: ``mean, min, max, none``. The method to aggregate the CN values. If ``none`` is selected, the CN values are not aggregated, but existing segments are masked by the provided segments.
+
+.. code-block:: bash
+
+    cns aggregate cns.tsv --segments segments.bed
+    
+
+.. figure:: files/cns_aggregated.png
+    :width: 640px
+
+    Aggregated CN values for the example segments.
+
 
 .. _segment_cmd:
 
@@ -281,31 +317,3 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
    :width: 640px
 
    5 mb segmentation of the imputed example segments with gaps removed.
-
-
-.. _aggregate_cmd:
-
-``aggregate``
-`````````````
-
-Aggregates CN values across segments, creating a consistent segmentation for each sample based on a provided BED file. 
-
-.. note::
-
-    BED file is 0 indexed!
-
-Additional arguments:
-
-* ``--segments``: a BED file with the segments to aggregate. The BED file must have the following columns: ``chrom``, ``start``, ``end``.
-* ``--how``: ``mean, min, max, none``. The method to aggregate the CN values. If ``none`` is selected, the CN values are not aggregated, but existing segments are masked by the provided segments.
-
-.. code-block:: bash
-
-    cns aggregate cns.tsv --segments segments.bed
-    
-
-.. figure:: files/cns_aggregated.png
-    :width: 640px
-
-    Aggregated CN values for the example segments.
-

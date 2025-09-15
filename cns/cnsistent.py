@@ -32,6 +32,12 @@ def _add_sp_args(action, parser):
     )
     parser.add_argument("--verbose", help="print progress to console", action="store_true")
     parser.add_argument("--time", help="save runtime info", action="store_true")
+    parser.add_argument(
+        "--segments",
+        type=str,
+        help="A file with segments that create a mask over the CNS file. Preferably a .bed file.",
+        required=False,
+    )
 
     if action in ["infer", "impute"]:
         parser.add_argument(
@@ -40,14 +46,6 @@ def _add_sp_args(action, parser):
             help='Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".',
             required=False,
             default="extend"
-        )
-
-    if action in ["align", "impute", "infer", "coverage", "ploidy", "breakage", "aggregate"]:
-        parser.add_argument(
-            "--segments",
-            type=str,
-            help="A file with segments that create a mask over the CNS file. Preferably a .bed file.",
-            required=False,
         )
         
     if action == "aggregate":
