@@ -162,7 +162,7 @@ class TestData(unittest.TestCase):
         pd.set_option('display.max_columns', 10)
 
     def test_sequence(self):
-        cns_align_df = main_align(self.cns_df, add_missing_chromosomes=False)
+        cns_align_df = main_align(self.cns_df, segs={"chr19": [(0, hg19.chr_lens["chr19"], "chr19")]})
         lens = cns_align_df["end"] - cns_align_df["start"]
         self.assertEqual(lens.sum() / 2, hg19.chr_lens["chr19"]) # 2 samples of full length        
         non_nan = cns_align_df.dropna()
@@ -170,7 +170,7 @@ class TestData(unittest.TestCase):
         self.assertGreater(hg19.chr_lens["chr19"], lens.sum() / 2)
 
     def test_impute(self):        
-        cns_align_df = main_align(self.cns_df, add_missing_chromosomes=False)
+        cns_align_df = main_align(self.cns_df, segs={"chr19": [(0, hg19.chr_lens["chr19"], "chr19")]})
         cns_imp_df = main_infer(cns_align_df)
         non_nan = cns_imp_df.dropna()
         lens = non_nan["end"] - non_nan["start"]

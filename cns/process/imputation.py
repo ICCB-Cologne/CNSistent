@@ -237,12 +237,15 @@ def merge_cns_df(cns_df, cn_columns=None, print_info=True):
     cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
     idx_to_remove = []
+    use_name = "name" in res_df.columns
 
     for i, (index, row) in enumerate(res_df.iterrows()):
         if i != 0 and _are_mergeable(prev, row, cn_columns):
             idx_to_remove.append(i - 1)
             res_df.at[index, "start"] = prev.start
             row.start = prev.start  # update the comparison copy too
+            if use_name:
+                row.name = str(prev.name)  + "&" + str(row.name)  # update the name for logging
         prev = row
 
     log_info(print_info, f"Merged entries: {len(idx_to_remove)}")
@@ -392,6 +395,7 @@ def cns_infer(cns_df, samples_df, method='extend', cn_columns=None, print_info=T
         DataFrame containing sample information.
     method : str, optional
         Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".
+        Note - if "name" is present in cns_df, it will be removed when using "extend" method.
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from cns_df.
     print_info : bool, optional
@@ -404,6 +408,8 @@ def cns_infer(cns_df, samples_df, method='extend', cn_columns=None, print_info=T
     """    
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if method ==  'extend':
+        if 'name' in cns_df.columns:
+            cns_df = cns_df.drop(columns=['name'])
         return _impute_extend(cns_df, cn_columns, print_info)
     if method == 'diploid':
         return _impute_diploid(cns_df, samples_df, cn_columns, print_info)

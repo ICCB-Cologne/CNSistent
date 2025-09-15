@@ -19,7 +19,7 @@ from .process import *
 from .utils import *
 
 
-def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, add_missing_chromosomes=True, assembly=hg19, print_info=False):
+def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg19, print_info=False):
     """
     Aligns all samples with the reference assembly. Adds missing segments, chromosomes, and cuts off the ends if needed.
 
@@ -33,8 +33,6 @@ def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, add_missing_
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
     assembly : object, optional
         Genome assembly to use. Default is `hg19`.
-    add_missing_chromosomes : bool, optional
-        If True, adds missing chromosomes to the data. Default is True.
     print_info : bool, optional
         If True, prints informational messages during processing. Default is False.
 
@@ -63,10 +61,11 @@ def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, add_missing_
     cn_columns = get_cn_cols(cns_df, cn_columns)
     cns_tailed_df = add_tails(cns_df, assembly=assembly, print_info=print_info)
     cns_aligned_df = fill_gaps(cns_tailed_df, print_info=print_info)
-    if add_missing_chromosomes:
-        cns_aligned_df = add_missing(cns_aligned_df, samples_df, assembly=assembly, print_info=print_info)
+    cns_aligned_df = add_missing(cns_aligned_df, samples_df, assembly=assembly, print_info=print_info)
     cns_cleared_df = remove_outliers(cns_aligned_df, assembly=assembly, print_info=print_info)
     res_df = merge_cns_df(cns_cleared_df, cn_columns, print_info=print_info)
+    if segs is not None:
+        res_df = aggregate_by_segments(res_df, segs, "none", cn_columns, print_info)
     return res_df
 
 
@@ -123,7 +122,6 @@ def main_impute(
     cn_columns=None,
     segs=None,
     method="extend",
-    add_missing_chromosomes=True,
     assembly=hg19,
     print_info=False,
 ):
@@ -140,8 +138,6 @@ def main_impute(
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
     assembly : object, optional
         Genome assembly to use. Default is `hg19`.
-    add_missing_chromosomes : bool, optional
-        If True, adds missing chromosomes to the data. Default is True.
     method : str, optional
         Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".
     print_info : bool, optional
@@ -152,7 +148,7 @@ def main_impute(
     pandas.DataFrame
         DataFrame with filled gaps, added missing chromosomes, and inferd values.
     """
-    res_df = main_align(cns_df, samples_df, cn_columns, segs, add_missing_chromosomes, assembly, print_info)
+    res_df = main_align(cns_df, samples_df, cn_columns, segs, assembly, print_info)
     res_df = main_infer(res_df, samples_df, cn_columns, segs, method, print_info)
     return res_df
 

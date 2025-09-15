@@ -5,12 +5,10 @@ import time
 import argparse
 from os.path import exists
 
-from cns.utils.misc import save_time
-from cns.utils.misc import parse_cncols
+from cns.utils.misc import parse_cncols, save_time
 from cns.utils.selection import dataframe_array_split
 from cns.utils.files import *
 from cns.pipelines import *
-from cns.utils.selection import dataframe_array_split
 
 
 def _add_sp_args(action, parser):
@@ -43,15 +41,6 @@ def _add_sp_args(action, parser):
             help='Inference method to use. Options are "extend", "diploid", or "zero". Default is "extend".',
             required=False,
             default="extend"
-        )
-
-    if action in ["align", "impute"]:
-        parser.add_argument(
-            "--add-missing-chroms",
-            type=bool,
-            help="If True, adds missing chromosomes to the data. Default is True.",
-            required=False,
-            default=True
         )
 
     if action in ["align", "impute", "infer", "coverage", "ploidy", "breakage", "aggregate"]:
@@ -151,12 +140,10 @@ def _get_blocks(action, input_block, samples_blocks, cn_cols, segs_block, assemb
         method_block = [args.method] * block_count
         return zip(input_block, samples_blocks, cols_block, segs_block, method_block, ver_block)
     if action == "align":
-        add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, cols_block, segs_block, add_missing, assembly_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block, assembly_block, ver_block)
     if action == "impute":
         method_block = [args.method] * block_count
-        add_missing = [args.add_missing_chroms] * block_count
-        return zip(input_block, samples_blocks, cols_block, segs_block,method_block, add_missing, assembly_block, ver_block)
+        return zip(input_block, samples_blocks, cols_block, segs_block,method_block, assembly_block, ver_block)
     elif action in ["coverage", "ploidy", "breakage"]:
         return zip(input_block, samples_blocks, cols_block, segs_block, assembly_block, ver_block)
     elif action == "aggregate":
