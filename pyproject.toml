@@ -21,7 +21,8 @@ dependencies = [
     "numpy",
     "matplotlib",
     "numba",
-    "scikit-learn"
+    "scikit-learn",
+    "statsmodels"
 ]
 
 [project.scripts]
