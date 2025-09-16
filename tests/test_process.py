@@ -115,7 +115,6 @@ class TestSegments(unittest.TestCase):
 
     def test_cent_regions(self):
         regions = make_segments("centromeres")
-        print(regions)
         self.assertEqual(len(regions), 24)
         self.assertEqual(regions["chr1"][0][0], 121500000)
 

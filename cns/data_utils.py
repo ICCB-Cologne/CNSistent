@@ -10,6 +10,7 @@ import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 from cns.utils import log_info, select_CNS_samples, load_cns, load_samples, load_segments, find_bends, z_score_filter
 import matplotlib.pyplot as plt
+import os
 
 
 def get_root_path():
@@ -222,6 +223,7 @@ def save_cns_fig(fig_name, fig=None):
     fig : matplotlib.figure.Figure, optional
         Figure to save. If None, uses current figure.
     """
+    os.makedirs(img_path, exist_ok=True)
     if fig == None:
         fig = plt.gcf()
     fig.savefig(f"{img_path}/{fig_name}.png", bbox_inches="tight", transparent=False, dpi=300)

@@ -121,3 +121,5 @@ Depends on `data_cluster.py` for breakpoint clustering.
 *  `test_CLI.sh` : Executes the tests and outputs to `./tests/temp`.  
 *  `test_time.sh`: Runs the time tests for the data processing across `1-32` threads (log scale).
 *  `test_*`: unittest based tests of the public API. 
+
+To run tests, execute `python -m unittest discover -v` in the repository root. 

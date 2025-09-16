@@ -51,5 +51,6 @@ Cite: https://www.nature.com/articles/35057062
 
 ### Licenses
 
+Cite [Adam Streck, Roland F Schwarz, CNSistent integration and feature extraction from somatic copy number profiles, GigaScience, Volume 14, 2025, giaf104](https://doi.org/10.1093/gigascience/giaf104).
 The code is available under the [MIT License](https://bitbucket.org/schwarzlab/cnsistent/src/main/LICENSE.txt).
 The data and text files in the `data` and `docs` folders are available under the [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/deed.en). 
