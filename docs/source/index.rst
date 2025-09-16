@@ -46,6 +46,7 @@ Load CNS data from a CSV file and visualize the first 5 rows using a heatmap.
 .. code-block:: python
 
     import cns
+    import cns.data_utils as cdu
     samples_df, raw_df = cdu.main_load("raw", "TRACERx")
     cns.fig_heatmap(cns.cns_head(raw_df, 5), max_cn=6)
 
