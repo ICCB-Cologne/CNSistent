@@ -10,6 +10,7 @@ import pandas as pd
 from os.path import join as pjoin, abspath, dirname
 from cns.utils import log_info, select_CNS_samples, load_cns, load_samples, load_segments, find_bends, z_score_filter
 import matplotlib.pyplot as plt
+import os
 
 
 def get_root_path():
@@ -203,7 +204,7 @@ def main_load(segment_type: str, dataset="all", use_filter=True, concat=True, pr
         log_info(print_info, "No segment type specified. Returning sample data only.")
         return samples_df, None
         
-    file_type = "cns" if segment_type in ["imp", "raw", "fill"] else "bin"
+    file_type = "cns" if segment_type in ["imp", "raw", "align"] else "bin"
     cns_dict = {dataset: load_cns_file(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets}
     cns_dict = {k: select_CNS_samples(v, samples_dict[k]).reset_index(drop=True) for k, v in cns_dict.items()}
     cns_df = pd.concat(cns_dict.values()) if (concat or len(datasets) == 1) else cns_dict
@@ -222,6 +223,7 @@ def save_cns_fig(fig_name, fig=None):
     fig : matplotlib.figure.Figure, optional
         Figure to save. If None, uses current figure.
     """
+    os.makedirs(img_path, exist_ok=True)
     if fig == None:
         fig = plt.gcf()
     fig.savefig(f"{img_path}/{fig_name}.png", bbox_inches="tight", transparent=False, dpi=300)

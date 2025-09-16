@@ -1,8 +1,7 @@
 import numpy as np
-from cns.process.breakpoints import split_into_bins, make_breaks
-from cns.utils.conversions import cytobands_to_df, genome_to_segments, tuples_to_segments
 from cns.utils.assemblies import hg19
-from cns.utils.files import load_segments
+from cns.process.breakpoints import split_into_bins, make_breaks
+from cns.utils.conversions import breaks_to_segments, cytobands_to_df, genome_to_segments, segments_to_breaks, tuples_to_segments
 
 
 def count_segments(segs):
@@ -337,10 +336,9 @@ def _get_centromeres(assembly):
     return cents
 
 
-
-def regions_select(select, assembly=hg19):
+def make_segments(segment_type, assembly=hg19):
     """
-    Selects and returns specific genomic regions based on the selection criteria.
+    Selects and returns specific genomic regions of the selected type.
 
     Parameters
     ----------
@@ -353,7 +351,6 @@ def regions_select(select, assembly=hg19):
         - "gaps": Returns gap regions.
         - "centromeres": Returns centromeric regions.
         - "chrX": Returns the whole chromosome X (replace X with the chromosome number or name).
-        - <file_path>: Returns regions from a file.
     assembly : object, optional
         The genome assembly to use. Default is hg19.
 
@@ -368,65 +365,32 @@ def regions_select(select, assembly=hg19):
     ValueError
         If an invalid chromosome is specified in the select parameter.
     """
-    if select == "":
+    if segment_type == "":
         return {}
-    if select == "arms":
-        arm_breaks = make_breaks("arms", assembly)
+    if segment_type == "arms":
+        arm_breaks = make_breaks("arms", assembly=assembly)
         return {
             chrom: [(breaks[0], breaks[1], f"{chrom}p"), (breaks[1], breaks[2], f"{chrom}q")]
             for chrom, breaks in arm_breaks.items()
         }
-    elif select == "bands":
+    elif segment_type == "bands":
         bands_df = cytobands_to_df(assembly.cytobands)
         return {
             chrom: [(start, end, name) for start, end, name in zip(subset["start"], subset["end"], subset["name"])]
             for chrom, subset in bands_df.groupby("chrom")
         }
-    elif select == "whole":
+    elif segment_type == "whole":
         return genome_to_segments(assembly)
-    elif select == "gaps":
+    elif segment_type == "gaps":
         return tuples_to_segments(assembly.gaps)
-    elif select == "centromeres":
+    elif segment_type == "centromeres":
         return _get_centromeres(assembly)
-    elif select[0:3] == "chr":
-        if select not in assembly.aut_names:
-            raise ValueError(f"Invalid chromosome {select} for assembly {assembly.name}")
-        return {select: [(0, assembly.chr_lens[select], select)]}
+    elif segment_type[0:3] == "chr":
+        if segment_type not in assembly.aut_names:
+            raise ValueError(f"Invalid chromosome {segment_type} for assembly {assembly.name}")
+        return {segment_type: [(0, assembly.chr_lens[segment_type], segment_type)]}
     else:
-        return load_segments(select)
-
-
-def process_segments(segs, remove_segs=None, filter_size=-1):
-    """
-    Processes segments by removing specified segments and filtering by size.
-
-    Parameters
-    ----------
-    input_data : dict
-        Dictionary of input segments with chromosome names as keys and list of segments as values.
-    remove_segs : dict, optional
-        Dictionary of segments to remove with chromosome names as keys and list of segments as values. Default is None.
-    filter_size : int, optional
-        Minimum size of segments to keep. Default is -1 (no filtering).
-
-    Returns
-    -------
-    dict
-        Dictionary of processed segments.
-    """
-    if not isinstance(segs, dict):
-        raise ValueError(f"input_segs must a dictionary of segments, got {type(remove_segs)}")
-    if filter_size > 0:
-        segs = filter_cons_size(segs, filter_size)
-    if remove_segs != None:
-        if not isinstance(remove_segs, dict):
-            raise ValueError(f"remove_segs must be None or a dictionary of segments, got {type(remove_segs)}")
-        if filter_size > 0:
-            remove_segs = filter_cons_size(remove_segs, filter_size)
-        segs = segment_difference(segs, remove_segs)
-        if filter_size > 0:
-            segs = filter_cons_size(segs, filter_size)
-    return segs
+        raise ValueError(f"Unable to create segments of type {segment_type}")
 
 
 def get_consecutive_segs(segs):
@@ -455,3 +419,65 @@ def get_consecutive_segs(segs):
             res.append([seg])
         last_end = seg[1]
     return res
+
+
+def align_segs_to_assembly(segs, sorted=False, assembly=hg19):
+    """
+    Aligns segments to the reference assembly by adding missing segments and adjusting boundaries.
+
+    Parameters
+    ----------
+    segs : dict
+        A dictionary with chromosome names as keys and lists of segments as values.
+    sorted : bool, optional
+        If True, sorts the segments for each chromosome. Default is False.
+    assembly : object, optional
+        The genome assembly to use. Default is hg19.
+
+    Returns
+    -------
+    dict
+        A dictionary with chromosome names as keys and lists of segments as values.
+    """
+    segs = segs.copy()
+    for chr, end in assembly.chr_lens.items():
+        if chr not in segs or len(segs[chr]) == 0:
+            segs[chr] = [(0, end)]
+        else:
+            if not sorted:
+                segs[chr].sort(key=lambda x: (x[0]))
+            if segs[chr][0][0] > 0:
+                segs[chr] = [(0, segs[chr][0][0], f"{chr}_start")] + segs[chr]
+            if segs[chr][-1][1] < end:
+                segs[chr].append((segs[chr][-1][1], end, f"{chr}_end"))
+    return segs
+
+
+def cns_df_to_segments(segs_df, process=None):
+    """
+    Converts a DataFrame of segments to a dictionary of segments by chromosome.
+
+    Parameters
+    ----------
+    segs_df : pd.DataFrame
+        A DataFrame containing segment information with columns "chrom", "start", "end", and optionally "name".
+    process : str, optional
+        The processing step to apply to the segments. Can be "merge" or "unify" or None.
+
+    Returns
+    -------
+    dict
+        A dictionary with chromosome names as keys and lists of segments as values.
+    """
+    segs = {}
+    for chrom, group in segs_df.groupby("chrom"):
+        names = group["name"] if "name" in group.columns else [f"{chrom}_{i}" for i in range(len(group))]
+        segs[chrom] = list(zip(group["start"], group["end"], names))
+    if process == "merge":
+        return merge_segments(segs)
+    elif process == "unify":
+        input_breaks = segments_to_breaks(segs)
+        return breaks_to_segments(input_breaks)
+    elif process is not None:
+        raise ValueError(f"Unknown segment processing method '{process}'")
+    return segs

@@ -226,7 +226,7 @@ def canonize_name(cns_df, print_info=False):
         log_info(print_info, f"Renamed column {name_col} to name.")
     return cns_df
 
-def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
+def canonize_cns_df(cns_df, input_cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
     """Canonizes copy number DataFrame by standardizing all columns.
     
     Applies standard canonization steps in order:
@@ -239,7 +239,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     Args:
         cns_df (pd.DataFrame): Copy number DataFrame to canonize
         assembly: Reference assembly for chromosome validation
-        cn_cols (str|list, optional): Copy number column(s) to validate
+        input_cn_columns (str|list, optional): Copy number column(s) to validate
         print_info (bool): Whether to print info messages
         
     Returns:
@@ -251,14 +251,13 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     """
     # convert columns to strings
     cns_df.columns = cns_df.columns.astype(str)
-    cn_columns = get_cn_cols(cns_df, cn_columns)
+    cn_columns = get_cn_cols(cns_df, input_cn_columns)
 
     cns_df = canonize_sample_id(cns_df, print_info)
     cns_df = canonize_chroms(cns_df, assembly, print_info)
     cns_df = canonize_positions(cns_df, print_info)
     cns_df = canonize_name(cns_df, print_info)
 
-    cn_columns = get_cn_cols(cns_df, cn_columns)  
     log_info(print_info, f"Using CN columns: {cn_columns}")
     if len(cn_columns) == 2 and order_columns:
         major_cn = cns_df[[cn_columns[0], cn_columns[1]]].max(axis=1)
@@ -268,7 +267,7 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
         cns_df["minor_cn"] = minor_cn
         cn_columns = ["major_cn", "minor_cn"]
         log_info(print_info, f"Converted columns to ordered")
-    else:
+    elif input_cn_columns == None:
         cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns, print_info)
 
     select_cols = ["sample_id", "chrom", "start", "end"] + cn_columns
@@ -278,8 +277,8 @@ def canonize_cns_df(cns_df, cn_columns=None, order_columns=False, assembly=hg19,
     cns_df = cns_df[select_cols]
     # set dtypes
     col_types = {"sample_id": str, "chrom": str, "start": int, "end": int}
-    for cn_col in cn_columns:
-        col_types[cn_col] = float
+    for cn_columns in cn_columns:
+        col_types[cn_columns] = float
     cns_df = cns_df.astype(col_types)
     return cns_df
 

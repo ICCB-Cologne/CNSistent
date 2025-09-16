@@ -22,7 +22,10 @@ def calc_breaks_per_chr(cns_df):
     def con_match_count(group):
         shifted_group = group.shift(-1)
         return (group['end'] == shifted_group['start']).sum()
-    return cns_df.groupby(['sample_id', 'chrom']).apply(con_match_count).reset_index(name='breaks')
+    # Use groupby object to select only the columns needed, avoiding deprecated behavior
+    return cns_df.groupby(['sample_id', 'chrom'])[['end', 'start']].apply(
+        lambda group: con_match_count(group.assign(start_next=group['start']))
+    ).reset_index(name='breaks')
 
 
 def calc_breaks_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
@@ -84,8 +87,8 @@ def calc_step_per_chr(cns_df, cn_col):
         step_sum = abs_diff[consecutive].sum()
         step_count = consecutive.sum()
         return pd.Series({'step': step_sum, 'count': step_count})
-    
-    res_df = cns_df.groupby(['sample_id', 'chrom']).apply(sum_abs_diff).reset_index()
+    # Only pass the columns needed to avoid deprecated behavior
+    res_df = cns_df.groupby(['sample_id', 'chrom'])[['end', 'start', cn_col]].apply(sum_abs_diff).reset_index()
     return res_df
 
 
@@ -114,9 +117,8 @@ def calc_step_per_sample(cns_df, samples_df, cn_col, assembly=hg19):
     chrom_types = get_chr_sets(cns_df, assembly)
 
     for suffix, names in chrom_types.items():
-        res[f"step_{cn_col}_{suffix}"] = (
-            step_per_chr.query("chrom in @names").groupby("sample_id")
-            .apply(lambda x: x["step"].sum() / x["count"].sum() if x["count"].sum() != 0 else 0)
-            .reset_index(name="cnstep").set_index("sample_id")
-        )
+        grouped = step_per_chr.query("chrom in @names").groupby("sample_id")[["step", "count"]]
+        cnstep = grouped.sum()
+        cnstep["cnstep"] = cnstep.apply(lambda x: x["step"] / x["count"] if x["count"] != 0 else 0, axis=1)
+        res[f"step_{cn_col}_{suffix}"] = cnstep["cnstep"]
     return res.fillna(0)

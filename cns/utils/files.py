@@ -1,9 +1,13 @@
 from os.path import abspath, exists
 import numpy as np
 import pandas as pd
+from io import StringIO
 
+from cns.process.segments import make_segments
+from cns.process.segments import cns_df_to_segments
+from cns.utils.logging import log_info
 from cns.utils.canonization import canonize_cns_df, canonize_sample_id
-from cns.utils.conversions import cns_df_to_segments, segments_to_cns_df
+from cns.utils.conversions import segments_to_cns_df
 from cns.utils.logging import log_warn, log_info
 from cns.utils.assemblies import hg19
 
@@ -17,7 +21,7 @@ def _get_separator(path):
         raise ValueError(f"Unknown file format for file {path}, cannot determine separator.")
 
 
-def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, assembly=hg19, print_info=False):
+def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, order_columns=False, assembly=hg19, print_info=False):
     """
     Loads a CNS file into a pandas DataFrame.
     Loading includes canonization process, where the positions column names are standardized "sample_id", "chrom", "start", "end".
@@ -37,6 +41,8 @@ def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, as
         If True, sorts the DataFrame by sample_id, chrom, and start.
     change_coords : bool, optional
         If True, changes the coordinates to 0-based.
+    order_columns : bool, optional
+        If True and there are two columns, the individual will be ordered as major/minor instead of their exising order and renamed to major_cn/minor_cn
     assembly : object, optional
         Genome assembly to use. Default is hg19.
     print_info : bool, optional
@@ -51,7 +57,7 @@ def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, as
         raise ValueError(f"File {path} not found.")
     sep = sep if sep is not None else _get_separator(path)
     cns_df = pd.read_csv(path, sep=sep, low_memory=False)
-    cns_df = canonize_cns_df(cns_df, cn_columns, False, assembly, print_info)
+    cns_df = canonize_cns_df(cns_df, cn_columns, order_columns, assembly, print_info)
     if change_coords:
         cns_df.loc[:, "start"] -= 1
     if sort:
@@ -59,7 +65,7 @@ def load_cns(path, cn_columns=None, sep=None, sort=False, change_coords=True, as
     return cns_df
 
 
-def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
+def save_cns(cns_df, path, sep=None, sort=False, change_coords=True, mode="w"):
     """
     Saves a CNS DataFrame to a file. Coordinates are 1-based on output by default.
 
@@ -80,11 +86,12 @@ def save_cns(cns_df, path, sort=False, change_coords=True, mode="w"):
     -------
     None
     """
+    sep = sep if sep is not None else _get_separator(path)
     if sort:
         cns_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
     if change_coords:
         cns_df.loc[:, "start"] += 1
-    cns_df.to_csv(path, sep="\t", index=False, mode=mode, header=mode=="w")
+    cns_df.to_csv(path, sep=sep, index=False, mode=mode, header=mode=="w")
     if change_coords:
         cns_df.loc[:, "start"] -= 1
 
@@ -165,7 +172,7 @@ def fill_sex_if_missing(cns_df, samples_df):
     """
     res_df = samples_df.copy()
     # Set found_sex to True for each sample if there is chrY, otherwise set it to False
-    found_sex = cns_df.groupby("sample_id").apply(lambda x: "chrY" in x["chrom"].values)
+    found_sex = cns_df.groupby("sample_id")["chrom"].apply(lambda chroms: "chrY" in chroms.values)
     found_sex = found_sex.map({True: "xy", False: "xx"})
     if "sex" in res_df.columns:
         res_df["found_sex"] = found_sex
@@ -176,22 +183,8 @@ def fill_sex_if_missing(cns_df, samples_df):
                     "This may result in an incorrect proportions of sex-chromosome features.")          
         res_df.drop(columns=["found_sex"], inplace=True)      
     # replace values in samples["sex"] with found_sex if samples["sex"] is not xy or xx
-    res_df.loc[~res_df["sex"].isin(["xy", "xx"]), "sex"] = found_sex
-    return res_df
-
-
-def _find_y_column(cns_df, samples_df, cn_columns):
-    res_df = samples_df.copy()
-    res_df["y_col"] = "NA"
-    for sample_id, group_df in cns_df.groupby("sample_id"):
-        chr_y = group_df.query("chrom == 'chrY'")
-        if len(chr_y) > 0:
-            if (chr_y[cn_columns[1]] == 0).all():
-                res_df.loc[sample_id, "y_col"] = cn_columns[0]
-            elif (chr_y[cn_columns[0]] == 0).all():
-                res_df.loc[sample_id, "y_col"] = cn_columns[1]
-            else:
-                log_warn(f"Sample {sample_id} has non-zero chrY CNs for both haplotypes.") 
+    mask = ~res_df["sex"].isin(["xy", "xx"])
+    res_df.loc[mask, "sex"] = found_sex[res_df.index[mask]].values
     return res_df
 
 
@@ -270,7 +263,11 @@ def load_segments(path):
     path = abspath(path)
     if not exists(path):
         raise ValueError(f"File {path} not found.")
-    segs_df = pd.read_csv(path, sep="\t", header=(None if is_bed else 0))
+    
+    # Read file, ignore lines that do not start with 'chr'
+    with open(path, "r") as f:
+        lines = [line for line in f if line.lstrip().startswith("chr")]
+    segs_df = pd.read_csv(StringIO("".join(lines)), sep="\t", header=(None if is_bed else 0))
     # check that columns "chrom", "start" and "end" exist, more colums may be present
     if not is_bed:
         if not all([col in segs_df.columns for col in ["chrom", "start", "end"]]):
@@ -292,3 +289,16 @@ def load_segments(path):
         segs_df["name"] = np.arange(len(segs_df))
 
     return cns_df_to_segments(segs_df)
+
+
+def obtain_segments(segs_source, in_cols = None, assembly = hg19, print_info = False):
+    if segs_source[-4:] == ".bed":
+        log_info(print_info, f"Loading input file {segs_source}...")
+        return load_segments(segs_source)
+    elif segs_source[-4:] == ".tsv":
+        log_info(print_info, f"Loading CNS input file {segs_source}...")
+        input_cns = load_cns(segs_source, cn_columns=in_cols, assembly=assembly, print_info=print_info)
+        return cns_df_to_segments(input_cns, process="unify")
+    else:
+        log_info(print_info, f"Creating {segs_source} segments...")
+        return make_segments(segs_source, assembly)

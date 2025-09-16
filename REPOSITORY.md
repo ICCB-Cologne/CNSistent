@@ -109,7 +109,7 @@ Contains notebooks used for data processing and analysis:
 *  `simulate_SOX2_overlay.ipynb`: Plots the SOX2 gene overlay on the lung cancer data. 
 
 **`scripts/`**
-*  `data_process.sh`: Fills and imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy. 
+*  `data_process.sh`: Imputes the raw data. Also calculates the data stats, in particular coverage and aneuploidy. 
 *  `data_aggregate.sh`: Creates various segmentations, and aggregates the preprocessed data based on these segmentations. 
 Depends on `data_cluster.py` for breakpoint clustering.
 *  `data_time.sh`: Run time tests for the data processing across `1-32` threads (log scale). 
@@ -121,3 +121,5 @@ Depends on `data_cluster.py` for breakpoint clustering.
 *  `test_CLI.sh` : Executes the tests and outputs to `./tests/temp`.  
 *  `test_time.sh`: Runs the time tests for the data processing across `1-32` threads (log scale).
 *  `test_*`: unittest based tests of the public API. 
+
+To run tests, execute `python -m unittest discover -v` in the repository root. 
