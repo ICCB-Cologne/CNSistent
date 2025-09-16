@@ -33,8 +33,10 @@ def _aggregate_regs(sample_id, chrom, values, seg_start, seg_end, seg_name, agg_
             row = values[row_id]
             start = max(row[0], seg_start)
             end = min(row[1], seg_end)
-            seg_cns.append(row[2:])
-            weights.append(end - start)
+            weight = end - start
+            if weight > 0:
+                seg_cns.append(row[2:])
+                weights.append(weight)
         row_id += 1
     
     if seg_cns == []:

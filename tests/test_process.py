@@ -5,8 +5,25 @@ import io
 
 from cns.process import *
 from cns.utils import hg19, hg38, segments_to_cns_df, tuples_to_segments
+from cns.pipelines import main_segment
 
-class TestSegments(unittest.TestCase):        
+class TestSegments(unittest.TestCase):    
+    def setUp(self):
+        self.assembly = type('Assembly', (object,), {
+            'aut_names': ['chr1', 'chr2', 'chr3'],
+            'chr_lens':{'chr1': 100, 'chr2': 200, 'chr3': 300, 'chrX': 100, 'chrY': 100},
+            'cum_starts': {'chr1': 0, 'chr2': 100, 'chr3': 300, 'chrX': 600, 'chrY': 700},
+            'aut_len': 300,
+            'sex_names': ['chrX', 'chrY'],
+            'chr_names': ['chr1', 'chr2', 'chr3'],
+            'chr_x': 'chrX',
+            'chr_y': 'chrY'
+        })
+        self.samples_df = pd.DataFrame({
+            'sex': ['xx', 'xy']
+        }, index=['s1', 's2'])
+    
+    
     def test_do_segments_overlap(self):
         segs_a = {1: [(0, 5), (4, 8)], 2: [(10, 15)]}
         segs_b = {1: [(5, 10)], 2: [(14, 20)], 3: [(25, 30)]}
@@ -64,41 +81,40 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(actual_output, expected_output)
 
     def test_regions_select(self):        
-        res = regions_select("whole")
+        res = make_segments("whole")
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 1)
         self.assertEqual(res["chr1"][0][0], 0)
         self.assertEqual(res["chr1"][0][2], "chr1")
 
-        res = regions_select("arms")
+        res = make_segments("arms")
         self.assertEqual(len(res), 24)
         self.assertEqual(len(res["chr1"]), 2)
         self.assertEqual(res["chr1"][0][2], "chr1p")
 
-        res = regions_select("bands")
+        res = make_segments("bands")
         self.assertEqual(len(res), 24)
         self.assertEqual(res["chr1"][0][2], "p36.33")
         self.assertEqual(res["chr10"][-1][1], hg19.chr_lens["chr10"])
 
         filter_size = 0
-        select = regions_select("whole")
-        remove = regions_select("gaps")
+        select = make_segments("whole")
+        remove = make_segments("gaps")
         self.assertGreater(len(remove), 0)
-        segs = process_segments(select, remove, filter_size)
+        segs = main_segment(select, remove, filter_size)
         self.assertGreater(len(segs["chr1"]), 0)
         self.assertEqual(remove["chr1"][0][1], segs["chr1"][0][0])  # check if the first segment is a gap
 
     def test_arms_gaps(self):
-        select = regions_select("whole")
-        remove = regions_select("gaps")
-        segs = process_segments(select, remove, 1000000)
+        select = make_segments("whole")
+        remove = make_segments("gaps")
+        segs = main_segment(select, remove, filter_size=1000000)
         segs_df = segments_to_cns_df(segs)
         self.assertEqual(segs_df.query("chrom == 'chr1'").shape[0], 2)
         self.assertEqual(segs_df.query("chrom == 'chr13'").shape[0], 1)
 
     def test_cent_regions(self):
-        regions = regions_select("centromeres")
-        print(regions)
+        regions = make_segments("centromeres")
         self.assertEqual(len(regions), 24)
         self.assertEqual(regions["chr1"][0][0], 121500000)
 
@@ -108,11 +124,11 @@ class TestSegments(unittest.TestCase):
 
         filter_size = 1
         expected_result = {1: [(15, 20), (20, 30)]}
-        result = process_segments(select, remove, filter_size)
+        result = main_segment(select, remove, filter_size=filter_size)
 
         filter_size = 6
         expected_result = {1: [(20, 30)], 2: []}
-        result = process_segments(select, remove, filter_size)
+        result = main_segment(select, remove, filter_size=filter_size)
 
         self.assertEqual(result, expected_result)
 
@@ -141,6 +157,24 @@ BCORL1	chrX	129115083	129192058"""
         self.assertEqual(res["chr1"][0][0], 2200000) # cut by the other segment
         res = split_segments(gene_segs, 100000)
         self.assertGreater(len(res["chr2"]), len(gene_segs["chr2"]))
+
+    def test_align_segs_to_assembly(self):
+        segs = {
+            "chr1": [(0, 50, "gene1"), (50, 100, "gene2")],
+            "chr2": [(50, 150, "gene3")],
+            "chr3": []
+        }
+        aligned = align_segs_to_assembly(segs, assembly=self.assembly)
+        self.assertEqual(len(aligned["chr1"]), 2)
+        self.assertEqual(len(aligned["chr2"]), 3)
+        self.assertEqual(len(aligned["chr3"]), 1)
+        self.assertEqual(aligned["chr1"][0][0], 0)
+        self.assertEqual(aligned["chr1"][-1][1], 100)
+        self.assertEqual(aligned["chr2"][0][0], 0)
+        self.assertEqual(aligned["chr2"][-1][1], 200)
+        self.assertEqual(aligned["chr3"][0][0], 0)
+        self.assertEqual(aligned["chr3"][-1][1], 300)
+        self.assertEqual(len(segs["chr2"]), 1)
 
 # TODO: Add sex chromosome checks
 class TestImputation(unittest.TestCase):
@@ -200,11 +234,8 @@ class TestImputation(unittest.TestCase):
         result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
-
-        result = cns_impute(result, self.samples_df, print_info=False)
-
+        result = cns_infer(result, self.samples_df, print_info=False)
         result = merge_cns_df(result, print_info=False)
-
         result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.at[4, "end"], 112)
         self.assertEqual(result.at[5, "end"], 125)
@@ -217,12 +248,25 @@ class TestImputation(unittest.TestCase):
         result = add_tails(self.cns_df, self.assembly)
         result = fill_gaps(result, print_info=False)    
         result = add_missing(result, self.samples_df, self.assembly, print_info=False)
-        result = cns_impute(result, self.samples_df, method='diploid', print_info=False)
+        result = cns_infer(result, self.samples_df, method='diploid', print_info=False)
         result = merge_cns_df(result, print_info=False)
         result = fill_nans_with_zeros(result, print_info=False)  
         self.assertEqual(result.major_cn.isnull().sum(), 0)
         self.assertEqual(result.shape[0], 10)
         self.assertEqual(result.at[3, "minor_cn"], 1)
+
+    def test_infer_segs(self):
+        cns_df = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's1', 's1'],
+            'chrom': ['chr1', 'chr1', 'chr1', 'chr1'],
+            'start': [0, 100, 200, 300],
+            'end': [100, 150, 300, 400],
+            'major_cn': [1, np.nan, 3, 2],
+            'minor_cn': [1, 2, 1, 0]
+        }) 
+        res_df = cns_infer(cns_df, self.samples_df)
+        self.assertEqual(res_df.at[1, "major_cn"], 1.0) # should ignore the following 3
+
 
 class TestBreakpoints(unittest.TestCase):
     def setUp(self):
@@ -340,7 +384,7 @@ class TestAggregation(unittest.TestCase):
             'start': [0, 50, 100, 200, 300, 400, 0, 50, 99, 50, 100, 120],
             'end': [50, 100, 150, 300, 400, 500, 50, 99, 100, 100, 120, 130],
             'major_cn': [1, 2, 1, 3, 4, 5, 2, 1, 0, 2, 1, 1],
-            'minor_cn': [0, 2, np.NaN, 0, 4, 3, 1, 0, 0, 1, 0, 1],
+            'minor_cn': [0, 2, np.nan, 0, 4, 3, 1, 0, 0, 1, 0, 1],
         })       
         self.samples = pd.DataFrame({
             'sample_id': ['s1', 's2', 's3', 's4'],
