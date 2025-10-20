@@ -263,8 +263,10 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
     for j, cn_column in enumerate(cn_columns):
         ax = axes[j] if n_columns > 1 else axes
 
+        min_cn = cns_df[cn_column].min()
         max_cn = cns_df[cn_column].max()
-        plot_chr_bg(ax, assembly=assembly, y_min = -1, y_max=max_cn + 1, alpha=0.2)
+        pad = max(0.5, (max_cn - min_cn) * 0.1)
+        plot_chr_bg(ax, assembly=assembly, y_min = min_cn - pad, y_max=max_cn + pad, alpha=0.2)
         for i, (group_key, group_df) in enumerate(groups_df):
             color = colors[i]
             label = group_key
