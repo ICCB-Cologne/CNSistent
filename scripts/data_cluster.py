@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
 	select = cns.cns_df_to_segments(cns_df, process="unify")
 	remove = cns.make_segments("gaps")
-	clustered = cns.main_segment(select, remove, merge_dist=dist_int, filter_size=dist_int//10, print_info=True)
+	clustered = cns.main_segment(select, remove, merge_dist=dist_int, filter_size=dist_int//10, pad_size=dist_int//10, print_info=True)
 	file = os.path.join(cdu.out_path, f'segs_merge_{args.dist}.bed')
 	print("Saving to file:", file)
 	cns.save_segments(clustered, file)

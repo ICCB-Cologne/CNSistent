@@ -358,6 +358,7 @@ def main_segment(
     merge_dist=-1,
     keep_ends=True,
     filter_size=-1,
+    pad_size=0,
     align_to_assembly=False,
     assembly=hg19,
     print_info=False,
@@ -401,6 +402,9 @@ def main_segment(
     if remove_segs != None:
         if not isinstance(remove_segs, dict):
             raise ValueError(f"remove_segs must be None or a dictionary of segments, got {type(remove_segs)}")
+        if pad_size > 0:
+            remove_segs = pad_segments(remove_segs, pad_size, assembly)
+            remove_segs = merge_segments(remove_segs, True)
         if filter_size > 0:
             remove_segs = filter_cons_size(remove_segs, filter_size)
         select_segs = segment_difference(select_segs, remove_segs)
@@ -463,6 +467,7 @@ def main_seg_agg(
     split_size=-1,
     merge_dist=-1,
     filter_size=-1,
+    pad_size=0,
     cn_columns=None,
     assembly=hg19,
     print_info=False,
@@ -486,6 +491,8 @@ def main_seg_agg(
         Distance in base pairs to merge nearby segments. Default is -1 (no merging).
     filter_size : int, optional
         Minimum size in base pairs to filter segments. Default is -1 (no filtering).
+    pad_size : int, optional
+        Size in base pairs to pad segments on both sizes. Default is 0 (no padding).
     cn_columns : list of str, optional
         List of column names for copy number data. If None, columns are inferred from `cns_df`.
     assembly : Assembly object, optional
@@ -498,6 +505,6 @@ def main_seg_agg(
     pandas.DataFrame
         DataFrame with aggregated CNS data.
     """
-    segs = main_segment(select_segs, remove_segs, split_size, merge_dist, filter_size, assembly, print_info)
+    segs = main_segment(select_segs, remove_segs, split_size, merge_dist, filter_size, pad_size, assembly, print_info)
     res_df = main_aggregate(cns_df, segs, how, cn_columns, print_info)
     return res_df

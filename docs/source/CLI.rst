@@ -307,8 +307,8 @@ Binning can be done on the whole genome, or on selected segments. Additionally, 
     1.2 If ``--filter`` is provided, segments that are strictly smaller than the value are removed.
 2. If ``--remove`` is provided, these segments are subtracted from the selection. The segments are removed based on the ``chrom``, ``start``, and ``end`` columns. The segments can be removed by chromosome, chromosome arm, or chromosome band.
     2.1 Value ``gaps`` can be used to remove genomic gaps (regions of low mappability) from the selection.
-
-    2.2 If ``--filter`` is provided, segments that are strictly smaller than the value are removed both before and after the subtraction process, i.e. a if a remove segment is smaller than the filter value, it is not used in subtraction. If the subtraction results in a segments smaller than the filter, it is likewise not used for binning.
+    2.2 If ``--pad`` is provided, the removal segments are padded on both sides by the given size in base pairs before subtraction.
+    2.3 If ``--filter`` is provided, segments that are strictly smaller than the value are removed both before and after the subtraction process, i.e. a if a remove segment is smaller than the filter value, it is not used in subtraction. If the subtraction results in a segments smaller than the filter, it is likewise not used for binning.
 3. If ``--merge`` is provided existing breakpoints are merged to match the specified merge distance.
 4. If ``--split`` is provided, the data is binned into segments of the given size. The segments are created by aggregating the CN values of the selected segments.
 

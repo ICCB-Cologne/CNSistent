@@ -99,12 +99,20 @@ def _parse_args():
         required=False,
         default=-1,
     )
+
+    parser.add_argument(
+        "--pad",
+        type=int,
+        help="Size in base pairs to pad removal segments on both sides. Default is 0 (no padding).",
+        required=False,
+        default=0,
+    )
     
     parser.add_argument(
         "--keep-ends",
         help="If clustering (merge > 0) is enabled, do not cluster start and end breakpoints of each chromosome",
         action="store_true",
-        default=True,
+        default=False,
     )
 
     parser.add_argument(

@@ -118,6 +118,11 @@ def merge_segments(segs, is_sorted=False):
 
             # If the current segment starts at the end of the last one
             if current[0] <= last_end:
+                name = current[2] if len(current) > 2 else None
+                if last_name is None and name is not None:
+                    last_name = name
+                elif last_name is not None and name is not None:
+                    last_name = f"{last_name}_{name}"                
                 merged[chr][-1] = (last_start, current[1]) if last_name is None else (last_start, current[1], last_name)
             else:
                 # Add the current segment as is
@@ -218,6 +223,38 @@ def segment_difference(segs_a, segs_b, sorted=False):
             diffs[chr] += subsections
 
     return diffs
+
+
+def pad_segments(chr_segs, pad_size, assembly=hg19):
+    """
+    Pads segments by a specified size on both sides.
+
+    Parameters
+    ----------
+    segs : dict
+        Dictionary of segments with chromosome names as keys and list of segments as values.
+    pad_size : int
+        Size to pad segments on both sides.
+    assembly : object, optional
+        Genome assembly to use. Default is `hg19`.
+
+    Returns
+    -------
+    dict
+        Dictionary of padded segments.
+    """
+    res = {}
+    for chrom, seg_group in chr_segs.items():
+        res[chrom] = []
+        for seg in seg_group:
+            new_start = max(0, seg[0] - pad_size)
+            new_end = min(seg[1] + pad_size, assembly.chr_lens[chrom])
+            if len(seg) > 2:
+                res[chrom].append((new_start, new_end, seg[2]))
+            else:
+                res[chrom].append((new_start, new_end))
+    return res
+
 
 
 def filter_cons_size(chr_segs, min_size):

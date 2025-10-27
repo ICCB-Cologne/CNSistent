@@ -97,11 +97,10 @@ class TestSegments(unittest.TestCase):
         self.assertEqual(res["chr1"][0][2], "p36.33")
         self.assertEqual(res["chr10"][-1][1], hg19.chr_lens["chr10"])
 
-        filter_size = 0
         select = make_segments("whole")
         remove = make_segments("gaps")
         self.assertGreater(len(remove), 0)
-        segs = main_segment(select, remove, filter_size)
+        segs = main_segment(select, remove, filter_size=0)
         self.assertGreater(len(segs["chr1"]), 0)
         self.assertEqual(remove["chr1"][0][1], segs["chr1"][0][0])  # check if the first segment is a gap
 
