@@ -451,6 +451,41 @@ class TestClustering(unittest.TestCase):
         self.assertEqual(clust2[0], (2, 8, 'clust_0'))
         self.assertEqual(clust2[2], (14, 20, 'clust_2'))
 
+    def test_pad_segments(self):
+        from types import SimpleNamespace
+        from cns.process.segments import pad_segments
+        # Mock assembly with chromosome lengths
+        assembly = SimpleNamespace(chr_lens={'chr1': 1000, 'chr2': 2000})
+        # Input segments: no names
+        segs = {
+            'chr1': [(100, 200), (300, 400)],
+            'chr2': [(0, 100), (1900, 2000)]
+        }
+        pad_size = 50
+        padded = pad_segments(segs, pad_size, assembly=assembly)
+        self.assertEqual(padded['chr1'][0], (50, 250))
+        self.assertEqual(padded['chr1'][1], (250, 450))
+        self.assertEqual(padded['chr2'][0], (0, 150))
+        self.assertEqual(padded['chr2'][1], (1850, 2000))
+
+        merged = merge_segments(padded)
+        self.assertEqual(merged['chr1'], [(50, 450)])
+
+        # With names
+        assembly2 = SimpleNamespace(chr_lens={'chr1': 500})
+        segs2 = {'chr1': [(10, 20, 'segA'), (480, 500, 'segB')]
+        }
+        pad_size2 = 15
+        padded2 = pad_segments(segs2, pad_size2, assembly=assembly2)
+        self.assertEqual(padded2['chr1'][0], (0, 35, 'segA'))
+        self.assertEqual(padded2['chr1'][1], (465, 500, 'segB'))
+        # Boundary case
+        assembly3 = SimpleNamespace(chr_lens={'chrX': 100})
+        segs3 = {'chrX': [(0, 10), (90, 100)]}
+        pad_size3 = 20
+        padded3 = pad_segments(segs3, pad_size3, assembly=assembly3)
+        self.assertEqual(padded3['chrX'][0], (0, 30))
+        self.assertEqual(padded3['chrX'][1], (70, 100))
 
 
 if __name__ == "__main__":

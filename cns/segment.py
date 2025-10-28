@@ -180,6 +180,7 @@ def main():
         args.merge, 
         args.keep_ends,
         args.filter, 
+        args.pad,
         args.align_to_assembly,
         assembly,
         print_info

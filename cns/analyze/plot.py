@@ -251,6 +251,8 @@ def _fig_common(cns_df, f_plot, cn_columns=None, colors=None, size=1, assembly=h
     cn_columns = _get_columns(cns_df, cn_columns)
     groups_df = cns_df.groupby("sample_id")
     line_count = len(groups_df)
+    if line_count > 100:
+        raise ValueError("Too many samples to plot, please plot fewer than 100 samples at a time (e.g., group by cancer type or other metadata).")
     colors = _get_colors(colors, line_count)
     alpha = (1 / line_count) ** (1 / 3) if f_plot == plot_lines or f_plot == plot_steps else 1 / line_count
 
