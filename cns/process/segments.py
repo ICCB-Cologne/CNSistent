@@ -518,3 +518,28 @@ def cns_df_to_segments(segs_df, process=None):
     elif process is not None:
         raise ValueError(f"Unknown segment processing method '{process}'")
     return segs
+
+
+def add_arms(cns_df):    
+    """
+    Adds a column to the CNS DataFrame indicating the chromosome arm for each segment. (p or q)
+    Parameters
+    ----------
+    cns_df : pd.DataFrame
+        A DataFrame containing segment information with columns "chrom", "start", and "end".
+    Returns
+    -------
+    pd.DataFrame
+        The input DataFrame with an additional column "arm" indicating the chromosome arm.
+    """
+    arms = make_segments("arms")
+    def get_arm_for_segment(row):
+        chrom = row["chrom"]
+        end = row["end"]
+        if end <= arms[chrom][0][1]:
+            return arms[chrom][0][2][-1:]
+        else:
+            return arms[chrom][1][2][-1:]
+    
+    cns_df["arm"] = cns_df.apply(get_arm_for_segment, axis=1)
+    return cns_df
