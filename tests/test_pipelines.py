@@ -69,7 +69,7 @@ class TestPipelines(unittest.TestCase):
     
     def test_main_ploidy(self):
         res_df = main_ploidy(self.cns, self.samples, assembly=self.assembly)
-        self.assertEqual(res_df.shape, (4, 21))
+        self.assertEqual(res_df.shape, (4, 22))
         self.assertTrue(np.all(res_df['ane_both_aut'] <= res_df['ane_any_aut']))   
         self.assertEqual(res_df.loc['s1', 'ane_any_sex'], 0)
         self.assertEqual(res_df.loc['s2', 'ane_any_sex'], 1/2)

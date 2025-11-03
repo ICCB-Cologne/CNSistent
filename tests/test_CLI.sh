@@ -21,9 +21,9 @@ run_and_compare() {
   expected_file="./out/$(basename "${output_file}")"
 
   # Compare the output with the expected output
-  if ! diff "${output_file}" "${expected_file}" > /dev/null; then
+if ! diff --strip-trailing-cr "${output_file}" "${expected_file}" > /dev/null; then
     echo -e "\033[0;31m Test failed: Output of $1 does not match expected output ${expected_file}"
-	diff "${output_file}" "${expected_file}"
+  diff --strip-trailing-cr "${output_file}" "${expected_file}"
   echo -e "Failed on command $1"
     exit 1
   fi
@@ -43,7 +43,7 @@ commands=(
   "segment ./temp/test_cns_align.tsv --split 1000000 --out ./temp/test_segs_1MB_gaps.bed --remove gaps --filter 500000 --verbose"
   "segment arms --out ./temp/test_segs_arms_gaps.bed --remove gaps --filter 100000"
   "segment ../data/COSMIC_consensus_genes.bed --out ./temp/test_COSMIC_gaps.bed --remove gaps --filter 100000"
-  "segment ./temp/test_cns_align.tsv --merge 100000 --out ./temp/mcs_regions.bed --verbose "
+  "segment ./temp/test_cns_align.tsv --merge 100000 --out ./temp/mcs_regions.bed --verbose --keep-ends"
   "cns aggregate ./temp/test_cns_align.tsv --segments ./temp/test_segs_1MB.bed --out ./temp/test_cns_1MB.tsv --verbose"
   "cns aggregate ./temp/test_cns_imp.tsv --segments ./temp/test_COSMIC_gaps.bed --out ./temp/test_cns_COSMIC.tsv --verbose --how min"
   "cns aggregate ./in/test_cns_single.tsv --segments ./temp/test_segs_arms_gaps.bed --out ./temp/test_cns_arms.tsv --verbose"

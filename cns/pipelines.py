@@ -348,6 +348,8 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     log_info(print_info, "Calculating ploidy for each sample.")
     for cn_col in cn_columns:
         res_df[f"ploidy_{cn_col}"] = calc_ploidy_per_column(cns_df, cn_col)
+    if len(cn_columns) == 2:
+        res_df["ploidy_total_cn"] = res_df[f"ploidy_{cn_columns[0]}"] + res_df[f"ploidy_{cn_columns[1]}"]
     return res_df
 
 
