@@ -7,6 +7,7 @@ from os.path import exists
 
 from cns.utils.misc import parse_cncols, save_time
 from cns.utils.selection import dataframe_array_split
+from cns.utils.logging import log_info, set_verbose, setup_mp_logging, stop_mp_logging, configure_worker_logging
 from cns.pipelines import *
 
 
@@ -153,6 +154,11 @@ def _get_blocks(action, input_block, samples_blocks, cn_cols, segs_block, assemb
         raise ValueError(f"Unknown action {action}")
 
 
+def _worker_init(queue, verbose):
+    """Initialize logging in worker process."""
+    configure_worker_logging(queue, verbose)
+
+
 def _process(action, cns_df, samples_df, cn_cols, select_segs, assembly, args):
     main_fun = _action_to_fun(action)
     threads = abs(args.threads)
@@ -163,11 +169,15 @@ def _process(action, cns_df, samples_df, cn_cols, select_segs, assembly, args):
     if threads == 1:
         return [main_fun(*list(*zip_blocks))]
     else:
-        with Pool(threads) as pool:
-            log_info(args.verbose, f"Multiprocessing with {threads} threads..")
-            res_blocs = pool.starmap(main_fun, zip_blocks)
-            pool.close()
-            pool.join()
+        log_info(f"Multiprocessing with {threads} threads..")
+        queue = setup_mp_logging()
+        try:
+            with Pool(threads, initializer=_worker_init, initargs=(queue, args.verbose)) as pool:
+                res_blocs = pool.starmap(main_fun, zip_blocks)
+                pool.close()
+                pool.join()
+        finally:
+            stop_mp_logging()
         return res_blocs
 
 
@@ -176,11 +186,12 @@ def main():
     action = args.action
     assembly = get_assembly(args.assembly)
     print_info = args.verbose
+    set_verbose(print_info)  # Configure logging level based on verbose flag
     in_cols = parse_cncols(args.cncols)
     out_file = args.out
 
-    log_info(print_info, f"***** cns {action} *****")
-    log_info(print_info, f"Loading CNS input file {args.data}...")
+    log_info(f"***** cns {action} *****")
+    log_info(f"Loading CNS input file {args.data}...")
     input_data = load_cns(args.data, cn_columns=in_cols, assembly=assembly, print_info=print_info)
     cn_columns = get_cn_cols(input_data, in_cols)
     if args.samples == "":
@@ -193,7 +204,7 @@ def main():
 
     # Process blocks
     for i in range(args.subsplit):
-        log_info(print_info, f"Processing block {i+1}/{args.subsplit}...")
+        log_info(f"Processing block {i+1}/{args.subsplit}...")
 
         samples_block = samples_blocks[i]
 
@@ -218,7 +229,7 @@ def main():
             else:
                 raise ValueError(f"Unknown action {action}")
 
-    log_info(print_info, "Done.")
+    log_info("Done.")
 
 
 if __name__ == "__main__":

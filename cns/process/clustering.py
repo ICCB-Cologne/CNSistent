@@ -102,7 +102,7 @@ def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False)
         Dictionary of clustered segments with chromosome names as keys and list of segments as values.
     """
     seg_count = values_count(input_segs)
-    log_info(print_info, f"Merging {seg_count} segments with merge distance {clust_dist} ... ")
+    log_info(f"Merging {seg_count} segments with merge distance {clust_dist} ... ")
     res = {}
     for chrom, chrom_segs in input_segs.items():
         cons = get_consecutive_segs(chrom_segs)        
@@ -117,6 +117,6 @@ def cluster_segments(input_segs, clust_dist, keep_ends = True, print_info=False)
         res[chrom] = chr_segs
 
     new_count = values_count(res)
-    log_info(print_info, f"Removed {seg_count - new_count} segments by distance merge.")
-    log_info(print_info, f"Resulting segment count: {new_count}")
+    log_info(f"Removed {seg_count - new_count} segments by distance merge.")
+    log_info(f"Resulting segment count: {new_count}")
     return res

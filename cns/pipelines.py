@@ -54,7 +54,7 @@ def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg1
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     if samples_df is None:
-        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        log_info("No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
@@ -106,7 +106,7 @@ def main_infer(cns_df, samples_df=None, cn_columns=None, segs=None, method="exte
     cn_columns = get_cn_cols(cns_df, cn_columns)
     if samples_df is None:
         if method == "diploid":
-            log_info(print_info, "Diploid inference method requires samples_df, but none provided, creating samples from CNS data.")
+            log_info("Diploid inference method requires samples_df, but none provided, creating samples from CNS data.")
             samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
@@ -188,7 +188,7 @@ def main_coverage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     if samples_df is None:
-        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        log_info("No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
@@ -246,7 +246,7 @@ def main_breakage(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=
     if not isinstance(cns_df, pd.DataFrame):       
         raise ValueError(f"cns_df must be a DataFrame, got {type(cns_df)}") 
     if samples_df is None:
-        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        log_info("No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
@@ -313,14 +313,14 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
     cns_df["end"] = cns_df["end"].astype(np.int64)
 
     if samples_df is None:
-        log_info(print_info, "No samples provided, creating samples from CNS data.")
+        log_info("No samples provided, creating samples from CNS data.")
         samples_df = samples_df_from_cns_df(cns_df)    
     elif not isinstance(samples_df, pd.DataFrame):
         raise ValueError(f"samples_df must be a DataFrame, got {type(samples_df)}")
     res_df = samples_df.copy()
     
     if segs is not None:
-        log_info(print_info, "Aggregating CN data by provided segments.")
+        log_info("Aggregating CN data by provided segments.")
         cns_df = aggregate_by_segments(cns_df, segs, "none", cn_columns, print_info)
 
     norm_sizes = get_norm_sizes(segs, assembly)
@@ -329,23 +329,23 @@ def main_ploidy(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg
         log_warn("NaNs are not considered in ploidy calculations, it is recommended to infer values first.")
         cns_df = cns_df[cns_df[cn_columns].notna().all(axis=1)]
 
-    log_info(print_info, "Calculating LOH for each sample.")
+    log_info("Calculating LOH for each sample.")
     res_df = calc_loh_bases(res_df, cns_df, cn_columns, "both", assembly)
     res_df = normalize_feature(res_df, "loh_both", norm_sizes)
     res_df = calc_loh_bases(res_df, cns_df, cn_columns, "any", assembly)
     res_df = normalize_feature(res_df, "loh_any", norm_sizes)
-    log_info(print_info, "Calculating aneuploidy for each sample.")
+    log_info("Calculating aneuploidy for each sample.")
     res_df = calc_ane_bases(res_df, cns_df, cn_columns, "any", assembly)
     res_df = normalize_feature(res_df, "ane_any", norm_sizes)
     if len(cn_columns) == 2:
         res_df = calc_ane_bases(res_df, cns_df, cn_columns, "both", assembly)
         res_df = normalize_feature(res_df, "ane_both", norm_sizes)
-        log_info(print_info, "Calculating imbalance for each sample.")
+        log_info("Calculating imbalance for each sample.")
         for col_i in range(2):
             res_df = calc_imb_bases(cns_df, res_df, cn_columns, col_index=col_i, assembly=assembly)
             res_df = normalize_feature(res_df, f"imb_{cn_columns[col_i]}", norm_sizes)
 
-    log_info(print_info, "Calculating ploidy for each sample.")
+    log_info("Calculating ploidy for each sample.")
     for cn_col in cn_columns:
         res_df[f"ploidy_{cn_col}"] = calc_ploidy_per_column(cns_df, cn_col)
     if len(cn_columns) == 2:

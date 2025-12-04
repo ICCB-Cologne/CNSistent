@@ -121,7 +121,7 @@ def aggregate_by_segments(cns_df, segs, how="mean", cn_columns=None, print_info=
     res_df = pd.DataFrame(new_rows, columns=sel_cols + ["name"]) 
     res_df["start"] = res_df["start"].astype(np.uint32)
     res_df["end"] = res_df["end"].astype(np.uint32)
-    log_info(print_info, f"Aggregated into {len(new_rows)} CNS." + " " * 40)
+    log_info(f"Aggregated into {len(new_rows)} CNS." + " " * 40)
     return res_df
 
 

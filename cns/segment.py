@@ -5,7 +5,7 @@ import time
 
 from cns.utils.files import obtain_segments, save_segments
 from cns.utils.assemblies import get_assembly
-from cns.utils.logging import log_info
+from cns.utils.logging import log_info, set_verbose
 from cns.utils.misc import parse_cncols, save_time
 from cns.pipelines import main_segment
 
@@ -155,24 +155,25 @@ def main():
     args = _parse_args()
     assembly = get_assembly(args.assembly)
     print_info = args.verbose
+    set_verbose(print_info)  # Configure logging level based on verbose flag
     in_cols = parse_cncols(args.cncols)
     out_file = args.out
 
-    log_info(print_info, "***** segment *****")
+    log_info("***** segment *****")
 
     start = time.time()
     
     # Process segments
-    log_info(print_info, f"Loading input segments from {args.data}...")
+    log_info(f"Loading input segments from {args.data}...")
     input_segs = obtain_segments(args.data, in_cols, assembly, print_info)
     
     if args.remove:
-        log_info(print_info, f"Loading regions to remove from {args.remove}...")
+        log_info(f"Loading regions to remove from {args.remove}...")
         remove_regs = obtain_segments(args.remove, in_cols, assembly, print_info)
     else:
         remove_regs = None
     
-    log_info(print_info, "Computing segmentation...")
+    log_info("Computing segmentation...")
     res_segs = main_segment(
         input_segs, 
         remove_regs, 
@@ -194,7 +195,7 @@ def main():
             save_time(out_file, runtime, start)
     
     save_segments(res_segs, out_file)
-    log_info(print_info, "Done.")
+    log_info("Done.")
 
 
 if __name__ == "__main__":

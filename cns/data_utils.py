@@ -47,7 +47,7 @@ def load_cns_file(filename, print_info=False):
     """
     source_folder = data_path if "raw" in filename else out_path
     path = abspath(pjoin(source_folder, filename))
-    log_info(print_info, f"Loading CNS data  from {path}")
+    log_info(f"Loading CNS data  from {path}")
     cns_df = load_cns(path)
     return cns_df
 
@@ -71,7 +71,7 @@ def load_samples_file(filename, use_filter=False, print_info=False):
     """
     source_folder = data_path if "raw" in filename else out_path
     path = abspath(pjoin(source_folder, filename))
-    log_info(print_info, f"Loading samples from {path}")
+    log_info(f"Loading samples from {path}")
     samples_df = load_samples(path)
 
     if use_filter:
@@ -106,7 +106,7 @@ def load_segs_out(filename, print_info=False):
     pd.DataFrame
         DataFrame containing segment data.
     """
-    log_info(print_info, f"Loading segments from {filename}")
+    log_info(f"Loading segments from {filename}")
     return load_segments(pjoin(out_path, filename))
 
 
@@ -130,25 +130,25 @@ def _filter_samples(samples_df, ane_min_frac=0.001, cover_min_frac=0.95, print_i
     pd.DataFrame
         Filtered DataFrame containing sample information.
     """
-    log_info(print_info, f"Total samples: {len(samples_df)}")
+    log_info(f"Total samples: {len(samples_df)}")
     
     cn_neutral = samples_df.query(f"ane_any_aut < {ane_min_frac}").index
-    log_info(print_info, f"{len(cn_neutral)} samples are CN neutral (below {ane_min_frac:.5f})")
+    log_info(f"{len(cn_neutral)} samples are CN neutral (below {ane_min_frac:.5f})")
 
     # Find samples with low coverage (below 95% in autosomes)
     low_coverage = samples_df.query(f"cover_any_aut < {cover_min_frac}").index
-    log_info(print_info, f"{len(low_coverage)} samples have low coverage (below {cover_min_frac:.5f})")
+    log_info(f"{len(low_coverage)} samples have low coverage (below {cover_min_frac:.5f})")
 
     if "TCGA_type" in samples_df.columns:
         samples_df["type"] = samples_df["TCGA_type"]    
         samples_df.drop(columns=["TCGA_type"], inplace=True)
     samples_df["type"] = samples_df["type"].replace({"LUADx2": "LUAD"}).replace({"LUADx3": "LUAD"})
     untyped = samples_df[samples_df["type"].fillna('').apply(lambda x: any(not c.isupper() for c in x))].index
-    log_info(print_info, f"{len(untyped)} samples do not have exact type")
+    log_info(f"{len(untyped)} samples do not have exact type")
 
     filtered_df = samples_df.query("(index not in @untyped) & (index not in @cn_neutral) & (index not in @low_coverage)")
 
-    log_info(print_info, f"Filtered samples: {len(filtered_df)}")
+    log_info(f"Filtered samples: {len(filtered_df)}")
 
     return filtered_df.copy()
 
@@ -198,17 +198,17 @@ def main_load(segment_type: str, dataset="all", use_filter=True, concat=True, pr
         samples["source"] = dataset
         samples_dict[dataset] = samples
     samples_df = pd.concat(samples_dict.values()) if (concat or len(datasets) == 1) else samples_dict
-    log_info(print_info, f"Total samples: {len(samples_df)}")
+    log_info(f"Total samples: {len(samples_df)}")
 
     if segment_type is None:
-        log_info(print_info, "No segment type specified. Returning sample data only.")
+        log_info("No segment type specified. Returning sample data only.")
         return samples_df, None
         
     file_type = "cns" if segment_type in ["imp", "raw", "align"] else "bin"
     cns_dict = {dataset: load_cns_file(f"{dataset}_{file_type}_{segment_type}.tsv", print_info) for dataset in datasets}
     cns_dict = {k: select_CNS_samples(v, samples_dict[k]).reset_index(drop=True) for k, v in cns_dict.items()}
     cns_df = pd.concat(cns_dict.values()) if (concat or len(datasets) == 1) else cns_dict
-    log_info(print_info, f"Total CNS segments: {len(cns_df)}")
+    log_info(f"Total CNS segments: {len(cns_df)}")
     
     return samples_df, cns_df
 
