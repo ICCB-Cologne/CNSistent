@@ -182,6 +182,35 @@ class TestCutoff(unittest.TestCase):
         self.assertEqual(len(res[1]), 5)
         self.assertEqual(res[2], 1)
         self.assertEqual(res[4], 3)
+
+
+class TestLogging(unittest.TestCase):
+    def test_handle_exception_on_error(self):
+        """Test that handle_exception decorator catches exceptions and exits."""
+        from cns.utils.logging import handle_exception, suppress_errors
+        
+        @handle_exception
+        def failing_function():
+            raise ValueError("Test error message")
+        
+        # Suppress error output during test
+        suppress_errors(True)
+        with self.assertRaises(SystemExit) as cm:
+            failing_function()
+        suppress_errors(False)
+        
+        self.assertEqual(cm.exception.code, 1)
+    
+    def test_handle_exception_on_success(self):
+        """Test that handle_exception decorator allows normal execution."""
+        from cns.utils.logging import handle_exception
+        
+        @handle_exception
+        def successful_function():
+            return 42
+        
+        result = successful_function()
+        self.assertEqual(result, 42)
     
 
 if __name__ == '__main__':

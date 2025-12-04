@@ -1,6 +1,7 @@
 import logging
 import logging.handlers
 import multiprocessing
+import sys
 from multiprocessing import Queue
 
 # Module-level logger
@@ -137,3 +138,28 @@ def suppress_errors(suppress=True):
     """
     logger = get_logger()
     logger.setLevel(logging.CRITICAL if suppress else logging.WARNING)
+
+
+def handle_exception(func):
+    """Decorator to handle exceptions by logging and exiting.
+    
+    Wraps a function to catch any exceptions, log them as errors,
+    and terminate the program with exit code 1.
+    
+    Parameters
+    ----------
+    func : callable
+        The function to wrap.
+        
+    Returns
+    -------
+    callable
+        The wrapped function.
+    """
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            log_error(str(e))
+            sys.exit(1)
+    return wrapper

@@ -5,7 +5,7 @@ import time
 
 from cns.utils.files import obtain_segments, save_segments
 from cns.utils.assemblies import get_assembly
-from cns.utils.logging import log_info, set_verbose
+from cns.utils.logging import log_info, set_verbose, handle_exception
 from cns.utils.misc import parse_cncols, save_time
 from cns.pipelines import main_segment
 
@@ -150,6 +150,7 @@ def _parse_args():
 
 
 
+@handle_exception
 def main():
     """Main function for segment action."""
     args = _parse_args()

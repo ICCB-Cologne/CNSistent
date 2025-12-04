@@ -7,7 +7,7 @@ from os.path import exists
 
 from cns.utils.misc import parse_cncols, save_time
 from cns.utils.selection import dataframe_array_split
-from cns.utils.logging import log_info, set_verbose, setup_mp_logging, stop_mp_logging, configure_worker_logging
+from cns.utils.logging import log_info, set_verbose, setup_mp_logging, stop_mp_logging, configure_worker_logging, handle_exception
 from cns.pipelines import *
 
 
@@ -181,6 +181,7 @@ def _process(action, cns_df, samples_df, cn_cols, select_segs, assembly, args):
         return res_blocs
 
 
+@handle_exception
 def main():
     args = _parse_args()
     action = args.action
