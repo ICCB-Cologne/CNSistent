@@ -92,7 +92,7 @@ def configure_worker_logging(queue, verbose):
     _logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
 
-def log_info(text):
+def log_info(text, suppress=False):
     """Log an info message.
     
     The message will only be displayed if verbose mode is enabled via set_verbose(True).
@@ -101,19 +101,25 @@ def log_info(text):
     ----------
     text : str
         The message to log.
+    suppress : bool, optional
+        If True, suppresses the log message. Default is False.
     """
-    get_logger().info(text)
+    if not suppress:
+        get_logger().info(text)
 
 
-def log_warn(text):
+def log_warn(text, suppress=False):
     """Log a warning message.
     
     Parameters
     ----------
     text : str
         The warning message to log.
+    suppress : bool, optional
+        If True, suppresses the log message. Default is False.
     """
-    get_logger().warning(text)
+    if not suppress:
+        get_logger().warning(text)
 
 
 def log_error(text):

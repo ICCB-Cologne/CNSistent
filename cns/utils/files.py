@@ -121,13 +121,13 @@ def load_samples(path, sep=None, print_info=False):
     samples_df = pd.read_csv(path, sep=sep)
     samples_df = canonize_sample_id(samples_df, print_info=print_info)
     if "sex" not in samples_df.columns:
-        log_info("'sex' column not found, adding column with value 'NA'.")
+        log_info("'sex' column not found, adding column with value 'NA'.", suppress=not print_info)
         samples_df["sex"] = "NA"
     else:
         # where samples_df["sex"] is not xy or xx, replace with NA
         unknowns = samples_df[~samples_df["sex"].isin(["xy", "xx"])]["sex"].unique()
         if len(unknowns) > 0:
-            log_info(f"Found unknown sex values: {unknowns}. Replacing with 'NA'. Use ['xx', 'xy'].")
+            log_info(f"Found unknown sex values: {unknowns}. Replacing with 'NA'. Use ['xx', 'xy'].", suppress=not print_info)
         samples_df.loc[~samples_df["sex"].isin(["xy", "xx"]), "sex"] = "NA"
 
     samples_df.set_index("sample_id", inplace=True)
@@ -293,12 +293,12 @@ def load_segments(path):
 
 def obtain_segments(segs_source, in_cols = None, assembly = hg19, print_info = False):
     if segs_source[-4:] == ".bed":
-        log_info(f"Loading input file {segs_source}...")
+        log_info(f"Loading input file {segs_source}...", suppress=not print_info)
         return load_segments(segs_source)
     elif segs_source[-4:] == ".tsv":
-        log_info(f"Loading CNS input file {segs_source}...")
+        log_info(f"Loading CNS input file {segs_source}...", suppress=not print_info)
         input_cns = load_cns(segs_source, cn_columns=in_cols, assembly=assembly, print_info=print_info)
         return cns_df_to_segments(input_cns, process="unify")
     else:
-        log_info(f"Creating {segs_source} segments...")
+        log_info(f"Creating {segs_source} segments...", suppress=not print_info)
         return make_segments(segs_source, assembly)

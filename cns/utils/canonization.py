@@ -82,7 +82,7 @@ def rename_cn_cols(cns_df, cn_columns=None, print_info=False):
         rename_map = {cn_columns[0]: "total_cn"}
 
     cns_df.rename(columns=rename_map, inplace=True)
-    log_info(f"Renamed CN columns: {rename_map}")
+    log_info(f"Renamed CN columns: {rename_map}", suppress=not print_info)
     return cns_df, list(rename_map.values())
 
 
@@ -122,10 +122,10 @@ def canonize_sample_id(df, print_info=False):
         sample_col = _find_column(df, ['sample', 'id', 'sampleId', 'sample_id', 'sample-id', 'sample_name', 'sampleName', 'sample-name'])	
         if sample_col is None:
             df.columns = ["sample_id"] + df.columns[1:].tolist()
-            log_info(f"Column sample_id not found, renamed first column to sample_id.")
+            log_info(f"Column sample_id not found, renamed first column to sample_id.", suppress=not print_info)
         else:
             df.rename(columns={sample_col: "sample_id"}, inplace=True)
-            log_info(f"Renamed column {sample_col} to sample_id.")
+            log_info(f"Renamed column {sample_col} to sample_id.", suppress=not print_info)
 
     return df
 
@@ -149,28 +149,28 @@ def canonize_chroms(cns_df, assembly=hg19, print_info=False):
         chrom_col = _find_column(cns_df, ['chrom', 'chr', 'chromosome'])
         if chrom_col is None:
             cns_df.columns = cns_df.columns[:1].tolist() + ["chrom"] + cns_df.columns[2:].tolist()
-            log_info(f"Column chrom not found, renamed second column to chrom.")
+            log_info(f"Column chrom not found, renamed second column to chrom.", suppress=not print_info)
         else:
             cns_df.rename(columns={chrom_col: "chrom"}, inplace=True)
-            log_info(f"Renamed column {chrom_col} to chrom.")
+            log_info(f"Renamed column {chrom_col} to chrom.", suppress=not print_info)
 
     chrom_vals = cns_df["chrom"].unique()
     # if the chromosomes values are all either digits or single characters, convert to chrX format
     if all([str(chrom).isdigit() or len(chrom) == 1 for chrom in chrom_vals]):
         cns_df["chrom"] = "chr" + cns_df["chrom"].astype(str)
         chrom_vals = cns_df["chrom"].unique()
-        log_info("Chromosome values converted to chr[1-Y] format.")
+        log_info("Chromosome values converted to chr[1-Y] format.", suppress=not print_info)
     # if the first 3 letters of the chromosome values are not lower case, convert these 3 letters to lower case
     if not all([chrom[:3].islower() for chrom in chrom_vals]):
         cns_df["chrom"] = cns_df["chrom"].apply(lambda x: x[:3].lower() + x[3:])
         chrom_vals = cns_df["chrom"].unique()
-        log_info("Chromosome values converted to lower case.")
+        log_info("Chromosome values converted to lower case.", suppress=not print_info)
     
     if not any([chrom in assembly.chr_names for chrom in chrom_vals]):
         raise ValueError(f"No chrom found. Chromosome values must be in {assembly.chr_names}, got {chrom_vals}.")
     not_known = [chrom for chrom in chrom_vals if chrom not in assembly.chr_names]
     if len(not_known) > 0:
-        log_info(f"Found chromosomes not in assembly: {not_known}, these will be dropped.")
+        log_info(f"Found chromosomes not in assembly: {not_known}, these will be dropped.", suppress=not print_info)
         rows_to_drop = cns_df[cns_df["chrom"].isin(not_known)].index
         cns_df.drop(rows_to_drop, inplace=True) 
     return cns_df
@@ -192,10 +192,10 @@ def canonize_positions(cns_df, print_info=False):
         start_col = _find_column(cns_df, ['start', 'begin', 'chromstart', 'chrom-start', 'chrom_start', 'startpos', 'start-pos', 'start_pos'])
         if start_col is None:
             cns_df.columns = cns_df.columns[:2].tolist() + ["start"] + cns_df.columns[3:].tolist()
-            log_info(f"Column start not found, renamed third column to start.")
+            log_info(f"Column start not found, renamed third column to start.", suppress=not print_info)
         else:
             cns_df.rename(columns={start_col: "start"}, inplace=True)
-            log_info(f"Renamed column {start_col} to start.")
+            log_info(f"Renamed column {start_col} to start.", suppress=not print_info)
     cns_df["start"] = cns_df["start"].astype(int)
 
     # if the column end does not exist, rename the fourth column to end
@@ -203,10 +203,10 @@ def canonize_positions(cns_df, print_info=False):
         end_col = _find_column(cns_df, ['end', 'stop', 'endpos', 'end-pos', 'end_pos' 'chromend', 'chrom-end', 'chrom_end'])
         if end_col is None:
             cns_df.columns = cns_df.columns[:3].tolist() + ["end"] + cns_df.columns[4:].tolist()
-            log_info(f"Column end not found, renamed fourth column to end.")
+            log_info(f"Column end not found, renamed fourth column to end.", suppress=not print_info)
         else:
             cns_df.rename(columns={end_col: "end"}, inplace=True)
-            log_info(f"Renamed column {end_col} to end.")
+            log_info(f"Renamed column {end_col} to end.", suppress=not print_info)
     return cns_df
 
 
@@ -223,7 +223,7 @@ def canonize_name(cns_df, print_info=False):
     name_col = _find_column(cns_df, ['name'])
     if name_col is not None and name_col != "name":
         cns_df.rename(columns={name_col: "name"}, inplace=True)
-        log_info(f"Renamed column {name_col} to name.")
+        log_info(f"Renamed column {name_col} to name.", suppress=not print_info)
     return cns_df
 
 def canonize_cns_df(cns_df, input_cn_columns=None, order_columns=False, assembly=hg19, print_info=False):
@@ -258,7 +258,7 @@ def canonize_cns_df(cns_df, input_cn_columns=None, order_columns=False, assembly
     cns_df = canonize_positions(cns_df, print_info)
     cns_df = canonize_name(cns_df, print_info)
 
-    log_info(f"Using CN columns: {cn_columns}")
+    log_info(f"Using CN columns: {cn_columns}", suppress=not print_info)
     if len(cn_columns) == 2 and order_columns:
         major_cn = cns_df[[cn_columns[0], cn_columns[1]]].max(axis=1)
         minor_cn = cns_df[[cn_columns[0], cn_columns[1]]].min(axis=1)
@@ -266,7 +266,7 @@ def canonize_cns_df(cns_df, input_cn_columns=None, order_columns=False, assembly
         cns_df["major_cn"] = major_cn
         cns_df["minor_cn"] = minor_cn
         cn_columns = ["major_cn", "minor_cn"]
-        log_info(f"Converted columns to ordered")
+        log_info(f"Converted columns to ordered", suppress=not print_info)
     elif input_cn_columns == None:
         cns_df, cn_columns = rename_cn_cols(cns_df, cn_columns, print_info)
 

@@ -49,10 +49,10 @@ def add_tails(cns_df, assembly=hg19, print_info=True):
             )
 
     if len(missing_ranges) == 0:
-        log_info(f"No missing ends found.")
+        log_info(f"No missing ends found.", suppress=not print_info)
         return cns_df.copy()
     else:
-        log_info(f"Adding {len(missing_ranges)} missing ends")
+        log_info(f"Adding {len(missing_ranges)} missing ends", suppress=not print_info)
         new_cns_df = pd.DataFrame(missing_ranges, columns=cns_df.columns)
         res_df = pd.concat([cns_df, new_cns_df])
         res_df.sort_values(
@@ -100,11 +100,11 @@ def fill_gaps(cns_df, print_info=True):
                 )
 
     if len(new_rows) == 0:
-        log_info(f"No gaps found.")
+        log_info(f"No gaps found.", suppress=not print_info)
         return cns_df.copy()
     else:
         # Concatenate the cns_dfs
-        log_info(f"Filling {len(new_rows)} gaps.")
+        log_info(f"Filling {len(new_rows)} gaps.", suppress=not print_info)
         new_cns_df = pd.DataFrame(new_rows, columns=cns_df.columns)
         res_df = pd.concat([cns_df, new_cns_df])
         res_df.sort_values(by=["sample_id", "chrom", "start"], inplace=True, ignore_index=True)
@@ -153,10 +153,10 @@ def add_missing(cns_df, samples_df=None, assembly=hg19, print_info=True):
                 new_entries.append(new_entry)
 
     if len(new_entries) == 0:
-        log_info(f"No missing chromosomes found.")
+        log_info(f"No missing chromosomes found.", suppress=not print_info)
         return cns_df.copy()
     else:
-        log_info(f"Adding {len(new_entries)} missing chromosomes.")
+        log_info(f"Adding {len(new_entries)} missing chromosomes.", suppress=not print_info)
         empty_chrs_df = pd.DataFrame(new_entries)
         res_df.reset_index(inplace=True)
         res_df = pd.concat([res_df, empty_chrs_df])
@@ -191,17 +191,17 @@ def remove_outliers(cns_df, assembly=hg19, print_info=True):
         if row.start < 0:
             if row.end < 0:
                 idx_to_remove.append(i)
-                log_info(f"Removed outlier:\n{row}")
+                log_info(f"Removed outlier:\n{row}", suppress=not print_info)
             else:
                 res_df.at[index, "start"] = 0
         if row.end > chr_lens[row.chrom]:
             if row.start >= chr_lens[row.chrom]:
                 idx_to_remove.append(i)
-                log_info(f"Removed outlier:\n{row}")
+                log_info(f"Removed outlier:\n{row}", suppress=not print_info)
             else:
                 res_df.at[index, "end"] = chr_lens[row.chrom]
 
-    log_info(f"Removed outliers: {len(idx_to_remove)}")
+    log_info(f"Removed outliers: {len(idx_to_remove)}", suppress=not print_info)
     # remove from cns_df where idx_to_remove is in the index
     res_df = res_df.drop(res_df.index[idx_to_remove]).sort_values(by=["sample_id", "chrom", "start"], ignore_index=True)
     return res_df
@@ -248,7 +248,7 @@ def merge_cns_df(cns_df, cn_columns=None, print_info=True):
                 row.name = str(prev.name)  + "&" + str(row.name)  # update the name for logging
         prev = row
 
-    log_info(f"Merged entries: {len(idx_to_remove)}")
+    log_info(f"Merged entries: {len(idx_to_remove)}", suppress=not print_info)
 
     # remove from cns_df where idx_to_remove is in the index
     res_df = res_df.drop(res_df.index[idx_to_remove]).sort_values(by=["sample_id", "chrom", "start"], ignore_index=True)
@@ -333,7 +333,7 @@ def _impute_extend(cns_df, cn_columns, print_info=True):
     query = ' or '.join([f"{col}.isnull()" for col in cn_columns])
     idx_to_remove = cns_df.query(query).index
 
-    log_info(f"New entries: {imputation_df.shape[0]}\nRemoved entries: {len(idx_to_remove)}")
+    log_info(f"New entries: {imputation_df.shape[0]}\nRemoved entries: {len(idx_to_remove)}", suppress=not print_info)
     # remove from cns_df where idx_to_remove is in the index
     filtered_df = cns_df.drop(idx_to_remove)
     # concat the new_table to cns_df
@@ -439,7 +439,7 @@ def fill_nans_with_zeros(cns_df, cn_columns=None, print_info=True):
     """   
     cn_columns = get_cn_cols(cns_df, cn_columns)    
     res_df = cns_df.copy()
-    log_info(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero")
+    log_info(f"Filling {res_df[cn_columns].isna().any(axis=1).sum()} NaN rows with zero", suppress=not print_info)
     # Fully missing chromosomes filled with 0
     for col in cn_columns:
         res_df[col] = res_df[col].fillna(0.0).infer_objects(copy=False)
