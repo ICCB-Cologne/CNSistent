@@ -13,9 +13,9 @@ from cns.utils.assemblies import hg19
 
 
 def _get_separator(path):
-    if path.endswith(".csv"):
+    if str(path).endswith(".csv"):
         return ","
-    elif path.endswith(".tsv"):
+    elif str(path).endswith(".tsv"):
         return "\t"
     else:
         raise ValueError(f"Unknown file format for file {path}, cannot determine separator.")
