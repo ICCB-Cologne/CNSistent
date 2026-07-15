@@ -13,8 +13,8 @@ For reference, the ``Assembly`` class is used to provide information about the g
 
 ``cns_df``
 ``````````
- A pandas DataFrame with the following columns: ``sample_id, chrom, start, end, CN, ...``. 
- The ``CN`` columns are the copy number values for each segment. The ``chrom`` column is expected to be in the format ``chr1``, ``chr2``, ..., ``chrX``, ``chrY``, ``chrM``. The ``start`` and ``end`` columns are 0-based coordinates.
+ A pandas DataFrame with the following columns: ``sample_id, chrom, start, end, CN, ...``.
+ The ``CN`` columns are the copy number values for each segment. The ``chrom`` column is expected to be in the format ``chr1``, ``chr2``, ..., ``chrX``, ``chrY``, ``chrM``. The ``start`` and ``end`` columns use 0-based, half-open coordinates: ``start`` is inclusive and ``end`` is exclusive.
 
 .. code-block:: python
 
@@ -118,9 +118,15 @@ The following functions can be used to manipulate segments:
 Imputation
 ``````````
 
-Functions for adding missing segments and values in the CNS data. The process is to first add missing regions with NaN values and then impute the missing values.
+Functions for aligning segments, adding missing segments, and imputing missing values. The process first adds missing regions with NaN values, removes overlaps, and then imputes the missing values.
 
 There are separate functions to fill the telomeres, fill the gaps, and add missing chromosomes.
+
+``remove_overlaps`` resolves overlaps between consecutive segments belonging to the same sample and chromosome. It removes bases equally from the end of the first segment and the start of the second segment. If the overlap has an odd length, the additional base is removed from the first segment. The function raises ``ValueError`` if this trimming would completely remove either segment. ``main_align`` and ``main_impute`` apply this operation automatically.
+
+.. code-block:: python
+
+    aligned_df = cns.remove_overlaps(cns_df, print_info=True)
 
 If guessing values in imputation is not desired, the ``fill_nans_with_zeros`` function can be used to simply fill with 0 instead.
 

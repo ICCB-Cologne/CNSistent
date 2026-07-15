@@ -48,7 +48,8 @@ def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg1
     2. Fills gaps between segments.
     3. Optionally adds missing chromosomes.
     4. Removes outlier segments.
-    5. Merges neighboring segments with the same copy number.
+    5. Removes overlaps between neighboring segments.
+    6. Merges neighboring segments with the same copy number.
 
     """
     if not isinstance(cns_df, pd.DataFrame):       
@@ -63,6 +64,7 @@ def main_align(cns_df, samples_df=None, cn_columns=None, segs=None, assembly=hg1
     cns_aligned_df = fill_gaps(cns_tailed_df, print_info=print_info)
     cns_aligned_df = add_missing(cns_aligned_df, samples_df, assembly=assembly, print_info=print_info)
     cns_cleared_df = remove_outliers(cns_aligned_df, assembly=assembly, print_info=print_info)
+    cns_cleared_df = remove_overlaps(cns_cleared_df, print_info=print_info)
     res_df = merge_cns_df(cns_cleared_df, cn_columns, print_info=print_info)
     if segs is not None:
         res_df = aggregate_by_segments(res_df, segs, "none", cn_columns, print_info=print_info)

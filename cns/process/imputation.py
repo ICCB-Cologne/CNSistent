@@ -87,6 +87,85 @@ def fill_gaps(cns_df, print_info=True):
     return res_df
 
 
+def remove_overlaps(cns_df, print_info=True):
+    """
+    Removes overlaps between consecutive CNS segments.
+
+    Overlapping bases are removed alternately from the first and second
+    segment, starting with the first segment. Equivalently, the first segment
+    loses ``ceil(overlap / 2)`` bases from its end and the second segment loses
+    ``floor(overlap / 2)`` bases from its start.
+
+    Parameters
+    ----------
+    cns_df : pandas.DataFrame
+        DataFrame containing CNS data in 0-based, half-open coordinates.
+    print_info : bool, optional
+        If True, prints informational messages during processing. Default is True.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A sorted copy of the CNS data without overlapping segments.
+
+    Raises
+    ------
+    ValueError
+        If trimming an overlap would completely remove either segment.
+    """
+    res_df = cns_df.copy().sort_values(
+        by=["sample_id", "chrom", "start"], kind="stable", ignore_index=True
+    )
+    sample_ids = res_df["sample_id"].to_numpy()
+    chroms = res_df["chrom"].to_numpy()
+    starts = res_df["start"].to_numpy(copy=True)
+    ends = res_df["end"].to_numpy(copy=True)
+
+    overlap_count = 0
+    removed_from_first = 0
+    removed_from_second = 0
+
+    for i in range(len(res_df) - 1):
+        if sample_ids[i] != sample_ids[i + 1] or chroms[i] != chroms[i + 1]:
+            continue
+
+        overlap = ends[i] - starts[i + 1]
+        if overlap <= 0:
+            continue
+
+        trim_first = (overlap + 1) // 2
+        trim_second = overlap // 2
+        new_first_end = ends[i] - trim_first
+        new_second_start = starts[i + 1] + trim_second
+
+        if new_first_end <= starts[i]:
+            raise ValueError(
+                "Removing overlap would completely remove the first segment "
+                f"at {sample_ids[i]}:{chroms[i]}:{starts[i]}-{ends[i]}."
+            )
+        if new_second_start >= ends[i + 1]:
+            raise ValueError(
+                "Removing overlap would completely remove the second segment "
+                f"at {sample_ids[i + 1]}:{chroms[i + 1]}:"
+                f"{starts[i + 1]}-{ends[i + 1]}."
+            )
+
+        ends[i] = new_first_end
+        starts[i + 1] = new_second_start
+        overlap_count += 1
+        removed_from_first += trim_first
+        removed_from_second += trim_second
+
+    res_df["start"] = starts
+    res_df["end"] = ends
+    log_info(
+        f"Resolved {overlap_count} overlaps by trimming {removed_from_first} bases "
+        f"from first segments and {removed_from_second} bases from second segments.",
+        suppress=not print_info,
+    )
+    return res_df
+
+
 # Add fully missing chromosomes
 def add_missing(cns_df, samples_df=None, assembly=hg19, print_info=True):
     """

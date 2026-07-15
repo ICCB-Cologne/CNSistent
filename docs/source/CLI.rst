@@ -147,12 +147,14 @@ Aligns all the segments so that each samples spans the whole reference. The foll
 1. Added NaN segments to the telomeres.
 2. Fill gaps in the data with NaN values.
 3. Add missing chromosomes, if they are missing compared to the reference.
-4. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major must match.
+4. Remove segments outside the selected assembly and clip segments to chromosome bounds.
+5. Remove overlaps between neighbouring segments. Bases are removed equally from both segments, starting with the first segment; processing stops with an error if a segment would be completely removed.
+6. Merge neighbouring segments with the same copy numbers (or NaNs). Both minor and major must match.
 
 .. _infer_cmd:
 
 ``infer``
-````````
+`````````
 
 Replaces any NaNs in the *CNS* file with the values of the closest neighbouring region that is not NaN. The following steps are performed:
 
@@ -173,7 +175,7 @@ Additional arguments:
 
 ``impute``
 ``````````
-Combines the ``align`` and ``infer`` commands to create an *CNS* file.
+Combines the ``align`` and ``infer`` commands to create a *CNS* file. This includes the overlap removal performed by ``align``.
 
 
 Additional arguments:

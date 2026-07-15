@@ -42,6 +42,22 @@ class TestPipelines(unittest.TestCase):
         self.assertTrue("chrY" in res.query("sample_id == 's4'")['chrom'].values)
         self.assertFalse("chrY" in res.query("sample_id == 's3'")['chrom'].values)
 
+    def test_main_align_removes_overlaps(self):
+        cns = pd.DataFrame({
+            'sample_id': ['s1', 's1'],
+            'chrom': ['chr1', 'chr1'],
+            'start': [0, 59],
+            'end': [60, 100],
+            'major_cn': [1, 2],
+            'minor_cn': [1, 1],
+        })
+
+        res = main_align(cns, self.samples.loc[['s1']], assembly=self.assembly)
+        chr1 = res.query("sample_id == 's1' and chrom == 'chr1'").reset_index(drop=True)
+
+        self.assertEqual(chr1.loc[0, ["start", "end"]].tolist(), [0, 59])
+        self.assertEqual(chr1.loc[1, ["start", "end"]].tolist(), [59, 100])
+
     def test_main_impute(self):
         res = main_align(self.cns, self.samples, assembly=self.assembly)
         res = main_infer(res, self.samples)

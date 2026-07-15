@@ -9,7 +9,8 @@
 project = 'CNSistent'
 copyright = '2024, Dr. Adam Streck'
 author = 'Dr. Adam Streck'
-release = '1.12.2024'
+version = '1.1'
+release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

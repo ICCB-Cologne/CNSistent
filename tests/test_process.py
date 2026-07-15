@@ -212,6 +212,56 @@ class TestImputation(unittest.TestCase):
         self.assertEqual(result.at[3, "start"], 100)
         self.assertEqual(result.at[3, "end"], 125)
 
+    def test_remove_overlaps(self):
+        cns_df = pd.DataFrame({
+            'sample_id': ['s1', 's1', 's2', 's2'],
+            'chrom': ['chr1', 'chr1', 'chr2', 'chr2'],
+            'start': [0, 7, 0, 8],
+            'end': [10, 20, 10, 20],
+            'major_cn': [1, 2, 1, 2],
+            'minor_cn': [1, 1, 1, 1]
+        })
+
+        result = remove_overlaps(cns_df, print_info=False)
+
+        # Three-base overlap: two bases from the first segment, one from the second.
+        self.assertEqual(result.loc[0, ["start", "end"]].tolist(), [0, 8])
+        self.assertEqual(result.loc[1, ["start", "end"]].tolist(), [8, 20])
+        # Two-base overlap: one base from each segment.
+        self.assertEqual(result.loc[2, ["start", "end"]].tolist(), [0, 9])
+        self.assertEqual(result.loc[3, ["start", "end"]].tolist(), [9, 20])
+        pd.testing.assert_frame_equal(cns_df, pd.DataFrame({
+            'sample_id': ['s1', 's1', 's2', 's2'],
+            'chrom': ['chr1', 'chr1', 'chr2', 'chr2'],
+            'start': [0, 7, 0, 8],
+            'end': [10, 20, 10, 20],
+            'major_cn': [1, 2, 1, 2],
+            'minor_cn': [1, 1, 1, 1]
+        }))
+
+    def test_remove_overlaps_raises_if_segment_is_lost(self):
+        first_lost_df = pd.DataFrame({
+            'sample_id': ['s1', 's1'],
+            'chrom': ['chr1', 'chr1'],
+            'start': [0, 0],
+            'end': [1, 2],
+            'major_cn': [1, 2],
+            'minor_cn': [1, 1]
+        })
+        second_lost_df = pd.DataFrame({
+            'sample_id': ['s1', 's1'],
+            'chrom': ['chr1', 'chr1'],
+            'start': [0, 1],
+            'end': [10, 2],
+            'major_cn': [1, 2],
+            'minor_cn': [1, 1]
+        })
+
+        with self.assertRaisesRegex(ValueError, "completely remove the first segment"):
+            remove_overlaps(first_lost_df, print_info=False)
+        with self.assertRaisesRegex(ValueError, "completely remove the second segment"):
+            remove_overlaps(second_lost_df, print_info=False)
+
     def test_add_missing(self):
         result = add_missing(self.cns_df, self.samples_df, self.assembly, print_info=False)
         self.assertEqual(result.shape[0], 9)
