@@ -1,9 +1,16 @@
 import math
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt, patches as mpatches
 from collections.abc import Sequence
 from itertools import accumulate
+
+try:
+    from matplotlib import pyplot as plt, patches as mpatches
+except ImportError as e:
+    raise ImportError(
+        "The CNSistent plotting API requires matplotlib, which is an optional dependency. "
+        "Install it with `pip install CNSistent[plot]`."
+    ) from e
 
 from cns.utils.cytobands import cytoband_color
 from cns.utils.gaps import gap_color

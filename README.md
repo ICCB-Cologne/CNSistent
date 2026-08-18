@@ -18,7 +18,7 @@ CNSistent can be used as a Python package, or downloaded together with the respe
 ```
 git clone git@github.com:ICCB-Cologne/CNSistent.git
 cd CNSistent
-pip install -e .
+pip install -e ".[plot]"
 wget -O out.tar.gz https://zenodo.org/records/14547456/files/out.tar.gz 
 mkdir -p out
 tar -xzf out.tar.gz -C ./out 
@@ -32,6 +32,17 @@ rm out.tar.gz
 ```
 pip install CNSistent
 ```
+
+The plotting API (`cns.fig_*`, `cns.plot_*`) needs matplotlib, which is not installed by
+default, as none of the CLI commands require it. To use it, install the `plot` extra:
+
+```
+pip install "CNSistent[plot]"
+```
+
+Numba is installed by default and is used to compile the aggregation and clustering
+kernels. It is not strictly required, `pip install --no-deps` environments without it
+still work, at roughly half the aggregation speed.
 
 
 ## Data

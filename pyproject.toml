@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "CNSistent"
-version = "1.1.0"
+version = "1.1.1"
 authors = [
     {name = "Adam Streck", email = "adam.streck@gmail.com"}
 ]
@@ -31,11 +31,14 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics"
 ]
 dependencies = [
-    "pandas>=2.2",
-    "numpy",
-    "matplotlib",
-    "numba"
+    "pandas>=1.5",
+    "numpy>=1.23",
+    "numba>=0.57"
 ]
+
+[project.optional-dependencies]
+# Only the plotting API (cns.analyze.plot) needs matplotlib, no CLI command does.
+plot = ["matplotlib>=3.5"]
 
 [project.urls]
 Homepage = "https://github.com/ICCB-Cologne/CNSistent"

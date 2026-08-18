@@ -1,4 +1,6 @@
-pandas>=2.2
-numpy
-matplotlib
-numba
+pandas>=1.5
+numpy>=1.23
+numba>=0.57
+# Optional in the PIP package (the `plot` extra), but installed here so that the
+# development environment can run the plotting API and the notebooks.
+matplotlib>=3.5

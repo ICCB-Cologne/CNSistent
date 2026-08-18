@@ -21,3 +21,18 @@ Initial public version.
 ### Fixes
 - `main_align` now removes segment overlaps before merging neighbouring segments.
 - Overlap removal now raises `ValueError` if trimming would completely remove either segment.
+
+## v1.1.1
+
+### Infrastructure
+- Relaxed the dependency requirements. `pandas>=2.2` was never a real minimum and is now
+  `pandas>=1.5` (verified down to 1.3.5), `numpy>=1.23`, and `numba>=0.57` (0.56.4 fails
+  to compile `np.round` of a 2-D array in the clustering kernel).
+- matplotlib is now an optional dependency, installed via the `plot` extra
+  (`pip install "CNSistent[plot]"`). It is only needed by the plotting API, not by any CLI
+  command, and it accounted for ~83 MB of the install. `cns.analyze.plot` is imported on
+  first access, so `cns.fig_lines` and friends keep working unchanged. Note that plotting
+  names are no longer star-exported, `from cns import *` no longer brings them into scope.
+- numba is still a default dependency, but is no longer required to import the package.
+  When it is absent the JIT decorators become no-ops and a warning is logged. Aggregation
+  is then about 2x slower.

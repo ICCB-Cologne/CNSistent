@@ -3,7 +3,7 @@ import pandas as pd
 from cns.utils.assemblies import hg19
 from cns.utils.conversions import calc_lengths
 from cns.utils.selection import get_chr_sets
-from numba import njit
+from cns.utils.jit import njit
     
 
 def _check_total(chrom, val, sex, feature, allele_spec, chr_x, chr_y):

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from numba import njit
+from cns.utils.jit import njit
 from cns.process.breakpoints import make_breaks
 from cns.utils.conversions import breaks_to_segments, calc_mid, calc_cum_mid
 from cns.utils.canonization import get_cn_cols
