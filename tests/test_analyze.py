@@ -205,5 +205,64 @@ class TestDistance(unittest.TestCase):
         res = calc_distances(cns_df, 'minor_cn', 'wasserstein')
         self.assertEqual(res.loc['s1', 's1'], 0)
         self.assertEqual(res.loc['s2', 's1'], 1)
+try:
+    import matplotlib
+    matplotlib.use("Agg")  # headless, has to precede the pyplot import
+    from matplotlib import pyplot as plt
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
 
-    
+
+@unittest.skipUnless(HAS_MATPLOTLIB, "matplotlib is optional, installed via the `plot` extra")
+class TestPlotting(unittest.TestCase):
+    """Covers cns.analyze.plot, which is imported on first attribute access.
+
+    Nothing else in the suite touches a plotting name, so without these tests the
+    module is never imported and a breakage would only surface for users.
+    """
+
+    FIGURES = ["fig_lines", "fig_dots", "fig_bars", "fig_steps", "fig_heatmap"]
+    AXIS_HELPERS = ["plot_chr_bg", "plot_cytobands", "plot_gaps", "plot_x_ticks",
+                    "add_cytoband_legend", "add_gap_legend", "no_x_ticks", "no_y_ticks",
+                    "plot_x_lines"]
+
+    def setUp(self):
+        self.cns_df = pd.DataFrame({
+            "sample_id": ["s1", "s1", "s1"],
+            "chrom": ["chr1", "chr1", "chr2"],
+            "start": [0, 50_000_000, 0],
+            "end": [50_000_000, 120_000_000, 90_000_000],
+            "major_cn": [2, 3, 1],
+            "minor_cn": [1, 1, 1],
+        })
+
+    def tearDown(self):
+        plt.close("all")
+
+    def test_lazy_access_returns_module_members(self):
+        import cns
+        from cns.analyze import plot
+        for name in self.FIGURES + self.AXIS_HELPERS:
+            self.assertIs(getattr(cns, name), getattr(plot, name), name)
+
+    def test_lazy_access_of_unknown_name_raises(self):
+        import cns
+        import cns.analyze
+        for module in [cns, cns.analyze]:
+            with self.assertRaises(AttributeError):
+                getattr(module, "not_a_plotting_function")
+
+    def test_figures_render(self):
+        import cns
+        for name in self.FIGURES:
+            fig, _ = getattr(cns, name)(self.cns_df)
+            self.assertIsInstance(fig, plt.Figure, name)
+            plt.close("all")
+
+    def test_axis_helpers_render(self):
+        import cns
+        for name in self.AXIS_HELPERS:
+            _, ax = plt.subplots()
+            getattr(cns, name)(ax)
+            plt.close("all")

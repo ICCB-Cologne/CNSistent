@@ -36,3 +36,6 @@ Initial public version.
 - numba is still a default dependency, but is no longer required to import the package.
   When it is absent the JIT decorators become no-ops and a warning is logged. Aggregation
   is then about 2x slower.
+- Added tests for the plotting API and CI now installs the `plot` extra so they run.
+  Since the module is imported lazily, nothing else in the suite loads it, so without
+  these tests a breakage in `cns.analyze.plot` would only surface for users.

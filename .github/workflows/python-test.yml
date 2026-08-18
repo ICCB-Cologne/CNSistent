@@ -19,7 +19,8 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -e . pytest
+        # The `plot` extra pulls in matplotlib, without which the plotting tests skip.
+        run: pip install -e ".[plot]" pytest
 
       - name: Test
         run: pytest tests/ -v
